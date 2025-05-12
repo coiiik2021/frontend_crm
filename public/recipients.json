@@ -1,0 +1,24 @@
+[
+    {
+        "name": "Nguyen Van A",
+        "company": "Cong ty ABC",
+        "email": "a@example.com",
+        "phone": "0123456789",
+        "street": "123 Le Loi",
+        "city": "Ha Noi",
+        "state": "HN",
+        "postCode": "10000",
+        "country": "Bangladesh"
+    },
+    {
+        "name": "Tran Thi B",
+        "company": "Cong ty XYZ",
+        "email": "b@example.com",
+        "phone": "0987654321",
+        "street": "456 Tran Hung Dao",
+        "city": "Ho Chi Minh",
+        "state": "HCM",
+        "postCode": "70000",
+        "country": "United States"
+    }
+]

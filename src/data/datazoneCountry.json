@@ -1,0 +1,66 @@
+[
+    {
+        "name": "HONG KONG (HK)",
+        "DHLECO": "Zone 2",
+        "DHLVN": "1",
+        "UPS": "1",
+        "FEDEX": "V",
+        "SF": "Zone 1"
+    },
+    {
+        "name": "Indonesia (ID)",
+        "DHLECO": "Zone 2",
+        "DHLVN": "3,0",
+        "UPS": "2",
+        "FEDEX": "T",
+        "SF": "Zone 10"
+    },
+    {
+        "name": "Korea, Rep. Of (KR)",
+        "DHLECO": "Zone 2",
+        "DHLVN": "5,0",
+        "UPS": "3",
+        "FEDEX": "Z",
+        "SF": "Zone 8"
+    },
+    {
+        "name": "Philippines, The (PH)",
+        "DHLECO": "Zone 2",
+        "DHLVN": "3,0",
+        "UPS": "2",
+        "FEDEX": "S",
+        "SF": "Zone 13"
+    },
+    {
+        "name": "Taiwan (TW)",
+        "DHLECO": "Zone 2",
+        "DHLVN": "3,0",
+        "UPS": "3",
+        "FEDEX": "X",
+        "SF": "Zone 7"
+    },
+    {
+        "name": "Thailand (TH)",
+        "DHLECO": "Zone 2",
+        "DHLVN": "1,0",
+        "UPS": "1",
+        "FEDEX": "R",
+        "SF": "Zone 5"
+    },
+    {
+        "name": "Vietnam (VN)",
+        "DHLECO": "Zone 2",
+        "DHLVN": "",
+        "UPS": "",
+        "FEDEX": "H",
+        "SF": ""
+    },
+    {
+        "name": "India (IN)",
+        "DHLECO": "Zone 3",
+        "DHLVN": "6,0",
+        "UPS": "4",
+        "FEDEX": "O",
+        "SF": "Zone 14"
+    }
+]
