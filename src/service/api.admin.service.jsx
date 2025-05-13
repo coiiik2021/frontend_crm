@@ -36,9 +36,45 @@ const GetAZoneCountry = async (name) => {
 
 const GetAPriceNet = async (name, zone, weight) => {
     const API = `/prices/getPriceNet?name=${name}&weight=${weight}&zone=${zone}`;
-    console.log(API);
+    console.log("API", API);
     return await axios.get(API);
 };
 
 
-export { GetPriceNet, PostPriceNet, PostZoneCountry, GetZoneCountry, GetAZoneCountry, GetAPriceNet };
+// price gas Oline
+const GetPriceAllGasoline = async (name) => {
+    const API = `price-gas-oline/all?name=${name}`;
+    return await axios.get(API);
+}
+
+const PostPriceGasoline = async (data) => {
+    const API = `price-gas-oline`;
+    return await axios.post(API, data);
+}
+
+const DeletePriceGasonline = async (id) => {
+    const API = `price-gas-oline/${id}`;
+    return await axios.delete(API);
+}
+
+
+// const net 
+
+const GetConstNet = async (name) => {
+    const API = `const-net?name=${name}`;
+    return await axios.get(API);
+}
+
+const PutConstNet = async (data) => {
+    const API = `const-net`;
+    return await axios.put(API, data);
+}
+
+const PostConstNet = async (data) => {
+    const API = `const-net`;
+    return await axios.post(API, data);
+}
+
+export { GetPriceNet, PostPriceNet, PostZoneCountry, GetZoneCountry, GetAZoneCountry, GetAPriceNet, GetPriceAllGasoline, PostPriceGasoline, DeletePriceGasonline };
+
+export { GetConstNet, PutConstNet, PostConstNet };

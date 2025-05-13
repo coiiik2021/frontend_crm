@@ -54,9 +54,9 @@ export default function InformationOrder(props) {
             try {
                 // Gọi API để lấy dữ liệu
                 const data = await GetZoneCountry();
-                console.log(data); // Kiểm tra dữ liệu trả về từ GetZoneCountry
+                console.log("data zone", data);
 
-                // Nếu `data` đã là JSON, không cần gọi `.json()`
+
                 setSavedList(data);
                 localStorage.setItem("savedRecipients", JSON.stringify(data));
 
@@ -252,6 +252,7 @@ export default function InformationOrder(props) {
                 initialNameCountry={initialNameCountry}
                 isChangeCountry={isChangeCountry}
                 setIsChangeCountry={setIsChangeCountry}
+                zone={zone}
             />
         </div>
     );

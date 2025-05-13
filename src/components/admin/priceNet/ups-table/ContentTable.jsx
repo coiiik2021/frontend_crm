@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import PriceNetTable from "../../TableDataPrice/PriceNetTable";
 import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable";
 import priceGasOline from "../../../../data/priceGasoline.json";
-import { GetPriceNet, PostPriceNet } from "../../../../service/api.admin.service";
+import { GetConstNet, GetPriceAllGasoline, GetPriceNet, PostPriceNet } from "../../../../service/api.admin.service";
 
 export default function ContentTable() {
     const [dataByDate, setDataByDate] = useState({});
@@ -19,6 +19,7 @@ export default function ContentTable() {
 
     const [zone, setZone] = useState([]);
 
+    const [constNet, setConstNet] = useState({});
     useEffect(() => {
         const fetchData = async () => {
             const dataVT = await GetPriceNet("ups-vt");
@@ -31,7 +32,16 @@ export default function ContentTable() {
             const firstDate = Object.keys(dataVT)[0];
 
             setSelectedDate(firstDate);
-            setPriceGasoline(priceGasOline);
+
+            const dataGasOline = await GetPriceAllGasoline("ups");
+
+
+            setPriceGasoline(dataGasOline);
+
+            const dataConstNet = await GetConstNet("ups-vt");
+            setConstNet(dataConstNet);
+
+
 
         };
 
@@ -85,12 +95,11 @@ export default function ContentTable() {
 
 
 
-            // Chuyển đổi dữ liệu từ Excel thành định dạng phù hợp
             const formattedData = jsonData.slice(1).map((row) => ({
-                weight: row[0]?.toString(), // Cột đầu tiên là weight
+                weight: row[0]?.toString(),
                 values: headers.slice(1).map((zone, index) => ({
-                    zone: zone, // Lấy tên zone từ header
-                    price: Math.trunc(row[index + 1] || 0), // Lấy giá trị từ cột tương ứng
+                    zone: zone,
+                    price: Math.trunc(row[index + 1] || 0),
                 })),
             }));
 
@@ -165,6 +174,8 @@ export default function ContentTable() {
                             <option value="priceSS">Giá SS</option>
                         </select>
 
+
+
                         <label
                             htmlFor="file-upload"
                             className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600"
@@ -193,9 +204,13 @@ export default function ContentTable() {
 
             <div className="max-w-full overflow-x-auto custom-scrollbar">
                 {isPriceNet ? (
-                    <PriceNetTable dataByDate={dataByDate} selectedDate={selectedDate} />
+                    <PriceNetTable dataByDate={dataByDate} selectedDate={selectedDate}
+                        constNet={constNet} setConstNet={setConstNet}
+
+                    />
                 ) : (
-                    <PriceGasolineTable priceGasoline={priceGasoline} setPriceGasoline={setPriceGasoline} />
+                    <PriceGasolineTable priceGasoline={priceGasoline} setPriceGasoline={setPriceGasoline} name={"ups"}
+                    />
                 )}
             </div>
         </div>

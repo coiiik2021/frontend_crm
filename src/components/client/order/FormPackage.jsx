@@ -1,8 +1,8 @@
-import { GetCodeByCompany, GetPriceNetDHLSin, GetPriceNetDHLVN, GetPriceNetFedEx, GetPriceNetSF, GetPriceNetViettel } from "../../../service/api.service.jsx";
+import { GetCodeByCompany } from "../../../service/api.service.jsx";
 import { motion, AnimatePresence } from "framer-motion"; // Thêm framer-motion
 import React, { useEffect, useRef, useState } from "react";
 import Button from "../../admin/ui/button/Button.jsx";
-import { GetAPriceNet, GetPriceNet, GetZoneCountry } from "../../../service/api.admin.service.jsx";
+import { GetAPriceNet } from "../../../service/api.admin.service.jsx";
 
 const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, zone, handleService, setSelectedService, isChangeCountry, setIsChangeCountry }) => {
     const ppXangDau = 0.2825;
@@ -122,7 +122,6 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                 realVolume: 0,
                 totalPackage: 0
             });
-            console.log("Updated Total:", newTotal);
             return newTotal;
         });
 
@@ -153,7 +152,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             const countryDataMap = rawData.reduce((acc, item) => {
                 const originalName = item[0].trim();
                 acc[originalName] = {
-                    dhlsin: item[1] || '',
+                    dhleco: item[1] || '',
                     dhlvn: item[2] ? item[2].replace(',', '.') : '',
                     ups: item[3] || '',
                     fedex: item[4] || '',
@@ -165,22 +164,10 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
 
             setCountryCode(countryDataMap);
 
-            console.log("zone" + zone, "countryCode", countryCode);
 
 
 
-            // Set codeCountrySelect based on the selected country
-            // const selectedCountryData = countryDataMap[nameCountry];
-            // if (selectedCountryData) {
-            //     console.log("Setting codeCountrySelect for:", nameCountry, selectedCountryData);
-            //     setCodeCountrySelect({
-            //         dhlsin: selectedCountryData.dhlsin,
-            //         dhlvn: selectedCountryData.dhlvn,
-            //         ups: selectedCountryData.ups,
-            //         fedex: selectedCountryData.fedex,
-            //         sf: selectedCountryData.sf
-            //     });
-            // }
+
         }
         loadCountry();
     }, [nameCountry]);
@@ -256,95 +243,12 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         return quaKho[0].code;
     };
 
-    // useEffect(() => {
-    //     async function fetchData() {
-    //         try {
-    //             // Xử lý dữ liệu từ GetPriceNetViettel()
-    //             const resNetUps = await GetPriceNet("ups-vt");
-    //             const processedDataUps = resNetUps.map(row => ({
-    //                 weight: row[0],
-    //                 prices: row.slice(1).map(price => loiNhuan * parseFloat(price.replace(/\./g, '').replace(',', '.')))
-    //             }));
-    //             console.log("Net UPS Data:", processedDataUps);
-    //             setNetUps(processedDataUps);
-
-    //             const resNetDHLVN = await GetPriceNetDHLVN();
-    //             const processedDataDHLVN = resNetDHLVN.data.values.map(row => ({
-    //                 weight: row[0],
-    //                 prices: row.slice(1).map(price => loiNhuan * parseFloat(price.replace(/\./g, '').replace(',', '.')))
-    //             }));
-    //             setNetDHLVN(processedDataDHLVN);
-
-    //             const resNetFedEx = await GetPriceNetFedEx();
-    //             const processedDataFedEx = resNetFedEx.data.values.map(row => ({
-    //                 weight: row[0],
-    //                 prices: row.slice(1).map(price => loiNhuan * parseFloat(price.replace(/\./g, '').replace(',', '.')))
-    //             }));
-    //             setNetFedEx(processedDataFedEx);
-
-    //             const resNetDHLSin = await GetPriceNetDHLSin();
-    //             const processedDataDHLSin = resNetDHLSin.data.values.map(row => ({
-    //                 weight: row[0],
-    //                 prices: row.slice(1).map(price => loiNhuan * dollar * parseFloat(price.replace(/\./g, '').replace(',', '.')))
-    //             }));
-    //             setNetDHLSIN(processedDataDHLSin);
-
-    //             const resNetSF = await GetPriceNetSF();
-    //             const processedDataSF = resNetSF.data.values.map(row => ({
-    //                 weight: row[0],
-    //                 prices: row.slice(1).map(price => loiNhuan * parseFloat(price.replace(/\./g, '').replace(',', '.')))
-    //             }));
-    //             setNetSF(processedDataSF);
-
-    //             // Xử lý dữ liệu từ GetCodeByCompany()
-    //             const resCodeCompany = await GetCodeByCompany();
-    //             const rawData = resCodeCompany.data.values;
-
-    //             // Tạo object với originalName làm key chính
-    //             const countryDataMap = rawData.reduce((acc, item) => {
-    //                 const originalName = item[0].trim(); // Giữ nguyên tên gốc làm key
-
-    //                 acc[originalName] = {
-    //                     dhlsin: item[1] || '',
-    //                     dhlvn: item[2] ? item[2].replace(',', '.') : '',
-    //                     ups: item[3] || '',
-    //                     fedex: item[4] || '',
-    //                     sf: item[5] || '',
-    //                     // Lấy country code từ tên
-    //                     countryCode: (originalName.match(/\(([A-Z]{2})\)/) || [])[1] || ''
-    //                 };
-
-    //                 return acc;
-    //             }, {});
-
-    //             setCountryCode(countryDataMap);
-    //         } catch (error) {
-    //             console.error("Error fetching data:", error);
-    //         }
-    //     }
-
-    //     fetchData();
-    // }, []);
-
-    // const [netUps, setNetUps] = useState([]);
-    // const [netDHLVN, setNetDHLVN] = useState([]);
-    // const [netFedEx, setNetFedEx] = useState([]);
-    // const [netDHLSIN, setNetDHLSIN] = useState([]);
-    // const [netSF, setNetSF] = useState([]);
 
     const handleGetQuote = async () => {
         const today = new Date();
         const dateBegin = new Date();
         const dateEnd = new Date();
-        const countryInfo = countryCode[initialNameCountry];
 
-        console.log(zone);
-
-        if (countryInfo) {
-            setCodeCountrySelect(countryInfo);
-        }
-
-        console.log("Country Code Data:", countryInfo);
 
         if (!validateInputs()) {
             setShowQuote(false);
@@ -354,8 +258,8 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         let dummyQuotes = [];
 
         if (codeCountrySelect.dhleco !== '') {
-            const price = getPriceDHLECO();
-            console.log("DHL eci Price:", price);
+            const price = await getPriceDHLECO();
+            console.log("price eco", price);
             const pricePPXD = price * ppXangDau;
             const VAT = (price + pricePPXD) * phanTramVAT;
 
@@ -363,7 +267,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             dateEnd.setDate(today.getDate() + 5);
 
             dummyQuotes.push({
-                company: "DHL SIN",
+                company: "DHL ECO",
                 price,
                 endDate: "2 - 4 ngày làm việc",
                 deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
@@ -371,7 +275,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                 code: "DHL",
                 VAT,
                 pricePPXD,
-                zone: codeCountrySelect.dhlsin
+                zone: codeCountrySelect.dhleco
             });
         }
 
@@ -408,7 +312,8 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         }
 
         if (codeCountrySelect.dhlvn !== '') {
-            const price = getPriceDHLVN();
+            const price = await getPriceDHLVN();
+            console.log("price vn", price);
             const pricePPXD = price * ppXangDau;
             const VAT = (price + pricePPXD) * phanTramVAT;
 
@@ -428,79 +333,65 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             });
         }
 
-        // if (codeCountrySelect.fedex !== '') {
-        //     const price = getPriceFedEx();
-        //     const pricePPXD = price * ppXangDau;
-        //     const VAT = (price + pricePPXD) * phanTramVAT;
+        if (codeCountrySelect.fedex !== '') {
+            const price = await getPriceFedEx();
+            console.log("price fedex", price);
+            const pricePPXD = price * ppXangDau;
+            const VAT = (price + pricePPXD) * phanTramVAT;
 
-        //     dateBegin.setDate(today.getDate() + 3);
-        //     dateEnd.setDate(today.getDate() + 5);
+            dateBegin.setDate(today.getDate() + 3);
+            dateEnd.setDate(today.getDate() + 5);
 
-        //     dummyQuotes.push({
-        //         company: "FedEx",
-        //         price,
-        //         endDate: "4 - 5 ngày",
-        //         deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
-        //         deliveryDateEnd: dateEnd.toLocaleDateString('vi-VN'),
-        //         VAT,
-        //         pricePPXD,
-        //         code: "FEDEX",
-        //         zone: codeCountrySelect.fedex
-        //     });
-        // }
+            dummyQuotes.push({
+                company: "FedEx",
+                price,
+                endDate: "4 - 5 ngày",
+                deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
+                deliveryDateEnd: dateEnd.toLocaleDateString('vi-VN'),
+                VAT,
+                pricePPXD,
+                code: "FEDEX",
+                zone: codeCountrySelect.fedex
+            });
+        }
 
-        // if (codeCountrySelect.sf !== '') {
-        //     const price = getPriceSF();
-        //     const pricePPXD = price * ppXangDau;
-        //     const VAT = (price + pricePPXD) * phanTramVAT;
+        if (codeCountrySelect.sf !== '') {
+            const price = await getPriceSF();
+            const pricePPXD = price * ppXangDau;
+            const VAT = (price + pricePPXD) * phanTramVAT;
 
-        //     dateBegin.setDate(today.getDate() + 3);
-        //     dateEnd.setDate(today.getDate() + 5);
+            dateBegin.setDate(today.getDate() + 3);
+            dateEnd.setDate(today.getDate() + 5);
 
-        //     dummyQuotes.push({
-        //         company: "SF",
-        //         price,
-        //         endDate: "5 – 7 ngày làm việc",
-        //         deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
-        //         deliveryDateEnd: dateEnd.toLocaleDateString('vi-VN'),
-        //         VAT,
-        //         pricePPXD,
-        //         zone: codeCountrySelect.sf
-        //     });
-        // }
+            dummyQuotes.push({
+                company: "SF",
+                price,
+                endDate: "5 – 7 ngày làm việc",
+                deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
+                deliveryDateEnd: dateEnd.toLocaleDateString('vi-VN'),
+                VAT,
+                pricePPXD,
+                zone: codeCountrySelect.sf
+            });
+        }
 
         setQuoteData(dummyQuotes);
         setShowQuote(!showQuote);
         setIsOpenFormPackage(!isOpenFormPackage);
     };
-
-
-
-
-
-
-
-
     const getPriceUPS = async () => {
         const inputWeight = total.realVolume;
         const weightToFind = parseFloat(inputWeight.toString().replace(',', '.'));
-
-        console.log("Weight to find:", weightToFind);
-        console.log(codeCountrySelect.ups);
         const price = await GetAPriceNet("ups-vt", "0" + codeCountrySelect.ups, weightToFind);
-        console.log(price);
         return price;
     };
 
 
     const getPriceDHLECO = async () => {
+
         const inputWeight = total.realVolume;
         const weightToFind = parseFloat(inputWeight.toString().replace(',', '.'));
-
-        console.log("Weight to find:", weightToFind);
-        console.log(codeCountrySelect.ups);
-        const price = await GetAPriceNet("dhl-eco", + codeCountrySelect.dhleco, weightToFind);
-        console.log(price);
+        const price = await GetAPriceNet("dhl-eco", codeCountrySelect.dhleco, weightToFind);
         return price;
     };
 
@@ -508,10 +399,8 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         const inputWeight = total.realVolume;
         const weightToFind = parseFloat(inputWeight.toString().replace(',', '.'));
 
-        console.log("Weight to find:", weightToFind);
-        console.log(codeCountrySelect.ups);
-        const price = await GetAPriceNet("dhl-vn", + codeCountrySelect.dhlvn, weightToFind);
-        console.log(price);
+        const price = await GetAPriceNet("dhl-vn", parseInt(codeCountrySelect.dhlvn), weightToFind);
+
         return price;
     };
 
@@ -519,21 +408,16 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         const inputWeight = total.realVolume;
         const weightToFind = parseFloat(inputWeight.toString().replace(',', '.'));
 
-        console.log("Weight to find:", weightToFind);
-        console.log(codeCountrySelect.ups);
         const price = await GetAPriceNet("sf", + codeCountrySelect.sf, weightToFind);
-        console.log(price);
+
         return price;
     };
 
-    const getPriceFedex = async () => {
+    const getPriceFedEx = async () => {
         const inputWeight = total.realVolume;
         const weightToFind = parseFloat(inputWeight.toString().replace(',', '.'));
+        const price = await GetAPriceNet("fedex", codeCountrySelect.fedex, weightToFind);
 
-        console.log("Weight to find:", weightToFind);
-        console.log(codeCountrySelect.ups);
-        const price = await GetAPriceNet("fedex", + codeCountrySelect.fedex, weightToFind);
-        console.log(price);
         return price;
     };
 
@@ -620,6 +504,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
     };
 
     const handleSelectService = (quote) => {
+        console.log(quote);
         const selectedServiceInfo = {
             carrier: quote.company,
             service: quote.code,
@@ -895,6 +780,14 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                 <motion.button
                     type="button"
                     onClick={() => {
+                        const countryInfo = countryCode[initialNameCountry];
+
+
+                        if (countryInfo) {
+                            setCodeCountrySelect(countryInfo);
+                            console.log("countryInfo", codeCountrySelect);
+                        }
+
                         handleGetQuote();
                     }}
                     className="bg-purple-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded hover:bg-purple-800 w-full sm:w-auto"

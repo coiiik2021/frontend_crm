@@ -1,35 +1,50 @@
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
+import { DeletePriceGasonline, PostPriceGasoline } from "../../../service/api.admin.service";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css"; // Import CSS của React DatePicker
 
-const PriceGasolineTable = ({ priceGasoline, setPriceGasoline }) => {
+const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedRow, setEditedRow] = useState({});
+
     const handleEdit = (index) => {
         setEditingIndex(index);
-        setEditedRow({ ...priceGasoline[index] }); // Khởi tạo đầy đủ giá trị của hàng
+        setEditedRow({ ...priceGasoline[index] });
     };
-    const handleSave = () => {
-        // api save 
+
+    const handleSave = async () => {
         const updatedData = [...priceGasoline];
         updatedData[editingIndex] = { ...editedRow };
         setPriceGasoline(updatedData);
         setEditingIndex(null);
+
+        const data = {
+            name: name,
+            date: editedRow.date,
+            price: editedRow.price,
+        };
+        console.log("data", data);
+        await PostPriceGasoline(data);
     };
+
     const handleInputChange = (field, value) => {
-        // api update 
         setEditedRow((prev) => ({
-            ...prev, // Giữ lại các giá trị hiện tại
-            [field]: value, // Cập nhật trường được chỉnh sửa
+            ...prev,
+            [field]: value,
         }));
     };
+
     const handleAddRow = () => {
         const newRow = { date: "", price: 0 };
         setPriceGasoline((prev) => [...prev, newRow]);
         setEditingIndex(priceGasoline.length); // Bắt đầu chỉnh sửa hàng mới
     };
-    const handleDelete = (index) => {
-        // api delete
+
+    const handleDelete = async (index) => {
+        await DeletePriceGasonline(priceGasoline[index].id);
         const updatedData = priceGasoline.filter((_, rowIndex) => rowIndex !== index);
+        console.log(priceGasoline[index]);
         setPriceGasoline(updatedData);
     };
 
@@ -80,10 +95,23 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline }) => {
                                 className="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600"
                             >
                                 {editingIndex === rowIndex ? (
-                                    <input
-                                        type="date"
-                                        value={editedRow.date}
-                                        onChange={(e) => handleInputChange("date", e.target.value)}
+                                    <DatePicker
+                                        selected={
+                                            editedRow.date
+                                                ? new Date(
+                                                    editedRow.date.split("/").reverse().join("-")
+                                                )
+                                                : null
+                                        }
+                                        onChange={(date) => {
+                                            const formattedDate = date
+                                                ? `${String(date.getDate()).padStart(2, "0")}/${String(
+                                                    date.getMonth() + 1
+                                                ).padStart(2, "0")}/${date.getFullYear()}`
+                                                : "";
+                                            handleInputChange("date", formattedDate);
+                                        }}
+                                        dateFormat="dd/MM/yyyy"
                                         className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 ) : (
@@ -109,7 +137,7 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline }) => {
                             >
                                 {editingIndex === rowIndex ? (
                                     <button
-                                        onClick={handleSave}
+                                        onClick={async () => await handleSave()}
                                         className="px-3 py-1 text-sm text-white bg-green-500 rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400"
                                     >
                                         Lưu
@@ -123,8 +151,8 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline }) => {
                                     </button>
                                 )}
                                 <button
-                                    onClick={() => handleDelete(rowIndex)}
-                                    className="ml-2 px-3 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    onClick={async () => await handleDelete(rowIndex)}
+                                    className="ml-2 px-3 py-1 te xt-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
                                 >
                                     Xóa
                                 </button>
