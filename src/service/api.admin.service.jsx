@@ -33,6 +33,31 @@ const GetAZoneCountry = async (name) => {
     return await axios.get(API);
 }
 
+// service
+
+const GetNameService = async (name) => {
+    const API = `service-company?name=${name}`;
+    return await axios.get(API);
+}
+
+const PostNameService = async (data) => {
+    const API = `service-company`;
+
+    return await axios.post(API, data);
+}
+
+const UpdateNameService = async (data) => {
+    const API = `service-company`;
+    return await axios.put(API, data);
+}
+
+const DeleteServiceCompany = async (nameService) => {
+    const API = `service-company?name=${nameService}`;
+    return await axios.delete(API);
+}
+
+
+export { GetNameService, PostNameService, UpdateNameService, DeleteServiceCompany };
 
 const GetAPriceNet = async (name, zone, weight) => {
     const API = `/prices/getPriceNet?name=${name}&weight=${weight}&zone=${zone}`;
@@ -52,10 +77,17 @@ const PostPriceGasoline = async (data) => {
     return await axios.post(API, data);
 }
 
+const PutPriceGasoline = async (data) => {
+    const API = `price-gas-oline`;
+    return await axios.put(API, data);
+}
+
 const DeletePriceGasonline = async (id) => {
     const API = `price-gas-oline/${id}`;
     return await axios.delete(API);
 }
+
+export { PutPriceGasoline };
 
 
 // const net 
@@ -78,3 +110,4 @@ const PostConstNet = async (data) => {
 export { GetPriceNet, PostPriceNet, PostZoneCountry, GetZoneCountry, GetAZoneCountry, GetAPriceNet, GetPriceAllGasoline, PostPriceGasoline, DeletePriceGasonline };
 
 export { GetConstNet, PutConstNet, PostConstNet };
+

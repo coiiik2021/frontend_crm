@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import { PutConstNet } from "../../../service/api.admin.service";
 
@@ -114,49 +114,58 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet }) => {
             </div>
 
             {/* Price Table */}
-            <div className="overflow-x-auto max-h-[500px] overflow-y-auto border border-gray-200 rounded-lg shadow-md">
-                <Table className="min-w-full">
-                    <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
-                        <TableRow>
-                            <TableCell
-                                isHeader
-                                className="px-4 py-3 text-xs font-medium border border-gray-100 dark:border-white/[0.05] bg-white dark:bg-dark-900 sticky left-0 z-10"
-                            >
-                                Weight (kg)
-                            </TableCell>
-                            {selectedDate &&
-                                dataByDate[selectedDate]?.[0]?.values.map((_, index) => (
+            {dataByDate && Object.keys(dataByDate).length > 0 ?
+                (
+                    <div className="overflow-x-auto max-h-[500px] overflow-y-auto border border-gray-200 rounded-lg shadow-md">
+                        <Table className="min-w-full">
+                            <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
+                                <TableRow>
                                     <TableCell
-                                        key={index}
                                         isHeader
-                                        className="px-4 py-3 text-xs font-medium border border-gray-100 dark:border-white/[0.05]"
+                                        className="px-4 py-3 text-xs font-medium border border-gray-100 dark:border-white/[0.05] bg-white dark:bg-dark-900 sticky left-0 z-10"
                                     >
-                                        {_.zone}
+                                        Weight (kg)
                                     </TableCell>
-                                ))}
-                        </TableRow>
-                    </TableHeader>
-
-                    <TableBody>
-                        {selectedDate &&
-                            dataByDate[selectedDate]?.map((row, rowIndex) => (
-                                <TableRow key={rowIndex}>
-                                    <TableCell className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05] bg-white dark:bg-dark-900 sticky left-0 z-10">
-                                        {row.weight}
-                                    </TableCell>
-                                    {row.values.map((val, priceIndex) => (
-                                        <TableCell
-                                            key={priceIndex}
-                                            className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05]"
-                                        >
-                                            {val.price.toLocaleString("en-US")}
-                                        </TableCell>
-                                    ))}
+                                    {selectedDate &&
+                                        dataByDate[selectedDate]?.[0]?.values.map((_, index) => (
+                                            <TableCell
+                                                key={index}
+                                                isHeader
+                                                className="px-4 py-3 text-xs font-medium border border-gray-100 dark:border-white/[0.05]"
+                                            >
+                                                {_.zone}
+                                            </TableCell>
+                                        ))}
                                 </TableRow>
-                            ))}
-                    </TableBody>
-                </Table>
-            </div>
+                            </TableHeader>
+
+                            <TableBody>
+                                {selectedDate &&
+                                    dataByDate[selectedDate]?.map((row, rowIndex) => (
+                                        <TableRow key={rowIndex}>
+                                            <TableCell className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05] bg-white dark:bg-dark-900 sticky left-0 z-10">
+                                                {row.weight}
+                                            </TableCell>
+                                            {row.values.map((val, priceIndex) => (
+                                                <TableCell
+                                                    key={priceIndex}
+                                                    className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05]"
+                                                >
+                                                    {val.price.toLocaleString("en-US")}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                ) : (
+                    <div className="p-4 text-center text-gray-500">
+                        Chưa có dữ liệu cho ngày này.
+                    </div>
+                )
+            }
+
         </div >
     );
 };
