@@ -45,7 +45,7 @@ export default function ContentTable() {
                     const firstService = dataServiceCompany.nameService[0];
                     setTableType(firstService);
 
-                    const dataNet = await GetPriceNet(firstService);
+                    const dataNet = await GetPriceNet(nameHang, firstService);
                     if (dataNet && Object.keys(dataNet).length > 0) {
                         setDataByDate(dataNet);
 
@@ -82,6 +82,7 @@ export default function ContentTable() {
             }
             return [newNameService, ...prev];
         });
+        setTableType(newNameService);
 
         setConstNet({
             dim: 5000,
@@ -93,14 +94,14 @@ export default function ContentTable() {
     const handleTableTypeChange = async (type) => {
         setTableType(type);
 
-        const data = await GetPriceNet(type);
+        const data = await GetPriceNet(nameHang, type);
         console.log("Data from API:", data);
         setDataByDate(data);
         const firstDate = Object.keys(data)[0];
         setSelectedDate(firstDate);
 
 
-        const dataConstNet = await GetConstNet(type);
+        const dataConstNet = await GetConstNet(nameHang + type);
         setConstNet(dataConstNet);
 
     };
@@ -169,7 +170,7 @@ export default function ContentTable() {
     const handleSaveData = async () => {
         console.log("Saving data:", dataByDate);
         console.log("Table type:", tableType);
-        await PostPriceNet(nameHang + tableType, dataByDate);
+        await PostPriceNet(nameHang, tableType, dataByDate);
         console.log("Dữ liệu đã được lưu:", dataByDate);
         alert("Thông tin đã được lưu thành công!");
         setIsImported(false);

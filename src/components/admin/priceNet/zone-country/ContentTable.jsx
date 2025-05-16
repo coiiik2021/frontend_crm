@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import * as XLSX from "xlsx"; // Import thư viện xlsx
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table";
 import { GetZoneCountry, PostZoneCountry } from "../../../../service/api.admin.service";
+import { set } from "date-fns";
 
 export default function ContentTable() {
     const [zoneCountry, setZoneCountry] = useState([]);
@@ -11,18 +12,18 @@ export default function ContentTable() {
 
     const [isImported, setIsImported] = useState(false); // State để kiểm tra xem dữ liệu đã được import hay chưa
 
+    const [serviceName, setServiceName] = useState(); // State để lưu tên dịch vụ
     useEffect(() => {
-        // Dữ liệu mặc định ban đầu
         const fetchData = async () => {
             const data = await GetZoneCountry();
+            console.log("Dữ liệu từ API:", data);
             setZoneCountry(data);
-        }
+        };
         fetchData();
     }, []);
 
-    // Lọc dữ liệu dựa trên giá trị tìm kiếm
     const filteredData = zoneCountry.filter((row) =>
-        row.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        row.nameCountry?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Hàm xử lý khi import file Excel
@@ -36,30 +37,29 @@ export default function ContentTable() {
             const workbook = XLSX.read(data, { type: "array" });
             const sheetName = workbook.SheetNames[0];
             const sheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Lấy dữ liệu dạng mảng
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-            console.log("Raw Excel Data:", jsonData); // Kiểm tra dữ liệu thô từ Excel
+            console.log("Raw Excel Data:", jsonData);
 
             if (jsonData.length < 1) {
                 alert("File Excel không chứa dữ liệu hợp lệ.");
                 return;
             }
 
-            // Chuyển đổi dữ liệu từ Excel thành định dạng phù hợp
-            const headers = jsonData[0]; // Dòng đầu tiên là header
-            const formattedData = jsonData.slice(1).map((row) => ({
-                name: row[0] || "", // Cột đầu tiên là tên quốc gia
-                dhleco: row[1] || "",
-                dhlvn: row[2] || "",
-                ups: row[3] || "",
-                fedex: row[4] || "",
-                sf: row[5] || "",
+            const headers = jsonData[0]; // Dòng đầu tiên là tiêu đề
+            const formattedData = jsonData.slice(1).filter((row) => row.length > 1).map((row) => ({
+                nameCountry: row[0] || "", // Cột đầu tiên là tên quốc gia
+                values: headers.slice(1).map((name, index) => ({
+                    nameCompany: name, // Tên dịch vụ từ tiêu đề
+                    zone: row[index + 1] !== undefined ? row[index + 1] : "", // Giá trị zone
+                })),
             }));
 
-            setZoneCountry(formattedData); // Cập nhật dữ liệu vào state
+            console.log("Formatted Data:", formattedData);
+            setZoneCountry(formattedData); // Lưu dữ liệu vào state
         };
         reader.readAsArrayBuffer(file);
-        setIsImported(true); // Đánh dấu là đã import dữ liệu
+        setIsImported(true);
     };
 
     // Hàm xử lý lưu trữ dữ liệu
@@ -101,17 +101,14 @@ export default function ContentTable() {
                         className="hidden"
                     />
                     {/* Nút lưu trữ */}
-                    {
-                        isImported &&
-
+                    {isImported && (
                         <button
-                            onClick={handleSaveData}
+                            onClick={async () => handleSaveData()}
                             className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600"
                         >
                             Lưu trữ
                         </button>
-                    }
-
+                    )}
                 </div>
             </div>
 
@@ -127,75 +124,49 @@ export default function ContentTable() {
                                 >
                                     Name
                                 </TableCell>
-                                <TableCell
-                                    isHeader
-                                    className="px-4 py-3 text-xs font-medium border border-gray-100 dark:border-white/[0.05]"
-                                >
-                                    DHLSIN
-                                </TableCell>
-                                <TableCell
-                                    isHeader
-                                    className="px-4 py-3 text-xs font-medium border border-gray-100 dark:border-white/[0.05]"
-                                >
-                                    DHLVN
-                                </TableCell>
-                                <TableCell
-                                    isHeader
-                                    className="px-4 py-3 text-xs font-medium border border-gray-100 dark:border-white/[0.05]"
-                                >
-                                    UPS
-                                </TableCell>
-                                <TableCell
-                                    isHeader
-                                    className="px-4 py-3 text-xs font-medium border border-gray-100 dark:border-white/[0.05]"
-                                >
-                                    FEDEX
-                                </TableCell>
-                                <TableCell
-                                    isHeader
-                                    className="px-4 py-3 text-xs font-medium border border-gray-100 dark:border-white/[0.05]"
-                                >
-                                    SF
-                                </TableCell>
+                                {zoneCountry.length > 0 &&
+                                    zoneCountry[0].values.map((item, index) => (
+                                        <TableCell
+                                            key={index}
+                                            isHeader
+                                            className="px-4 py-3 text-xs font-medium border border-gray-100 dark:border-white/[0.05]"
+                                        >
+                                            {item.nameCompany}
+                                        </TableCell>
+                                    ))}
                             </TableRow>
                         </TableHeader>
 
                         {/* Table Body */}
                         <TableBody>
-                            {filteredData.map((row, rowIndex) => (
-                                <TableRow key={rowIndex}>
+                            {filteredData.length > 0 ? (
+                                filteredData.map((row, rowIndex) => (
+                                    <TableRow key={rowIndex}>
+                                        <TableCell
+                                            className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05] bg-white dark:bg-dark-900 sticky left-0 z-10"
+                                        >
+                                            {row.nameCountry}
+                                        </TableCell>
+                                        {row.values.map((item, index) => (
+                                            <TableCell
+                                                key={index}
+                                                className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05]"
+                                            >
+                                                {item.zone}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
                                     <TableCell
-                                        className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05] bg-white dark:bg-dark-900 sticky left-0 z-10"
+                                        colSpan={zoneCountry[0]?.values.length + 1 || 1}
+                                        className="px-4 py-3 text-center text-xs text-gray-500"
                                     >
-                                        {row.name}
-                                    </TableCell>
-                                    <TableCell
-                                        className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05]"
-                                    >
-                                        {row.dhleco}
-                                    </TableCell>
-                                    <TableCell
-                                        className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05]"
-                                    >
-                                        {row.dhlvn}
-                                    </TableCell>
-                                    <TableCell
-                                        className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05]"
-                                    >
-                                        {row.ups}
-                                    </TableCell>
-                                    <TableCell
-                                        className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05]"
-                                    >
-                                        {row.fedex}
-                                    </TableCell>
-                                    <TableCell
-                                        className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05]"
-                                    >
-                                        {row.sf}
+                                        Không tìm thấy kết quả phù hợp.
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                 </div>

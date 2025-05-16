@@ -6,8 +6,9 @@ import Products from "../../../components/client/order/Products";
 import FormDetailOrder from "../../../components/client/order/FormDetailOrder";
 
 export default function OrderPage() {
-    const [currentStep, setCurrentStep] = useState(1);
+    const [currentStep, setCurrentStep] = useState(2);
     const [recipientInfo, setRecipientInfo] = useState({
+        id: "",
         name: "",
         company: "",
         email: "",

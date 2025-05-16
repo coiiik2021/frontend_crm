@@ -2,14 +2,37 @@ import { GetCodeByCompany } from "../../../service/api.service.jsx";
 import { motion, AnimatePresence } from "framer-motion"; // Thêm framer-motion
 import React, { useEffect, useRef, useState } from "react";
 import Button from "../../admin/ui/button/Button.jsx";
-import { GetAPriceNet } from "../../../service/api.admin.service.jsx";
+import { GetAllConstNet, GetAllPriceGasoline, GetAllServiceCompany, GetAPriceNet, GetListPriceQuote } from "../../../service/api.admin.service.jsx";
+import { data } from "react-router";
 
 const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, zone, handleService, setSelectedService, isChangeCountry, setIsChangeCountry }) => {
+
+    //theo hãng
     const ppXangDau = 0.2825;
 
-    const phanTramVAT = 0.08;
+    //api
+    const [ppxd, setPpxd] = useState([]);
 
+    // theo service
+    const phanTramVphanTramAT = 0.08;
+
+    const [constService, setConstService] = useState();
+
+    // name service
+    const [nameService, setNameService] = useState();
+
+    useEffect(() => {
+        const fetchData = () => {
+
+        }
+
+        fetchData();
+    }, []);
+
+    //call api
     const dollar = 26000;
+
+    //
     const loiNhuan = 1;
 
     const [nameCountry, setNameCountry] = useState(initialNameCountry);
@@ -68,7 +91,6 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
     };
 
     const handleChange = (id, field, value) => {
-        // Chỉ cho phép nhập số và dấu chấm
         const numericValue = value.replace(/[^\d.]/g, '');
 
         setPackages(packages.map(pkg => {
@@ -111,7 +133,6 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             return updatedPkg;
         }));
 
-        // Cập nhật total sau khi packages thay đổi
         setTotal(prev => {
             const newTotal = packages.reduce((acc, pkg) => ({
                 realVolume: acc.realVolume + (pkg.total?.realVolume || 0),
@@ -130,47 +151,13 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             [`${id}-${field}`]: "",
         }));
 
-        setShowQuote(false);
-        setIsOpenFormPackage(true);
+        setShowQuote(false); // Ẩn phần báo giá
+        setIsOpenFormPackage(true); // Hiển thị thông tin package
     };
 
-    const [countryCode, setCountryCode] = useState({});
-    const [codeCountrySelect, setCodeCountrySelect] = useState({
-        dhleco: "Zone 5",
-        dhlvn: 7,
-        ups: 5,
-        fedex: "D",
-        sf: '',
-    });
-
-
     useEffect(() => {
-        async function loadCountry() {
-            const resCodeCompany = await GetCodeByCompany();
-            const rawData = resCodeCompany.data.values;
 
-            const countryDataMap = rawData.reduce((acc, item) => {
-                const originalName = item[0].trim();
-                acc[originalName] = {
-                    dhleco: item[1] || '',
-                    dhlvn: item[2] ? item[2].replace(',', '.') : '',
-                    ups: item[3] || '',
-                    fedex: item[4] || '',
-                    sf: item[5] || '',
-                    countryCode: (originalName.match(/\(([A-Z]{2})\)/) || [])[1] || ''
-                };
-                return acc;
-            }, {});
-
-            setCountryCode(countryDataMap);
-
-
-
-
-
-        }
-        loadCountry();
-    }, [nameCountry]);
+    }, [initialNameCountry]);
 
     const quaKho = [
         { code: "NO FEE", price: 0, note: "không dính phí quá khổ" },
@@ -242,189 +229,39 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         }
         return quaKho[0].code;
     };
-
-
     const handleGetQuote = async () => {
-        const today = new Date();
-        const dateBegin = new Date();
-        const dateEnd = new Date();
-
 
         if (!validateInputs()) {
             setShowQuote(false);
+            setIsChangeCountry(true);
             return;
         }
 
         let dummyQuotes = [];
 
-        if (codeCountrySelect.dhleco !== '') {
-            const price = await getPriceDHLECO();
-            console.log("price eco", price);
-            const pricePPXD = price * ppXangDau;
-            const VAT = (price + pricePPXD) * phanTramVAT;
+        const dataRequest = {
+            nameCountry: initialNameCountry, // Tên quốc gia
+            weight: total.realVolume, // Tổng cân nặng thực tế
+            packages: packages.map(pkg => ({
+                weight: parseFloat(pkg.weight) || 0, // Cân nặng của kiện
+                width: parseFloat(pkg.width) || 0,  // Chiều rộng của kiện
+                length: parseFloat(pkg.length) || 0, // Chiều dài của kiện
+                height: parseFloat(pkg.height) || 0, // Chiều cao của kiện
+            })),
+        };
+        console.log("data request", dataRequest);
+        const data = await GetListPriceQuote(dataRequest);
+        console.log("dataResponse", data);
 
-            dateBegin.setDate(today.getDate() + 3);
-            dateEnd.setDate(today.getDate() + 5);
-
-            dummyQuotes.push({
-                company: "DHL ECO",
-                price,
-                endDate: "2 - 4 ngày làm việc",
-                deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
-                deliveryDateEnd: dateEnd.toLocaleDateString('vi-VN'),
-                code: "DHL",
-                VAT,
-                pricePPXD,
-                zone: codeCountrySelect.dhleco
-            });
-        }
-
-        if (codeCountrySelect.ups !== '') {
-            const price = await getPriceUPS(codeCountrySelect.ups);
-            const pricePPXD = price * ppXangDau;
-            const VAT = (price + pricePPXD) * phanTramVAT;
-
-            dateBegin.setDate(today.getDate() + 3);
-            dateEnd.setDate(today.getDate() + 5);
-
-            dummyQuotes.push({
-                company: "UPS",
-                price,
-                code: 'Tiết Kiệm',
-                endDate: "2 – 4 ngày làm việc",
-                deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
-                deliveryDateEnd: dateEnd.toLocaleDateString('vi-VN'),
-                VAT,
-                pricePPXD,
-                zone: codeCountrySelect.ups
-            });
-            dummyQuotes.push({
-                company: "UPS",
-                price,
-                code: "UPS",
-                endDate: "2 – 4 ngày làm việc",
-                deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
-                deliveryDateEnd: dateEnd.toLocaleDateString('vi-VN'),
-                VAT,
-                pricePPXD,
-                zone: codeCountrySelect.ups
-            });
-        }
-
-        if (codeCountrySelect.dhlvn !== '') {
-            const price = await getPriceDHLVN();
-            console.log("price vn", price);
-            const pricePPXD = price * ppXangDau;
-            const VAT = (price + pricePPXD) * phanTramVAT;
-
-            dateBegin.setDate(today.getDate() + 3);
-            dateEnd.setDate(today.getDate() + 5);
-
-            dummyQuotes.push({
-                company: "DHL VN",
-                price,
-                endDate: "3 - 5 ngày làm việc",
-                deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
-                deliveryDateEnd: dateEnd.toLocaleDateString('vi-VN'),
-                VAT,
-                code: "DHL",
-                pricePPXD,
-                zone: codeCountrySelect.dhlvn
-            });
-        }
-
-        if (codeCountrySelect.fedex !== '') {
-            const price = await getPriceFedEx();
-            console.log("price fedex", price);
-            const pricePPXD = price * ppXangDau;
-            const VAT = (price + pricePPXD) * phanTramVAT;
-
-            dateBegin.setDate(today.getDate() + 3);
-            dateEnd.setDate(today.getDate() + 5);
-
-            dummyQuotes.push({
-                company: "FedEx",
-                price,
-                endDate: "4 - 5 ngày",
-                deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
-                deliveryDateEnd: dateEnd.toLocaleDateString('vi-VN'),
-                VAT,
-                pricePPXD,
-                code: "FEDEX",
-                zone: codeCountrySelect.fedex
-            });
-        }
-
-        if (codeCountrySelect.sf !== '') {
-            const price = await getPriceSF();
-            const pricePPXD = price * ppXangDau;
-            const VAT = (price + pricePPXD) * phanTramVAT;
-
-            dateBegin.setDate(today.getDate() + 3);
-            dateEnd.setDate(today.getDate() + 5);
-
-            dummyQuotes.push({
-                company: "SF",
-                price,
-                endDate: "5 – 7 ngày làm việc",
-                deliveryDateBegin: dateBegin.toLocaleDateString('vi-VN'),
-                deliveryDateEnd: dateEnd.toLocaleDateString('vi-VN'),
-                VAT,
-                pricePPXD,
-                zone: codeCountrySelect.sf
-            });
-        }
-
-        setQuoteData(dummyQuotes);
+        setQuoteData(data);
         setShowQuote(!showQuote);
+        setIsChangeCountry(true);
         setIsOpenFormPackage(!isOpenFormPackage);
     };
-    const getPriceUPS = async () => {
-        const inputWeight = total.realVolume;
-        const weightToFind = parseFloat(inputWeight.toString().replace(',', '.'));
-        const price = await GetAPriceNet("ups-vt", "0" + codeCountrySelect.ups, weightToFind);
-        return price;
-    };
-
-
-    const getPriceDHLECO = async () => {
-
-        const inputWeight = total.realVolume;
-        const weightToFind = parseFloat(inputWeight.toString().replace(',', '.'));
-        const price = await GetAPriceNet("dhl-eco", codeCountrySelect.dhleco, weightToFind);
-        return price;
-    };
-
-    const getPriceDHLVN = async () => {
-        const inputWeight = total.realVolume;
-        const weightToFind = parseFloat(inputWeight.toString().replace(',', '.'));
-
-        const price = await GetAPriceNet("dhl-vn", parseInt(codeCountrySelect.dhlvn), weightToFind);
-
-        return price;
-    };
-
-    const getPriceSF = async () => {
-        const inputWeight = total.realVolume;
-        const weightToFind = parseFloat(inputWeight.toString().replace(',', '.'));
-
-        const price = await GetAPriceNet("sf", + codeCountrySelect.sf, weightToFind);
-
-        return price;
-    };
-
-    const getPriceFedEx = async () => {
-        const inputWeight = total.realVolume;
-        const weightToFind = parseFloat(inputWeight.toString().replace(',', '.'));
-        const price = await GetAPriceNet("fedex", codeCountrySelect.fedex, weightToFind);
-
-        return price;
-    };
 
 
 
 
-    // Animation variants
     const fadeIn = {
         hidden: { opacity: 0 },
         visible: {
@@ -779,16 +616,10 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             <div className="flex justify-center sm:justify-end mt-4 pb-5">
                 <motion.button
                     type="button"
-                    onClick={() => {
-                        const countryInfo = countryCode[initialNameCountry];
+                    onClick={async () => {
 
+                        await handleGetQuote();
 
-                        if (countryInfo) {
-                            setCodeCountrySelect(countryInfo);
-                            console.log("countryInfo", codeCountrySelect);
-                        }
-
-                        handleGetQuote();
                     }}
                     className="bg-purple-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded hover:bg-purple-800 w-full sm:w-auto"
                     whileHover={{ scale: 1.03 }}
@@ -849,7 +680,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                         <div className="flex items-start justify-between">
                                             <div>
                                                 <h2 className="text-sm font-bold text-gray-800 flex items-center">
-                                                    {quote.company} Saver®
+                                                    {quote.nameService} Saver®
                                                     <span className="ml-1 text-xs font-normal bg-green-100 text-green-800 px-1.5 py-0.5 rounded">
                                                         {quote.code || "JD"}
                                                     </span>
@@ -862,7 +693,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                         </div>
                                     </div>
 
-                                    <div className="p-3 flex-grow">
+                                    {/* <div className="p-3 flex-grow">
                                         <div className="mb-2">
                                             <h3 className="text-xs font-semibold text-gray-700">Dự kiến giao hàng</h3>
                                             <p className="text-sm text-blue-600 font-medium">
@@ -871,22 +702,23 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                         </div>
                                         <p className="text-xs text-gray-500 mb-2">Lấy hàng trong 2h - 36h</p>
                                         <p className="text-xs text-gray-400 mb-2">Hiệu lực đến: 31-12-2025</p>
-                                    </div>
+                                    </div> */}
 
                                     <div className="p-3 bg-gray-50 border-t">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-xs text-gray-500">NET: {formatCurrency(quote.price)} VND</p>
+                                                <p className="text-xs text-gray-500">Weight: {formatCurrency(quote.totalWeight)} KG</p>
+                                                <p className="text-xs text-gray-500">NET: {formatCurrency(quote.priceNet)} VND</p>
                                                 <p className="text-xs text-gray-500">PPXD: {formatCurrency(quote.pricePPXD)} VND</p>
-                                                {total.totalOverSize !== 0 && (
+                                                {/* {total.totalOverSize !== 0 && (
                                                     <p className="text-xs text-gray-500">
                                                         Oversize: {formatCurrency((quote.code === "Tiết Kiệm" ? 0 : total.totalOverSize))} VND
                                                     </p>
-                                                )}
-                                                <p className="text-xs text-gray-500">VAT(8%): {formatCurrency(quote.VAT)} VND</p>
+                                                )} */}
+                                                <p className="text-xs text-gray-500">VAT(8%): {formatCurrency(quote.priceVAT)} VND</p>
 
                                                 <p className="text-base font-bold text-gray-800 mt-1">
-                                                    {formatCurrency(quote.price + quote.VAT + quote.pricePPXD + (quote.code === "Tiết Kiệm" ? 0 : total.totalOverSize))} VND
+                                                    {formatCurrency(quote.priceNet + quote.priceVAT + quote.pricePPXD + (quote.code === "Tiết Kiệm" ? 0 : total.totalOverSize || 0))} VND
                                                 </p>
                                             </div>
                                             <Button

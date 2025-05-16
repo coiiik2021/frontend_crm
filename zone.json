@@ -1,0 +1,5129 @@
+{
+    "data": [
+        {
+            "nameCountry": "HONG KONG (HK)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 1
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 1
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "V"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": "Zone 1"
+                }
+            ]
+        },
+        {
+            "nameCountry": "Indonesia (ID)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 3
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 2
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "T"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": "Zone 10"
+                }
+            ]
+        },
+        {
+            "nameCountry": "Korea, Rep. Of (KR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 5
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 3
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "Z"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": "Zone 8"
+                }
+            ]
+        },
+        {
+            "nameCountry": "Philippines, The (PH)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 3
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 2
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "S"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": "Zone 13"
+                }
+            ]
+        },
+        {
+            "nameCountry": "Taiwan (TW)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 3
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 3
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "X"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": "Zone 7"
+                }
+            ]
+        },
+        {
+            "nameCountry": "Thailand (TH)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 1
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 1
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "R"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": "Zone 5"
+                }
+            ]
+        },
+        {
+            "nameCountry": "Vietnam (VN)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": ""
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "India (IN)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 3"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 6
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 4
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "O"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": "Zone 14"
+                }
+            ]
+        },
+        {
+            "nameCountry": "USA (US)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 5"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 7
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 5
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "D"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Austria (AT)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Belgium (BE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "M"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Switzerland (CH)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 0
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Czech Rep., The (CZ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Germany (DE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "M"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Denmark (DK)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Spain (ES)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "M"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Finland (FI)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 0
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "France (FR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "M"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "United Kingdom (GB)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "M"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Ireland, Rep. Of (IE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Italy (IT)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "M"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Netherlands, The (NL)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "M"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Norway (NO)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Poland (PL)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Portugal (PT)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Sweden (SE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Turkey (TR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Andorra (AD)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Bulgaria (BG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Croatia (HR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Cyprus (CY)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Estonia (EE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Georgia (GE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Greece (GR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Hungary (HU)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Iceland (IS)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Latvia (LV)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Liechtenstein (LI)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Lithuania (LT)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Luxembourg (LU)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Malta (MT)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Monaco (MC)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "E"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Montenegro, Rep Of (ME)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Romania (RO)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "San Marino (SM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Serbia, Rep. Of (RS)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Slovakia (SK)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Slovenia (SI)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Vatican City (VA)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "EU 2"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 8
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Afghanistan (AF)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": ""
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "India (IN)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 4"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": ""
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "O"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Albania (AL)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Bahrain (BH)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Bosnia & Herzegovina(BA)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Canary Islands, The (IC)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 6
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Egypt (EG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Gibraltar (GI)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Guernsey (GG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Iran (IR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Israel (IL)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Jersey (JE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Jordan (JO)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Korea, D.P.R Of (KP)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Kosovo (KV)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Kuwait (KW)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Lebanon (LB)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Libya (LY)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "North Macedonia (MK)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Oman (OM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Qatar (QA)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Russian Federation (RU)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Saudi Arabia (SA)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "South Africa (ZA)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Syria (SY)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "United Arab Emirates (AE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Yemen, Rep. Of (YE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 7"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Argentina (AR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8A"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Brazil (BR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8A"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Chile (CL)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8A"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Colombia (CO)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8A"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Algeria (DZ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "American Samoa (AS)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Angola (AO)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Anguilla (AI)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Antigua (AG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Malaysia",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 1"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 1
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 2
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "Q"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Armenia (AM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Aruba (AW)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Azerbaijan (AZ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Bahamas (BS)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Barbados (BB)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Belarus (BY)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 9
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Belize (BZ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Benin (BJ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Bermuda (BM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Bolivia (BO)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Bonaire (XB)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Botswana (BW)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Burkina Faso (BF)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Burundi (BI)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Cameroon (CM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Cape Verde (CV)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Cayman Islands (KY)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Central African Rep(CF)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Chad (TD)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Comoros (KM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Congo (CG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Congo, DPR (CD)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Cook Islands (CK)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 0
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Costa Rica (CR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Cote D Ivoire (CI)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Cuba (CU)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Curacao (XC)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Djibouti (DJ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Dominica (DM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Dominican Rep. (DO)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Ecuador (EC)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "El Salvador (SV)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Eritrea (ER)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Eswatini (SZ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Ethiopia (ET)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Falkland Islands (FK)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Faroe Islands (FO)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Fiji (FJ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "French Guyana (GF)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Gabon (GA)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Gambia (GM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Ghana (GH)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Greenland (GL)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Grenada (GD)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Guadeloupe (GP)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Guam (GU)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Guatemala (GT)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Guinea Rep. (GN)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Guinea-Bissau (GW)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Guinea-Equatorial (GQ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Guyana (British) (GY)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Haiti (HT)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Honduras (HN)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Iraq (IQ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Jamaica (JM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Kazakhstan (KZ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Kenya (KE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Kiribati (KI)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Kyrgyzstan (KG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Lesotho (LS)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Liberia (LR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Madagascar (MG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Malawi (MW)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Mali (ML)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Mariana Islands (MP)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Marshall Islands (MH)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Martinique (MQ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Mauritania (MR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Mauritius (MU)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Mayotte (YT)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Micronesia (FM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Moldova, Rep. Of (MD)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Mongolia (MN)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "C"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": "Zone 16"
+                }
+            ]
+        },
+        {
+            "nameCountry": "Montserrat (MS)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Morocco (MA)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Mozambique (MZ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Namibia (NA)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Nauru, Rep. Of (NR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Nevis (XN)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "New Caledonia (NC)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Nicaragua (NI)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Niger (NE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Nigeria (NG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Niue (NU)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Palau (PW)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Panama (PA)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Saint Helena (SH)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 0
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Samoa (WS)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Sao Tome And Principe (ST)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Senegal (SN)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Seychelles (SC)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Sierra Leone (SL)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Solomon Islands (SB)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Somalia (SO)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Somaliland, Rep Of (XS)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "South Sudan (SS)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Sudan (SD)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Suriname (SR)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Tahiti (PF)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Tajikistan (TJ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Tanzania (TZ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Timor-Leste (TL)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 6
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Togo (TG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Tonga (TO)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Trinidad And Tobago (TT)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Tunisia (TN)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Turkmenistan (TM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Turks & Caicos (TC)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Tuvalu (TV)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 0
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Uganda (UG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Ukraine (UA)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 7
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Uruguay (UY)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Uzbekistan (UZ)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "F"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Vanuatu (VU)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": ""
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Venezuela (VE)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Virgin Islands-British (VG)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Virgin Islands-US (VI)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 8
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "G"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Zambia (ZM)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        },
+        {
+            "nameCountry": "Zimbabwe (ZW)",
+            "values": [
+                {
+                    "nameService": "dhleco",
+                    "zone": "Zone 8B"
+                },
+                {
+                    "nameService": "dhlvn",
+                    "zone": 10
+                },
+                {
+                    "nameService": "ups",
+                    "zone": 9
+                },
+                {
+                    "nameService": "fedex",
+                    "zone": "H"
+                },
+                {
+                    "nameService": "sf",
+                    "zone": ""
+                }
+            ]
+        }
+    ]
+}

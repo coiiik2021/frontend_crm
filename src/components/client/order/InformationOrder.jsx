@@ -18,14 +18,8 @@ export default function InformationOrder(props) {
     const [initialNameCountry, setInitialNameCountry] = useState("USA (US)");
     const [isChangeCountry, setIsChangeCountry] = useState(false);
     const [zone, setZone] = useState({});
-
-    const country = [
-        { value: "bd", label: "Bangladesh" },
-        { value: "usa", label: "United States" },
-        { value: "canada", label: "Canada" },
-    ];
-
-    const [countries, setCountries] = useState([]);
+    const [isOpenFormPackage, setIsOpenFormPackage] = useState(false);
+    const [showQuote, setShowQuote] = useState(true);
 
     const [errors, setErrors] = useState({
         name: false,
@@ -213,12 +207,13 @@ export default function InformationOrder(props) {
                                 <Select
                                     options={countryOptions}
                                     placeholder="--Select Country--"
-                                    onChange={val => {
-                                        setForm({ ...form, country: val })
+                                    onChange={(val) => {
+                                        setForm({ ...form, country: val });
                                         setInitialNameCountry(val);
-                                        setIsChangeCountry(!isChangeCountry);
+                                        setIsChangeCountry(true); // Đánh dấu đã thay đổi country
+                                        setIsOpenFormPackage(true); // Hiển thị thông tin package
+                                        setShowQuote(false); // Ẩn phần báo giá
                                         setZone(countryCode[val.value]);
-
                                     }}
                                     defaultValue={form.country}
                                     className={`bg-gray-50 dark:bg-gray-800 ${errors.country ? "border-red-500" : ""}`}
