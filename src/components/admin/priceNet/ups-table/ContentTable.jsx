@@ -89,6 +89,7 @@ export default function ContentTable() {
             dim: 5000,
             ppxd: 100,
             vat: 8,
+            overSize: 100
         });
     };
 

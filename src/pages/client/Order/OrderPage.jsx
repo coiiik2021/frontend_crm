@@ -8,7 +8,7 @@ import FormDetailOrder from "../../../components/client/order/FormDetailOrder";
 export default function OrderPage() {
     const [currentStep, setCurrentStep] = useState(2);
     const [recipientInfo, setRecipientInfo] = useState({
-        id: "",
+        id: "1",
         name: "",
         company: "",
         email: "",
@@ -58,7 +58,6 @@ export default function OrderPage() {
     const [selectedService, setSelectedService] = useState(null);
 
     const handleStepChange = (newStep) => {
-        // Clear product errors when changing steps
         if (newStep === 3) {
             setProductsErrors({});
         }

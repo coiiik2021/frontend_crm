@@ -35,6 +35,8 @@ export default function InformationOrder(props) {
     const [countryOptions, setCountryOptions] = useState([]);
 
     const handleService = () => {
+        console.log("form" , form);
+
         if (validateForm()) {
             setRecipientInfo(form);
             setCurrentStep(3);
@@ -60,11 +62,7 @@ export default function InformationOrder(props) {
                 const countryDataMap = rawData.reduce((acc, item) => {
                     const originalName = item[0].trim();
                     acc[originalName] = {
-                        dhlsin: item[1] || '',
-                        dhlvn: item[2] ? item[2].replace(',', '.') : '',
-                        ups: item[3] || '',
-                        fedex: item[4] || '',
-                        sf: item[5] || '',
+
                         countryCode: (originalName.match(/\(([A-Z]{2})\)/) || [])[1] || ''
                     };
                     return acc;
@@ -89,15 +87,26 @@ export default function InformationOrder(props) {
     const validateForm = () => {
         const newErrors = {};
         Object.keys(form).forEach((key) => {
-            if (!form[key]) {
-                newErrors[key] = true;
-            } else {
-                newErrors[key] = false;
+            if(key!=="id"){
+                if (!form[key]) {
+                    newErrors[key] = true;
+                } else {
+                    newErrors[key] = false;
+                }
             }
         });
         setErrors(newErrors);
         return Object.values(newErrors).every((error) => !error);
     };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm((prevForm) => ({
+            ...prevForm,
+            [name]: value,
+        }));
+    };
+
 
     const handleSave = (e) => {
         e.preventDefault();
@@ -190,8 +199,10 @@ export default function InformationOrder(props) {
                                     Recipient Information
                                 </h4>
                             </div>
-                            {['name', 'company', 'email', 'phone', 'street', 'city', 'state', 'postCode'].map((field, idx) => (
-                                <div key={idx}>
+
+
+                            {[ 'name', 'company', 'email', 'phone', 'street', 'city', 'state', 'postCode'].map((field, idx) => (
+                                <div key={idx} >
                                     <Label htmlFor={field}>{`${field.charAt(0).toUpperCase() + field.slice(1)}`}</Label>
                                     <Input
                                         type="text"

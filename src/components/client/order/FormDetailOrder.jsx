@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import * as XLSX from "xlsx";
 
 export default function FormDetailOrder({ recipientInfo, packages, products, productsTotal, selectedService }) {
@@ -53,6 +53,8 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
         totalValue: productsTotal.priceProduct,
         selectedService: selectedService
     };
+    const [listProduct, setListProduct] = useState([]);
+
 
     const formatCurrency = (amount) => {
         const num = parseFloat(String(amount).replace(/[^0-9.]/g, ''));
@@ -63,6 +65,43 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
             maximumFractionDigits: 0
         }).format(num);
     };
+
+    useEffect(() => {
+
+
+        const newList = products.map(product => ({
+            id: product.id,
+            description: product["Mô tả sản phẩm"],
+            origin: product["Xuất xứ"],
+            unit: product["Kiểu đơn vị"],
+            quantity: product["Số lượng"],
+            totalPrice: product.totalPrice,
+            price: product.price,
+        }));
+        setListProduct(newList);
+
+        const newPackages = packages.map(p => (
+            {
+                weight: p.weight,
+                length: p.length,
+                width: p.width,
+                height: p.height,
+            }
+        ))
+
+        const dataRequest = {
+            recipientInfo: recipientInfo,
+            serviceSelectInfo: selectedService,
+            products: newList,
+            packages: newPackages,
+            productsTotal: productsTotal,
+        }
+
+        console.log("dataRequest" , dataRequest);
+
+
+
+    }, [])
 
     const [priceNet, setPriceNet] = useState(selectedService.totalPrice);
     const [priceTransport, setPriceTransport] = useState(0);
@@ -387,11 +426,11 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
                             <p className="font-medium">{selectedService.service}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-gray-600">Thời gian giao hàng</p>
-                            <p className="font-medium">{selectedService.deliveryTime}</p>
-                            <p className="text-xs text-gray-500">
-                                {selectedService.deliveryDateBegin} - {selectedService.deliveryDateEnd}
-                            </p>
+                            {/*<p className="text-sm text-gray-600">Thời gian giao hàng</p>*/}
+                            {/*<p className="font-medium">{selectedService.deliveryTime}</p>*/}
+                            {/*<p className="text-xs text-gray-500">*/}
+                            {/*    {selectedService.deliveryDateBegin} - {selectedService.deliveryDateEnd}*/}
+                            {/*</p>*/}
                         </div>
                         <div>
                             <p className="text-sm text-gray-600">Khu vực</p>
@@ -403,7 +442,7 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
                                         <p className="text-xs text-gray-500">Phí cơ bản</p>
-                                        <p className="font-medium">{formatCurrency(selectedService.price)} VND</p>
+                                        <p className="font-medium">{formatCurrency(selectedService.priceNet)} VND</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-500">Phí xăng dầu</p>
@@ -411,7 +450,7 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-500">Phí quá khổ</p>
-                                        <p className="font-medium">{formatCurrency(selectedService.oversizeFee)} VND</p>
+                                        <p className="font-medium">{formatCurrency(selectedService.overSize? selectedService.overSize.price : 0)} VND</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-500">VAT (8%)</p>

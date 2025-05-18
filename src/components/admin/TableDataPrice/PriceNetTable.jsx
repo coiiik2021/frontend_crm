@@ -16,6 +16,7 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet }) => {
 
     const handleSave = async () => {
         setConstNet(editValues);
+        console.log("editValues", editValues);
 
         await PutConstNet(editValues);
         setIsEditing(false);
@@ -62,7 +63,7 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet }) => {
                     )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label className="block text-sm font-medium mb-1">Chỉ số Dim</label>
                         {isEditing ? (
@@ -108,6 +109,21 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet }) => {
                             />
                         ) : (
                             <div className="p-2 bg-gray-50 rounded">{constNet.vat} %</div>
+                        )}
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Chỉ số Oversize</label>
+                        {isEditing ? (
+                            <input
+                                name="overSize"
+                                type="number"
+                                step="0.01"
+                                value={editValues.overSize}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border rounded"
+                            />
+                        ) : (
+                            <div className="p-2 bg-gray-50 rounded">{constNet.overSize} %</div>
                         )}
                     </div>
                 </div>

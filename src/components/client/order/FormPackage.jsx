@@ -165,7 +165,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         { code: "LPS", price: 1602700, note: "Chu vi Package: dài + 2 x (rộng + cao) nằm trong [300, 399]" },
         { code: "OMS", price: 6580000, note: ["Package trên 70KG bạn vui lòng liên hệ sales EbayExpress để được hướng dẫn gửi hàng", "Chu vi Package: dài + 2 x (rộng + cao) >= 400", "Package có chiều dài từ 274CM"] }
     ];
-
+    
     const quoteRef = useRef(null);
 
     const scrollContainer = (direction) => {
@@ -243,9 +243,9 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             nameCountry: initialNameCountry, // Tên quốc gia
             weight: total.realVolume, // Tổng cân nặng thực tế
             packages: packages.map(pkg => ({
-                weight: parseFloat(pkg.weight) || 0, // Cân nặng của kiện
-                width: parseFloat(pkg.width) || 0,  // Chiều rộng của kiện
-                length: parseFloat(pkg.length) || 0, // Chiều dài của kiện
+                weight: parseFloat(pkg.weight) || 0,
+                width: parseFloat(pkg.width) || 0,
+                length: parseFloat(pkg.length) || 0,
                 height: parseFloat(pkg.height) || 0, // Chiều cao của kiện
             })),
         };
@@ -341,20 +341,21 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
     };
 
     const handleSelectService = (quote) => {
+        const [carrier, service] = quote.nameService.split(" ");
+
+
         console.log(quote);
         const selectedServiceInfo = {
-            carrier: quote.company,
-            service: quote.code,
-            price: quote.price,
+            carrier: carrier,
+            service: service,
+            priceNet: quote.priceNet,
             pricePPXD: quote.pricePPXD,
-            oversizeFee: quote.code === "Tiết Kiệm" ? 0 : total.totalOverSize,
-            VAT: quote.VAT,
-            totalPrice: quote.price + quote.VAT + quote.pricePPXD + (quote.code === "Tiết Kiệm" ? 0 : total.totalOverSize),
-            deliveryTime: quote.endDate,
-            deliveryDateBegin: quote.deliveryDateBegin,
-            deliveryDateEnd: quote.deliveryDateEnd,
+            overSize: quote.overSize,
+            VAT: quote.priceVAT,
+            totalPrice: quote.priceNet + quote.priceVAT + quote.pricePPXD + (quote.overSize? quote.overSize.price : 0),
             zone: quote.zone
         };
+        console.log("selectedServiceInfo", selectedServiceInfo);
         setSelectedService(selectedServiceInfo);
         handleService();
     };
@@ -502,46 +503,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                             </div>
                                         </div>
 
-                                        <AnimatePresence>
-                                            {noteOverSize(pkg) && quaKhoMap.get(pkg.total?.OverSize)?.price !== 0 && (
-                                                <motion.div
-                                                    className="bg-white p-3 rounded-lg shadow-xs"
-                                                    initial={{ opacity: 0, height: 0 }}
-                                                    animate={{ opacity: 1, height: "auto" }}
-                                                    exit={{ opacity: 0, height: 0 }}
-                                                    transition={{ duration: 0.3 }}
-                                                >
-                                                    <div className="flex items-center mb-2">
-                                                        <svg className="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                                                        </svg>
-                                                        <h3 className="text-xs font-medium text-gray-600">OverSize</h3>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-xxs text-gray-500 mb-1">Loại quá khổ</span>
-                                                            <span className="text-xs font-semibold text-blue-600">
-                                                                {pkg.total?.OverSize || "N/A"}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-xxs text-gray-500 mb-1">Phụ phí</span>
-                                                            <span className="text-xs font-semibold text-blue-600">
-                                                                {formatCurrency(quaKhoMap.get(pkg.total?.OverSize)?.price || 0)} VND
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="mt-2 flex items-start space-x-2 p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
-                                                        <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-amber-100 text-amber-600 mt-0.5">
-                                                            !
-                                                        </span>
-                                                        <div className="flex-1">
-                                                            <span className="font-medium">Chú ý: </span> {noteOverSize(pkg)}
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
+
                                     </motion.div>
                                 </motion.div>
                             ))}
@@ -680,10 +642,20 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                         <div className="flex items-start justify-between">
                                             <div>
                                                 <h2 className="text-sm font-bold text-gray-800 flex items-center">
-                                                    {quote.nameService} Saver®
+                                                    {
+                                                        (() => {
+                                                            const [carrierName] = quote.nameService.split(" "); // Tách nameService thành mảng
+                                                            return carrierName; // Trả về carrierName
+                                                        })() // Chú ý: Gọi hàm tự thực thi
+                                                    } Saver®
                                                     <span className="ml-1 text-xs font-normal bg-green-100 text-green-800 px-1.5 py-0.5 rounded">
-                                                        {quote.code || "JD"}
-                                                    </span>
+        {
+            (() => {
+                const [, serviceName] = quote.nameService.split(" "); // Lấy serviceName
+                return serviceName; // Trả về serviceName
+            })() // Chú ý: Gọi hàm tự thực thi
+        }
+    </span>
                                                 </h2>
                                                 <p className="text-xs text-gray-500 mt-1">{quote.endDate}</p>
                                             </div>
@@ -710,6 +682,16 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                                 <p className="text-xs text-gray-500">Weight: {formatCurrency(quote.totalWeight)} KG</p>
                                                 <p className="text-xs text-gray-500">NET: {formatCurrency(quote.priceNet)} VND</p>
                                                 <p className="text-xs text-gray-500">PPXD: {formatCurrency(quote.pricePPXD)} VND</p>
+                                                {
+                                                    quote.overSize?.price !== 0 && (
+                                                       <>
+                                                           <p className="text-xs text-gray-500">OverSize: {formatCurrency(quote.overSize?.price)} VND</p>
+                                                           <p className="text-xs text-gray-500">Description: {(quote.overSize?.description)}</p>
+                                                       </>
+
+
+                                                    )
+                                                }
                                                 {/* {total.totalOverSize !== 0 && (
                                                     <p className="text-xs text-gray-500">
                                                         Oversize: {formatCurrency((quote.code === "Tiết Kiệm" ? 0 : total.totalOverSize))} VND
@@ -718,7 +700,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                                 <p className="text-xs text-gray-500">VAT(8%): {formatCurrency(quote.priceVAT)} VND</p>
 
                                                 <p className="text-base font-bold text-gray-800 mt-1">
-                                                    {formatCurrency(quote.priceNet + quote.priceVAT + quote.pricePPXD + (quote.code === "Tiết Kiệm" ? 0 : total.totalOverSize || 0))} VND
+                                                    {formatCurrency(quote.priceNet + quote.priceVAT + quote.pricePPXD + (quote.overSize? quote.overSize.price : 0))} VND
                                                 </p>
                                             </div>
                                             <Button

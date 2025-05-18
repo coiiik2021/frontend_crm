@@ -1,15 +1,15 @@
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table/index.js";
 import { NavLink } from "react-router";
 import { PencilIcon, TrashBinIcon } from "../../../icons/index.js";
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import Label from "../form/Label.js";
 import Input from "../form/input/InputField.js";
 import Button from "../../../elements/Button/index";
 import {Modal} from "../ui/modal/index.js";
 import {useModal} from "../../../hooks/useModal";
+import {DeleteOverSize, GetOverSizeByName, PostOverSize} from "../../../service/api.admin.service.jsx";
 
 const OverSizeTable = () => {
-    // State quản lý sort key và order
     const [sortKey, setSortKey] = useState("name");
     const [sortOrder, setSortOrder] = useState("asc");
 
@@ -22,16 +22,52 @@ const OverSizeTable = () => {
         }
     };
 
-    const handleAddNew = () => {
-        console.log("Nhấn vào nút Thêm mới");
+    const [overSize, setOverSize] = useState([]);
+
+
+    const nameCompany = "ups";
+
+    const [newOverSize, setNewOverSize] = useState({
+        name: "",
+        price: "",
+        description: "",
+        nameCompany: nameCompany,
+    });
+
+    useEffect( () => {
+        async function fetchData() {
+            const dataOverSize = await GetOverSizeByName(nameCompany);
+
+            console.log("dataOverSize", dataOverSize);
+
+            setOverSize(dataOverSize);
+
+        }
+         fetchData();
+
+    }, [])
+
+    const handleAddNew = async () => {
+
+        const data = await PostOverSize(newOverSize);
+        if(data){
+            setOverSize(
+                [...overSize, data]
+            )
+            setNewOverSize({
+                name: "",
+                nameCompany: nameCompany,
+                price: "",
+                description: "",
+            })
+        }
+        console.log("data", data);
+
+
     };
 
     // Mock dữ liệu hiển thị trên bảng
-    const currentData = [
-        { name: "User A", price: "Developer", description: "New York" },
-        { name: "User B", price: "Designer", description: "Los Angeles" },
-        { name: "User C", price: "Manager", description: "Chicago" },
-    ];
+
 
     const { isOpen, openModal, closeModal } = useModal();
 
@@ -59,15 +95,20 @@ const OverSizeTable = () => {
                             <div className="px-2 overflow-y-auto custom-scrollbar">
                                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                                     <div>
-                                        <Label>Tên hãng</Label>
-                                        <Input type="text" value={"123"} disabled />
+                                        <Label>name</Label>
+                                        <Input type="text" value={newOverSize.name} onChange={(e) => setNewOverSize({...newOverSize, name: e.target.value}) }/>
                                     </div>
 
                                     <div>
-                                        <Label>Tên dịch vụ</Label>
-                                        <Input type="text" value={"123"} onChange={(e) => console.log(e.target.value)} />
+                                        <Label>price</Label>
+                                        <Input type="number" value={overSize.price} onChange={(e) => setNewOverSize({...newOverSize, price: e.target.value})} />
                                     </div>
 
+                                    <div>
+                                        <Label>Description</Label>
+                                        <Input type="text" value={overSize.description} onChange={(e) => setNewOverSize({...newOverSize, description: e.target.value})} />
+
+                                    </div>
 
                                 </div>
                             </div>
@@ -76,8 +117,8 @@ const OverSizeTable = () => {
                                     Close
                                 </Button>
                                 <Button size="sm" onClick={
-                                     () => {
-                                        console.log("Save");
+                                     async () => {
+                                        await handleAddNew();
                                         closeModal();
                                     }
                                 }>
@@ -159,7 +200,7 @@ const OverSizeTable = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {currentData.map((item, i) => (
+                    {overSize.map((item, i) => (
                         <TableRow key={i + 1}>
                             <TableCell className="px-4 py-4 font-medium text-gray-800 border border-gray-100 dark:border-white/[0.05] dark:text-white text-theme-sm whitespace-nowrap ">
                                 <NavLink to="/quan-ly/shipment-detail">{item.name}</NavLink>
@@ -173,11 +214,22 @@ const OverSizeTable = () => {
 
                             <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap ">
                                 <div className="flex items-center w-full gap-2">
-                                    <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                                    <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                                        onClick={
+                                            async () => {
+                                                await DeleteOverSize(item.id);
+                                                setOverSize(
+                                                    overSize.filter((item) => item.id !== item.id)
+                                                );
+                                            }
+                                        }
+                                    >
                                         <TrashBinIcon className="size-5" />
+
                                     </button>
                                     <button className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90">
                                         <PencilIcon className="size-5" />
+
                                     </button>
                                 </div>
                             </TableCell>

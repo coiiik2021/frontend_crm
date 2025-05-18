@@ -1,135 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import {useState, useMemo, useEffect} from "react";
 
 import { NavLink } from "react-router";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import PaginationWithIcon from "../tables/DataTables/TableOne/PaginationWithIcon";
+import {Modal} from "../ui/modal/index.js";
+import Label from "../form/Label.js";
+import Input from "../form/input/InputField.js";
+import {useModal} from "../../../hooks/useModal.js";
+import {GetAllBaseUser, PostBaseUser} from "../../../service/api.admin.service.jsx";
+import Button from "../../../elements/Button/index.jsx";
 
-const tableRowData = [
-    {
-        id: 1,
-        user: {
-            image: "/images/user/user-20.jpg",
-            name: "Abram Schleifer",
-        },
-        email: "Sales Assistant @gmail.com",
-        location: "Edinburgh",
-        age: 57,
-        date: "25 Apr, 2027",
-        salary: "$89,500",
-    },
-    {
-        id: 2,
-        user: {
-            image: "/images/user/user-21.jpg",
-            name: "Charlotte Anderson",
-        },
-        email: "Marketing Manager",
-        location: "London",
-        age: 42,
-        date: "12 Mar, 2025",
-        salary: "$105,000",
-    },
-    {
-        id: 3,
-        user: {
-            image: "/images/user/user-22.jpg",
-            name: "Ethan Brown",
-        },
-        email: "Software Engineer",
-        location: "San Francisco",
-        age: 30,
-        date: "01 Jan, 2024",
-        salary: "$120,000",
-    },
-    {
-        id: 4,
-        user: {
-            image: "/images/user/user-23.jpg",
-            name: "Sophia Martinez",
-        },
-        email: "Product Manager",
-        location: "New York",
-        age: 35,
-        date: "15 Jun, 2026",
-        salary: "$95,000",
-    },
-    {
-        id: 5,
-        user: {
-            image: "/images/user/user-24.jpg",
-            name: "James Wilson",
-        },
-        email: "Data Analyst",
-        location: "Chicago",
-        age: 28,
-        date: "20 Sep, 2025",
-        salary: "$80,000",
-    },
-    {
-        id: 6,
-        user: {
-            image: "/images/user/user-25.jpg",
-            name: "Olivia Johnson",
-        },
-        email: "HR Specialist",
-        location: "Los Angeles",
-        age: 40,
-        date: "08 Nov, 2026",
-        salary: "$75,000",
-    },
-    {
-        id: 7,
-        user: {
-            image: "/images/user/user-26.jpg",
-            name: "William Smith",
-        },
-        email: "Financial Analyst",
-        location: "Seattle",
-        age: 38,
-        date: "03 Feb, 2026",
-        salary: "$88,000",
-    },
-    {
-        id: 8,
-        user: {
-            image: "/images/user/user-27.jpg",
-            name: "Isabella Davis",
-        },
-        email: "UI/UX Designer",
-        location: "Austin",
-        age: 29,
-        date: "18 Jul, 2025",
-        salary: "$92,000",
-    },
-    {
-        id: 9,
-        user: {
-            image: "/images/user/user-28.jpg",
-            name: "Liam Moore",
-        },
-        email: "DevOps Engineer",
-        location: "Boston",
-        age: 33,
-        date: "30 Oct, 2024",
-        salary: "$115,000",
-    },
-    {
-        id: 10,
-        user: {
-            image: "/images/user/user-29.jpg",
-            name: "Mia Garcia",
-        },
-        email: "Content Strategist",
-        location: "Denver",
-        age: 27,
-        date: "12 Dec, 2027",
-        salary: "$70,000",
-    },
-];
-
-export default function ContentTable() {
+export default function ContentTable(  props) {
+    const {users, setUsers} = props;
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [sortKey, setSortKey] = useState("name");
@@ -137,7 +21,8 @@ export default function ContentTable() {
     const [searchTerm, setSearchTerm] = useState("");
 
     const filteredAndSortedData = useMemo(() => {
-        return tableRowData
+        console.log(users);
+        return users
             .filter((item) =>
                 Object.values(item).some(
                     (value) =>
@@ -148,12 +33,12 @@ export default function ContentTable() {
             .sort((a, b) => {
                 if (sortKey === "name") {
                     return sortOrder === "asc"
-                        ? a.user.name.localeCompare(b.user.name)
-                        : b.user.name.localeCompare(a.user.name);
+                        ? a.fullName.localeCompare(b.fullName)
+                        : b.fullName.localeCompare(a.fullName);
                 }
                 if (sortKey === "salary") {
-                    const salaryA = Number.parseInt(a[sortKey].replace(/\$|,/g, ""));
-                    const salaryB = Number.parseInt(b[sortKey].replace(/\$|,/g, ""));
+                    const salaryA = Number.parseInt(a[sortKey]);
+                    const salaryB = Number.parseInt(b[sortKey]);
                     return sortOrder === "asc" ? salaryA - salaryB : salaryB - salaryA;
                 }
                 return sortOrder === "asc"
@@ -161,14 +46,19 @@ export default function ContentTable() {
                     : String(b[sortKey]).localeCompare(String(a[sortKey]));
             });
     }, [sortKey, sortOrder, searchTerm]);
-
     const totalItems = filteredAndSortedData.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
 
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+    const currentData  = filteredAndSortedData.slice(startIndex, endIndex);
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const { isOpen, openModal, closeModal } = useModal();
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
 
+    const [newDataUser, setNewDataUser] = useState({});
     const handleSort = (key) => {
         if (sortKey === key) {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -178,12 +68,180 @@ export default function ContentTable() {
         }
     };
 
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-    const currentData = filteredAndSortedData.slice(startIndex, endIndex);
+    const handleCreateUser = async () => {
+        console.log(newDataUser);
+        setNewDataUser({...newDataUser, role: "USER"});
+        await PostBaseUser(newDataUser);
+        //
+        console.log("close Model");
+
+        setUsers([...users, newDataUser]);
+
+        closeModal();
+    }
+
+
+
+
 
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
+
+            <Button variant="primary"                                 className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+                    onClick={openModal}>ADD USER</Button>
+
+            <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
+                <div className="relative w-full p-6 overflow-y-auto bg-white rounded-3xl dark:bg-gray-900 lg:p-8">
+                    <div className="flex items-center justify-between mb-6">
+                        <h4 className="text-2xl font-bold text-gray-800 dark:text-white/90">
+                            Add New User
+                        </h4>
+                        <button
+                            onClick={closeModal}
+                            className="p-1 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form className="space-y-6">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            {/* Email Field */}
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Email Address*
+                                </Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="user@example.com"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700"
+                                    required
+                                    onChange={(e) => setNewDataUser({ ...newDataUser, email: e.target.value })}
+                                />
+                            </div>
+
+                            {/* Full Name Field */}
+                            <div className="space-y-2">
+                                <Label htmlFor="fullName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Full Name*
+                                </Label>
+                                <Input
+                                    id="fullName"
+                                    type="text"
+                                    placeholder="John Doe"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700"
+                                    required
+                                    onChange={(e) => setNewDataUser({ ...newDataUser, fullName: e.target.value })}
+                                />
+                            </div>
+
+                            {/* Gender Field */}
+                            <div className="space-y-2">
+                                <Label htmlFor="gender" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Gender
+                                </Label>
+                                <select
+                                    id="gender"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700"
+                                    name="gender"
+                                    onChange={(e) => setNewDataUser({ ...newDataUser, gender: e.target.value })}
+                                >
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            {/* Phone Field */}
+                            <div className="space-y-2">
+                                <Label htmlFor="phone" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Phone Number
+                                </Label>
+                                <Input
+                                    id="phone"
+                                    type="tel"
+                                    placeholder="012 1234 567"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700"
+                                    onChange={(e) => setNewDataUser({ ...newDataUser, phone: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="salary" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Salary
+                                </Label>
+                                <Input
+                                    id="salary"
+                                    type="number"
+                                    placeholder="VND"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700"
+                                    onChange={(e) => setNewDataUser({ ...newDataUser, salary: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="kpi" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    KPI
+                                </Label>
+                                <Input
+                                    id="kpi"
+                                    type="number"
+                                    placeholder="VND7"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700"
+                                    onChange={(e) => setNewDataUser({ ...newDataUser, kpi: e.target.value })}
+                                />
+                            </div>
+
+
+
+                            {/* Date of Birth Field */}
+                            <div className="space-y-2">
+                                <Label htmlFor="dob" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Date of Birth
+                                </Label>
+                                <Input
+                                    id="dob"
+                                    type="date"
+                                    onChange={(e) => setNewDataUser({...newDataUser, dateOfBirth: e.target.value})} // Xử lý giá trị khi thay đổi
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700"
+                                />
+
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col-reverse items-center justify-end gap-3 pt-4 md:flex-row">
+                            <Button
+                                type="button"
+                                size="lg"
+                                variant="outline"
+                                onClick={  () => {
+                                    setNewDataUser({});
+                                    closeModal();
+                                }}
+                                className="w-full md:w-auto px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700"
+
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                size="lg"
+                                className="w-full md:w-auto px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700"
+                                onClick={ async  () => {
+                                    await handleCreateUser();
+                                }
+                                }
+                            >
+                                Save User
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+            </Modal>
             <div className="flex flex-col gap-2 px-4 py-4 border border-b-0 border-gray-100 dark:border-white/[0.05] rounded-t-xl sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                     <span className="text-gray-500 dark:text-gray-400"> Show </span>
@@ -259,7 +317,7 @@ export default function ContentTable() {
                         <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
                             <TableRow>
                                 {[
-                                    { key: "name", label: "User" },
+                                    { key: "fullName", label: "Full Name" },
                                     { key: "email", label: "Email" },
                                     { key: "phone", label: "Phone" },
                                     { key: "age", label: "Age" },
@@ -322,16 +380,16 @@ export default function ContentTable() {
                                 <TableRow key={i + 1}>
                                     <TableCell className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] whitespace-nowrap">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 overflow-hidden rounded-full">
-                                                <img
-                                                    src={item.user.image}
-                                                    className="size-10"
-                                                    alt="user"
-                                                />
-                                            </div>
+                                            {/*<div className="w-10 h-10 overflow-hidden rounded-full">*/}
+                                            {/*    <img*/}
+                                            {/*        src={item.user.image}*/}
+                                            {/*        className="size-10"*/}
+                                            {/*        alt="user"*/}
+                                            {/*    />*/}
+                                            {/*</div>*/}
                                             <div>
                                                 <NavLink to="/profile" className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                                                    {item.user.name}
+                                                    {item.fullName}
                                                 </NavLink>
                                             </div>
                                         </div>
@@ -340,16 +398,16 @@ export default function ContentTable() {
                                         {item.email}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                                        {item.location}
+                                        {item.phone}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                                        {item.age}
+                                        {18}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                                        {item.date}
+                                        {item.dateOfBirth}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                                        {item.salary}
+                                        {1000}
                                     </TableCell>
                                 </TableRow>
                             ))}

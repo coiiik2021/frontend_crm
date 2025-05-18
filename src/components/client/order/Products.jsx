@@ -176,7 +176,6 @@ const Products = ({
             setProducts(importedProducts);
             setProductsTotal({
                 quantity: importedProducts.length,
-                price: 0,
                 priceProduct: importedProducts.reduce((sum, p) => sum + p.totalPrice, productsTotal.priceProduct),
             });
         };

@@ -131,6 +131,54 @@ const GetListPriceQuote = async (data) => {
 export { GetListPriceQuote };
 
 
+// ovserSize
+
+const GetOverSizeByName = async (nameCompany) => {
+    const API = `over-size/all?nameCompany=${nameCompany}`;
+    return await axios.get(API);
+}
+
+const PostOverSize = async (data) => {
+    const API = `over-size`;
+    return await axios.post(API, data);
+}
+
+const PutOverSize = async (data) => {
+    const API = `over-size`;
+    return await axios.put(API, data);
+}
+
+const DeleteOverSize = async (id) => {
+    const API = `over-size/${id}`;
+    return await axios.delete(API);
+}
+
+// account - base_user
+
+const PostBaseUser = async (data) => {
+    console.log("data", data);
+    const API = `base_user`;
+    return await axios.post(API, data);
+}
+
+
+
+const GetAllBaseUser = async (nameRole) => {
+    const API = `base_user/${nameRole}`;
+    return await axios.get(API);
+}
+const PutBaseUser = async (data) => {
+    const API = `base_user`;
+    return await axios.put(API, data);
+}
+
+export { PostBaseUser, GetAllBaseUser, PutBaseUser };
+
+
+
+export { GetOverSizeByName, PostOverSize, PutOverSize, DeleteOverSize };
+
+
 export { GetPriceNet, PostPriceNet, PostZoneCountry, GetZoneCountry, GetAZoneCountry, GetAPriceNet, GetPriceAllGasoline, PostPriceGasoline, DeletePriceGasonline };
 
 export { GetAllConstNet, GetConstNet, PutConstNet, PostConstNet };
