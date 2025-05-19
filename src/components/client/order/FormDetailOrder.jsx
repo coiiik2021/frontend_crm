@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import * as XLSX from "xlsx";
 
-export default function FormDetailOrder({ recipientInfo, packages, products, productsTotal, selectedService }) {
+export default function FormDetailOrder({ recipientInfo, packages, products, productsTotal, selectedService, dataRequest, setDataRequest }) {
     const [showProductsForm, setShowProductsForm] = useState(true);
     const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -37,7 +37,8 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
             company: recipientInfo.company,
             address: `${recipientInfo.street}, ${recipientInfo.city}, ${recipientInfo.state} ${recipientInfo.postCode}`,
             phone: recipientInfo.phone,
-            email: recipientInfo.email
+            email: recipientInfo.email,
+            country: recipientInfo.country
         },
 
         // Chuyển đổi products thành items
@@ -53,7 +54,36 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
         totalValue: productsTotal.priceProduct,
         selectedService: selectedService
     };
-    const [listProduct, setListProduct] = useState([]);
+
+    useEffect(() => {
+        const newList = products.map(product => ({
+            id: product.id,
+            description: product["Mô tả sản phẩm"],
+            origin: product["Xuất xứ"],
+            unit: product["Kiểu đơn vị"],
+            quantity: product["Số lượng"],
+            totalPrice: product.totalPrice,
+            price: product.price,
+        }));
+
+        const newPackages = packages.map(p => (
+            {
+                weight: p.weight,
+                length: p.length,
+                width: p.width,
+                height: p.height,
+            }
+        ))
+
+        const dataRequestAPI = {
+            recipientInfo: recipientInfo,
+            serviceSelectInfo: selectedService,
+            products: newList,
+            packages: newPackages,
+            productsTotal: productsTotal,
+        }
+        setDataRequest(dataRequestAPI);
+    }, [])
 
 
     const formatCurrency = (amount) => {
@@ -69,33 +99,6 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
     useEffect(() => {
 
 
-        const newList = products.map(product => ({
-            id: product.id,
-            description: product["Mô tả sản phẩm"],
-            origin: product["Xuất xứ"],
-            unit: product["Kiểu đơn vị"],
-            quantity: product["Số lượng"],
-            totalPrice: product.totalPrice,
-            price: product.price,
-        }));
-        setListProduct(newList);
-
-        const newPackages = packages.map(p => (
-            {
-                weight: p.weight,
-                length: p.length,
-                width: p.width,
-                height: p.height,
-            }
-        ))
-
-        const dataRequest = {
-            recipientInfo: recipientInfo,
-            serviceSelectInfo: selectedService,
-            products: newList,
-            packages: newPackages,
-            productsTotal: productsTotal,
-        }
 
         console.log("dataRequest" , dataRequest);
 

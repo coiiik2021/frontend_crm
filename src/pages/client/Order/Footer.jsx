@@ -1,9 +1,16 @@
-export default function Footer({ currentStep, setCurrentStep, products, productsErrors, setProductsErrors }) {
+import {CreateBill} from "../../../service/api.admin.service.jsx";
+import {useEffect} from "react";
+
+export default function Footer({ currentStep, setCurrentStep, products, productsErrors, setProductsErrors, dataRequest }) {
     const handleBack = () => {
         if (currentStep > 1) {
             setCurrentStep(currentStep - 1);
         }
     };
+
+    useEffect(() => {
+        console.log(dataRequest);
+    })
 
     const validateProducts = () => {
         if (currentStep === 3) {
@@ -36,12 +43,20 @@ export default function Footer({ currentStep, setCurrentStep, products, products
         return true;
     };
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         if (currentStep < 4) {
             if (validateProducts()) {
                 setCurrentStep(currentStep + 1);
             }
         }
+        if(currentStep === 4){
+            const response = await CreateBill(dataRequest);
+            console.log(response);
+            if(response === "created successfully"){
+                window.location.href = "/";
+            }
+        }
+
     };
 
     const getButtonText = () => {

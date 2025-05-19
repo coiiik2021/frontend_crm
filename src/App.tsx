@@ -74,6 +74,7 @@ import DhlTable from "./components/admin/priceNet/dhl-table/DhlTable.jsx";
 import SfTable from "./components/admin/priceNet/sf-table/SfTable.jsx";
 import FedexTable from "./components/admin/priceNet/fedex-table/FedexTable.jsx";
 import ZoneCountryTable from "./components/admin/priceNet/zone-country/ZoneCountryTable.jsx";
+import BillTable from "./components/admin/bills/BillTable.jsx";
 
 
 
@@ -118,7 +119,7 @@ export default function App() {
 
 
 
-            <Route path="/quan-ly/shipment" element={<ShipmentTable />} />
+            <Route path="/quan-ly/shipment" element={<BillTable />} />
 
             <Route path="/quan-ly/shipment-detail" element={<ShipmentDetail />} />
 

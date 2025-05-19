@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import InformationOrder from "../../../components/client/order/InformationOrder";
@@ -35,6 +35,8 @@ export default function OrderPage() {
         }
     ]);
 
+    const [dataRequest, setDataRequest] = useState();
+
     // Products state
     const [products, setProducts] = useState([
         {
@@ -63,6 +65,10 @@ export default function OrderPage() {
         }
         setCurrentStep(newStep);
     };
+
+
+
+
 
     let content = null;
     if (currentStep === 2) {
@@ -108,6 +114,8 @@ export default function OrderPage() {
                     const height = pkg.height || 0;
                     return `${length}*${width}*${height}`;
                 }).join(", ")}
+                dataRequest={dataRequest}
+                setDataRequest={setDataRequest}
             />
         );
     }
@@ -123,6 +131,7 @@ export default function OrderPage() {
                 products={products}
                 productsErrors={productsErrors}
                 setProductsErrors={setProductsErrors}
+                dataRequest={dataRequest}
             />}
         </div>
     )

@@ -144,9 +144,6 @@ export default function InformationOrder(props) {
     };
 
 
-
-
-
     return (
         <div className="relative">
             {/* Nút bên phải */}

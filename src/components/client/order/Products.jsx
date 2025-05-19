@@ -86,6 +86,7 @@ const Products = ({
                 unit: "",
                 price: 0,
                 totalPrice: 0,
+                unitPrice: 0,
             }, ...prev
         ]);
 

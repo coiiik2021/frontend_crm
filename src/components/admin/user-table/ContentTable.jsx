@@ -12,7 +12,7 @@ import {useModal} from "../../../hooks/useModal.js";
 import {GetAllBaseUser, PostBaseUser} from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
 
-export default function ContentTable(  props) {
+export default function ContentTable( props) {
     const {users, setUsers} = props;
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -21,14 +21,9 @@ export default function ContentTable(  props) {
     const [searchTerm, setSearchTerm] = useState("");
 
     const filteredAndSortedData = useMemo(() => {
-        console.log(users);
         return users
             .filter((item) =>
-                Object.values(item).some(
-                    (value) =>
-                        typeof value === "string" &&
-                        value.toLowerCase().includes(searchTerm.toLowerCase())
-                )
+                item.fullName.toLowerCase().includes(searchTerm.toLowerCase())
             )
             .sort((a, b) => {
                 if (sortKey === "name") {
@@ -36,21 +31,25 @@ export default function ContentTable(  props) {
                         ? a.fullName.localeCompare(b.fullName)
                         : b.fullName.localeCompare(a.fullName);
                 }
+
                 if (sortKey === "salary") {
                     const salaryA = Number.parseInt(a[sortKey]);
                     const salaryB = Number.parseInt(b[sortKey]);
                     return sortOrder === "asc" ? salaryA - salaryB : salaryB - salaryA;
                 }
+
                 return sortOrder === "asc"
                     ? String(a[sortKey]).localeCompare(String(b[sortKey]))
                     : String(b[sortKey]).localeCompare(String(a[sortKey]));
             });
-    }, [sortKey, sortOrder, searchTerm]);
+    }, [users, sortKey, sortOrder, searchTerm]);
+
     const totalItems = filteredAndSortedData.length;
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-    const currentData  = filteredAndSortedData.slice(startIndex, endIndex);
+
+    const currentData=  (filteredAndSortedData.slice(startIndex, endIndex));
 
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const { isOpen, openModal, closeModal } = useModal();
@@ -69,12 +68,9 @@ export default function ContentTable(  props) {
     };
 
     const handleCreateUser = async () => {
-        console.log(newDataUser);
-        setNewDataUser({...newDataUser, role: "USER"});
-        await PostBaseUser(newDataUser);
-        //
-        console.log("close Model");
+        const data = {...newDataUser,  nameRole: "USER"};
 
+        await PostBaseUser(data);
         setUsers([...users, newDataUser]);
 
         closeModal();
