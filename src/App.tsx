@@ -66,7 +66,7 @@ import AppLayoutClient from "./layout/client/AppLayoutClient";
 import HomePage from "./pages/client/HomePage.jsx";
 import GetAQuote from "./part/GetAQuote.jsx";
 import OrderPage from "./pages/client/Order/OrderPage.jsx";
-import ManagerTable from "./components/admin/manager-table/ManagerTable.tsx";
+import ManagerTable from "./components/admin/manager-table/ManagerTable";
 import SaleTable from "./components/admin/sale-table/SaleTable.tsx";
 import UserTable from "./components/admin/user-table/UserTable.jsx";
 import UpsTable from "./components/admin/priceNet/ups-table/UpsTable.jsx";
@@ -76,25 +76,18 @@ import FedexTable from "./components/admin/priceNet/fedex-table/FedexTable.jsx";
 import ZoneCountryTable from "./components/admin/priceNet/zone-country/ZoneCountryTable.jsx";
 import BillTable from "./components/admin/bills/BillTable.jsx";
 
-
-
 export default function App() {
   return (
     <>
       <Router>
         <ScrollToTop />
         <Routes>
-
           client
           <Route element={<AppLayoutClient />}>
             <Route index path="/" element={<HomePage />} />
             <Route index path="/gia-van-chuyen" element={<GetAQuote />} />
             <Route index path="/tao-don-hang" element={<OrderPage />} />
-
-
           </Route>
-
-
           {/* Dashboard Layout */}
           <Route element={<AppLayoutAdmin />}>
             <Route index path="/quan-ly" element={<Ecommerce />} />
@@ -115,19 +108,19 @@ export default function App() {
             <Route path="/quan-ly/dhl-table" element={<DhlTable />} />
             <Route path="/quan-ly/fedex-table" element={<FedexTable />} />
             <Route path="/quan-ly/sf-table" element={<SfTable />} />
-            <Route path="/quan-ly/zone-country" element={<ZoneCountryTable />} />
-
-
+            <Route
+              path="/quan-ly/zone-country"
+              element={<ZoneCountryTable />}
+            />
 
             <Route path="/quan-ly/shipment" element={<BillTable />} />
 
-            <Route path="/quan-ly/shipment-detail" element={<ShipmentDetail />} />
+            <Route
+              path="/quan-ly/shipment-detail"
+              element={<ShipmentDetail />}
+            />
 
             <Route path="/quan-ly/my-debits" element={<ShipmentTable />} />
-
-
-
-
 
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/invoice" element={<Invoices />} />
@@ -184,7 +177,6 @@ export default function App() {
             <Route path="/bar-chart" element={<BarChart />} />
             <Route path="/pie-chart" element={<PieChart />} />
           </Route>
-
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
@@ -193,7 +185,6 @@ export default function App() {
             path="/two-step-verification"
             element={<TwoStepVerification />}
           />
-
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
           <Route path="/maintenance" element={<Maintenance />} />

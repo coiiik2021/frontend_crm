@@ -30,6 +30,7 @@ export default function ContentTable(props) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredAndSortedData = useMemo(() => {
+    console.log(users);
     return users
       .filter((item) =>
         item.fullName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -75,7 +76,7 @@ export default function ContentTable(props) {
   };
 
   const handleCreateUser = async () => {
-    const data = { ...newDataUser, nameRole: "USER" };
+    const data = { ...newDataUser, nameRole: "MANAGER" };
 
     await PostBaseUser(data);
     setUsers([...users, newDataUser]);
@@ -90,14 +91,14 @@ export default function ContentTable(props) {
         className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
         onClick={openModal}
       >
-        ADD USER
+        ADD MANAGER
       </Button>
 
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="relative w-full p-6 overflow-y-auto bg-white rounded-3xl dark:bg-gray-900 lg:p-8">
           <div className="flex items-center justify-between mb-6">
             <h4 className="text-2xl font-bold text-gray-800 dark:text-white/90">
-              Add New User
+              Add New Manager
             </h4>
             <button
               onClick={closeModal}
@@ -286,7 +287,7 @@ export default function ContentTable(props) {
                 size="lg"
                 className="w-full md:w-auto px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700"
               >
-                Save User
+                Save Manager
               </Button>
             </div>
           </form>
