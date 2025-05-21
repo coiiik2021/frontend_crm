@@ -184,14 +184,14 @@ export default function ContentTable() {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => setCurrentPage(1)}
-                        className={`px-4 py-2 rounded ${currentPage ===1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+                        className={`px-4 py-2 rounded ${currentPage === 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
                     >
                         Giá Net
                     </button>
 
                     <button
                         onClick={() => setCurrentPage(2)}
-                        className={`px-4 py-2 rounded ${currentPage ===2  ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+                        className={`px-4 py-2 rounded ${currentPage === 2 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
                     >
                         Giá xăng dầu
                     </button>
@@ -289,31 +289,40 @@ export default function ContentTable() {
                             </div>
                         </Modal>
 
-                        <Button
-                            type="button"
-                            className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600"
-                            onClick={async () => {
-                                await DeleteServiceCompany(tableType);
-                                serviceCompany.filter((item) => item !== tableType);
-                                setTableType(serviceCompany[0]);
-                                handleTableTypeChange(serviceCompany[0]);
-                            }}
-                        >
-                            Xóa
-                        </Button>
-                        <label
-                            htmlFor="file-upload"
-                            className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600"
-                        >
-                            Import Excel
-                        </label>
-                        <input
-                            id="file-upload"
-                            type="file"
-                            accept=".xlsx, .xls"
-                            onChange={handleFileUpload}
-                            className="hidden"
-                        />
+
+                        {
+                            serviceCompany.length > 0 && (
+                                <>
+                                    <Button
+                                        type="button"
+                                        className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600"
+                                        onClick={async () => {
+                                            await DeleteServiceCompany(tableType);
+                                            serviceCompany.filter((item) => item !== tableType);
+                                            setTableType(serviceCompany[0]);
+                                            handleTableTypeChange(serviceCompany[0]);
+                                        }}
+                                    >
+                                        Xóa
+                                    </Button>
+                                    <label
+                                        htmlFor="file-upload"
+                                        className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600"
+                                    >
+                                        Import Excel
+                                    </label>
+                                    <input
+                                        id="file-upload"
+                                        type="file"
+                                        accept=".xlsx, .xls"
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                    />
+                                </>
+
+                            )
+
+                        }
                         {isImported && (
                             <button
                                 onClick={handleSaveData}

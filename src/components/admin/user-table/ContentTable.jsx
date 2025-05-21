@@ -400,11 +400,10 @@ export default function ContentTable(props) {
                       </p>
                       <button className="flex flex-col gap-0.5">
                         <svg
-                          className={`text-gray-300 dark:text-gray-700  ${
-                            sortKey === key && sortOrder === "asc"
+                          className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "asc"
                               ? "text-brand-500"
                               : ""
-                          }`}
+                            }`}
                           width="8"
                           height="5"
                           viewBox="0 0 8 5"
@@ -417,11 +416,10 @@ export default function ContentTable(props) {
                           />
                         </svg>
                         <svg
-                          className={`text-gray-300 dark:text-gray-700  ${
-                            sortKey === key && sortOrder === "desc"
+                          className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "desc"
                               ? "text-brand-500"
                               : ""
-                          }`}
+                            }`}
                           width="8"
                           height="5"
                           viewBox="0 0 8 5"

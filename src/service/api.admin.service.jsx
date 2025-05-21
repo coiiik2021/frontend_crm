@@ -188,9 +188,17 @@ const GetAllBill = async () => {
 const CreateBill = async (data) => {
   const API = `bill/create`;
   return await axios.post(API, data);
-};
+}
 
-export { GetAllBill, CreateBill };
+const UpdateBill = async (data) => {
+  const API = `bill`;
+  console.log("data", data);
+  return await axios.put(API, data);
+}
+
+export { GetAllBill, CreateBill, UpdateBill };
+
+
 
 export { GetOverSizeByName, PostOverSize, PutOverSize, DeleteOverSize };
 
