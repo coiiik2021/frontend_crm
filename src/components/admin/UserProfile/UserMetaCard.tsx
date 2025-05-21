@@ -3,6 +3,7 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import { use, useState } from "react";
 
 type UserMetaCardProps = {
   user: any;
@@ -10,6 +11,7 @@ type UserMetaCardProps = {
 
 export default function UserMetaCard({ user }: UserMetaCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
+  const [currentUser, setCurrentUser] = useState(user);
   const handleSave = () => {
     // Handle save logic here
     console.log("Saving changes...");
@@ -25,11 +27,11 @@ export default function UserMetaCard({ user }: UserMetaCardProps) {
             </div>
             <div className="order-3 xl:order-2">
               <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
-                {user?.fullName}
+                {currentUser?.fullName}
               </h4>
               <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {user?.nameRole}
+                  {currentUser?.nameRole}
                 </p>
               </div>
             </div>
@@ -111,37 +113,37 @@ export default function UserMetaCard({ user }: UserMetaCardProps) {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-3 lg:col-span-1">
                     <Label>Full name</Label>
-                    <Input type="text" value={user?.fullName} />
+                    <Input type="text" value={currentUser?.fullName} />
                   </div>
 
                   <div className="col-span-3 lg:col-span-1">
                     <Label>Gender</Label>
-                    <Input type="text" value={user?.gender} />
+                    <Input type="text" value={currentUser?.gender} />
                   </div>
 
                   <div className="col-span-3 lg:col-span-1">
                     <Label>Date of birth</Label>
-                    <Input type="text" value={user?.dateOfBirth} />
+                    <Input type="text" value={currentUser?.dateOfBirth} />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Email Address</Label>
-                    <Input type="text" value={user?.email} />
+                    <Input type="text" value={currentUser?.email} />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Phone</Label>
-                    <Input type="text" value={user?.phone} />
+                    <Input type="text" value={currentUser?.phone} />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Salary</Label>
-                    <Input type="text" value={user?.salary} />
+                    <Input type="text" value={currentUser?.salary} />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>KPI</Label>
-                    <Input type="text" value={user?.kpi} />
+                    <Input type="text" value={currentUser?.kpi} />
                   </div>
                 </div>
               </div>
