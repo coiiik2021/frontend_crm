@@ -1,11 +1,13 @@
+import { useLocation } from "react-router-dom";
 import PageBreadcrumb from "../../components/admin/common/PageBreadCrumb";
 import UserMetaCard from "../../components/admin/UserProfile/UserMetaCard";
 import UserInfoCard from "../../components/admin/UserProfile/UserInfoCard";
-import UserAddressCard from "../../components/admin/UserProfile/UserAddressCard";
+import UserService from "../../components/admin/UserProfile/UserService";
 import PageMeta from "../../components/admin/common/PageMeta";
 
-
 export default function UserProfiles() {
+  const location = useLocation();
+  const user = location.state?.user;
   return (
     <>
       <PageMeta
@@ -18,9 +20,9 @@ export default function UserProfiles() {
           Profile
         </h3>
         <div className="space-y-6">
-          <UserMetaCard />
-          <UserInfoCard />
-          <UserAddressCard />
+          <UserMetaCard user={user} />
+          <UserInfoCard user={user} />
+          <UserService user={user} />
         </div>
       </div>
     </>

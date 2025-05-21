@@ -133,7 +133,6 @@ const GetListPriceQuote = async (data) => {
 
 export { GetListPriceQuote };
 
-
 // overSize
 
 const GetOverSizeByName = async (nameCompany) => {
@@ -159,7 +158,6 @@ const DeleteOverSize = async (id) => {
 // account - base_user
 
 const PostBaseUser = async (data) => {
-  console.log("data", data);
   const API = `base_user`;
   return await axios.post(API, data);
 };
@@ -173,23 +171,26 @@ const PutBaseUser = async (data) => {
   return await axios.put(API, data);
 };
 
-export { PostBaseUser, GetAllBaseUser, PutBaseUser };
+const GetConstUser = async (user_id) => {
+  const API = `const_user/${user_id}`;
+  return await axios.get(API);
+};
+export { PostBaseUser, GetAllBaseUser, PutBaseUser, GetConstUser };
 
+//const_user
 
 // bill
 const GetAllBill = async () => {
-    const API = `bill/all`;
-    return await axios.get(API);
-}
+  const API = `bill/all`;
+  return await axios.get(API);
+};
 
 const CreateBill = async (data) => {
-    const API = `bill/create`;
-    return await axios.post(API, data);
-}
+  const API = `bill/create`;
+  return await axios.post(API, data);
+};
 
 export { GetAllBill, CreateBill };
-
-
 
 export { GetOverSizeByName, PostOverSize, PutOverSize, DeleteOverSize };
 

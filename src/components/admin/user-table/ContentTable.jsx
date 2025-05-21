@@ -441,7 +441,8 @@ export default function ContentTable(props) {
                       {/*</div>*/}
                       <div>
                         <NavLink
-                          to="/profile"
+                          to="/quan-ly/profile"
+                          state={{ user: item }}
                           className="block font-medium text-gray-800 text-theme-sm dark:text-white/90"
                         >
                           {item.fullName}
