@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 
 export default function FormDetailOrder({ recipientInfo, packages, products, productsTotal, selectedService, dataRequest, setDataRequest }) {
@@ -55,6 +55,15 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
         selectedService: selectedService
     };
 
+
+    const [serviceSelectNew, setServiceSelectNew] = useState(selectedService);
+
+
+    const [priceNetConfirm, setPriceNetConfirm] = useState(selectedService.priceNet);
+    const [priceOtherConfirm, setPriceOtherConfirm] = useState(0);
+
+
+
     useEffect(() => {
         const newList = products.map(product => ({
             id: product.id,
@@ -75,15 +84,26 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
             }
         ))
 
+        const newServiceSelectInfo = {
+            ...serviceSelectNew,
+            priceNetReal: selectedService.priceNet,
+            priceNetFake: priceNetConfirm,
+            priceOther: priceOtherConfirm
+        }
+
+
+
+
         const dataRequestAPI = {
             recipientInfo: recipientInfo,
-            serviceSelectInfo: selectedService,
+            serviceSelectInfo: newServiceSelectInfo,
             products: newList,
             packages: newPackages,
             productsTotal: productsTotal,
         }
         setDataRequest(dataRequestAPI);
-    }, [])
+    }, [serviceSelectNew, priceNetConfirm, priceOtherConfirm]);
+
 
 
     const formatCurrency = (amount) => {
@@ -97,13 +117,7 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
     };
 
     useEffect(() => {
-
-
-
-        console.log("dataRequest" , dataRequest);
-
-
-
+        console.log("dataRequest", dataRequest);
     }, [])
 
     const [priceNet, setPriceNet] = useState(selectedService.totalPrice);
@@ -114,8 +128,16 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
 
     const handlePriceChange = (value, setter) => {
         const numericValue = value.replace(/[^0-9]/g, '');
-        setter(numericValue ? parseInt(numericValue, 10) : 0);
-        setIsEdited(false);
+        const parsedValue = numericValue ? parseInt(numericValue, 10) : 0;
+
+        setter(parsedValue); // Cập nhật giá trị mới cho priceNetNew hoặc priceTransport
+
+        // Cập nhật serviceSelectNew.priceNet
+        if (setter === setPriceNetNew) {
+            const newPriceNet = parsedValue / ((1 + serviceSelectNew.constPPXD / 100) * (1 + serviceSelectNew.constVAT / 100)) -
+                (serviceSelectNew.overSize ? serviceSelectNew.overSize.price : 0);
+            setServiceSelectNew({ ...serviceSelectNew, priceNet: newPriceNet });
+        }
     };
 
     const handlePriceConfirm = () => {
@@ -400,7 +422,8 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
                                     <td className="border p-2 text-center">{item.origin}</td>
                                     <td className="border p-2 text-center">{item.quantity}</td>
                                     <td className="border p-2 text-center">{item.unit}</td>
-                                    <td className="border p-2 text-center">{item.unitPrice.toFixed(2)}</td>
+                                    <td className="border p-2 text-center">{item.unitPrice}</td>
+                                    {/*// toFixed(2)*/}
                                     <td className="border p-2 text-center">{item.subtotal.toFixed(2)}</td>
                                 </tr>
                             ))}
@@ -445,19 +468,19 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
                                         <p className="text-xs text-gray-500">Phí cơ bản</p>
-                                        <p className="font-medium">{formatCurrency(selectedService.priceNet)} VND</p>
+                                        <p className="font-medium">{formatCurrency(serviceSelectNew.priceNet)} VND</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-500">Phí xăng dầu</p>
-                                        <p className="font-medium">{formatCurrency(selectedService.pricePPXD)} VND</p>
+                                        <p className="font-medium">{formatCurrency(serviceSelectNew.priceNet * selectedService.constPPXD / 100 + (serviceSelectNew.overSize ? serviceSelectNew.overSize.price * selectedService.constPPXD / 100 : 0))} VND</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-500">Phí quá khổ</p>
-                                        <p className="font-medium">{formatCurrency(selectedService.overSize? selectedService.overSize.price : 0)} VND</p>
+                                        <p className="font-medium">{formatCurrency(selectedService.overSize ? selectedService.overSize.price : 0)} VND</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-500">VAT (8%)</p>
-                                        <p className="font-medium">{formatCurrency(selectedService.VAT)} VND</p>
+                                        <p className="text-xs text-gray-500">VAT ({selectedService.constVAT}%)</p>
+                                        <p className="font-medium">{formatCurrency((serviceSelectNew.priceNet + (selectedService.overSize ? selectedService.overSize.price : 0)) * (1 + selectedService.constPPXD / 100) * selectedService.constVAT / 100)} VND</p>
                                     </div>
                                     {priceTransport !== 0 && (
                                         <div>
@@ -468,19 +491,8 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
                                     <div className="col-span-2 border-t pt-2 mt-2">
                                         <p className="text-sm font-semibold text-gray-700">Tổng cộng</p>
                                         <p className="text-lg font-bold text-blue-600 flex items-center space-x-2">
-
-                                            {isConfirmed && (
-                                                <span className="line-through text-gray-400 mr-2">
-                                                    {formatCurrency(priceNet)} VND
-
-
-                                                </span>
-                                            )}
-                                            <span className={`${priceNet > priceNetNew + priceTransport ? "text-red-500" : "text-blue-600"}`}>
+                                            <span className={`${priceNet > priceNetNew ? "text-red-500" : "text-blue-600"}`}>
                                                 {formatCurrency(priceNetNew + priceTransport)} VND
-
-
-
                                             </span>
                                         </p>
                                     </div>
@@ -494,6 +506,18 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
             {!isConfirmed && (
                 <div className="mt-8 border-t pt-4">
                     <div className="flex flex-col items-end space-y-3">
+                        <div className="flex items-center justify-between w-1/3">
+                            <label className="font-medium">Tổng cũ:</label>
+                            <input
+                                type="text"
+                                value={formatCurrency((selectedService.priceNet + (selectedService.overSize ? selectedService.overSize.price : 0)) * (1 + selectedService.constPPXD / 100) * (1 + selectedService.constVAT / 100) + priceTransport)}
+                                className="border-2 border-gray-300 rounded-md p-2 w-48 text-right bg-gray-100"
+                                readOnly
+                            />
+                        </div>
+
+
+
                         <div className="flex items-center justify-between w-1/3">
                             <label className="font-medium">Tiền vận chuyển (VND):</label>
                             <input
@@ -520,7 +544,11 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
                     <div className="mt-6">
                         <button
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200"
-                            onClick={() => setIsConfirmed(true)}
+                            onClick={() => {
+                                setPriceNetConfirm(serviceSelectNew.priceNet);
+                                setPriceOtherConfirm(priceTransport);
+                                setIsConfirmed(true);
+                            }}
                         >
                             Xác nhận thay đổi
                         </button>
@@ -529,8 +557,10 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
             )}
 
             {isConfirmed && (
+
                 <div className="mt-8 border-t pt-4 flex flex-col items-end space-y-3">
                     <div className="flex items-center justify-between w-1/3 pt-3 border-t">
+
                         <label className="font-medium">Tổng cộng:</label>
                         <span className="font-bold text-lg text-blue-600 flex items-center space-x-2">
                             {formatCurrency(priceNet + priceTransport)} VND

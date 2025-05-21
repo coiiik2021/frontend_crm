@@ -77,6 +77,7 @@ export default function ContentTable(props) {
 
   const handleCreateUser = async () => {
     const data = { ...newDataUser, nameRole: "MANAGER" };
+    console.log(data);
 
     await PostBaseUser(data);
     setUsers([...users, newDataUser]);
@@ -286,6 +287,7 @@ export default function ContentTable(props) {
                 type="submit"
                 size="lg"
                 className="w-full md:w-auto px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700"
+
               >
                 Save Manager
               </Button>
@@ -389,11 +391,10 @@ export default function ContentTable(props) {
                       </p>
                       <button className="flex flex-col gap-0.5">
                         <svg
-                          className={`text-gray-300 dark:text-gray-700  ${
-                            sortKey === key && sortOrder === "asc"
-                              ? "text-brand-500"
-                              : ""
-                          }`}
+                          className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "asc"
+                            ? "text-brand-500"
+                            : ""
+                            }`}
                           width="8"
                           height="5"
                           viewBox="0 0 8 5"
@@ -406,11 +407,10 @@ export default function ContentTable(props) {
                           />
                         </svg>
                         <svg
-                          className={`text-gray-300 dark:text-gray-700  ${
-                            sortKey === key && sortOrder === "desc"
-                              ? "text-brand-500"
-                              : ""
-                          }`}
+                          className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "desc"
+                            ? "text-brand-500"
+                            : ""
+                            }`}
                           width="8"
                           height="5"
                           viewBox="0 0 8 5"

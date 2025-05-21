@@ -349,11 +349,11 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             carrier: carrier,
             service: service,
             priceNet: quote.priceNet,
-            pricePPXD: quote.pricePPXD,
+            constPPXD: quote.constPPXD,
             overSize: quote.overSize,
-            VAT: quote.priceVAT,
-            totalPrice: quote.priceNet + quote.priceVAT + quote.pricePPXD + (quote.overSize? quote.overSize.price : 0),
-            zone: quote.zone
+            constVAT: quote.constVAT,
+            zone: quote.zone,
+            totalPrice: (quote.priceNet + (quote.overSize ? quote.overSize.price : 0))*(1+quote.constPPXD/100)*(1+quote.constVAT/100)
         };
         console.log("selectedServiceInfo", selectedServiceInfo);
         setSelectedService(selectedServiceInfo);
@@ -681,11 +681,11 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                             <div>
                                                 <p className="text-xs text-gray-500">Weight: {formatCurrency(quote.totalWeight)} KG</p>
                                                 <p className="text-xs text-gray-500">NET: {formatCurrency(quote.priceNet)} VND</p>
-                                                <p className="text-xs text-gray-500">PPXD: {formatCurrency(quote.pricePPXD)} VND</p>
+                                                <p className="text-xs text-gray-500">PPXD: {formatCurrency(quote.priceNet * quote.constPPXD/100 + (quote.overSize? quote.overSize.price * quote.constPPXD/100 : 0))} VND</p>
                                                 {
                                                     quote.overSize?.price !== 0 && (
                                                        <>
-                                                           <p className="text-xs text-gray-500">OverSize: {formatCurrency(quote.overSize?.price)} VND</p>
+                                                           <p className="text-xs text-gray-500">OverSize: {formatCurrency(quote.overSize? quote.overSize.price * quote.constVAT : 0)} VND</p>
                                                            <p className="text-xs text-gray-500">Description: {(quote.overSize?.description)}</p>
                                                        </>
 
@@ -697,10 +697,10 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                                         Oversize: {formatCurrency((quote.code === "Tiết Kiệm" ? 0 : total.totalOverSize))} VND
                                                     </p>
                                                 )} */}
-                                                <p className="text-xs text-gray-500">VAT(8%): {formatCurrency(quote.priceVAT)} VND</p>
+                                                <p className="text-xs text-gray-500">VAT({quote.constVAT}%): {formatCurrency( (quote.priceNet + (quote.overSize? quote.overSize.price : 0)) *(1+  quote.constPPXD/100) *quote.constVAT/100 )} VND</p>
 
                                                 <p className="text-base font-bold text-gray-800 mt-1">
-                                                    {formatCurrency(quote.priceNet + quote.priceVAT + quote.pricePPXD + (quote.overSize? quote.overSize.price : 0))} VND
+                                                    {formatCurrency( (quote.priceNet + (quote.overSize ? quote.overSize.price : 0))*(1+quote.constPPXD/100)*(1+quote.constVAT/100)   )} VND
                                                 </p>
                                             </div>
                                             <Button

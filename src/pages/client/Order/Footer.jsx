@@ -1,5 +1,5 @@
-import {CreateBill} from "../../../service/api.admin.service.jsx";
-import {useEffect} from "react";
+import { CreateBill } from "../../../service/api.admin.service.jsx";
+import { useEffect } from "react";
 
 export default function Footer({ currentStep, setCurrentStep, products, productsErrors, setProductsErrors, dataRequest }) {
     const handleBack = () => {
@@ -49,10 +49,12 @@ export default function Footer({ currentStep, setCurrentStep, products, products
                 setCurrentStep(currentStep + 1);
             }
         }
-        if(currentStep === 4){
+        if (currentStep === 4) {
+
+            console.log(dataRequest);
             const response = await CreateBill(dataRequest);
             console.log(response);
-            if(response === "created successfully"){
+            if (response === "created successfully") {
                 window.location.href = "/";
             }
         }

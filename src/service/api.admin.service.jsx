@@ -178,16 +178,22 @@ export { PostBaseUser, GetAllBaseUser, PutBaseUser };
 
 // bill
 const GetAllBill = async () => {
-    const API = `bill/all`;
-    return await axios.get(API);
+  const API = `bill/all`;
+  return await axios.get(API);
 }
 
 const CreateBill = async (data) => {
-    const API = `bill/create`;
-    return await axios.post(API, data);
+  const API = `bill/create`;
+  return await axios.post(API, data);
 }
 
-export { GetAllBill, CreateBill };
+const UpdateBill = async (data) => {
+  const API = `bill`;
+  console.log("data", data);
+  return await axios.put(API, data);
+}
+
+export { GetAllBill, CreateBill, UpdateBill };
 
 
 

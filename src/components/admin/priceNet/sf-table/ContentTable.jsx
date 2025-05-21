@@ -11,6 +11,7 @@ import { useModal } from "../../../../hooks/useModal";
 import { Modal } from "../../ui/modal"; // Sửa đường dẫn import Modal
 import Label from "../../form/Label";
 import Input from "../../form/input/InputField";
+import OverSizeTable from "../../TableDataPrice/OverSizeTable.jsx";
 
 
 export default function ContentTable() {
@@ -18,7 +19,7 @@ export default function ContentTable() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [tableType, setTableType] = useState("");
     const [priceGasoline, setPriceGasoline] = useState({});
-    const [isPriceNet, setIsPriceNet] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
     const [isImported, setIsImported] = useState(false);
 
     const [newNameService, setNewNameService] = useState("");
@@ -88,6 +89,7 @@ export default function ContentTable() {
             dim: 5000,
             ppxd: 100,
             vat: 8,
+            overSize: 100
         });
     };
 
@@ -181,20 +183,27 @@ export default function ContentTable() {
             <div className="p-4 flex justify-between items-center">
                 <div className="flex items-center gap-4">
                     <button
-                        onClick={() => setIsPriceNet(true)}
-                        className={`px-4 py-2 rounded ${isPriceNet ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+                        onClick={() => setCurrentPage(1)}
+                        className={`px-4 py-2 rounded ${currentPage === 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
                     >
                         Giá Net
                     </button>
 
                     <button
-                        onClick={() => setIsPriceNet(false)}
-                        className={`px-4 py-2 rounded ${!isPriceNet ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+                        onClick={() => setCurrentPage(2)}
+                        className={`px-4 py-2 rounded ${currentPage === 2 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
                     >
                         Giá xăng dầu
                     </button>
 
-                    {isPriceNet && (
+                    <button
+                        onClick={() => setCurrentPage(3)}
+                        className={`px-4 py-2 rounded ${currentPage === 3 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+                    >
+                        Phụ phí quá khổ
+                    </button>
+
+                    {currentPage === 1 && (
                         <>
                             <select
                                 value={selectedDate || ""}
@@ -228,7 +237,7 @@ export default function ContentTable() {
                 </div>
 
                 {/* Nút Thêm Dịch Vụ và Import Excel */}
-                {isPriceNet &&
+                {currentPage === 1 &&
                     <div className="flex items-center gap-4 ml-auto">
                         <Button
                             type="button"
@@ -280,31 +289,39 @@ export default function ContentTable() {
                             </div>
                         </Modal>
 
-                        <Button
-                            type="button"
-                            className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600"
-                            onClick={async () => {
-                                await DeleteServiceCompany(tableType);
-                                serviceCompany.filter((item) => item !== tableType);
-                                setTableType(serviceCompany[0]);
-                                handleTableTypeChange(serviceCompany[0]);
-                            }}
-                        >
-                            Xóa
-                        </Button>
-                        <label
-                            htmlFor="file-upload"
-                            className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600"
-                        >
-                            Import Excel
-                        </label>
-                        <input
-                            id="file-upload"
-                            type="file"
-                            accept=".xlsx, .xls"
-                            onChange={handleFileUpload}
-                            className="hidden"
-                        />
+                        {
+                            serviceCompany.length > 0 && (
+                                <>
+                                    <Button
+                                        type="button"
+                                        className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600"
+                                        onClick={async () => {
+                                            await DeleteServiceCompany(tableType);
+                                            serviceCompany.filter((item) => item !== tableType);
+                                            setTableType(serviceCompany[0]);
+                                            handleTableTypeChange(serviceCompany[0]);
+                                        }}
+                                    >
+                                        Xóa
+                                    </Button>
+                                    <label
+                                        htmlFor="file-upload"
+                                        className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600"
+                                    >
+                                        Import Excel
+                                    </label>
+                                    <input
+                                        id="file-upload"
+                                        type="file"
+                                        accept=".xlsx, .xls"
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                    />
+                                </>
+
+                            )
+
+                        }
                         {isImported && (
                             <button
                                 onClick={handleSaveData}
@@ -318,7 +335,7 @@ export default function ContentTable() {
 
             </div>
             <div className="max-w-full overflow-x-auto custom-scrollbar">
-                {isPriceNet ? (
+                {currentPage === 1 ? (
 
                     <PriceNetTable
                         dataByDate={dataByDate}
@@ -327,13 +344,13 @@ export default function ContentTable() {
                         setConstNet={setConstNet}
                     />
 
-                ) : (
+                ) : currentPage === 2 ? (
                     <PriceGasolineTable
                         priceGasoline={priceGasoline}
                         setPriceGasoline={setPriceGasoline}
                         name={nameHang}
                     />
-                )}
+                ) : <OverSizeTable />}
             </div>
         </div>
     );
