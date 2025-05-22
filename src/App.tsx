@@ -59,7 +59,7 @@ import AppLayoutAdmin from "./layout/admin/AppLayoutAdmin.tsx";
 import { ScrollToTop } from "./components/admin/common/ScrollToTop";
 import TaskList from "./pages/ADMIN/Task/TaskList";
 import Saas from "./pages/ADMIN/Dashboard/Saas";
-import UserProfiles from "./pages/ADMIN/UserProfiles.tsx";
+import UserProfiles from "./pages/ADMIN/UserProfiles.jsx";
 import ShipmentTable from "./components/admin/shipment-table/ShipmentTable.jsx";
 import ShipmentDetail from "./components/admin/shipment-detail/ShipmentDetail.tsx";
 import AppLayoutClient from "./layout/client/AppLayoutClient";
@@ -75,6 +75,7 @@ import SfTable from "./components/admin/priceNet/sf-table/SfTable.jsx";
 import FedexTable from "./components/admin/priceNet/fedex-table/FedexTable.jsx";
 import ZoneCountryTable from "./components/admin/priceNet/zone-country/ZoneCountryTable.jsx";
 import BillTable from "./components/admin/bills/BillTable.jsx";
+import ProtectedRoute from './ProtectedRoute';
 
 export default function App() {
   return (
@@ -86,10 +87,23 @@ export default function App() {
           <Route element={<AppLayoutClient />}>
             <Route index path="/" element={<HomePage />} />
             <Route index path="/gia-van-chuyen" element={<GetAQuote />} />
+          </Route>
+
+          <Route element={
+            <ProtectedRoute allowedRoles={["ROLE_USER"]}>
+              <AppLayoutClient />
+            </ProtectedRoute>
+          }>
             <Route index path="/tao-don-hang" element={<OrderPage />} />
           </Route>
+
           {/* Dashboard Layout */}
-          <Route element={<AppLayoutAdmin />}>
+
+          <Route element={
+            <ProtectedRoute allowedRoles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+              <AppLayoutAdmin />
+            </ProtectedRoute>
+          }>
             <Route index path="/quan-ly" element={<Ecommerce />} />
             <Route path="/quan-ly/analytics" element={<Analytics />} />
             <Route path="/quan-ly/marketing" element={<Marketing />} />
@@ -193,7 +207,7 @@ export default function App() {
           <Route path="/five-zero-three" element={<FiveZeroThree />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
         </Routes>
-      </Router>
+      </Router >
     </>
   );
 }

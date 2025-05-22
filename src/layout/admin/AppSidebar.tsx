@@ -52,11 +52,10 @@ const navItems: NavItem[] = [
     name: "User",
     subItems: [
       {
-        name: "User", path: "/quan-ly/user-table", pro: false,
+        name: "User", path: "/quan-ly/user-table",
 
       },
-      { name: "Manager", path: "/quan-ly/manager-table", pro: true },
-      { name: "Sales", path: "/quan-ly/sale-table", pro: true },
+      { name: "Manager", path: "/quan-ly/manager-table" },
     ],
   },
 

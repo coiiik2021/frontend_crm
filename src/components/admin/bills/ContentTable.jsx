@@ -138,9 +138,6 @@ export default function ContentTable(props) {
         closeModal();
     }
 
-
-
-
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
 

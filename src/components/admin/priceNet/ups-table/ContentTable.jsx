@@ -91,6 +91,7 @@ export default function ContentTable() {
             vat: 8,
             overSize: 100
         });
+        setDataByDate({});
     };
 
     const handleTableTypeChange = async (type) => {
@@ -279,6 +280,7 @@ export default function ContentTable() {
                                         <Button size="sm" onClick={
                                             async () => {
                                                 await handleCreateService();
+
                                                 closeModal();
                                             }
                                         }>

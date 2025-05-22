@@ -1,5 +1,7 @@
 import axios from "./axios.admin.customize";
 
+const token = localStorage.getItem("token");
+
 // price net
 const GetPriceNet = async (nameCompany, nameService) => {
   const API = `/prices?nameCompany=${nameCompany}&nameService=${nameService}`;
@@ -41,6 +43,11 @@ const GetNameService = async (name) => {
   return await axios.get(API);
 };
 
+const GetNameServiceByUser = async () => {
+  const API = `service-company/allByUser`;
+  return await axios.get(API);
+}
+
 const PostNameService = async (data) => {
   const API = `service-company`;
 
@@ -68,6 +75,7 @@ export {
   PostNameService,
   UpdateNameService,
   DeleteServiceCompany,
+  GetNameServiceByUser
 };
 
 const GetAPriceNet = async (name, zone, weight) => {
@@ -195,6 +203,31 @@ const UpdateBill = async (data) => {
   console.log("data", data);
   return await axios.put(API, data);
 }
+
+
+// const user
+const GetConstsByUser = async (user_id) => {
+  const API = `const_user/${user_id}`;
+  return await axios.get(API);
+};
+
+const PostConstUser = async (data) => {
+  const API = `const_user`;
+  return await axios.post(API, data);
+}
+
+const PutConstUser = async (data) => {
+  const API = `const_user/update`;
+  return await axios.put(API, data);
+}
+
+const DeleteConstUser = async (data) => {
+  const API = `const_user/delete`;
+  return await axios.post(API, data);
+}
+
+export { GetConstsByUser, PostConstUser, PutConstUser, DeleteConstUser };
+
 
 export { GetAllBill, CreateBill, UpdateBill };
 
