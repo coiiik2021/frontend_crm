@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import PageBreadcrumb from "../../components/admin/common/PageBreadCrumb";
 import UserMetaCard from "../../components/admin/profile/UserMetaCard";
 import UserInfoCard from "../../components/admin/profile/UserInfoCard";
@@ -7,7 +8,14 @@ import UserService from "../../components/admin/profile/UserService";
 
 export default function UserProfiles() {
   const location = useLocation();
-  const user = location.state?.user;
+  const [user, setUser] = useState(location.state?.user || null);
+
+  // Nếu location.state thay đổi (ví dụ do redirect), cập nhật lại user
+  useEffect(() => {
+    if (location.state?.user) {
+      setUser(location.state.user);
+    }
+  }, [location.state]);
   return (
     <>
       <PageMeta
@@ -21,7 +29,7 @@ export default function UserProfiles() {
         </h3>
         <div className="space-y-6">
           <UserMetaCard user={user} />
-          <UserInfoCard user={user} />
+          <UserInfoCard user={user} setUser={setUser} />
           <UserService user={user} />
         </div>
       </div>

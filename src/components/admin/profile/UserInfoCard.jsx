@@ -1,17 +1,38 @@
 import { useModal } from "../../../hooks/useModal";
 import { Modal } from "../ui/modal";
+import { useState } from "react";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import { PutBaseUser } from "../../../service/api.admin.service";
 
-
-export default function UserInfoCard({ user }) {
+export default function UserInfoCard({ user, setUser }) {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
-    closeModal();
+  const [currentUser, setCurrentUser] = useState(user);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCurrentUser((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await PutBaseUser(currentUser);
+      setUser((prevUser) => ({
+        ...prevUser,
+        ...currentUser,
+      }));
+      closeModal();
+      console.log("User updated successfully");
+    } catch (error) {
+      console.error("Error updating user:", error);
+    }
+  };
+
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -22,7 +43,7 @@ export default function UserInfoCard({ user }) {
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
                 Full name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
@@ -31,7 +52,7 @@ export default function UserInfoCard({ user }) {
             </div>
 
             <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
                 Gender
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
@@ -40,7 +61,7 @@ export default function UserInfoCard({ user }) {
             </div>
 
             <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
                 Date of birth
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
@@ -49,7 +70,7 @@ export default function UserInfoCard({ user }) {
             </div>
 
             <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
                 Email address
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
@@ -58,7 +79,7 @@ export default function UserInfoCard({ user }) {
             </div>
 
             <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
                 Phone
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
@@ -67,15 +88,16 @@ export default function UserInfoCard({ user }) {
             </div>
 
             <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
                 Salary
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
                 {user?.salary}
               </p>
             </div>
+
             <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
                 KPI
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
@@ -87,7 +109,7 @@ export default function UserInfoCard({ user }) {
 
         <button
           onClick={openModal}
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:w-auto"
         >
           <svg
             className="fill-current"
@@ -118,79 +140,91 @@ export default function UserInfoCard({ user }) {
               Update your details to keep your profile up-to-date.
             </p>
           </div>
-          <form className="flex flex-col">
+          <form className="flex flex-col" onSubmit={handleSubmit}>
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-              <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      value="https://www.facebook.com/PimjoHQ"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type="text" value="https://x.com/PimjoHQ" />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      value="https://www.linkedin.com/company/pimjo"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input type="text" value="https://instagram.com/PimjoHQ" />
-                  </div>
-                </div>
-              </div>
               <div className="mt-7">
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                   Personal Information
                 </h5>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>First Name</Label>
-                    <Input type="text" value="Musharof" />
+                  <div>
+                    <Label>Full name</Label>
+                    <Input
+                      type="text"
+                      name="fullName"
+                      value={currentUser?.fullName}
+                      onChange={handleChange}
+                    />
                   </div>
 
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Last Name</Label>
-                    <Input type="text" value="Chowdhury" />
+                  <div>
+                    <Label>Gender</Label>
+                    <select
+                      name="gender"
+                      value={currentUser?.gender || "Other"}
+                      onChange={handleChange}
+                      className="w-full rounded border border-gray-300 px-3 py-2 dark:bg-gray-800 dark:text-white"
+                    >
+                      <option value="Other">Other</option>
+                      <option value="MALE">Male</option>
+                      <option value="FEMALE">Female</option>
+                    </select>
                   </div>
 
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Email Address</Label>
-                    <Input type="text" value="randomuser@pimjo.com" />
+                  <div>
+                    <Label>Date of birth</Label>
+                    <Input
+                      type="date"
+                      name="dateOfBirth"
+                      value={currentUser?.dateOfBirth || ""}
+                      onChange={handleChange}
+                    />
                   </div>
 
-                  <div className="col-span-2 lg:col-span-1">
+                  <div>
                     <Label>Phone</Label>
-                    <Input type="text" value="+09 363 398 46" />
+                    <Input
+                      type="text"
+                      name="phone"
+                      value={currentUser?.phone}
+                      onChange={handleChange}
+                    />
                   </div>
 
-                  <div className="col-span-2">
-                    <Label>Bio</Label>
-                    <Input type="text" value="Team Manager" />
+                  <div>
+                    <Label>Salary</Label>
+                    <Input
+                      type="number"
+                      name="salary"
+                      value={currentUser?.salary}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>KPI</Label>
+                    <Input
+                      type="number"
+                      name="kpi"
+                      value={currentUser?.kpi}
+                      onChange={handleChange}
+                    />
                   </div>
                 </div>
               </div>
             </div>
+
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
+              <Button
+                size="sm"
+                variant="outline"
+                type="button"
+                onClick={closeModal}
+              >
                 Close
               </Button>
-              <Button size="sm" onClick={handleSave}>
+              <Button size="sm" type="submit">
                 Save Changes
               </Button>
             </div>

@@ -46,7 +46,7 @@ const GetNameService = async (name) => {
 const GetNameServiceByUser = async () => {
   const API = `service-company/allByUser`;
   return await axios.get(API);
-}
+};
 
 const PostNameService = async (data) => {
   const API = `service-company`;
@@ -75,7 +75,7 @@ export {
   PostNameService,
   UpdateNameService,
   DeleteServiceCompany,
-  GetNameServiceByUser
+  GetNameServiceByUser,
 };
 
 const GetAPriceNet = async (name, zone, weight) => {
@@ -175,7 +175,7 @@ const GetAllBaseUser = async (nameRole) => {
   return await axios.get(API);
 };
 const PutBaseUser = async (data) => {
-  const API = `base_user`;
+  const API = `base_user/update`;
   return await axios.put(API, data);
 };
 
@@ -196,14 +196,13 @@ const GetAllBill = async () => {
 const CreateBill = async (data) => {
   const API = `bill/create`;
   return await axios.post(API, data);
-}
+};
 
 const UpdateBill = async (data) => {
   const API = `bill`;
   console.log("data", data);
   return await axios.put(API, data);
-}
-
+};
 
 // const user
 const GetConstsByUser = async (user_id) => {
@@ -214,24 +213,21 @@ const GetConstsByUser = async (user_id) => {
 const PostConstUser = async (data) => {
   const API = `const_user`;
   return await axios.post(API, data);
-}
+};
 
 const PutConstUser = async (data) => {
   const API = `const_user/update`;
   return await axios.put(API, data);
-}
+};
 
 const DeleteConstUser = async (data) => {
   const API = `const_user/delete`;
   return await axios.post(API, data);
-}
+};
 
 export { GetConstsByUser, PostConstUser, PutConstUser, DeleteConstUser };
 
-
 export { GetAllBill, CreateBill, UpdateBill };
-
-
 
 export { GetOverSizeByName, PostOverSize, PutOverSize, DeleteOverSize };
 
