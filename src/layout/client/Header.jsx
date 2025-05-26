@@ -55,7 +55,7 @@ export default function Header() {
                         {isLoggedIn ? (
                             <div className="flex items-center space-x-4">
                                 <NavLink
-                                    to="/profile"
+                                    to="/quan-ly"
                                     className="px-4 py-2 bg-purple-500 text-white text-sm font-medium rounded-md hover:bg-purple-700"
                                 >
                                     Quản lý tài khoản

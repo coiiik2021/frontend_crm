@@ -11,6 +11,9 @@ import Input from "../form/input/InputField.js";
 import { useModal } from "../../../hooks/useModal.js";
 import { GetAllBaseUser, PostBaseUser } from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
+import { PlusIcon, XIcon, PencilIcon } from "lucide-react";
+import { Description } from "@headlessui/react";
+import { jwtDecode } from "jwt-decode";
 
 export default function ContentTable(props) {
     const { dataBill } = props;
@@ -19,6 +22,9 @@ export default function ContentTable(props) {
     const [sortKey, setSortKey] = useState("name");
     const [sortOrder, setSortOrder] = useState("asc");
     const [searchTerm, setSearchTerm] = useState("");
+    const [roles, setRoles] = useState([]);
+
+    const [billEdit, setBillEdit] = useState({});
 
     const formatCurrency = (amount) => {
         const num = parseFloat(String(amount).replace(/[^0-9.]/g, ''));
@@ -51,6 +57,13 @@ export default function ContentTable(props) {
             </span>
         );
     }
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            const decoded = jwtDecode(token);
+            setRoles(decoded.roles);
+        }
+    }, [])
 
     // Icons (giả định sử dụng Heroicons hoặc similar)
     function ChevronUpIcon({ className }) {
@@ -121,6 +134,9 @@ export default function ContentTable(props) {
             setSortOrder("asc");
         }
     };
+
+    const { isOpen, openModal, closeModal } = useModal();
+
 
 
 
@@ -208,8 +224,9 @@ export default function ContentTable(props) {
                                     { key: "bill_employee", label: "BILL PHỤ" },
                                     { key: "awb", label: "AWB " },
                                     { key: "company_service", label: "DỊCH VỤ" },
-                                    { key: "payment_bill_real", label: "Thành tiền (trước)" },
-                                    { key: "payment_bill_fake", label: "Thành tiền (sau)" },
+                                    { key: "payment_bill_real", label: "Thành tiền (Tạm tính)" },
+                                    { key: "price_order", label: "Tiền order" },
+                                    { key: "payment_bill_fake", label: "Thành tiền (chốt)" },
                                     { key: "packageInfo_end", label: "PACKAGE CHỐT" },
                                     { key: "status", label: "TRẠNG THÁI" },
                                 ].map(({ key, label }) => (
@@ -280,7 +297,25 @@ export default function ContentTable(props) {
 
                                     {/* Thành tiền */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        {formatCurrency(item.total_real)} VNĐ
+                                        <button
+                                            onClick={() => {
+                                                setBillEdit(item);
+                                                openModal();
+                                            }}
+                                            className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                        >
+                                            <PencilIcon className="w-5 h-5" />
+                                        </button>
+                                        <div color="green" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <p style={{ color: "green" }} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                {formatCurrency(item.total_real)} VNĐ
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p style={{ color: "red" }} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                {formatCurrency(item.total_real)} VNĐ
+                                            </p>
+                                        </div>
                                     </TableCell>
 
                                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -327,6 +362,148 @@ export default function ContentTable(props) {
                     />
                 </div>
             </div>
+
+            <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[800px] m-4">
+                <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                            Hóa đơn: HB{billEdit.bill_house?.substring(0, 5)}
+                        </h3>
+                        <button
+                            onClick={closeModal}
+                            className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                        >
+                            <XIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    {/* Form */}
+                    <form className="space-y-6">
+
+
+                        {/* Package Section */}
+                        {
+                            (roles.includes("ROLE_ADMIN")) && (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                Tổng tiền vào | ra
+                                            </h4>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const currentDate = new Date();
+                                                const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
+                                                const newPriceOrder = {
+                                                    name: `Mục mới (${formattedDate})`,
+                                                    price: "",
+                                                    description: "",
+                                                    date: formattedDate, // Thêm ngày tháng năm vào model
+                                                };
+                                                setBillEdit({
+                                                    ...billEdit,
+                                                    priceOrders: [...(billEdit.priceOrders || []), newPriceOrder]
+                                                });
+                                            }}
+                                            className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                        >
+                                            <PlusIcon className="w-4 h-4 mr-1" />
+                                            Thêm price Order
+                                        </button>
+                                    </div>
+
+                                    {/* Package List */}
+                                    <div className="space-y-2">
+                                        {(billEdit.priceOrders || []).map((order, index) => (
+                                            <div key={index} className="flex items-center justify-between space-x-4">
+                                                {/* Input for Date */}
+                                                <div className="w-1/4">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                                                    <input
+                                                        type="text"
+                                                        value={order.date}
+                                                        readOnly
+                                                        className="w-full px-2 py-1 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                    />
+                                                </div>
+
+                                                {/* Input for Name */}
+                                                <div className="w-1/4">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                                                    <input
+                                                        type="text"
+                                                        value={order.name}
+                                                        onChange={(e) => {
+                                                            const updatedOrders = [...billEdit.priceOrders];
+                                                            updatedOrders[index].name = e.target.value;
+                                                            setBillEdit({ ...billEdit, priceOrders: updatedOrders });
+                                                        }}
+                                                        className="w-full px-2 py-1 text-sm text-gray-700 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                    />
+                                                </div>
+
+                                                {/* Input for Price */}
+                                                <div className="w-1/4">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
+                                                    <input
+                                                        type="number"
+                                                        value={order.price}
+                                                        onChange={(e) => {
+                                                            const updatedOrders = [...billEdit.priceOrders];
+                                                            updatedOrders[index].price = e.target.value;
+                                                            setBillEdit({ ...billEdit, priceOrders: updatedOrders });
+                                                        }}
+                                                        className="w-full px-2 py-1 text-sm text-gray-700 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                    />
+                                                </div>
+
+                                                {/* Input for Description */}
+                                                <div className="w-1/4">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                                                    <input
+                                                        type="text"
+                                                        value={order.description}
+                                                        onChange={(e) => {
+                                                            const updatedOrders = [...billEdit.priceOrders];
+                                                            updatedOrders[index].description = e.target.value;
+                                                            setBillEdit({ ...billEdit, priceOrders: updatedOrders });
+                                                        }}
+                                                        className="w-full px-2 py-1 text-sm text-gray-700 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )
+                        }
+
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
+                            <button
+                                type="button"
+                                onClick={closeModal}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                            >
+                                Đóng
+                            </button>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    console.log("billEdit", billEdit);
+                                }}
+                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </Modal>
         </div>
     );
 }

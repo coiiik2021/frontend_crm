@@ -18,7 +18,7 @@ import {
 } from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
 import { PlusIcon, TrashIcon, XIcon } from "lucide-react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 
 
@@ -143,7 +143,7 @@ export default function ContentTable(props) {
 
     const handleUpdateBill = async (bill) => {
 
-        if(roles.includes("ROLE_TRANSPORTER") || roles.includes("ROLE_ADMIN")){
+        if (roles.includes("ROLE_TRANSPORTER") || roles.includes("ROLE_ADMIN")) {
             const dataRequest = {
                 id: bill.bill_house,
                 package_end: bill.packages.map((pkg) => ({
@@ -156,12 +156,12 @@ export default function ContentTable(props) {
             const dataResponse = await UpdateBillTRANSPORTER(dataRequest);
             console.log(dataResponse);
             currentData.map((item) => {
-                if(item.bill_house === bill.bill_house){
+                if (item.bill_house === bill.bill_house) {
                     item.packageInfo_end = dataResponse.packageInfo_end;
                 }
             })
         }
-        if(roles.includes("ROLE_CS") || roles.includes("ROLE_ADMIN")){
+        if (roles.includes("ROLE_CS") || roles.includes("ROLE_ADMIN")) {
             const updatedBill = {
                 id: bill.bill_house,
                 bill_employee: bill.bill_employee,
@@ -170,7 +170,7 @@ export default function ContentTable(props) {
             }
             await UpdateBillCS(updatedBill);
             currentData.map((item) => {
-                if(item.bill_house === bill.bill_house){
+                if (item.bill_house === bill.bill_house) {
                     console.log(item);
                     item.bill_employee = bill.bill_employee;
                     item.awb = bill.awb;
@@ -543,7 +543,7 @@ export default function ContentTable(props) {
                                             )
                                         }
                                         {
-                                            (roles.includes("ROLE_CS") || roles.includes("ROLE_ADMIN"))  && (
+                                            (roles.includes("ROLE_CS") || roles.includes("ROLE_ADMIN")) && (
                                                 (
                                                     <>
                                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
