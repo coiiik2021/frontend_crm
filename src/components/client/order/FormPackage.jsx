@@ -1,9 +1,7 @@
-import { GetCodeByCompany } from "../../../service/api.service.jsx";
 import { motion, AnimatePresence } from "framer-motion"; // Thêm framer-motion
 import React, { useEffect, useRef, useState } from "react";
 import Button from "../../admin/ui/button/Button.jsx";
-import { GetAllConstNet, GetAllPriceGasoline, GetAllServiceCompany, GetAPriceNet, GetListPriceQuote } from "../../../service/api.admin.service.jsx";
-import { data } from "react-router";
+import { GetListPriceQuote } from "../../../service/api.admin.service.jsx";
 
 const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, zone, handleService, setSelectedService, isChangeCountry, setIsChangeCountry }) => {
 

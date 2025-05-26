@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import React, { useState, useRef, useEffect } from 'react';
-// import { GetTrackingOrder } from 'service/api.service';
 import Button from './Button';
 
 export default function CheckStatusOrder() {

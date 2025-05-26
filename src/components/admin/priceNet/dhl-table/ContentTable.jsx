@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import PriceNetTable from "../../TableDataPrice/PriceNetTable";
 import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable";
-import priceGasOline from "../../../../data/priceGasoline.json";
 import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, PostNameService, PostPriceNet } from "../../../../service/api.admin.service";
 import Button from "../../../../elements/Button";
 import { useModal } from "../../../../hooks/useModal";
