@@ -1,10 +1,10 @@
 import { Link } from "react-router";
 
-interface BreadcrumbProps {
+interface LayoutInvoiceProps {
   pageTitle: string;
 }
 
-const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
+const LayoutInvoice: React.FC<LayoutInvoiceProps> = ({ pageTitle }) => {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
       <h2
@@ -48,4 +48,4 @@ const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
   );
 };
 
-export default PageBreadcrumb;
+export default LayoutInvoice;

@@ -165,7 +165,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         { code: "LPS", price: 1602700, note: "Chu vi Package: dài + 2 x (rộng + cao) nằm trong [300, 399]" },
         { code: "OMS", price: 6580000, note: ["Package trên 70KG bạn vui lòng liên hệ sales EbayExpress để được hướng dẫn gửi hàng", "Chu vi Package: dài + 2 x (rộng + cao) >= 400", "Package có chiều dài từ 274CM"] }
     ];
-    
+
     const quoteRef = useRef(null);
 
     const scrollContainer = (direction) => {
@@ -353,7 +353,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             overSize: quote.overSize,
             constVAT: quote.constVAT,
             zone: quote.zone,
-            totalPrice: (quote.priceNet + (quote.overSize ? quote.overSize.price : 0))*(1+quote.constPPXD/100)*(1+quote.constVAT/100)
+            totalPrice: (quote.priceNet + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100)
         };
         console.log("selectedServiceInfo", selectedServiceInfo);
         setSelectedService(selectedServiceInfo);
@@ -649,13 +649,13 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                                         })() // Chú ý: Gọi hàm tự thực thi
                                                     } Saver®
                                                     <span className="ml-1 text-xs font-normal bg-green-100 text-green-800 px-1.5 py-0.5 rounded">
-        {
-            (() => {
-                const [, serviceName] = quote.nameService.split(" "); // Lấy serviceName
-                return serviceName; // Trả về serviceName
-            })() // Chú ý: Gọi hàm tự thực thi
-        }
-    </span>
+                                                        {
+                                                            (() => {
+                                                                const [, serviceName] = quote.nameService.split(" "); // Lấy serviceName
+                                                                return serviceName; // Trả về serviceName
+                                                            })() // Chú ý: Gọi hàm tự thực thi
+                                                        }
+                                                    </span>
                                                 </h2>
                                                 <p className="text-xs text-gray-500 mt-1">{quote.endDate}</p>
                                             </div>
@@ -681,13 +681,13 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                             <div>
                                                 <p className="text-xs text-gray-500">Weight: {formatCurrency(quote.totalWeight)} KG</p>
                                                 <p className="text-xs text-gray-500">NET: {formatCurrency(quote.priceNet)} VND</p>
-                                                <p className="text-xs text-gray-500">PPXD: {formatCurrency(quote.priceNet * quote.constPPXD/100 + (quote.overSize? quote.overSize.price * quote.constPPXD/100 : 0))} VND</p>
+                                                <p className="text-xs text-gray-500">PPXD: {formatCurrency(quote.priceNet * quote.constPPXD / 100 + (quote.overSize ? quote.overSize.price * quote.constPPXD / 100 : 0))} VND</p>
                                                 {
                                                     quote.overSize?.price !== 0 && (
-                                                       <>
-                                                           <p className="text-xs text-gray-500">OverSize: {formatCurrency(quote.overSize? quote.overSize.price * quote.constVAT : 0)} VND</p>
-                                                           <p className="text-xs text-gray-500">Description: {(quote.overSize?.description)}</p>
-                                                       </>
+                                                        <>
+                                                            <p className="text-xs text-gray-500">OverSize: {formatCurrency(quote.overSize ? quote.overSize.price : 0)} VND</p>
+                                                            <p className="text-xs text-gray-500">Description: {(quote.overSize?.description)}</p>
+                                                        </>
 
 
                                                     )
@@ -697,10 +697,10 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                                         Oversize: {formatCurrency((quote.code === "Tiết Kiệm" ? 0 : total.totalOverSize))} VND
                                                     </p>
                                                 )} */}
-                                                <p className="text-xs text-gray-500">VAT({quote.constVAT}%): {formatCurrency( (quote.priceNet + (quote.overSize? quote.overSize.price : 0)) *(1+  quote.constPPXD/100) *quote.constVAT/100 )} VND</p>
+                                                <p className="text-xs text-gray-500">VAT({quote.constVAT}%): {formatCurrency((quote.priceNet + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * quote.constVAT / 100)} VND</p>
 
                                                 <p className="text-base font-bold text-gray-800 mt-1">
-                                                    {formatCurrency( (quote.priceNet + (quote.overSize ? quote.overSize.price : 0))*(1+quote.constPPXD/100)*(1+quote.constVAT/100)   )} VND
+                                                    {formatCurrency((quote.priceNet + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100))} VND
                                                 </p>
                                             </div>
                                             <Button

@@ -7,7 +7,7 @@ import Form from "../../admin/form/Form.js";
 import FormPackage from "./FormPackage.jsx";
 import { useState, useEffect } from "react";
 import { GetCodeByCompany } from "../../../service/api.service.jsx";
-import { GetZoneCountry } from "../../../service/api.admin.service.jsx";
+import { DeleteConsigneeFavorite, GetAllConsigneeFavorite, GetZoneCountry, PostConsigneeFavorite } from "../../../service/api.admin.service.jsx";
 
 export default function InformationOrder(props) {
     const { recipientInfo, setRecipientInfo, packages, setPackages, currentStep, setCurrentStep, setSelectedService } = props;
@@ -35,7 +35,7 @@ export default function InformationOrder(props) {
     const [countryOptions, setCountryOptions] = useState([]);
 
     const handleService = () => {
-        console.log("form" , form);
+        console.log("form", form);
 
         if (validateForm()) {
             setRecipientInfo(form);
@@ -50,10 +50,12 @@ export default function InformationOrder(props) {
             try {
                 // Gọi API để lấy dữ liệu
                 const data = await GetZoneCountry();
-                console.log("data zone", data);
+                const dataResponse = await GetAllConsigneeFavorite();
 
+                console.log("data zone", dataResponse);
 
-                setSavedList(data);
+                setSavedList(dataResponse);
+
                 localStorage.setItem("savedRecipients", JSON.stringify(data));
 
                 const resCodeCompany = await GetCodeByCompany();
@@ -87,7 +89,7 @@ export default function InformationOrder(props) {
     const validateForm = () => {
         const newErrors = {};
         Object.keys(form).forEach((key) => {
-            if(key!=="id"){
+            if (key !== "id") {
                 if (!form[key]) {
                     newErrors[key] = true;
                 } else {
@@ -108,17 +110,24 @@ export default function InformationOrder(props) {
     };
 
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
+
+        const dataResponse = await PostConsigneeFavorite(form);
+
+        console.log("dataResponse", dataResponse);
         if (validateForm()) {
-            const newList = [...savedList, form];
+            const newList = [...savedList, dataResponse];
             setSavedList(newList);
             localStorage.setItem("savedRecipients", JSON.stringify(newList));
             setRecipientInfo(form);
+            form.id = dataResponse.id;
+            console.log(form);
             setShowForm(false);
         } else {
             setShowForm(true);
         }
+
     };
 
     const handleConfirm = () => {
@@ -135,10 +144,12 @@ export default function InformationOrder(props) {
         setRecipientInfo(savedList[idx]);
         setShowForm(true);
         setShowSavedPopup(false);
+        console.log("Selected recipient:", savedList[idx]);
     };
 
-    const handleDeleteSaved = (idx) => {
+    const handleDeleteSaved = async (idx, id) => {
         const newList = savedList.filter((_, i) => i !== idx);
+        await DeleteConsigneeFavorite(id);
         setSavedList(newList);
         localStorage.setItem("savedRecipients", JSON.stringify(newList));
     };
@@ -175,7 +186,7 @@ export default function InformationOrder(props) {
                                     </Button>
                                     <Button
                                         size="sm"
-                                        onClick={() => handleDeleteSaved(idx)}
+                                        onClick={async () => await handleDeleteSaved(idx, item.id)}
                                     >
                                         Xoá
                                     </Button>
@@ -189,7 +200,7 @@ export default function InformationOrder(props) {
             {/* Form nhập liệu */}
             {showForm && (
                 <ComponentCard title="Information Order">
-                    <Form onSubmit={handleSave}>
+                    <Form onSubmit={async (e) => await handleSave(e)}>
                         <div className="grid gap-6 sm:grid-cols-2">
                             <div className="col-span-full">
                                 <h4 className="pb-4 text-base font-medium text-gray-800 border-b border-gray-200 dark:border-gray-800 dark:text-white/90">
@@ -198,7 +209,7 @@ export default function InformationOrder(props) {
                             </div>
 
 
-                            {[ 'name', 'company', 'email', 'phone', 'street', 'city', 'state', 'postCode'].map((field, idx) => (
+                            {['name', 'company', 'email', 'phone', 'street', 'city', 'state', 'postCode'].map((field, idx) => (
                                 <div key={idx} >
                                     <Label htmlFor={field}>{`${field.charAt(0).toUpperCase() + field.slice(1)}`}</Label>
                                     <Input

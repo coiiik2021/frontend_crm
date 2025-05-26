@@ -9,11 +9,21 @@ import { Modal } from "../ui/modal/index.js";
 import Label from "../form/Label.js";
 import Input from "../form/input/InputField.js";
 import { useModal } from "../../../hooks/useModal.js";
-import { GetAllBaseUser, PostBaseUser, UpdateBill } from "../../../service/api.admin.service.jsx";
+import {
+    GetAllBaseUser,
+    PostBaseUser,
+
+    UpdateBillCS,
+    UpdateBillTRANSPORTER
+} from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
 import { PlusIcon, TrashIcon, XIcon } from "lucide-react";
+import {jwtDecode} from "jwt-decode";
+
+
 
 export default function ContentTable(props) {
+
     const { dataBill } = props;
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -21,8 +31,19 @@ export default function ContentTable(props) {
     const [sortOrder, setSortOrder] = useState("asc");
     const [searchTerm, setSearchTerm] = useState("");
 
+    const [roles, setRoles] = useState([]);
+
 
     const [billEdit, setBillEdit] = useState({});
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            const decoded = jwtDecode(token);
+            setRoles(decoded.roles);
+            console.log("Thông tin trong token:", decoded.roles);
+        }
+    }, [])
 
     function StatusBadge({ status }) {
         // Kiểm tra nếu status là null/undefined thì gán giá trị mặc định
@@ -121,21 +142,45 @@ export default function ContentTable(props) {
 
 
     const handleUpdateBill = async (bill) => {
-        const updatedBill = {
-            id: bill.bill_house,
-            bill_employee: bill.bill_employee,
-            awb: bill.awb,
-            status: bill.status,
-            package_end: bill.packages.map((pkg) => ({
-                weight: pkg.weight,
-                length: pkg.length,
-                height: pkg.height,
-                width: pkg.width
-            }))
-        }
 
-        await UpdateBill(updatedBill);
+        if(roles.includes("ROLE_TRANSPORTER") || roles.includes("ROLE_ADMIN")){
+            const dataRequest = {
+                id: bill.bill_house,
+                package_end: bill.packages.map((pkg) => ({
+                    weight: pkg.weight,
+                    length: pkg.length,
+                    height: pkg.height,
+                    width: pkg.width
+                }))
+            }
+            const dataResponse = await UpdateBillTRANSPORTER(dataRequest);
+            console.log(dataResponse);
+            currentData.map((item) => {
+                if(item.bill_house === bill.bill_house){
+                    item.packageInfo_end = dataResponse.packageInfo_end;
+                }
+            })
+        }
+        if(roles.includes("ROLE_CS") || roles.includes("ROLE_ADMIN")){
+            const updatedBill = {
+                id: bill.bill_house,
+                bill_employee: bill.bill_employee,
+                awb: bill.awb,
+                status: bill.status,
+            }
+            await UpdateBillCS(updatedBill);
+            currentData.map((item) => {
+                if(item.bill_house === bill.bill_house){
+                    console.log(item);
+                    item.bill_employee = bill.bill_employee;
+                    item.awb = bill.awb;
+                    item.status = bill.status;
+                }
+            })
+        }
         closeModal();
+
+
     }
 
     return (
@@ -219,7 +264,7 @@ export default function ContentTable(props) {
                                     { key: "house_bill", label: "HOUSE BILL" },
                                     { key: "information_human", label: "THÔNG TIN NGƯỜI" },
                                     { key: "bill_employee", label: "BILL PHỤ" },
-                                    { key: "aws", label: "AWB" },
+                                    { key: "awb", label: "AWB" },
                                     { key: "company_service", label: "DỊCH VỤ" },
                                     { key: "country_name", label: "NƯỚC ĐẾN" },
                                     { key: "packageInfo_begin", label: "PACKAGE KHAI BÁO" },
@@ -264,7 +309,7 @@ export default function ContentTable(props) {
                                     {/* House Bill */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap">
                                         <NavLink
-                                            to="/profile"
+                                            to={`/quan-ly/bill-content/${item.bill_house}`}
                                             className="font-medium text-brand-600 dark:text-brand-400 hover:underline"
                                         >
                                             EB{item.bill_house.substring(0, 5)}
@@ -290,7 +335,7 @@ export default function ContentTable(props) {
 
                                     {/* AWS */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                        {item.aws}
+                                        {item.awb}
                                     </TableCell>
 
                                     {/* Dịch vụ */}
@@ -372,173 +417,187 @@ export default function ContentTable(props) {
 
                                     {/* Form */}
                                     <form className="space-y-6">
-                                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                            {/* Bill Phụ */}
-                                            <div className="space-y-2" hidden>
-                                                <Label className="text-sm font-medium">Bill Phụ</Label>
-                                                <Input
-                                                    type="text"
-                                                    value={billEdit.id || ""}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-sm font-medium">Bill Phụ</Label>
-                                                <Input
-                                                    type="text"
-                                                    value={billEdit.bill_employee || ""}
-                                                    onChange={(e) => setBillEdit({ ...billEdit, bill_employee: e.target.value })}
-                                                    placeholder="Nhập Bill Phụ"
-                                                    className="w-full"
-                                                />
-                                            </div>
 
-                                            {/* AWB */}
-                                            <div className="space-y-2">
-                                                <Label className="text-sm font-medium">AWB</Label>
-                                                <Input
-                                                    type="text"
-                                                    value={billEdit.awb || ""}
-                                                    onChange={(e) => setBillEdit({ ...billEdit, awb: e.target.value })}
-                                                    placeholder="Nhập AWB"
-                                                    className="w-full"
-                                                />
-                                            </div>
-                                        </div>
 
                                         {/* Package Section */}
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        KG Chốt (SL: {billEdit.packageInfo_begin?.quantity || 0} /{" "}
-                                                        {billEdit.packageInfo_begin?.total_weight || 0} KG)
-                                                    </h4>
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const newPackage = {
-                                                            weight: "",
-                                                            length: "",
-                                                            height: "",
-                                                            width: ""
-                                                        };
-                                                        setBillEdit({
-                                                            ...billEdit,
-                                                            packages: [...(billEdit.packages || []), newPackage]
-                                                        });
-                                                    }}
-                                                    className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                                                >
-                                                    <PlusIcon className="w-4 h-4 mr-1" />
-                                                    Thêm Package
-                                                </button>
-                                            </div>
-
-                                            {/* Package List */}
-                                            <div className="space-y-3">
-                                                {billEdit.packages?.map((pkg, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 md:grid-cols-4"
-                                                    >
-                                                        {/* Weight */}
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Cân nặng (KG)</Label>
-                                                            <Input
-                                                                type="number"
-                                                                value={pkg.weight || ""}
-                                                                onChange={(e) => {
-                                                                    const updatedPackages = [...billEdit.packages];
-                                                                    updatedPackages[index].weight = e.target.value;
-                                                                    setBillEdit({ ...billEdit, packages: updatedPackages });
-                                                                }}
-                                                                placeholder="0.00"
-                                                                className="w-full"
-                                                            />
+                                        {
+                                            (roles.includes("ROLE_TRANSPORTER") || roles.includes("ROLE_ADMIN")) && (
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                                KG Chốt (SL: {billEdit.packageInfo_end?.quantity || 0} /{" "}
+                                                                {billEdit.packageInfo_end?.total_weight || 0} KG)
+                                                            </h4>
                                                         </div>
-
-                                                        {/* Dimensions */}
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Dài (cm)</Label>
-                                                            <Input
-                                                                type="number"
-                                                                value={pkg.length || ""}
-                                                                onChange={(e) => {
-                                                                    const updatedPackages = [...billEdit.packages];
-                                                                    updatedPackages[index].length = e.target.value;
-                                                                    setBillEdit({ ...billEdit, packages: updatedPackages });
-                                                                }}
-                                                                placeholder="0.00"
-                                                                className="w-full"
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Cao (cm)</Label>
-                                                            <Input
-                                                                type="number"
-                                                                value={pkg.height || ""}
-                                                                onChange={(e) => {
-                                                                    const updatedPackages = [...billEdit.packages];
-                                                                    updatedPackages[index].height = e.target.value;
-                                                                    setBillEdit({ ...billEdit, packages: updatedPackages });
-                                                                }}
-                                                                placeholder="0.00"
-                                                                className="w-full"
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Rộng (cm)</Label>
-                                                            <Input
-                                                                type="number"
-                                                                value={pkg.width || ""}
-                                                                onChange={(e) => {
-                                                                    const updatedPackages = [...billEdit.packages];
-                                                                    updatedPackages[index].width = e.target.value;
-                                                                    setBillEdit({ ...billEdit, packages: updatedPackages });
-                                                                }}
-                                                                placeholder="0.00"
-                                                                className="w-full"
-                                                            />
-                                                        </div>
-
-                                                        {/* Delete Button (only show if more than one package) */}
-                                                        {billEdit.packages.length > 1 && (
-                                                            <div className="flex items-end md:col-span-4">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        const updatedPackages = billEdit.packages.filter((_, i) => i !== index);
-                                                                        setBillEdit({ ...billEdit, packages: updatedPackages });
-                                                                    }}
-                                                                    className="flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:hover:text-red-400"
-                                                                >
-                                                                    <TrashIcon className="w-4 h-4 mr-1" />
-                                                                    Xóa Package
-                                                                </button>
-                                                            </div>
-                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const newPackage = {
+                                                                    weight: "",
+                                                                    length: "",
+                                                                    height: "",
+                                                                    width: ""
+                                                                };
+                                                                setBillEdit({
+                                                                    ...billEdit,
+                                                                    packages: [...(billEdit.packages || []), newPackage]
+                                                                });
+                                                            }}
+                                                            className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                                        >
+                                                            <PlusIcon className="w-4 h-4 mr-1" />
+                                                            Thêm Package
+                                                        </button>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        </div>
 
-                                        {/* Status */}
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-medium">Trạng thái</Label>
-                                            <select
-                                                value={billEdit.status || ""}
-                                                onChange={(e) => setBillEdit({ ...billEdit, status: e.target.value })}
-                                                className="w-full px-3 py-2 text-sm border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            >
-                                                <option value="complete">Hoàn thành</option>
-                                                <option value="waiting">Chờ xử lý</option>
-                                                <option value="processing">Đang xử lý</option>
-                                                <option value="cancelled">Đã hủy</option>
-                                            </select>
-                                        </div>
+                                                    {/* Package List */}
+                                                    <div className="space-y-3">
+                                                        {billEdit.packages?.map((pkg, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 md:grid-cols-4"
+                                                            >
+                                                                {/* Weight */}
+                                                                <div className="space-y-1">
+                                                                    <Label className="text-xs">Cân nặng (KG)</Label>
+                                                                    <Input
+                                                                        type="number"
+                                                                        value={pkg.weight || ""}
+                                                                        onChange={(e) => {
+                                                                            const updatedPackages = [...billEdit.packages];
+                                                                            updatedPackages[index].weight = e.target.value;
+                                                                            setBillEdit({ ...billEdit, packages: updatedPackages });
+                                                                        }}
+                                                                        placeholder="0.00"
+                                                                        className="w-full"
+                                                                    />
+                                                                </div>
+
+                                                                {/* Dimensions */}
+                                                                <div className="space-y-1">
+                                                                    <Label className="text-xs">Dài (cm)</Label>
+                                                                    <Input
+                                                                        type="number"
+                                                                        value={pkg.length || ""}
+                                                                        onChange={(e) => {
+                                                                            const updatedPackages = [...billEdit.packages];
+                                                                            updatedPackages[index].length = e.target.value;
+                                                                            setBillEdit({ ...billEdit, packages: updatedPackages });
+                                                                        }}
+                                                                        placeholder="0.00"
+                                                                        className="w-full"
+                                                                    />
+                                                                </div>
+
+                                                                <div className="space-y-1">
+                                                                    <Label className="text-xs">Cao (cm)</Label>
+                                                                    <Input
+                                                                        type="number"
+                                                                        value={pkg.height || ""}
+                                                                        onChange={(e) => {
+                                                                            const updatedPackages = [...billEdit.packages];
+                                                                            updatedPackages[index].height = e.target.value;
+                                                                            setBillEdit({ ...billEdit, packages: updatedPackages });
+                                                                        }}
+                                                                        placeholder="0.00"
+                                                                        className="w-full"
+                                                                    />
+                                                                </div>
+
+                                                                <div className="space-y-1">
+                                                                    <Label className="text-xs">Rộng (cm)</Label>
+                                                                    <Input
+                                                                        type="number"
+                                                                        value={pkg.width || ""}
+                                                                        onChange={(e) => {
+                                                                            const updatedPackages = [...billEdit.packages];
+                                                                            updatedPackages[index].width = e.target.value;
+                                                                            setBillEdit({ ...billEdit, packages: updatedPackages });
+                                                                        }}
+                                                                        placeholder="0.00"
+                                                                        className="w-full"
+                                                                    />
+                                                                </div>
+
+                                                                {/* Delete Button (only show if more than one package) */}
+                                                                {billEdit.packages.length > 1 && (
+                                                                    <div className="flex items-end md:col-span-4">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                const updatedPackages = billEdit.packages.filter((_, i) => i !== index);
+                                                                                setBillEdit({ ...billEdit, packages: updatedPackages });
+                                                                            }}
+                                                                            className="flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:hover:text-red-400"
+                                                                        >
+                                                                            <TrashIcon className="w-4 h-4 mr-1" />
+                                                                            Xóa Package
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
+                                        {
+                                            (roles.includes("ROLE_CS") || roles.includes("ROLE_ADMIN"))  && (
+                                                (
+                                                    <>
+                                                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                                            {/* Bill Phụ */}
+                                                            <div className="space-y-2" hidden>
+                                                                <Label className="text-sm font-medium">Bill Phụ</Label>
+                                                                <Input
+                                                                    type="text"
+                                                                    value={billEdit.id || ""}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-sm font-medium">Bill Phụ</Label>
+                                                                <Input
+                                                                    type="text"
+                                                                    value={billEdit.bill_employee || ""}
+                                                                    onChange={(e) => setBillEdit({ ...billEdit, bill_employee: e.target.value })}
+                                                                    placeholder="Nhập Bill Phụ"
+                                                                    className="w-full"
+                                                                />
+                                                            </div>
+
+                                                            {/* AWB */}
+                                                            <div className="space-y-2">
+                                                                <Label className="text-sm font-medium">AWB</Label>
+                                                                <Input
+                                                                    type="text"
+                                                                    value={billEdit.awb || ""}
+                                                                    onChange={(e) => setBillEdit({ ...billEdit, awb: e.target.value })}
+                                                                    placeholder="Nhập AWB"
+                                                                    className="w-full"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        {/* Status */}
+                                                        <div className="space-y-2">
+                                                            <Label className="text-sm font-medium">Trạng thái</Label>
+                                                            <select
+                                                                value={billEdit.status || ""}
+                                                                onChange={(e) => setBillEdit({ ...billEdit, status: e.target.value })}
+                                                                className="w-full px-3 py-2 text-sm border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            >
+                                                                <option value="complete">Hoàn thành</option>
+                                                                <option value="waiting">Chờ xử lý</option>
+                                                                <option value="processing">Đã tiếp nhận hàng</option>
+                                                                <option value="shipping">Vận chuyển</option>
+                                                                <option value="cancelled">Đã hủy</option>
+                                                            </select>
+                                                        </div>
+
+                                                    </>
+                                                )
+                                            )
+                                        }
 
                                         {/* Action Buttons */}
                                         <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">

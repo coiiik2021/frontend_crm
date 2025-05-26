@@ -76,6 +76,7 @@ import FedexTable from "./components/admin/priceNet/fedex-table/FedexTable.jsx";
 import ZoneCountryTable from "./components/admin/priceNet/zone-country/ZoneCountryTable.jsx";
 import BillTable from "./components/admin/bills/BillTable.jsx";
 import ProtectedRoute from './ProtectedRoute';
+import BillContent from "./components/admin/bills/BillContent.jsx";
 
 export default function App() {
   return (
@@ -100,7 +101,7 @@ export default function App() {
           {/* Dashboard Layout */}
 
           <Route element={
-            <ProtectedRoute allowedRoles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+            <ProtectedRoute allowedRoles={["ROLE_ADMIN", "ROLE_MANAGER", "ROLE_TRANSPORTER", "ROLE_CS"]}>
               <AppLayoutAdmin />
             </ProtectedRoute>
           }>
@@ -122,6 +123,8 @@ export default function App() {
             <Route path="/quan-ly/dhl-table" element={<DhlTable />} />
             <Route path="/quan-ly/fedex-table" element={<FedexTable />} />
             <Route path="/quan-ly/sf-table" element={<SfTable />} />
+            <Route path="/quan-ly/bill-content/:id" element={<BillContent />} />
+
             <Route
               path="/quan-ly/zone-country"
               element={<ZoneCountryTable />}

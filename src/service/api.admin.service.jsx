@@ -198,9 +198,15 @@ const CreateBill = async (data) => {
   return await axios.post(API, data);
 };
 
-const UpdateBill = async (data) => {
-  const API = `bill`;
+const UpdateBillCS = async (data) => {
+  const API = `bill/cs`;
   console.log("data", data);
+  return await axios.put(API, data);
+};
+
+const UpdateBillTRANSPORTER = async (data) => {
+  const API = `bill/transporter`;
+  console.log("data/", data);
   return await axios.put(API, data);
 };
 
@@ -224,10 +230,38 @@ const DeleteConstUser = async (data) => {
   const API = `const_user/delete`;
   return await axios.post(API, data);
 };
-
 export { GetConstsByUser, PostConstUser, PutConstUser, DeleteConstUser };
 
-export { GetAllBill, CreateBill, UpdateBill };
+
+// invoice
+const GetInvoiceById = async (id) => {
+  const API = `invoice/${id}`;
+  return await axios.get(API);
+};
+
+
+export { GetInvoiceById };
+
+// favorite 
+
+const GetAllConsigneeFavorite = async () => {
+  const API = `consignee-favorite`;
+  return await axios.get(API);
+}
+
+const PostConsigneeFavorite = async (data) => {
+  const API = `consignee-favorite`;
+  return await axios.post(API, data);
+};
+
+const DeleteConsigneeFavorite = async (id) => {
+  const API = `consignee-favorite/${id}`;
+  return await axios.delete(API);
+};
+export { GetAllConsigneeFavorite, PostConsigneeFavorite, DeleteConsigneeFavorite };
+
+
+export { GetAllBill, CreateBill, UpdateBillTRANSPORTER, UpdateBillCS };
 
 export { GetOverSizeByName, PostOverSize, PutOverSize, DeleteOverSize };
 

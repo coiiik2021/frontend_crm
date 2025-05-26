@@ -27,7 +27,11 @@ export default function SignInForm() {
       const decoded = jwtDecode(response.accessToken);
       const roles = decoded.roles || [];
 
-      if (roles.includes("ROLE_ADMIN") || roles.includes("ROLE_MANAGER")) {
+      if (roles.includes("ROLE_ADMIN")
+          || roles.includes("ROLE_MANAGER")
+          || roles.includes("ROLE_TRANSPORTER")
+          || roles.includes("ROLE_CS")
+      ) {
         navigate("/quan-ly");
       } else if (roles.includes("ROLE_USER")) {
         navigate("/");

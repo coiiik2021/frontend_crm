@@ -10,6 +10,7 @@ export default function BillTable() {
     useEffect(() => {
         const loadData = async () => {
             const dataBill = await GetAllBill();
+            console.log("dataBill", dataBill);
             setDataBill(dataBill);
         }
         loadData();

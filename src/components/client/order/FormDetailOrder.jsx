@@ -117,7 +117,13 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
     };
 
     useEffect(() => {
+        console.log("recipientInfo", recipientInfo);
+        console.log("packages", packages);
+        console.log("products", products);
+        console.log("productsTotal", productsTotal);
+        console.log("selectedService", selectedService);
         console.log("dataRequest", dataRequest);
+        console.log("setDataRequest", setDataRequest);
     }, [])
 
     const [priceNet, setPriceNet] = useState(selectedService.totalPrice);
