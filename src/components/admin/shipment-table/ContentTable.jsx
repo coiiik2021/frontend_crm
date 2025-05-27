@@ -6,13 +6,9 @@ import { NavLink } from "react-router";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import PaginationWithIcon from "../tables/DataTables/TableOne/PaginationWithIcon";
 import { Modal } from "../ui/modal/index.js";
-import Label from "../form/Label.js";
-import Input from "../form/input/InputField.js";
 import { useModal } from "../../../hooks/useModal.js";
-import { GetAllBaseUser, PostBaseUser } from "../../../service/api.admin.service.jsx";
-import Button from "../../../elements/Button/index.jsx";
-import { PlusIcon, XIcon, PencilIcon } from "lucide-react";
-import { Description } from "@headlessui/react";
+import { DeletePriceOrder, GetAllBaseUser, GetAllPriceOrder, PostBaseUser, PostPriceOrder, PutPriceOrder } from "../../../service/api.admin.service.jsx";
+import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 
 export default function ContentTable(props) {
@@ -24,6 +20,7 @@ export default function ContentTable(props) {
     const [searchTerm, setSearchTerm] = useState("");
     const [roles, setRoles] = useState([]);
 
+    const [priceOrders, setPriceOrders] = useState([]);
     const [billEdit, setBillEdit] = useState({});
 
     const formatCurrency = (amount) => {
@@ -37,7 +34,6 @@ export default function ContentTable(props) {
     };
 
     function StatusBadge({ status }) {
-        // Kiểm tra nếu status là null/undefined thì gán giá trị mặc định
         const safeStatus = status ? status.toLowerCase() : '';
 
         const statusColors = {
@@ -77,7 +73,7 @@ export default function ContentTable(props) {
     function ChevronDownIcon({ className }) {
         return (
             <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 111.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414z" clipRule="evenodd" />
             </svg>
         );
     }
@@ -85,7 +81,7 @@ export default function ContentTable(props) {
     function ArrowsUpDownIcon({ className }) {
         return (
             <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414zM10 3a1 1 0 011 1v10a1 1 0 11-2 0V4a1 1 0 011-1z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 111.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414zM10 3a1 1 0 011 1v10a1 1 11-2 0V4a1 1 011-1z" clipRule="evenodd" />
             </svg>
         );
     }
@@ -137,9 +133,97 @@ export default function ContentTable(props) {
 
     const { isOpen, openModal, closeModal } = useModal();
 
+    // Hàm gọi API lấy dữ liệu priceOrders
+    const fetchPriceOrders = async (billHouse) => {
+        try {
+            const response = await GetAllPriceOrder(billEdit.bill_house);
+
+            // Sắp xếp danh sách theo ngày tạo
+            const sortedOrders = sortPriceOrdersByDate(response);
+
+            setPriceOrders(sortedOrders); // Cập nhật dữ liệu priceOrders
+        } catch (error) {
+            console.error("Lỗi khi lấy dữ liệu priceOrders:", error);
+        }
+    };
+
+    // Gọi API khi modal mở và billEdit.bill_house thay đổi
+    useEffect(() => {
+        if (isOpen && billEdit.bill_house) {
+            fetchPriceOrders(billEdit.bill_house);
+        }
+    }, [isOpen, billEdit.bill_house]);
+
+    const handleConfirm = (order) => {
+        // Xử lý xác nhận order tại đây
+        console.log("Xác nhận order:", order);
+        // Bạn có thể thêm logic để lưu trữ hoặc xử lý order đã xác nhận
+    }
+
+    const handleCreatePriceOrder = async (dataRequest) => {
+        try {
+            const dataResponse = await PostPriceOrder(dataRequest);
+
+            setPriceOrders((prevOrders) => {
+                const filteredOrders = prevOrders.filter((order) => order.id !== "");
+                const updatedOrders = [...filteredOrders, dataResponse];
+                setIsDataChanged(true);
+                return updatedOrders;
+            });
+        } catch (error) {
+            console.error("Lỗi khi tạo price order:", error);
+        }
+    };
+
+    const handleDeletePriceOrder = async (orderId, index) => {
+        try {
+            await DeletePriceOrder(orderId);
+
+            setPriceOrders((prevOrders) => {
+                const updatedOrders = prevOrders.filter((_, i) => i !== index);
+                setIsDataChanged(true); // Đánh dấu dữ liệu đã thay đổi
+                return updatedOrders;
+            });
+        } catch (error) {
+            console.error("Lỗi khi xóa price order:", error);
+        }
+    };
+
+    const parseCustomDateTime = (dateTimeString) => {
+        const [time, date] = dateTimeString.split(" ");
+        const [hours, minutes, seconds] = time.split(":").map(Number);
+        const [day, month, year] = date.split(":").map(Number);
+
+        return new Date(year, month - 1, day, hours, minutes, seconds);
+    };
+
+    const sortPriceOrdersByDate = (orders) => {
+        return orders.sort((a, b) => {
+            const dateA = parseCustomDateTime(a.created_at);
+            const dateB = parseCustomDateTime(b.created_at);
+            return dateA - dateB; // Sắp xếp tăng dần (sớm nhất trước)
+        });
+    };
 
 
 
+    const handleUpdatePriceOrder = async (orderId, updatedData) => {
+        try {
+            await PutPriceOrder(orderId, updatedData);
+
+            setPriceOrders((prevOrders) => {
+                const updatedOrders = prevOrders.map((order) =>
+                    order.id === orderId ? { ...order, ...updatedData } : order
+                );
+                setIsDataChanged(true);
+                return updatedOrders;
+            });
+        } catch (error) {
+            console.error("Lỗi khi cập nhật price order:", error);
+        }
+    };
+
+    const [isDataChanged, setIsDataChanged] = useState(false);
 
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
@@ -294,27 +378,43 @@ export default function ContentTable(props) {
                                             {item.company_service}
                                         </span>
                                     </TableCell>
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                            {formatCurrency(item.total_real)} VNĐ
+                                        </span>
+                                    </TableCell>
 
                                     {/* Thành tiền */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        <button
-                                            onClick={() => {
-                                                setBillEdit(item);
-                                                openModal();
-                                            }}
-                                            className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                        >
-                                            <PencilIcon className="w-5 h-5" />
-                                        </button>
-                                        <div color="green" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            <p style={{ color: "green" }} className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                {formatCurrency(item.total_real)} VNĐ
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p style={{ color: "red" }} className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                {formatCurrency(item.total_real)} VNĐ
-                                            </p>
+                                        <div className="relative flex flex-col items-start space-y-2">
+                                            {/* Nút chỉnh sửa ở góc trên bên phải */}
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    openModal();
+                                                    setBillEdit(item);
+                                                }}
+                                                className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                            >
+                                                <PencilIcon className="w-5 h-5" />
+                                            </button>
+
+                                            {/* Giá trị tiền order */}
+                                            <div className="flex flex-col space-y-1 pt-6">
+                                                {/* Giá trị xanh */}
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                                                        {formatCurrency(item.priceOrder.total_complete)} VNĐ
+                                                    </span>
+                                                </div>
+
+                                                {/* Giá trị đỏ */}
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                                                        {formatCurrency(item.priceOrder.total_process)} VNĐ
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </TableCell>
 
@@ -363,7 +463,16 @@ export default function ContentTable(props) {
                 </div>
             </div>
 
-            <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[800px] m-4">
+            <Modal
+                isOpen={isOpen}
+                onClose={() => {
+                    closeModal();
+                    if (isDataChanged) {
+                        window.location.reload(); // Chỉ reload nếu dữ liệu đã thay đổi
+                    }
+                }}
+                className="max-w-[800px] m-4"
+            >
                 <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
@@ -371,7 +480,14 @@ export default function ContentTable(props) {
                             Hóa đơn: HB{billEdit.bill_house?.substring(0, 5)}
                         </h3>
                         <button
-                            onClick={closeModal}
+                            onClick={() => {
+                                closeModal();
+                                if (isDataChanged) {
+                                    window.location.reload(); // Chỉ reload nếu dữ liệu đã thay đổi
+                                }
+                            }
+
+                            }
                             className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                         >
                             <XIcon className="w-5 h-5" />
@@ -385,94 +501,168 @@ export default function ContentTable(props) {
                         {/* Package Section */}
                         {
                             (roles.includes("ROLE_ADMIN")) && (
-                                <div className="space-y-4">
+                                <div className="space-y-6">
+                                    {/* Header */}
                                     <div className="flex items-center justify-between">
-                                        <div>
-                                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Tổng tiền vào | ra
-                                            </h4>
-                                        </div>
+                                        <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
+                                            Quản lý Price Orders
+                                        </h4>
                                         <button
                                             type="button"
                                             onClick={() => {
                                                 const currentDate = new Date();
                                                 const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
                                                 const newPriceOrder = {
-                                                    name: `Mục mới (${formattedDate})`,
+                                                    id: "",
+                                                    name: "",
                                                     price: "",
                                                     description: "",
-                                                    date: formattedDate, // Thêm ngày tháng năm vào model
+                                                    date: formattedDate,
                                                 };
-                                                setBillEdit({
-                                                    ...billEdit,
-                                                    priceOrders: [...(billEdit.priceOrders || []), newPriceOrder]
-                                                });
+                                                setPriceOrders([...priceOrders, newPriceOrder]);
                                             }}
                                             className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
                                         >
                                             <PlusIcon className="w-4 h-4 mr-1" />
-                                            Thêm price Order
+                                            Thêm Price Order
                                         </button>
                                     </div>
 
-                                    {/* Package List */}
-                                    <div className="space-y-2">
-                                        {(billEdit.priceOrders || []).map((order, index) => (
-                                            <div key={index} className="flex items-center justify-between space-x-4">
-                                                {/* Input for Date */}
-                                                <div className="w-1/4">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
-                                                    <input
-                                                        type="text"
-                                                        value={order.date}
-                                                        readOnly
-                                                        className="w-full px-2 py-1 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                                                    />
+                                    {/* Price Order List */}
+                                    <div className="space-y-4">
+                                        {(priceOrders || []).map((order, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                                            >
+                                                {/* STT */}
+                                                <div className="w-1/12 text-center">
+                                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        {index + 1}
+                                                    </p>
                                                 </div>
 
-                                                {/* Input for Name */}
-                                                <div className="w-1/4">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                                                {/* Name */}
+                                                <div className="w-full sm:w-1/4">
+                                                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Tên
+                                                    </label>
                                                     <input
                                                         type="text"
                                                         value={order.name}
                                                         onChange={(e) => {
-                                                            const updatedOrders = [...billEdit.priceOrders];
+                                                            const updatedOrders = [...priceOrders];
                                                             updatedOrders[index].name = e.target.value;
-                                                            setBillEdit({ ...billEdit, priceOrders: updatedOrders });
+                                                            setPriceOrders(updatedOrders);
                                                         }}
-                                                        className="w-full px-2 py-1 text-sm text-gray-700 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                        className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                                                     />
                                                 </div>
 
-                                                {/* Input for Price */}
-                                                <div className="w-1/4">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
+                                                {/* Price */}
+                                                <div className="w-full sm:w-1/4">
+                                                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Giá
+                                                    </label>
                                                     <input
                                                         type="number"
                                                         value={order.price}
                                                         onChange={(e) => {
-                                                            const updatedOrders = [...billEdit.priceOrders];
+                                                            const updatedOrders = [...priceOrders];
                                                             updatedOrders[index].price = e.target.value;
-                                                            setBillEdit({ ...billEdit, priceOrders: updatedOrders });
+                                                            setPriceOrders(updatedOrders);
                                                         }}
-                                                        className="w-full px-2 py-1 text-sm text-gray-700 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                        className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                                                     />
                                                 </div>
 
-                                                {/* Input for Description */}
-                                                <div className="w-1/4">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                                                {/* Description */}
+                                                <div className="w-full sm:w-1/4">
+                                                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Mô tả
+                                                    </label>
                                                     <input
                                                         type="text"
                                                         value={order.description}
                                                         onChange={(e) => {
-                                                            const updatedOrders = [...billEdit.priceOrders];
+                                                            const updatedOrders = [...priceOrders];
                                                             updatedOrders[index].description = e.target.value;
-                                                            setBillEdit({ ...billEdit, priceOrders: updatedOrders });
+                                                            setPriceOrders(updatedOrders);
                                                         }}
-                                                        className="w-full px-2 py-1 text-sm text-gray-700 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                        className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                                                     />
+                                                </div>
+
+                                                {/* DateTime */}
+                                                <div className="w-full sm:w-1/4">
+                                                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Ngày tạo
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={order.created_at || "Chưa có ngày tạo"} // Hiển thị ngày tạo nếu có, nếu không hiển thị placeholder
+                                                        readOnly // Chỉ đọc, không cho phép chỉnh sửa
+                                                        className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                    />
+                                                </div>
+
+                                                {/* Buttons */}
+                                                <div className="flex items-center gap-2">
+                                                    {order.id === "" ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const dataRequest = {
+                                                                    id: order.id,
+                                                                    name: order.name,
+                                                                    price: order.price,
+                                                                    description: order.description,
+                                                                    bill_id: billEdit.bill_house,
+                                                                };
+                                                                handleCreatePriceOrder(dataRequest);
+                                                                setIsDataChanged(true);
+
+                                                            }}
+                                                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                                                        >
+                                                            Lưu
+                                                        </button>
+                                                    ) : (
+                                                        (!order.active &&
+                                                            <button
+                                                                type="button"
+                                                                onClick={async () => {
+                                                                    await PutPriceOrder(order.id);
+                                                                    order.active = true;
+                                                                    const updatedOrders = [...priceOrders];
+                                                                    updatedOrders[index] = order;
+                                                                    setPriceOrders(updatedOrders);
+                                                                    setIsDataChanged(true);
+                                                                }
+                                                                }
+                                                                className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                                            >
+                                                                Xác nhận
+                                                            </button>
+                                                        )
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        onClick={async () => {
+                                                            const updatedOrders = priceOrders.filter((_, i) => i !== index);
+                                                            setPriceOrders(updatedOrders);
+
+                                                            await DeletePriceOrder(order.id);
+                                                            setIsDataChanged(true);
+
+
+
+                                                            props.setDataBill(updatedDataBill); // Giả sử bạn có hàm `setDataBill` để cập nhật `dataBill`
+                                                        }}
+                                                        className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                                    >
+                                                        Xóa
+                                                    </button>
                                                 </div>
                                             </div>
                                         ))}
@@ -486,12 +676,19 @@ export default function ContentTable(props) {
                         <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
                             <button
                                 type="button"
-                                onClick={closeModal}
+                                onClick={
+                                    () => {
+                                        closeModal();
+                                        if (isDataChanged) {
+                                            window.location.reload();
+                                        }
+                                    }
+                                }
                                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
                             >
                                 Đóng
                             </button>
-                            <button
+                            {/* <button
                                 type="button"
                                 onClick={async () => {
                                     console.log("billEdit", billEdit);
@@ -499,7 +696,7 @@ export default function ContentTable(props) {
                                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 Lưu thay đổi
-                            </button>
+                            </button> */}
                         </div>
                     </form>
                 </div>

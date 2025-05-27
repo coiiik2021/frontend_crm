@@ -677,7 +677,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                     <div className="p-3 bg-gray-50 border-t">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-xs text-gray-500">Weight: {formatCurrency(quote.totalWeight)} KG</p>
+                                                <p className="text-xs text-gray-500">Weight: {quote.totalWeight} KG</p>
                                                 <p className="text-xs text-gray-500">NET: {formatCurrency(quote.priceNet)} VND</p>
                                                 <p className="text-xs text-gray-500">PPXD: {formatCurrency(quote.priceNet * quote.constPPXD / 100 + (quote.overSize ? quote.overSize.price * quote.constPPXD / 100 : 0))} VND</p>
                                                 {

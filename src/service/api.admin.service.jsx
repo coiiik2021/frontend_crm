@@ -258,7 +258,32 @@ const DeleteConsigneeFavorite = async (id) => {
   const API = `consignee-favorite/${id}`;
   return await axios.delete(API);
 };
+
 export { GetAllConsigneeFavorite, PostConsigneeFavorite, DeleteConsigneeFavorite };
+
+
+// price order
+
+const GetAllPriceOrder = async (id) => {
+  const API = `price-order/${id}`;
+  return await axios.get(API);
+};
+
+const PostPriceOrder = async (data) => {
+  const API = `price-order`;
+  return await axios.post(API, data);
+}
+
+const PutPriceOrder = async (id) => {
+  const API = `price-order/${id}`;
+  return await axios.put(API);
+}
+const DeletePriceOrder = async (id) => {
+  const API = `price-order/${id}`;
+  return await axios.delete(API);
+}
+
+export { GetAllPriceOrder, PostPriceOrder, PutPriceOrder, DeletePriceOrder };
 
 
 export { GetAllBill, CreateBill, UpdateBillTRANSPORTER, UpdateBillCS };
