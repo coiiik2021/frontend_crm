@@ -2,19 +2,24 @@ import { useState } from "react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import { DeletePriceGasonline, PostPriceGasoline, PutPriceGasoline } from "../../../service/api.admin.service";
 import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css"; // Import CSS của React DatePicker
+import "react-datepicker/dist/react-datepicker.css";
+import { Modal } from "../ui/modal";
 
 const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedRow, setEditedRow] = useState({});
     const [isCreating, setIsCreating] = useState(false);
+    // Thêm state cho modal xác nhận xóa
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [rowToDeleteIndex, setRowToDeleteIndex] = useState(null);
+
 
     const handleEdit = (index) => {
         setEditingIndex(index);
         setEditedRow({
             date: priceGasoline[index]?.date || "",
-            price: priceGasoline[index]?.price || 0, // Giá trị mặc định là 0
-            id: priceGasoline[index]?.id || null, // Lưu id nếu có
+            price: priceGasoline[index]?.price || 0,
+            id: priceGasoline[index]?.id || null,
         });
         console.log(priceGasoline[index]);
     };
@@ -33,20 +38,17 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
         };
 
         if (isCreating) {
-            // Gửi API để tạo dữ liệu mới
             console.log("Creating new data:", data);
             await PostPriceGasoline(data);
         } else {
-            // Gửi API để cập nhật dữ liệu đã tồn tại
             console.log("Updating existing data:", data);
             await PutPriceGasoline(data);
         }
 
-        setIsCreating(false); // Đặt lại trạng thái
+        setIsCreating(false);
     };
 
     const handleInputChange = (field, value) => {
-        // Loại bỏ số 0 ở đầu nếu có
         const sanitizedValue = field === "price" ? value.replace(/^0+/, "") : value;
 
         setEditedRow((prev) => ({
@@ -58,16 +60,35 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
     const handleAddRow = () => {
         const newRow = { date: "", price: 0 };
         setPriceGasoline((prev) => [...prev, newRow]);
-        setEditingIndex(priceGasoline.length); // Bắt đầu chỉnh sửa hàng mới
-        setEditedRow(newRow); // Đặt hàng mới vào editedRow
-        setIsCreating(true); // Đánh dấu là đang tạo dữ liệu mới
+        setEditingIndex(priceGasoline.length);
+        setEditedRow(newRow);
+        setIsCreating(true);
     };
 
-    const handleDelete = async (index) => {
-        await DeletePriceGasonline(priceGasoline[index].id);
-        const updatedData = priceGasoline.filter((_, rowIndex) => rowIndex !== index);
-        console.log(priceGasoline[index]);
+    // Thay đổi hàm handleDelete để mở modal xác nhận
+    const handleDeleteClick = (index) => {
+        setRowToDeleteIndex(index);
+        setDeleteConfirmOpen(true);
+    };
+
+    // Hàm xử lý khi người dùng xác nhận xóa
+    const confirmDelete = async () => {
+        if (rowToDeleteIndex === null) return;
+
+        await DeletePriceGasonline(priceGasoline[rowToDeleteIndex].id);
+        const updatedData = priceGasoline.filter((_, rowIndex) => rowIndex !== rowToDeleteIndex);
+        console.log(priceGasoline[rowToDeleteIndex]);
         setPriceGasoline(updatedData);
+
+        // Đóng modal xác nhận
+        setDeleteConfirmOpen(false);
+        setRowToDeleteIndex(null);
+    };
+
+    // Hàm hủy xóa
+    const cancelDelete = () => {
+        setDeleteConfirmOpen(false);
+        setRowToDeleteIndex(null);
     };
 
     return (
@@ -153,7 +174,7 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
                                             {editingIndex === rowIndex ? (
                                                 <input
                                                     type="number"
-                                                    value={editedRow.price || ""} // Giá trị mặc định là chuỗi rỗng nếu không có giá trị
+                                                    value={editedRow.price || ""}
                                                     onChange={(e) => handleInputChange("price", e.target.value)}
                                                     className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 />
@@ -182,8 +203,8 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
                                                 </button>
                                             )}
                                             <button
-                                                onClick={async () => await handleDelete(rowIndex)}
-                                                className="ml-2 px-3 py-1 te xt-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                                onClick={() => handleDeleteClick(rowIndex)}
+                                                className="ml-2 px-3 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
                                             >
                                                 Xóa
                                             </button>
@@ -194,6 +215,44 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
                         </Table>
                     )
             }
+
+            {/* Modal xác nhận xóa */}
+            <Modal
+                isOpen={deleteConfirmOpen}
+                onClose={cancelDelete}
+                className="max-w-[400px] mx-auto p-0 rounded-3xl bg-white shadow-lg dark:bg-gray-900"
+            >
+                <div className="w-full">
+                    <div className="p-6">
+                        <div className="flex flex-col items-center justify-center text-center">
+                            <div className="w-16 h-16 mb-4 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600 dark:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="mb-2 text-xl font-medium text-gray-900 dark:text-white">Xác nhận xóa</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Bạn có chắc chắn muốn xóa mục này không? Hành động này không thể hoàn tác.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-center space-x-3">
+                        <button
+                            onClick={cancelDelete}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            onClick={confirmDelete}
+                            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:bg-red-700 dark:hover:bg-red-800"
+                        >
+                            Xóa
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };

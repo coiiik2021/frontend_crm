@@ -18,7 +18,7 @@ export default function ContentTable(props) {
     const [sortKey, setSortKey] = useState("name");
     const [sortOrder, setSortOrder] = useState("asc");
     const [searchTerm, setSearchTerm] = useState("");
-    const [roles, setRoles] = useState([]);
+    const [authorities, setAuthorities] = useState([]);
 
     const [priceOrders, setPriceOrders] = useState([]);
     const [billEdit, setBillEdit] = useState({});
@@ -57,7 +57,7 @@ export default function ContentTable(props) {
         const token = localStorage.getItem("token");
         if (token) {
             const decoded = jwtDecode(token);
-            setRoles(decoded.roles);
+            setAuthorities(decoded.authorities);
         }
     }, [])
 
@@ -500,7 +500,7 @@ export default function ContentTable(props) {
 
                         {/* Package Section */}
                         {
-                            (roles.includes("ROLE_ADMIN")) && (
+                            (authorities.includes("ADMIN")) && (
                                 <div className="space-y-6">
                                     {/* Header */}
                                     <div className="flex items-center justify-between">

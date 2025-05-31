@@ -31,7 +31,7 @@ export default function ContentTable(props) {
     const [sortOrder, setSortOrder] = useState("asc");
     const [searchTerm, setSearchTerm] = useState("");
 
-    const [roles, setRoles] = useState([]);
+    const [authorities, setAuthorities] = useState([]);
 
 
     const [billEdit, setBillEdit] = useState({});
@@ -40,8 +40,8 @@ export default function ContentTable(props) {
         const token = localStorage.getItem("token");
         if (token) {
             const decoded = jwtDecode(token);
-            setRoles(decoded.roles);
-            console.log("Thông tin trong token:", decoded.roles);
+            setAuthorities(decoded.authorities);
+            console.log("Thông tin trong token:", decoded.authorities);
         }
     }, [])
 
@@ -143,7 +143,7 @@ export default function ContentTable(props) {
 
     const handleUpdateBill = async (bill) => {
 
-        if (roles.includes("ROLE_TRANSPORTER") || roles.includes("ROLE_ADMIN")) {
+        if (authorities.includes("TRANSPORTER") || authorities.includes("ADMIN")) {
             const dataRequest = {
                 id: bill.bill_house,
                 package_end: bill.packages.map((pkg) => ({
@@ -161,7 +161,7 @@ export default function ContentTable(props) {
                 }
             })
         }
-        if (roles.includes("ROLE_CS") || roles.includes("ROLE_ADMIN")) {
+        if (authorities.includes("ROLE_CS") || authorities.includes("ADMIN")) {
             const updatedBill = {
                 id: bill.bill_house,
                 bill_employee: bill.bill_employee,
@@ -421,7 +421,7 @@ export default function ContentTable(props) {
 
                                         {/* Package Section */}
                                         {
-                                            (roles.includes("ROLE_TRANSPORTER") || roles.includes("ROLE_ADMIN")) && (
+                                            (authorities.includes("ROLE_TRANSPORTER") || authorities.includes("ADMIN")) && (
                                                 <div className="space-y-4">
                                                     <div className="flex items-center justify-between">
                                                         <div>
@@ -543,7 +543,7 @@ export default function ContentTable(props) {
                                             )
                                         }
                                         {
-                                            (roles.includes("ROLE_CS") || roles.includes("ROLE_ADMIN")) && (
+                                            (authorities.includes("ROLE_CS") || authorities.includes("ADMIN")) && (
                                                 (
                                                     <>
                                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

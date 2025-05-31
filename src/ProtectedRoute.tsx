@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children 
 
     try {
         const decoded: any = jwtDecode(token);
-        const userRoles: string[] = decoded.roles || [];
+        const userRoles: string[] = decoded.authorities || [];
         console.log(token);
 
         const hasAccess = allowedRoles.some(role => userRoles.includes(role));

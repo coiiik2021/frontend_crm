@@ -9,16 +9,16 @@ const BillContent = () => {
 
     const renderContent = () => {
         switch (activeTab) {
-            case "shipmad":
-                return <div>Shipmad Content</div>;
+            case "shipmark":
+                return <div>shipmark Content</div>;
+            case "awb":
+                return <div>awb Content</div>;
             case "invoice":
                 return <InvoiceContent />;
-            case "chungtu":
-                return <div>Chứng từ Content</div>;
-            case "chungtukhac":
+            case "invoiceOther":
                 return <ShippingDocumentContent bill_id={id || ""} />; // Replace with actual bill_id as needed
             default:
-                return <div>Shipmad Content</div>;
+                return <div>shipmark Content</div>;
         }
     };
 
@@ -28,12 +28,21 @@ const BillContent = () => {
             <div className="flex justify-around bg-gray-100 p-4 border-b border-gray-300">
                 <button
                     onClick={() => setActiveTab("shipmad")}
-                    className={`px-4 py-2 text-sm font-semibold rounded-lg ${activeTab === "shipmad"
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg ${activeTab === "shipmark"
                         ? "bg-blue-500 text-white"
                         : "bg-gray-200 text-gray-700"
                         }`}
                 >
-                    Shipmad
+                    shipping mark
+                </button>
+                <button
+                    onClick={() => setActiveTab("awb")}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg ${activeTab === "awb"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                        }`}
+                >
+                    awb
                 </button>
                 <button
                     onClick={() => setActiveTab("invoice")}
@@ -44,23 +53,15 @@ const BillContent = () => {
                 >
                     Invoice
                 </button>
+
                 <button
-                    onClick={() => setActiveTab("chungtu")}
-                    className={`px-4 py-2 text-sm font-semibold rounded-lg ${activeTab === "chungtu"
+                    onClick={() => setActiveTab("invoiceOther")}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg ${activeTab === "invoiceOther"
                         ? "bg-blue-500 text-white"
                         : "bg-gray-200 text-gray-700"
                         }`}
                 >
-                    Chứng từ
-                </button>
-                <button
-                    onClick={() => setActiveTab("chungtukhac")}
-                    className={`px-4 py-2 text-sm font-semibold rounded-lg ${activeTab === "chungtukhac"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                        }`}
-                >
-                    Chứng từ khác
+                    Invoice Other
                 </button>
             </div>
 

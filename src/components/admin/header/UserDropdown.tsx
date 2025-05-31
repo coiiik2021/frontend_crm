@@ -7,7 +7,7 @@ import { jwtDecode } from "jwt-decode";
 
 interface MyJwtPayload {
   sub: string;       // thường là email hoặc user id
-  roles: string[];   // hoặc là any[]
+  authorities: string[];   // hoặc là any[]
   exp: number;       // thời gian hết hạn
   iat: number;       // issued at
   [key: string]: any; // nếu có thêm field khác
@@ -65,7 +65,7 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {decoded?.roles.includes("ROLE_ADMIN") ? "Admin" : "Manager"}
+            {decoded?.authorities.includes("ADMIN") ? "Admin" : "Manager"}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
             {decoded?.sub || "No email found"}

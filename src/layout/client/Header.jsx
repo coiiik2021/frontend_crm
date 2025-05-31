@@ -2,17 +2,21 @@ import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router";
 import BrandIcon from "../../part/BrandIcon.jsx";
 import Button from "../../part/Button.jsx";
+import { jwtDecode } from "jwt-decode";
 
 export default function Header() {
     const [isCollapse, setIsCollapse] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false); // State để kiểm tra trạng thái đăng nhập
     const location = useLocation();
     const path = location.pathname;
+    const [authorities, setAuthorities] = useState([]);
 
     useEffect(() => {
         // Kiểm tra token trong localStorage
         const token = localStorage.getItem("token");
         setIsLoggedIn(!!token); // Nếu có token, đặt isLoggedIn thành true
+        const decoded = jwtDecode(token);
+        setAuthorities(decoded.authorities || []);
     }, []);
 
     const handleLogout = () => {
@@ -55,7 +59,7 @@ export default function Header() {
                         {isLoggedIn ? (
                             <div className="flex items-center space-x-4">
                                 <NavLink
-                                    to="/quan-ly"
+                                    to={authorities.includes('ADMIN') ? '/quan-ly' : authorities.includes('USER') ? '/quan-ly/shipment' : '/quan-ly/user-table'}
                                     className="px-4 py-2 bg-purple-500 text-white text-sm font-medium rounded-md hover:bg-purple-700"
                                 >
                                     Quản lý tài khoản

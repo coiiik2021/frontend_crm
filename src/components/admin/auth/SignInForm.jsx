@@ -23,17 +23,20 @@ export default function SignInForm() {
 
     try {
       const response = await APILogin(accountRequest);
+      console.log(response);
       localStorage.setItem("token", response.accessToken);
       const decoded = jwtDecode(response.accessToken);
-      const roles = decoded.roles || [];
+      const authorities = decoded.authorities || [];
 
-      if (roles.includes("ROLE_ADMIN")
-          || roles.includes("ROLE_MANAGER")
-          || roles.includes("ROLE_TRANSPORTER")
-          || roles.includes("ROLE_CS")
+      if (authorities.includes("ADMIN")
+
+        || authorities.includes("EMPLOYEE")
       ) {
         navigate("/quan-ly");
-      } else if (roles.includes("ROLE_USER")) {
+      } else if (authorities.includes("MANAGER")) {
+        navigate("/quan-ly/user-table");
+      }
+      else if (authorities.includes("USER")) {
         navigate("/");
       } else {
         alert("Không xác định được quyền người dùng.");
@@ -41,7 +44,7 @@ export default function SignInForm() {
 
     } catch (error) {
       console.error("Login failed", error);
-      alert("Login failed");
+      alert("Login failed no");
     }
   }
 

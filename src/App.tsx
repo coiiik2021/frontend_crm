@@ -55,19 +55,19 @@ import Modals from "./pages/ADMIN/UiElements/Modals";
 import ResetPassword from "./pages/ADMIN/AuthPages/ResetPassword";
 import TwoStepVerification from "./pages/ADMIN/AuthPages/TwoStepVerification";
 import Success from "./pages/ADMIN/OtherPage/Success";
-import AppLayoutAdmin from "./layout/admin/AppLayoutAdmin.tsx";
+import AppLayoutAdmin from "./layout/admin/AppLayoutAdmin";
 import { ScrollToTop } from "./components/admin/common/ScrollToTop";
 import TaskList from "./pages/ADMIN/Task/TaskList";
 import Saas from "./pages/ADMIN/Dashboard/Saas";
 import UserProfiles from "./pages/ADMIN/UserProfiles.jsx";
 import ShipmentTable from "./components/admin/shipment-table/ShipmentTable.jsx";
-import ShipmentDetail from "./components/admin/shipment-detail/ShipmentDetail.tsx";
+import ShipmentDetail from "./components/admin/shipment-detail/ShipmentDetail";
 import AppLayoutClient from "./layout/client/AppLayoutClient";
 import HomePage from "./pages/client/HomePage.jsx";
 import GetAQuote from "./part/GetAQuote.jsx";
 import OrderPage from "./pages/client/Order/OrderPage.jsx";
 import ManagerTable from "./components/admin/manager-table/ManagerTable.jsx";
-import SaleTable from "./components/admin/sale-table/SaleTable.tsx";
+import SaleTable from "./components/admin/sale-table/SaleTable";
 import UserTable from "./components/admin/user-table/UserTable.jsx";
 import UpsTable from "./components/admin/priceNet/ups-table/UpsTable.jsx";
 import DhlTable from "./components/admin/priceNet/dhl-table/DhlTable.jsx";
@@ -84,24 +84,8 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
-          client
-          <Route element={<AppLayoutClient />}>
-            <Route index path="/" element={<HomePage />} />
-            <Route index path="/gia-van-chuyen" element={<GetAQuote />} />
-          </Route>
-
           <Route element={
-            <ProtectedRoute allowedRoles={["ROLE_USER"]}>
-              <AppLayoutClient />
-            </ProtectedRoute>
-          }>
-            <Route index path="/tao-don-hang" element={<OrderPage />} />
-          </Route>
-
-          {/* Dashboard Layout */}
-
-          <Route element={
-            <ProtectedRoute allowedRoles={["ROLE_ADMIN", "ROLE_MANAGER", "ROLE_TRANSPORTER", "ROLE_CS"]}>
+            <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "EMPLOYEE"]}>
               <AppLayoutAdmin />
             </ProtectedRoute>
           }>
@@ -194,6 +178,49 @@ export default function App() {
             <Route path="/bar-chart" element={<BarChart />} />
             <Route path="/pie-chart" element={<PieChart />} />
           </Route>
+          <Route element={<AppLayoutClient />}>
+            <Route index path="/" element={<HomePage />} />
+            <Route index path="/gia-van-chuyen" element={<GetAQuote />} />
+          </Route>
+
+          <Route element={
+            <ProtectedRoute allowedRoles={["USER"]}>
+              <AppLayoutClient />
+            </ProtectedRoute>
+          }>
+            <Route index path="/tao-don-hang" element={<OrderPage />} />
+          </Route>
+
+          {/* Dashboard Layout */}
+
+          <Route element={
+            <ProtectedRoute allowedRoles={["USER", "MANAGER", "EMPLOYEE"]}>
+              <AppLayoutAdmin />
+            </ProtectedRoute>
+          }>
+            <Route path="/quan-ly/shipment" element={<BillTable />} />
+
+            <Route
+              path="/quan-ly/shipment-detail"
+              element={<ShipmentDetail />}
+            />
+
+            <Route path="/quan-ly/my-debits" element={<ShipmentTable />} />
+          </Route>
+
+          <Route element={
+            <ProtectedRoute allowedRoles={["MANAGER"]}>
+              <AppLayoutAdmin />
+            </ProtectedRoute>
+          }>
+            <Route path="/quan-ly/user-table" element={<UserTable />} />
+            {/* Others Page */}
+            <Route path="/quan-ly/profile" element={<UserProfiles />} />
+
+
+          </Route>
+
+
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />

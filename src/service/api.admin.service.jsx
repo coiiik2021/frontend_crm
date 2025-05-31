@@ -36,6 +36,13 @@ const GetAZoneCountry = async (name) => {
   return await axios.get(API);
 };
 
+const GetAllByServiceCompany = async (id) => {
+  const API = `zone-country/${id}`;
+  return await axios.get(API);
+};
+
+
+
 // service
 
 const GetNameService = async (name) => {
@@ -43,10 +50,12 @@ const GetNameService = async (name) => {
   return await axios.get(API);
 };
 
-const GetNameServiceByUser = async () => {
-  const API = `service-company/allByUser`;
+const GetNameServiceByUser = async (isAdmin) => {
+  const API = isAdmin ? `service-company/allByUser` : `service-company/allByManager`;
   return await axios.get(API);
 };
+
+
 
 const PostNameService = async (data) => {
   const API = `service-company`;
@@ -233,6 +242,23 @@ const DeleteConstUser = async (data) => {
 export { GetConstsByUser, PostConstUser, PutConstUser, DeleteConstUser };
 
 
+// price net user by zone and weight
+
+const PostPriceNetUserByWeightAndZone = async (data) => {
+  const API = 'price-user-weight-zone';
+  return await axios.post(API, data);
+}
+
+const DeletePriceNetUserByWeightAndZone = async (id) => {
+  const API = `price-user-weight-zone/${id}`;
+  return await axios.delete(API);
+}
+
+const GetAllPriceNetForUserByZoneAndWeight = async (data) => {
+  const API = "price-user-weight-zone/getPriceUserOfServiceCompany";
+  return await axios.post(API, data);
+}
+
 // invoice
 const GetInvoiceById = async (id) => {
   const API = `invoice/${id}`;
@@ -296,10 +322,14 @@ export {
   PostZoneCountry,
   GetZoneCountry,
   GetAZoneCountry,
+  GetAllByServiceCompany,
   GetAPriceNet,
   GetPriceAllGasoline,
   PostPriceGasoline,
   DeletePriceGasonline,
+  PostPriceNetUserByWeightAndZone,
+  GetAllPriceNetForUserByZoneAndWeight,
+  DeletePriceNetUserByWeightAndZone
 };
 
 export { GetAllConstNet, GetConstNet, PutConstNet, PostConstNet };
