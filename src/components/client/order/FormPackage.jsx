@@ -4,21 +4,6 @@ import Button from "../../admin/ui/button/Button.jsx";
 import { GetListPriceQuote } from "../../../service/api.admin.service.jsx";
 
 const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, zone, handleService, setSelectedService, isChangeCountry, setIsChangeCountry }) => {
-
-    //theo hãng
-    const ppXangDau = 0.2825;
-
-    //api
-    const [ppxd, setPpxd] = useState([]);
-
-    // theo service
-    const phanTramVphanTramAT = 0.08;
-
-    const [constService, setConstService] = useState();
-
-    // name service
-    const [nameService, setNameService] = useState();
-
     useEffect(() => {
         const fetchData = () => {
 
@@ -27,11 +12,6 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         fetchData();
     }, []);
 
-    //call api
-    const dollar = 26000;
-
-    //
-    const loiNhuan = 1;
 
     const [nameCountry, setNameCountry] = useState(initialNameCountry);
     const [isOpenFormPackage, setIsOpenFormPackage] = useState(!isChangeCountry);

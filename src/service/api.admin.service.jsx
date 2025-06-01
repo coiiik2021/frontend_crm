@@ -188,11 +188,20 @@ const PutBaseUser = async (data) => {
   return await axios.put(API, data);
 };
 
+const GetUserOfManager = async (manager_id) => {
+  const API = `base_user/userOfManager/${manager_id}`;
+  return await axios.get(API);
+};
+
+
 const GetConstUser = async (user_id) => {
   const API = `const_user/${user_id}`;
   return await axios.get(API);
 };
-export { PostBaseUser, GetAllBaseUser, PutBaseUser, GetConstUser };
+
+
+
+export { PostBaseUser, GetAllBaseUser, PutBaseUser, GetConstUser, GetUserOfManager };
 
 //const_user
 
@@ -209,6 +218,12 @@ const CreateBill = async (data) => {
 
 const UpdateBillCS = async (data) => {
   const API = `bill/cs`;
+  console.log("data", data);
+  return await axios.put(API, data);
+};
+
+const UpdateBillAccountant = async (data) => {
+  const API = `bill/accountant`;
   console.log("data", data);
   return await axios.put(API, data);
 };
@@ -312,7 +327,7 @@ const DeletePriceOrder = async (id) => {
 export { GetAllPriceOrder, PostPriceOrder, PutPriceOrder, DeletePriceOrder };
 
 
-export { GetAllBill, CreateBill, UpdateBillTRANSPORTER, UpdateBillCS };
+export { GetAllBill, CreateBill, UpdateBillTRANSPORTER, UpdateBillCS, UpdateBillAccountant };
 
 export { GetOverSizeByName, PostOverSize, PutOverSize, DeleteOverSize };
 
@@ -333,3 +348,41 @@ export {
 };
 
 export { GetAllConstNet, GetConstNet, PutConstNet, PostConstNet };
+
+// API để lấy tất cả các quyền hạn có thể có
+const GetAllPermissions = async (id) => {
+  const API = `permission/full_permission_role/${id}`;
+  return await axios.get(API);
+};
+
+// API để lấy những quyền hạn mà một user cụ thể đã được cấp
+const GetUserPermissions = async (userId) => {
+  const API = `permission/${userId}`;
+  return await axios.get(API);
+};
+
+// API để cập nhật quyền người dùng
+const UpdateUserPermissions = async (data) => {
+  const API = `permission/update`;
+  return await axios.put(API, data);
+};
+
+// API để lấy thông tin thanh toán của một hóa đơn
+const GetPaymentDetails = async (billId) => {
+  const API = `payment/${billId}`;
+  return await axios.get(API);
+};
+
+// API để cập nhật thông tin thanh toán của một hóa đơn
+const UpdatePaymentDetails = async (data) => {
+  const API = `payment`;
+  return await axios.put(API, data);
+};
+
+export {
+  GetAllPermissions,
+  GetUserPermissions,
+  UpdateUserPermissions,
+  GetPaymentDetails,
+  UpdatePaymentDetails
+};

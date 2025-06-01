@@ -11,6 +11,7 @@ export default function ShipmentTable() {
     useEffect(() => {
         const loadData = async () => {
             const dataBill = await GetAllBill();
+            console.log(dataBill);
             setDataBill(dataBill);
         }
         loadData();

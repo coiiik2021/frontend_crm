@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 
 import { NavLink } from "react-router";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import PaginationWithIcon from "../tables/DataTables/TableOne/PaginationWithIcon";
 import { Modal } from "../ui/modal/index.js";
 import { useModal } from "../../../hooks/useModal.js";
-import { DeletePriceOrder, GetAllBaseUser, GetAllPriceOrder, PostBaseUser, PostPriceOrder, PutPriceOrder } from "../../../service/api.admin.service.jsx";
+import { DeletePriceOrder, GetAllBaseUser, GetAllPriceOrder, GetPaymentDetails, PostBaseUser, PostPriceOrder, PutPriceOrder, UpdateBillAccountant, UpdatePaymentDetails } from "../../../service/api.admin.service.jsx";
 import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 
@@ -133,6 +133,72 @@ export default function ContentTable(props) {
 
     const { isOpen, openModal, closeModal } = useModal();
 
+    // Thêm state để lưu thông tin thanh toán
+    const [paymentDetails, setPaymentDetails] = useState({
+        cash: 0,
+        banking: 0
+    });
+
+    // Hàm để lấy thông tin thanh toán từ backend
+    const fetchPaymentDetails = async (billId) => {
+        try {
+            const response = await GetPaymentDetails(billId);
+            console.log("Payment details:", response);
+
+            // Cập nhật state với dữ liệu từ API
+            setPaymentDetails({
+                cash: response.priceCash || 0,
+                banking: response.priceCard || 0
+            });
+        } catch (error) {
+            console.error("Error fetching payment details:", error);
+            // Nếu có lỗi, đặt giá trị mặc định
+            setPaymentDetails({
+                cash: 0,
+                banking: 0
+            });
+        }
+    };
+
+    // Hàm xử lý khi người dùng bấm vào nút xem chi tiết thanh toán
+    const handleViewPaymentDetails = (item) => {
+        setBillEdit(item);
+        fetchPaymentDetails(item.bill_house);
+        setIsOpenFormPayment(true);
+    };
+
+    // Hàm xử lý khi người dùng bấm Save
+    const handleUpdatePayment = async () => {
+        try {
+
+
+            const dataRequest = {
+                bill_id: billEdit.bill_house,
+                priceCash: paymentDetails.cash,
+                priceCard: paymentDetails.banking
+            }
+
+            const dataResponse = await UpdatePaymentDetails(dataRequest);
+
+
+            console.log("Payment updated:", dataResponse);
+
+            // Đánh dấu dữ liệu đã thay đổi
+
+
+            // Đóng modal
+            setIsOpenFormPayment(false);
+
+            // Thông báo thành công
+            alert("Cập nhật thanh toán thành công!");
+            window.location.reload();
+
+        } catch (error) {
+            console.error("Error updating payment:", error);
+            alert("Lỗi khi cập nhật thanh toán!");
+        }
+    };
+
     // Hàm gọi API lấy dữ liệu priceOrders
     const fetchPriceOrders = async (billHouse) => {
         try {
@@ -225,6 +291,67 @@ export default function ContentTable(props) {
 
     const [isDataChanged, setIsDataChanged] = useState(false);
 
+
+    const [isOpenFormPayment, setIsOpenFormPayment] = useState(false);
+
+    // Cập nhật hàm xử lý thay đổi giá trị input
+    const handlePaymentInputChange = (field, value) => {
+        // Chuyển đổi giá trị thành số
+        let numericValue = Number(value);
+
+        // Nếu người dùng xóa hết và để trống, đặt giá trị là 0
+        if (value === '') {
+            numericValue = 0;
+        }
+
+        // Cập nhật state
+        setPaymentDetails(prev => ({
+            ...prev,
+            [field]: numericValue
+        }));
+    };
+
+    // Thêm state và hàm xử lý cập nhật trạng thái
+
+    // Hàm xử lý cập nhật trạng thái
+    const handleUpdateStatus = async (billId, newStatus) => {
+        try {
+            // Giả sử bạn có API để cập nhật trạng thái
+            const dataRequest = {
+                bill_id: billId,
+                status_payment: newStatus
+            };
+
+            await UpdateBillAccountant(dataRequest);
+
+            // Cập nhật UI
+            const updatedData = currentData.map(item => {
+                if (item.bill_house === billId) {
+                    return { ...item, status_payment: newStatus };
+                }
+                return item;
+            });
+
+
+            // Thông báo thành công
+            alert("Cập nhật trạng thái thành công!");
+            window.location.reload();
+        } catch (error) {
+            console.error("Error updating status:", error);
+            alert("Lỗi khi cập nhật trạng thái!");
+        }
+    };
+
+    // Thêm các trạng thái có thể có
+    const availableStatuses = [
+        { value: "completed", label: "Hoàn thành" },
+        { value: "processing", label: "Đang xử lý" },
+        { value: "cancelled", label: "Đã hủy" }
+    ];
+
+    const statusPopoverRef = useRef(null);
+
+
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
 
@@ -311,7 +438,7 @@ export default function ContentTable(props) {
                                     { key: "payment_bill_real", label: "Thành tiền (Tạm tính)" },
                                     { key: "price_order", label: "Tiền order" },
                                     { key: "payment_bill_fake", label: "Thành tiền (chốt)" },
-                                    { key: "packageInfo_end", label: "PACKAGE CHỐT" },
+                                    { key: "payments", label: "Thanh toán" },
                                     { key: "status", label: "TRẠNG THÁI" },
                                 ].map(({ key, label }) => (
                                     <TableCell
@@ -424,21 +551,56 @@ export default function ContentTable(props) {
 
 
 
-                                    {/* Package chốt */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <div className="space-y-1">
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                <span className="font-medium">SL:</span> {item.packageInfo_end.quantity}
-                                            </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                <span className="font-medium">Cân nặng:</span> {item.packageInfo_end.total_weight} KG
-                                            </p>
+                                    {/* price payment */}
+                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <div className="relative flex flex-col items-start space-y-2">
+                                            {/* Nút để mở modal thanh toán */}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleViewPaymentDetails(item)}
+                                                className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                            >
+                                                <PencilIcon className="w-5 h-5" />
+                                            </button>
+
+                                            {/* Giá trị tiền order */}
+                                            <div className="flex flex-col space-y-1 pt-6">
+                                                {/* Giá trị xanh */}
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                                                        {formatCurrency(item.pricePayment.payment_cash)} VNĐ
+                                                    </span>
+                                                </div>
+
+                                                {/* Giá trị đỏ */}
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                                                        {formatCurrency(item.pricePayment.payment_card)} VNĐ
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </TableCell>
 
                                     {/* Trạng thái */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <StatusBadge status={item.status_payment} />
+                                        <div className="flex items-center space-x-2">
+                                            <StatusBadge status={item.status_payment} />
+
+                                            {authorities.includes("ADMIN") || authorities.includes("ROLE_CS") ? (
+                                                <select
+                                                    value={item.status_payment || "pending"}
+                                                    onChange={(e) => handleUpdateStatus(item.bill_house, e.target.value)}
+                                                    className="ml-2 text-xs border border-gray-300 rounded p-1 bg-white dark:bg-gray-700 dark:border-gray-600"
+                                                >
+                                                    {availableStatuses.map((status) => (
+                                                        <option key={status.value} value={status.value}>
+                                                            {status.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            ) : null}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -688,15 +850,158 @@ export default function ContentTable(props) {
                             >
                                 Đóng
                             </button>
-                            {/* <button
+
+                        </div>
+                    </form>
+                </div>
+            </Modal>
+
+
+            <Modal
+                isOpen={isOpenFormPayment}
+                onClose={() => {
+                    setIsOpenFormPayment(false);
+                    if (isDataChanged) {
+                        window.location.reload();
+                    }
+                }}
+                className="max-w-[800px] m-4"
+            >
+                <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                            Chi tiết thanh toán: HB{billEdit.bill_house?.substring(0, 5)}
+                        </h3>
+                        <button
+                            onClick={() => {
+                                setIsOpenFormPayment(false);
+                                if (isDataChanged) {
+                                    window.location.reload();
+                                }
+                            }}
+                            className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                        >
+                            <XIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    {/* Form */}
+                    <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                        {/* Package Section */}
+                        <div className="space-y-6">
+                            {/* Header */}
+                            <div className="flex items-center justify-between">
+                                <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
+                                    Quản lý thanh toán
+                                </h4>
+                            </div>
+
+                            {/* Payment Form */}
+                            <div className="space-y-4">
+                                {/* Tiền mặt */}
+                                <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                                    <div className="w-1/12 text-center">
+                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            1
+                                        </p>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Tiền mặt (VNĐ)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={paymentDetails.cash === 0 && document.activeElement === document.getElementById('cash-input') ? '' : paymentDetails.cash}
+                                            onChange={(e) => handlePaymentInputChange('cash', e.target.value)}
+                                            onFocus={(e) => {
+                                                if (paymentDetails.cash === 0) {
+                                                    e.target.value = '';
+                                                }
+                                            }}
+                                            onBlur={(e) => {
+                                                if (e.target.value === '') {
+                                                    handlePaymentInputChange('cash', '0');
+                                                }
+                                            }}
+                                            id="cash-input"
+                                            className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Tiền chuyển khoản */}
+                                <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                                    <div className="w-1/12 text-center">
+                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            2
+                                        </p>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Tiền chuyển khoản (VNĐ)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={paymentDetails.banking === 0 && document.activeElement === document.getElementById('banking-input') ? '' : paymentDetails.banking}
+                                            onChange={(e) => handlePaymentInputChange('banking', e.target.value)}
+                                            onFocus={(e) => {
+                                                if (paymentDetails.banking === 0) {
+                                                    e.target.value = '';
+                                                }
+                                            }}
+                                            onBlur={(e) => {
+                                                if (e.target.value === '') {
+                                                    handlePaymentInputChange('banking', '0');
+                                                }
+                                            }}
+                                            id="banking-input"
+                                            className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Tổng tiền */}
+                                <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
+                                    <div className="w-1/12 text-center">
+                                        <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                                            Σ
+                                        </p>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block mb-1 text-sm font-medium text-blue-700 dark:text-blue-300">
+                                            Tổng tiền thanh toán (VNĐ)
+                                        </label>
+                                        <div className="w-full px-3 py-2 text-sm font-bold border rounded-md bg-white dark:bg-gray-800 dark:text-blue-300 dark:border-blue-800">
+                                            {formatCurrency(paymentDetails.cash + paymentDetails.banking)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
+                            <button
                                 type="button"
-                                onClick={async () => {
-                                    console.log("billEdit", billEdit);
+                                onClick={() => {
+                                    setIsOpenFormPayment(false);
+                                    if (isDataChanged) {
+                                        window.location.reload();
+                                    }
                                 }}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                            >
+                                Đóng
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleUpdatePayment}
                                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 Lưu thay đổi
-                            </button> */}
+                            </button>
                         </div>
                     </form>
                 </div>

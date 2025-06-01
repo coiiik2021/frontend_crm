@@ -366,10 +366,10 @@ export default function ContentTable(props) {
                                     <TableCell className="px-6 py-4 whitespace-nowrap">
                                         <div className="space-y-1">
                                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                <span className="font-medium">SL:</span> {item.packageInfo_end.quantity}
+                                                <span className="font-medium">SL:</span> {item?.packageInfo_end?.quantity}
                                             </p>
                                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                <span className="font-medium">Cân nặng:</span> {item.packageInfo_end.total_weight} KG
+                                                <span className="font-medium">Cân nặng:</span> {item?.packageInfo_end?.total_weight} KG
                                             </p>
                                         </div>
                                     </TableCell>

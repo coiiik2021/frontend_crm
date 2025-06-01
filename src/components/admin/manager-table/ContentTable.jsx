@@ -33,13 +33,13 @@ export default function ContentTable(props) {
     console.log(users);
     return users
       .filter((item) =>
-        item.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+        item.email.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => {
         if (sortKey === "name") {
           return sortOrder === "asc"
-            ? a.fullName.localeCompare(b.fullName)
-            : b.fullName.localeCompare(a.fullName);
+            ? a.email.localeCompare(b.email)
+            : b.email.localeCompare(a.email);
         }
 
         if (sortKey === "salary") {

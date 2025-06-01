@@ -5,6 +5,9 @@ import UserMetaCard from "../../components/admin/profile/UserMetaCard";
 import UserInfoCard from "../../components/admin/profile/UserInfoCard";
 import PageMeta from "../../components/admin/common/PageMeta";
 import UserService from "../../components/admin/profile/UserService";
+import UserOfManager from "../../components/admin/profile/UserOfManager";
+
+
 
 export default function UserProfiles() {
   const location = useLocation();
@@ -31,6 +34,11 @@ export default function UserProfiles() {
           <UserMetaCard user={user} />
           <UserInfoCard user={user} setUser={setUser} />
           <UserService user={user} />
+          {
+            user.nameRole === "MANAGER" && (
+              <UserOfManager user={user} />
+            )
+          }
         </div>
       </div>
     </>
