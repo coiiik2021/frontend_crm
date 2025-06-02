@@ -161,7 +161,7 @@ export default function ContentTable(props) {
                 }
             })
         }
-        if (authorities.includes("ROLE_CS") || authorities.includes("ADMIN")) {
+        if (authorities.includes("CS") || authorities.includes("ADMIN")) {
             const updatedBill = {
                 id: bill.bill_house,
                 bill_employee: bill.bill_employee,
@@ -421,7 +421,7 @@ export default function ContentTable(props) {
 
                                         {/* Package Section */}
                                         {
-                                            (authorities.includes("ROLE_TRANSPORTER") || authorities.includes("ADMIN")) && (
+                                            (authorities.includes("TRANSPORTER") || authorities.includes("ADMIN")) && (
                                                 <div className="space-y-4">
                                                     <div className="flex items-center justify-between">
                                                         <div>
@@ -543,7 +543,7 @@ export default function ContentTable(props) {
                                             )
                                         }
                                         {
-                                            (authorities.includes("ROLE_CS") || authorities.includes("ADMIN")) && (
+                                            (authorities.includes("CS") || authorities.includes("ADMIN")) && (
                                                 (
                                                     <>
                                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
