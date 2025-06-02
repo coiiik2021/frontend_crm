@@ -40,7 +40,7 @@ export default function SignInForm() {
 
       }
       else if (authorities.includes("USER")) {
-        navigate("/");
+        navigate("/quan-ly/shipment");
       } else {
         alert("Không xác định được quyền người dùng.");
       }

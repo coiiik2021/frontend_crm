@@ -233,6 +233,8 @@ const UpdateBillTRANSPORTER = async (data) => {
   console.log("data/", data);
   return await axios.put(API, data);
 };
+export { GetAllBill, CreateBill, UpdateBillTRANSPORTER, UpdateBillCS, UpdateBillAccountant };
+
 
 // const user
 const GetConstsByUser = async (user_id) => {
@@ -254,6 +256,9 @@ const DeleteConstUser = async (data) => {
   const API = `const_user/delete`;
   return await axios.post(API, data);
 };
+
+
+
 export { GetConstsByUser, PostConstUser, PutConstUser, DeleteConstUser };
 
 
@@ -327,7 +332,6 @@ const DeletePriceOrder = async (id) => {
 export { GetAllPriceOrder, PostPriceOrder, PutPriceOrder, DeletePriceOrder };
 
 
-export { GetAllBill, CreateBill, UpdateBillTRANSPORTER, UpdateBillCS, UpdateBillAccountant };
 
 export { GetOverSizeByName, PostOverSize, PutOverSize, DeleteOverSize };
 

@@ -114,14 +114,7 @@ export default function App() {
               element={<ZoneCountryTable />}
             />
 
-            <Route path="/quan-ly/shipment" element={<BillTable />} />
 
-            <Route
-              path="/quan-ly/shipment-detail"
-              element={<ShipmentDetail />}
-            />
-
-            <Route path="/quan-ly/my-debits" element={<ShipmentTable />} />
 
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/invoice" element={<Invoices />} />
@@ -194,7 +187,7 @@ export default function App() {
           {/* Dashboard Layout */}
 
           <Route element={
-            <ProtectedRoute allowedRoles={["USER", "MANAGER", "EMPLOYEE"]}>
+            <ProtectedRoute allowedRoles={["ADMIN", "USER", "MANAGER", "EMPLOYEE"]}>
               <AppLayoutAdmin />
             </ProtectedRoute>
           }>
