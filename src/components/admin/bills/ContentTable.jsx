@@ -396,9 +396,6 @@ export default function ContentTable(props) {
 
                                     </TableCell>
                                 </TableRow>
-
-
-
                             ))}
                             <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[800px] m-4">
                                 <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
@@ -421,7 +418,7 @@ export default function ContentTable(props) {
 
                                         {/* Package Section */}
                                         {
-                                            (authorities.includes("ROLE_TRANSPORTER") || authorities.includes("ADMIN")) && (
+                                            (authorities.includes("TRANSPORTER") || authorities.includes("ADMIN")) && (
                                                 <div className="space-y-4">
                                                     <div className="flex items-center justify-between">
                                                         <div>
@@ -543,7 +540,7 @@ export default function ContentTable(props) {
                                             )
                                         }
                                         {
-                                            (authorities.includes("ROLE_CS") || authorities.includes("ADMIN")) && (
+                                            (authorities.includes("CS") || authorities.includes("ADMIN")) && (
                                                 (
                                                     <>
                                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
