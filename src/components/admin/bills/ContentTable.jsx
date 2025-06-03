@@ -161,7 +161,7 @@ export default function ContentTable(props) {
                 }
             })
         }
-        if (authorities.includes("ROLE_CS") || authorities.includes("ADMIN")) {
+        if (authorities.includes("CS") || authorities.includes("ADMIN")) {
             const updatedBill = {
                 id: bill.bill_house,
                 bill_employee: bill.bill_employee,
@@ -269,8 +269,11 @@ export default function ContentTable(props) {
                                     { key: "country_name", label: "NƯỚC ĐẾN" },
                                     { key: "packageInfo_begin", label: "PACKAGE KHAI BÁO" },
                                     { key: "packageInfo_end", label: "PACKAGE CHỐT" },
+
                                     { key: "status", label: "TRẠNG THÁI" },
-                                    { key: "Action", label: "Cập nhật thông tin" },
+                                    { key: "Action", label: "Cập nhật thông tin" }
+
+
 
                                 ].map(({ key, label }) => (
                                     <TableCell
@@ -381,7 +384,7 @@ export default function ContentTable(props) {
                                         <StatusBadge status={item.status} />
                                     </TableCell>
                                     <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        {item.status !== "Hoàn thành" ? (
+                                        {item.status !== "Hoàn thành" && (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) ? (
                                             <Button
                                                 variant="primary"
                                                 className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"

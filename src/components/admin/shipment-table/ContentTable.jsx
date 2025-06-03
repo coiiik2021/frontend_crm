@@ -511,17 +511,19 @@ export default function ContentTable(props) {
                                     {/* Thành tiền */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                                         <div className="relative flex flex-col items-start space-y-2">
-                                            {/* Nút chỉnh sửa ở góc trên bên phải */}
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    openModal();
-                                                    setBillEdit(item);
-                                                }}
-                                                className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                            >
-                                                <PencilIcon className="w-5 h-5" />
-                                            </button>
+                                            {
+                                                (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            openModal();
+                                                            setBillEdit(item);
+                                                        }}
+                                                        className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                    >
+                                                        <PencilIcon className="w-5 h-5" />
+                                                    </button>)
+                                            }
 
                                             {/* Giá trị tiền order */}
                                             <div className="flex flex-col space-y-1 pt-6">
@@ -549,16 +551,19 @@ export default function ContentTable(props) {
 
 
                                     {/* price payment */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <TableCell TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300" >
                                         <div className="relative flex flex-col items-start space-y-2">
                                             {/* Nút để mở modal thanh toán */}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleViewPaymentDetails(item)}
-                                                className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                            >
-                                                <PencilIcon className="w-5 h-5" />
-                                            </button>
+                                            {
+                                                (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleViewPaymentDetails(item)}
+                                                        className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                    >
+                                                        <PencilIcon className="w-5 h-5" />
+                                                    </button>)
+                                            }
 
                                             {/* Giá trị tiền order */}
                                             <div className="flex flex-col space-y-1 pt-6">
@@ -584,7 +589,7 @@ export default function ContentTable(props) {
                                         <div className="flex items-center space-x-2">
                                             <StatusBadge status={item.status_payment} />
 
-                                            {authorities.includes("ADMIN") || authorities.includes("CS") ? (
+                                            {authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER") ? (
                                                 <select
                                                     value={item.status_payment || "pending"}
                                                     onChange={(e) => handleUpdateStatus(item.bill_house, e.target.value)}
@@ -604,7 +609,7 @@ export default function ContentTable(props) {
                         </TableBody>
                     </Table>
                 </div>
-            </div>
+            </div >
 
             <div className="border border-t-0 rounded-b-xl border-gray-100 py-4 pl-[18px] pr-4 dark:border-white/[0.05]">
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
@@ -870,17 +875,21 @@ export default function ContentTable(props) {
                         <h3 className="text-xl font-bold text-gray-800 dark:text-white">
                             Chi tiết thanh toán: HB{billEdit.bill_house?.substring(0, 5)}
                         </h3>
-                        <button
-                            onClick={() => {
-                                setIsOpenFormPayment(false);
-                                if (isDataChanged) {
-                                    window.location.reload();
-                                }
-                            }}
-                            className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                        >
-                            <XIcon className="w-5 h-5" />
-                        </button>
+                        {
+                            authorities.includes("ADMIN") || authorities.includes("CS") && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsOpenFormPayment(false);
+                                        if (isDataChanged) {
+                                            window.location.reload();
+                                        }
+                                    }}
+                                    className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                                >
+                                    <XIcon className="w-5 h-5" />
+                                </button>)
+                        }
                     </div>
 
                     {/* Form */}
@@ -1003,6 +1012,6 @@ export default function ContentTable(props) {
                     </form>
                 </div>
             </Modal>
-        </div>
+        </div >
     );
 }

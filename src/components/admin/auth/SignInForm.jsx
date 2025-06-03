@@ -35,13 +35,10 @@ export default function SignInForm() {
       } else if (authorities.includes("MANAGER")) {
         navigate("/quan-ly/user-table");
       }
-      else if (authorities.includes("CS") || authorities.includes("TRANSPORTER") || authorities.includes("ACCOUNTANT")) {
+      else if (authorities.includes("USER") || authorities.includes("CS") || authorities.includes("TRANSPORTER") || authorities.includes("ACCOUNTANT")) {
         navigate("/quan-ly/shipment");
-
       }
-      else if (authorities.includes("USER")) {
-        navigate("/quan-ly/shipment");
-      } else {
+      else {
         alert("Không xác định được quyền người dùng.");
       }
 

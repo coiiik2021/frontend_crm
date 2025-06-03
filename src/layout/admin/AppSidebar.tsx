@@ -134,7 +134,15 @@ const AppSidebar: React.FC = () => {
               subItems: [
                 {
                   name: "User", path: "/quan-ly/user-table",
-
+                },
+                {
+                  name: "Cs", path: "/quan-ly/cs-table",
+                },
+                {
+                  name: "Accountant", path: "/quan-ly/accountant-table",
+                },
+                {
+                  name: "Transporter", path: "/quan-ly/transporter-table",
                 },
               ],
             },

@@ -77,6 +77,9 @@ import ZoneCountryTable from "./components/admin/priceNet/zone-country/ZoneCount
 import BillTable from "./components/admin/bills/BillTable.jsx";
 import ProtectedRoute from './ProtectedRoute';
 import BillContent from "./components/admin/bills/BillContent.jsx";
+import CsTable from "./components/admin/cs-table/CsTable";
+import TransporterTable from "./components/admin/transporter-table/TransporterTable";
+import AccountantTable from "./components/admin/accountant-table/AccountantTable";
 
 export default function App() {
   return (
@@ -187,7 +190,7 @@ export default function App() {
           {/* Dashboard Layout */}
 
           <Route element={
-            <ProtectedRoute allowedRoles={["ADMIN", "USER", "MANAGER", "EMPLOYEE"]}>
+            <ProtectedRoute allowedRoles={["ADMIN", "USER", "MANAGER", "TRANSPORTER", "CS", "ACCOUNTANT"]}>
               <AppLayoutAdmin />
             </ProtectedRoute>
           }>
@@ -207,10 +210,13 @@ export default function App() {
             </ProtectedRoute>
           }>
             <Route path="/quan-ly/user-table" element={<UserTable />} />
+
+            <Route path="/quan-ly/cs-table" element={<CsTable />} />
+            <Route path="/quan-ly/transporter-table" element={<TransporterTable />} />
+            <Route path="/quan-ly/accountant-table" element={<AccountantTable />} />
+
             {/* Others Page */}
             <Route path="/quan-ly/profile" element={<UserProfiles />} />
-
-
           </Route>
 
 
