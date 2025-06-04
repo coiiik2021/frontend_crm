@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import * as XLSX from "xlsx";
 import ExcelJS from 'exceljs';
 
 
@@ -205,8 +204,7 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
     setIsEdited(true);
   };
 
-  const exportToExcel = () => {
-    // Lấy dữ liệu động
+  const exportToExcel = async () => {
     const shipper = invoiceData.shipper;
     const consignee = invoiceData.consignee;
     const items = invoiceData.items;
@@ -218,199 +216,210 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
     const dimensions = invoiceData.dimensions;
     const totalValue = invoiceData.totalValue;
 
-    // Tạo mảng dữ liệu mô phỏng bố cục invoice.html
-    const data = [
-      ["", "INVOICE", "", "", "", "", "", "", ""], // B1-I1 merge
-      ["", "", "", "", "", "", "", "", ""],
-      ["", "", "Invoice No.:", invoiceNo, "", "", "", "Date:", date],
-      ["", "", "", "", "", "", "", "", ""],
-      ["", "SHIPPER", "", "", "", "", "", "Air waybill No.", airWaybillNo],
-      ["", "Company Name", shipper.name, "", "", "", "", "", shippingMethod],
-      ["", "Address", shipper.address, "", "", "", "", "", ""],
-      ["", "Town/ Area Code", shipper.address, "", "", "", "", "", "1"],
-      ["", "State/ Country", "VIETNAM", "", "", "", "", "", ""],
-      ["", "Tax Code", "0399321378", "", "", "", "", "", weight],
-      ["", "Contact Name", shipper.name, "", "", "", "", "", ""],
-      ["", "Phone/Fax No.", shipper.phone, "", "", "", "", "", dimensions],
-      ["", "", "", "", "", "", "", "", ""],
-      ["", "CONSIGNEE", "", "", "", "", "", "", ""],
-      ["", "Company Name", consignee.company, "", "", "", "", "", ""],
-      ["", "Address", consignee.address, "", "", "", "", "", ""],
-      ["", "Postal code", consignee.postCode, "", "", "", "", "", ""],
-      ["", "State/ Country", consignee.country, "", "", "", "", "", ""],
-      ["", "Contact Name", consignee.name, "", "", "", "", "", ""],
-      ["", "Phone/Fax No.", consignee.phone, "", "", "", "", "", ""],
-      ["", "", "", "", "", "", "", "", ""],
-      ["", "Full Description of Goods", "", "", "Origin", "Q'Ty", "Unit", "Unit Price", "Subtotal"],
-      ["", "(Name of goods, composition of material, marks, etc)", "", "", "", "", "(pcs/sets)", "(in USD)", "(in USD)"],
-      ...items.map(p => [
-        "",
-        p.description,
-        "",
-        "",
-        p.origin,
-        p.quantity,
-        p.unit,
-        p.unitPrice,
-        p.subtotal
-      ]),
-      ["", "", "", "", "", "Total Value (in USD)", "", "", totalValue],
-      ["", "SAMPLE", "", "", "", "", "", "", ""],
-      ["", "Reason for Export", "", "", "", "", "", "", ""],
-      ["", "I declare that the information is true and correct to the best of my knowledge,", "", "", "", "", "", "", ""],
-      ["", "and that the goods are of VIETNAM origin.", "", "", "", "", "", "", ""],
-      ["", "I (name)", "", "", "", "", "certify that the particulars and", "", ""],
-      ["", "quantity of goods specified in this document are goods which are submitted for", "", "", "", "", "", "", ""],
-      ["", "clearance for export out of Vietnam.", "", "", "", "", "", "", ""],
-      ["", "", "", "", "", "", "", "Signature/Title/Stamp", ""],
-      ["", "", "", "", "", "", "", "", ""],
-      ["", "", "", "", "", "", "", "", ""],
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Invoice');
+
+    worksheet.columns = [
+      { width: 2 },    // A
+      { width: 15 },   // B
+      { width: 15 },   // C
+      { width: 30 },   // D
+      { width: 15 },   // E
+      { width: 15 },   // F
+      { width: 15 },   // G
+      { width: 15 },   // H
+      { width: 15 }    // I
     ];
 
-    const ws = XLSX.utils.aoa_to_sheet(data);
 
-    // Merge cell theo mẫu
-    ws['!merges'] = [
-      { s: { r: 0, c: 1 }, e: { r: 0, c: 8 } }, // INVOICE
-      { s: { r: 4, c: 1 }, e: { r: 4, c: 6 } }, // SHIPPER
-      { s: { r: 13, c: 1 }, e: { r: 13, c: 6 } }, // CONSIGNEE
-      { s: { r: 21, c: 1 }, e: { r: 21, c: 3 } }, // Full Description of Goods header
-      { s: { r: 22, c: 1 }, e: { r: 22, c: 3 } }, // (Name of goods...) subheader
-      { s: { r: 5, c: 2 }, e: { r: 5, c: 6 } },
-      { s: { r: 6, c: 2 }, e: { r: 6, c: 6 } },
-      { s: { r: 7, c: 2 }, e: { r: 7, c: 6 } },
-      { s: { r: 8, c: 2 }, e: { r: 8, c: 6 } },
-      { s: { r: 9, c: 2 }, e: { r: 9, c: 6 } },
-      { s: { r: 10, c: 2 }, e: { r: 10, c: 6 } },
-      { s: { r: 11, c: 2 }, e: { r: 11, c: 6 } },
+    const titleRow = worksheet.addRow(['', 'INVOICE', '', '', '', '', '', '', '']);
+    titleRow.height = 40;
+    worksheet.mergeCells('B1:I1');
+    const titleCell = worksheet.getCell('B1');
+    titleCell.font = { size: 28, bold: true };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-      { s: { r: 14, c: 2 }, e: { r: 14, c: 7 } },
-      { s: { r: 15, c: 2 }, e: { r: 15, c: 7 } },
-      { s: { r: 16, c: 2 }, e: { r: 16, c: 7 } },
-      { s: { r: 17, c: 2 }, e: { r: 17, c: 7 } },
-      { s: { r: 18, c: 2 }, e: { r: 18, c: 7 } },
-      { s: { r: 19, c: 2 }, e: { r: 19, c: 7 } },
-
-      { s: { r: 24, c: 5 }, e: { r: 24, c: 7 } },
+    worksheet.addRow(['', '', '', '', '', '', '', '', '']);
 
 
-    ];
+    const invoice_no = worksheet.addRow(['', '', 'Invoice No.:', invoiceNo, '', '', '', 'Date:', date]);
+    invoice_no.getCell(3).font = {bold:true, italic:true}
+    invoice_no.getCell(8).font = {bold:true, italic:true}
+    invoice_no.getCell(4).font = {bold:true}
+    invoice_no.getCell(9).font = {bold:true}
+    worksheet.addRow(['', '', '', '', '', '', '', '', '']);
 
-    // Border style dưới (gạch dưới)
-    const borderBottom = {
-      bottom: { style: 'medium', color: { rgb: 'FF0000' } }
-    };
-    // Border quanh cho bảng sản phẩm
-    const borderAll = {
-      top: { style: 'medium', color: { rgb: 'FF0000' } },
-      bottom: { style: 'medium', color: { rgb: 'FF0000' } },
-      left: { style: 'medium', color: { rgb: 'FF0000' } },
-      right: { style: 'medium', color: { rgb: 'FF0000' } }
-    };
+    const shipperTitle = worksheet.addRow(['', 'SHIPPER', '', '', '', '', '', 'Air waybill No.', airWaybillNo]);
+    shipperTitle.getCell(2).font = { bold: true , underline: true};
+    shipperTitle.getCell(8).font = { bold: true}
+    shipperTitle.getCell(9).font = { bold: true}
+    worksheet.mergeCells('B5:G5');
 
-    // Set style cho các dòng cần gạch dưới
-    const underlineRows = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20];
-    underlineRows.forEach(r => {
-      for (let c = 0; c < 9; c++) {
-        const col = String.fromCharCode(65 + c);
-        const cell = `${col}${r + 1}`;
-        if (ws[cell]) {
-          ws[cell].s = ws[cell].s || {};
-          ws[cell].s.border = borderBottom;
-        }
+    const company = worksheet.addRow(['', 'Company Name', shipper.name, '', '', '', '', '', shippingMethod]);
+    company.getCell(3).font = {bold: true}
+    company.getCell(9).font = {bold: true}
+    worksheet.addRow(['', 'Address', shipper.address, '', '', '', '', '', '']);
+    worksheet.addRow(['', 'Town/ Area Code', shipper.address, '', '', '', '', '', '1']);
+    const country_shipper = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '', '', '', '']);
+    country_shipper.getCell(3).font = {bold:true}
+    worksheet.addRow(['', 'Tax Code', '0399321378', '', '', '', '', '', weight]);
+    worksheet.addRow(['', 'Contact Name', shipper.name, '', '', '', '', '', '']);
+    worksheet.addRow(['', 'Phone/Fax No.', shipper.phone, '', '', '', '', '', dimensions]);
+    worksheet.addRow(['', '', '', '', '', '', '', '', '']);
+
+    const consigneeTitle = worksheet.addRow(['', 'CONSIGNEE', '', '', '', '', '', '', '']);
+    consigneeTitle.getCell(2).font = { bold: true , underline: true};
+    worksheet.mergeCells('B14:G14');
+
+    const company_consignee = worksheet.addRow(['', 'Company Name', consignee.company, '', '', '', '', '', '']);
+    company_consignee.getCell(3).font = {bold:true}
+    worksheet.addRow(['', 'Address', consignee.address, '', '', '', '', '', '']);
+    worksheet.addRow(['', 'Postal code', consignee.postCode, '', '', '', '', '', '']);
+    const country_consignee = worksheet.addRow(['', 'State/ Country', consignee.country, '', '', '', '', '', '']);
+    country_consignee.getCell(3).font = { bold: true}
+    worksheet.addRow(['', 'Contact Name', consignee.name, '', '', '', '', '', '']);
+    worksheet.addRow(['', 'Phone/Fax No.', consignee.phone, '', '', '', '', '', '']);
+    worksheet.addRow(['', '', '', '', '', '', '', '', '']);
+
+
+    worksheet.mergeCells('C6:G6');
+    worksheet.mergeCells('C7:G7');
+    worksheet.mergeCells('C8:G8');
+    worksheet.mergeCells('C9:G9');
+    worksheet.mergeCells('C10:G10');
+    worksheet.mergeCells('C11:G11');
+    worksheet.mergeCells('C12:G12');
+
+    worksheet.mergeCells('C15:I15');
+    worksheet.mergeCells('C16:I16');
+    worksheet.mergeCells('C17:I17');
+    worksheet.mergeCells('C18:I18');
+    worksheet.mergeCells('C19:I19');
+    worksheet.mergeCells('C20:I20');
+
+    const headerRow = worksheet.addRow([
+      '',
+      'Full Description of Goods\n(Name of goods, composition of material, marks, etc)',
+      '',
+      '',
+      'Origin',
+      'Q\'Ty\n(pcs/sets)',
+      'Unit',
+      'Unit Price\n(in USD)',
+      'Subtotal\n(in USD)'
+    ]);
+    headerRow.height = 45; // Tăng chiều cao để hiển thị xuống dòng
+
+    // Merge các ô tương ứng
+    worksheet.mergeCells('B22:D22'); // merge mô tả hàng hóa
+
+    headerRow.eachCell((cell, colNumber) => {
+      if(colNumber !== 1){
+        cell.font = { bold: true };
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+          wrapText: true  // cho phép xuống dòng trong ô
+        };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF0F0F0' }
+        };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
       }
     });
 
-    // Set style cho header bảng sản phẩm
-    for (let c = 1; c < 9; c++) {
-      const col = String.fromCharCode(65 + c);
-      const cell = `${col}23`;
-      if (ws[cell]) {
-        ws[cell].s = ws[cell].s || {};
-        ws[cell].s.font = { bold: true };
-        ws[cell].s.alignment = { horizontal: 'center', vertical: 'center' };
-        ws[cell].s.border = borderAll;
-      }
-    }
-    // Set border cho bảng sản phẩm
-    const startRow = 21;
-    const endRow = 21 + items.length;
-    for (let r = startRow; r < endRow; r++) {
-      for (let c = 1; c < 9; c++) {
-        const col = String.fromCharCode(65 + c);
-        const cell = `${col}${r + 1}`;
-        if (ws[cell]) {
-          ws[cell].s = ws[cell].s || {};
-          ws[cell].s.border = borderAll;
-          // Wrap text cho mô tả sản phẩm
-          if (c === 1) {
-            ws[cell].s.alignment = { wrapText: true, vertical: 'top' };
+    items.forEach(item => {
+      const row = worksheet.addRow([
+        '',
+        item.description,
+        '',
+        '',
+        item.origin,
+        item.quantity,
+        item.unit,
+        item.unitPrice,
+        item.subtotal
+      ]);
+      row.height = 60;
+
+      row.eachCell((cell, colNumber) => {
+        if (colNumber !== 1) {
+          cell.font = { name: 'Times New Roman', size: 14 };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+
+          if (colNumber === 2) {
+            cell.alignment = { wrapText: true, vertical: 'top' };
+          } else if (colNumber >= 5 && colNumber <= 9) {
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
           }
         }
-      }
-    }
-    // Set style cho dòng tổng
-    for (let c = 1; c < 9; c++) {
-      const col = String.fromCharCode(65 + c);
-      const cell = `${col}${endRow + 1}`;
-      if (ws[cell]) {
-        ws[cell].s = ws[cell].s || {};
-        ws[cell].s.font = { bold: true };
-        ws[cell].s.border = borderAll;
-      }
-    }
+      });
+    });
 
-    // Set font đậm cho các mục
-    [1, 5, 14].forEach(r => {
-      const cell = `B${r + 1}`;
-      if (ws[cell]) {
-        ws[cell].s = ws[cell].s || {};
-        ws[cell].s.font = { bold: true };
+
+    const totalRow = worksheet.addRow(['', '', '', '', '', 'Total Value (in USD)', '', '', totalValue]);
+
+    totalRow.eachCell((cell, colNumber) => {
+      if (colNumber === 6 || colNumber === 9) {
+        cell.font = { name: 'Times New Roman', size: 14, bold: true };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
       }
     });
-    // Set căn giữa cho tiêu đề
-    ws['B1'].s = ws['B1'].s || {};
-    ws['B1'].s.font = { bold: true, sz: 28 };
-    ws['B1'].s.alignment = { horizontal: 'center', vertical: 'center' };
 
-    // Độ rộng cột lớn cho bảng đẹp
-    ws['!cols'] = [
-      { wch: 2 },    // A
-      { wch: 15 },   // B - mô tả sản phẩm
-      { wch: 15 },   // C
-      { wch: 30 },   // D
-      { wch: 15 },   // E
-      { wch: 15 },   // F
-      { wch: 15 },   // G
-      { wch: 15 },   // H
-      { wch: 15 }    // I
-    ];
-    // Chiều cao dòng cho tiêu đề và bảng sản phẩm
-    ws['!rows'] = [
-      { hpt: 40 }, // dòng 1: INVOICE
-      null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-      { hpt: 30 }, // dòng header bảng sản phẩm
-      { hpt: 25 }, // dòng subheader bảng sản phẩm
-      ...Array(items.length).fill({ hpt: 60 }) // các dòng sản phẩm
-    ];
+    worksheet.mergeCells('F' + totalRow.number + ':H' + totalRow.number);
 
-    // Thêm các dòng này vào cuối mảng `data` (có thể merge cell cho các dòng dài).
-    ws['!merges'].push(
-      { s: { r: endRow + 3, c: 1 }, e: { r: endRow + 3, c: 4 } }, // SAMPLE
-      { s: { r: endRow + 4, c: 1 }, e: { r: endRow + 4, c: 8 } }, // Reason for Export
-      { s: { r: endRow + 5, c: 1 }, e: { r: endRow + 5, c: 8 } }, // I declare...
-      { s: { r: endRow + 6, c: 1 }, e: { r: endRow + 6, c: 8 } }, // and that the goods...
-      { s: { r: endRow + 7, c: 1 }, e: { r: endRow + 7, c: 2 } }, // I (name)
-      { s: { r: endRow + 7, c: 6 }, e: { r: endRow + 7, c: 8 } }, // certify that...
-      { s: { r: endRow + 8, c: 1 }, e: { r: endRow + 8, c: 8 } }, // quantity of goods...
-      { s: { r: endRow + 9, c: 1 }, e: { r: endRow + 9, c: 8 } }, // clearance for export...
-      { s: { r: endRow + 10, c: 7 }, e: { r: endRow + 10, c: 8 } }, // Signature/Title/Stamp
-    );
+    const simple = worksheet.addRow(['', 'SAMPLE', '', '', '', '', '', '', '']);
+    simple.font = { size: 14, bold: true };
+    simple.alignment = { horizontal: 'center', vertical: 'middle' };
 
-    // Xuất file
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Invoice");
-    XLSX.writeFile(wb, `invoice_${invoiceNo}.xlsx`);
+    worksheet.addRow(['', 'Reason for Export', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'I declare that the information is true and correct to the best of my knowledge,', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'and that the goods are of VIETNAM origin.', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'I (name)', '', '', '', '', 'certify that the particulars and', '', '']);
+    worksheet.addRow(['', 'quantity of goods specified in this document are goods which are submitted for', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'clearance for export out of Vietnam.', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', '', '', '', '', '', '', 'Signature/Title/Stamp', '']);
+
+    const lastRow = worksheet.lastRow?.number || 0;
+    if (lastRow > 0) {
+      worksheet.mergeCells('B' + (lastRow - 7) + ':I' + (lastRow - 7)); // SAMPLE
+      worksheet.mergeCells('B' + (lastRow - 6) + ':I' + (lastRow - 6)); // Reason for Export
+      worksheet.mergeCells('B' + (lastRow - 5) + ':I' + (lastRow - 5)); // I declare...
+      worksheet.mergeCells('B' + (lastRow - 4) + ':I' + (lastRow - 4)); // and that the goods...
+      worksheet.mergeCells('G' + (lastRow - 3) + ':I' + (lastRow - 3)); // certify that...
+      worksheet.mergeCells('C' + (lastRow - 3) + ':F' + (lastRow - 3));
+      worksheet.mergeCells('B' + (lastRow - 2) + ':I' + (lastRow - 2)); // quantity of goods...
+      worksheet.mergeCells('B' + (lastRow - 1) + ':I' + (lastRow - 1)); // clearance for export...
+      worksheet.mergeCells('H' + lastRow + ':I' + lastRow); // Signature/Title/Stamp
+    }
+
+    // Save file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice_${invoiceNo}.xlsx`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   return (
