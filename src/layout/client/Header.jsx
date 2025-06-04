@@ -12,11 +12,20 @@ export default function Header() {
     const [authorities, setAuthorities] = useState([]);
 
     useEffect(() => {
-        // Kiểm tra token trong localStorage
         const token = localStorage.getItem("token");
-        setIsLoggedIn(!!token); // Nếu có token, đặt isLoggedIn thành true
-        const decoded = jwtDecode(token);
-        setAuthorities(decoded.authorities || []);
+        setIsLoggedIn(!!token); // true nếu có token
+
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                setAuthorities(decoded.authorities || []);
+            } catch (error) {
+                console.error("Token decode error:", error);
+                setAuthorities([]); // hoặc chuyển hướng đăng nhập lại
+            }
+        } else {
+            setAuthorities([]);
+        }
     }, []);
 
     const handleLogout = () => {
