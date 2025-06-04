@@ -87,11 +87,8 @@ export default function ContentTable(props) {
   const handleCreateUser = async () => {
     const data = { ...newDataUser, nameRole: "TRANSPORTER" };
 
-
-
     await PostBaseUser(data);
     setUsers([...users, newDataUser]);
-
     closeModal();
   };
 

@@ -28,6 +28,17 @@ export default function UserProfile() {
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const loadData = async () => {
+      const dataBaseUser = await GetAllBaseUser("user");
+      console.log(dataBaseUser);
+      setUsers(dataBaseUser);
+    };
+    loadData();
+  }, []);
+
+
   const calculateAge = (dob) => {
     const birthDate = new Date(dob);
     const today = new Date();

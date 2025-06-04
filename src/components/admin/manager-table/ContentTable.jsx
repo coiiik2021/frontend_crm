@@ -77,6 +77,7 @@ export default function ContentTable(props) {
 
   const handleCreateUser = async () => {
     const data = { ...newDataUser, nameRole: "MANAGER" };
+
     console.log(data);
 
     await PostBaseUser(data);

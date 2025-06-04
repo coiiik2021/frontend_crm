@@ -78,7 +78,14 @@ const GetAllServiceCompany = async () => {
   return await axios.get(API);
 };
 
+
+const GetShipperServiceCompany = async (name, nameService) => {
+  const API = `service-company/shipper?name=${name}&nameService=${nameService}`;
+  return await axios.get(API);
+}
+
 export {
+  GetShipperServiceCompany,
   GetAllServiceCompany,
   GetNameService,
   PostNameService,
@@ -188,6 +195,11 @@ const PutBaseUser = async (data) => {
   return await axios.put(API, data);
 };
 
+const GetBaseUserForSender = async () => {
+  const API = `base_user/sender`;
+  return await axios.get(API);
+};
+
 const GetUserOfManager = async (manager_id) => {
   const API = `base_user/userOfManager/${manager_id}`;
   return await axios.get(API);
@@ -201,7 +213,8 @@ const GetConstUser = async (user_id) => {
 
 
 
-export { PostBaseUser, GetAllBaseUser, PutBaseUser, GetConstUser, GetUserOfManager };
+
+export { PostBaseUser, GetAllBaseUser, GetBaseUserForSender, PutBaseUser, GetConstUser, GetUserOfManager };
 
 //const_user
 

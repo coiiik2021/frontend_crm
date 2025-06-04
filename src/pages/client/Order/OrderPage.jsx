@@ -1,12 +1,26 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import InformationOrder from "../../../components/client/order/InformationOrder";
 import Products from "../../../components/client/order/Products";
 import FormDetailOrder from "../../../components/client/order/FormDetailOrder";
+import { GetBaseUserForSender } from "../../../service/api.admin.service";
 
 export default function OrderPage() {
     const [currentStep, setCurrentStep] = useState(2);
+
+    const [senderInfo, setSenderInfo] = useState({});
+
+
+    useEffect(() => {
+        const loadSender = async () => {
+            const dataResponse = await GetBaseUserForSender();
+            console.log(dataResponse);
+            setSenderInfo(dataResponse);
+        }
+        loadSender();
+    }, [currentStep]);
+
     const [recipientInfo, setRecipientInfo] = useState({
         id: "1",
         name: "",
@@ -19,6 +33,8 @@ export default function OrderPage() {
         postCode: "",
         country: ""
     });
+
+
     const [packages, setPackages] = useState([
         {
             id: 1,
@@ -81,6 +97,8 @@ export default function OrderPage() {
                 currentStep={currentStep}
                 setCurrentStep={handleStepChange}
                 setSelectedService={setSelectedService}
+                senderInfo={senderInfo}
+                setSenderInfo={setSenderInfo}
             />
         );
     }
