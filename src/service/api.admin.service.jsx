@@ -184,7 +184,7 @@ const GetAllBaseUser = async (nameRole) => {
   return await axios.get(API);
 };
 const PutBaseUser = async (data) => {
-  const API = `base_user/update`;
+  const API = `/update`;
   return await axios.put(API, data);
 };
 
@@ -233,6 +233,9 @@ const UpdateBillTRANSPORTER = async (data) => {
   console.log("data/", data);
   return await axios.put(API, data);
 };
+
+
+
 export { GetAllBill, CreateBill, UpdateBillTRANSPORTER, UpdateBillCS, UpdateBillAccountant };
 
 

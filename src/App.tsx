@@ -190,7 +190,7 @@ export default function App() {
           {/* Dashboard Layout */}
 
           <Route element={
-            <ProtectedRoute allowedRoles={["ADMIN", "USER", "MANAGER", "TRANSPORTER", "CS", "ACCOUNTANT"]}>
+            <ProtectedRoute allowedRoles={["ADMIN", "USER", "MANAGER", "TRANSPORTER", "CS"]}>
               <AppLayoutAdmin />
             </ProtectedRoute>
           }>
