@@ -218,19 +218,19 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
 
     // Tạo mảng dữ liệu mô phỏng bố cục invoice.html
     const data = [
-      ["", "", "", "", "INVOICE", "", "", "", ""], // B1-I1 merge
+      ["", "INVOICE", "", "", "", "", "", "", ""], // B1-I1 merge
       ["", "", "", "", "", "", "", "", ""],
       ["", "", "Invoice No.:", invoiceNo, "", "", "", "Date:", date],
       ["", "", "", "", "", "", "", "", ""],
       ["", "SHIPPER", "", "", "", "", "", "Air waybill No.", airWaybillNo],
       ["", "Company Name", shipper.name, "", "", "", "", "", shippingMethod],
       ["", "Address", shipper.address, "", "", "", "", "", ""],
-      ["", "Town/ Area Code", shipper.address, "", "", "", "", "", ""],
+      ["", "Town/ Area Code", shipper.address, "", "", "", "", "", "1"],
       ["", "State/ Country", "VIETNAM", "", "", "", "", "", ""],
-      ["", "Tax Code", "0399321378", "", "", "", "", "", "1"],
+      ["", "Tax Code", "0399321378", "", "", "", "", "", weight],
       ["", "Contact Name", shipper.name, "", "", "", "", "", ""],
-      ["", "Phone/Fax No.", shipper.phone, "", "", "", "", "", weight],
-      ["", "", "", "", "", "", "", "", dimensions],
+      ["", "Phone/Fax No.", shipper.phone, "", "", "", "", "", dimensions],
+      ["", "", "", "", "", "", "", "", ""],
       ["", "CONSIGNEE", "", "", "", "", "", "", ""],
       ["", "Company Name", consignee.company, "", "", "", "", "", ""],
       ["", "Address", consignee.address, "", "", "", "", "", ""],
@@ -238,7 +238,7 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
       ["", "State/ Country", consignee.country, "", "", "", "", "", ""],
       ["", "Contact Name", consignee.name, "", "", "", "", "", ""],
       ["", "Phone/Fax No.", consignee.phone, "", "", "", "", "", ""],
-      [""],
+      ["", "", "", "", "", "", "", "", ""],
       ["", "Full Description of Goods", "", "", "Origin", "Q'Ty", "Unit", "Unit Price", "Subtotal"],
       ["", "(Name of goods, composition of material, marks, etc)", "", "", "", "", "(pcs/sets)", "(in USD)", "(in USD)"],
       ...items.map(p => [
@@ -252,15 +252,15 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
         p.unitPrice,
         p.subtotal
       ]),
-      ["", "", "", "", "", "", "", "Total Value (in USD)", totalValue],
+      ["", "", "", "", "", "Total Value (in USD)", "", "", totalValue],
       ["", "SAMPLE", "", "", "", "", "", "", ""],
-      ["Reason for Export", "", "", "", "", "", "", "", ""],
-      ["I declare that the information is true and correct to the best of my knowledge,", "", "", "", "", "", "", "", ""],
-      ["and that the goods are of VIETNAM origin.", "", "", "", "", "", "", "", ""],
-      ["I (name)", "", "", "", "", "certify that the particulars and", "", "", ""],
-      ["quantity of goods specified in this document are goods which are submitted for", "", "", "", "", "", "", "", ""],
-      ["clearance for export out of Vietnam.", "", "", "", "", "", "", "", ""],
-      ["", "", "", "", "", "", "Signature/Title/Stamp", "", ""],
+      ["", "Reason for Export", "", "", "", "", "", "", ""],
+      ["", "I declare that the information is true and correct to the best of my knowledge,", "", "", "", "", "", "", ""],
+      ["", "and that the goods are of VIETNAM origin.", "", "", "", "", "", "", ""],
+      ["", "I (name)", "", "", "", "", "certify that the particulars and", "", ""],
+      ["", "quantity of goods specified in this document are goods which are submitted for", "", "", "", "", "", "", ""],
+      ["", "clearance for export out of Vietnam.", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", "Signature/Title/Stamp", ""],
       ["", "", "", "", "", "", "", "", ""],
       ["", "", "", "", "", "", "", "", ""],
     ];
@@ -274,6 +274,24 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
       { s: { r: 13, c: 1 }, e: { r: 13, c: 6 } }, // CONSIGNEE
       { s: { r: 21, c: 1 }, e: { r: 21, c: 3 } }, // Full Description of Goods header
       { s: { r: 22, c: 1 }, e: { r: 22, c: 3 } }, // (Name of goods...) subheader
+      { s: { r: 5, c: 2 }, e: { r: 5, c: 6 } },
+      { s: { r: 6, c: 2 }, e: { r: 6, c: 6 } },
+      { s: { r: 7, c: 2 }, e: { r: 7, c: 6 } },
+      { s: { r: 8, c: 2 }, e: { r: 8, c: 6 } },
+      { s: { r: 9, c: 2 }, e: { r: 9, c: 6 } },
+      { s: { r: 10, c: 2 }, e: { r: 10, c: 6 } },
+      { s: { r: 11, c: 2 }, e: { r: 11, c: 6 } },
+
+      { s: { r: 14, c: 2 }, e: { r: 14, c: 7 } },
+      { s: { r: 15, c: 2 }, e: { r: 15, c: 7 } },
+      { s: { r: 16, c: 2 }, e: { r: 16, c: 7 } },
+      { s: { r: 17, c: 2 }, e: { r: 17, c: 7 } },
+      { s: { r: 18, c: 2 }, e: { r: 18, c: 7 } },
+      { s: { r: 19, c: 2 }, e: { r: 19, c: 7 } },
+
+      { s: { r: 24, c: 5 }, e: { r: 24, c: 7 } },
+
+
     ];
 
     // Border style dưới (gạch dưới)
@@ -355,15 +373,15 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
 
     // Độ rộng cột lớn cho bảng đẹp
     ws['!cols'] = [
-      { wch: 5 },    // A
-      { wch: 60 },   // B - mô tả sản phẩm
+      { wch: 2 },    // A
+      { wch: 15 },   // B - mô tả sản phẩm
       { wch: 15 },   // C
-      { wch: 15 },   // D
+      { wch: 30 },   // D
       { wch: 15 },   // E
       { wch: 15 },   // F
       { wch: 15 },   // G
-      { wch: 20 },   // H
-      { wch: 20 }    // I
+      { wch: 15 },   // H
+      { wch: 15 }    // I
     ];
     // Chiều cao dòng cho tiêu đề và bảng sản phẩm
     ws['!rows'] = [
@@ -382,13 +400,13 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
     // Thêm các dòng này vào cuối mảng `data` (có thể merge cell cho các dòng dài).
     ws['!merges'].push(
       { s: { r: endRow + 1, c: 1 }, e: { r: endRow + 1, c: 3 } }, // SAMPLE
-      { s: { r: endRow + 2, c: 0 }, e: { r: endRow + 2, c: 8 } }, // Reason for Export
-      { s: { r: endRow + 3, c: 0 }, e: { r: endRow + 3, c: 8 } }, // I declare...
-      { s: { r: endRow + 4, c: 0 }, e: { r: endRow + 4, c: 8 } }, // and that the goods...
-      { s: { r: endRow + 5, c: 0 }, e: { r: endRow + 5, c: 4 } }, // I (name)
+      { s: { r: endRow + 2, c: 1 }, e: { r: endRow + 2, c: 8 } }, // Reason for Export
+      { s: { r: endRow + 3, c: 1 }, e: { r: endRow + 3, c: 8 } }, // I declare...
+      { s: { r: endRow + 4, c: 1 }, e: { r: endRow + 4, c: 8 } }, // and that the goods...
+      { s: { r: endRow + 5, c: 1 }, e: { r: endRow + 5, c: 4 } }, // I (name)
       { s: { r: endRow + 5, c: 5 }, e: { r: endRow + 5, c: 8 } }, // certify that...
-      { s: { r: endRow + 6, c: 0 }, e: { r: endRow + 6, c: 8 } }, // quantity of goods...
-      { s: { r: endRow + 7, c: 0 }, e: { r: endRow + 7, c: 8 } }, // clearance for export...
+      { s: { r: endRow + 6, c: 1 }, e: { r: endRow + 6, c: 8 } }, // quantity of goods...
+      { s: { r: endRow + 7, c: 1 }, e: { r: endRow + 7, c: 8 } }, // clearance for export...
       { s: { r: endRow + 8, c: 6 }, e: { r: endRow + 8, c: 8 } }, // Signature/Title/Stamp
     );
   };

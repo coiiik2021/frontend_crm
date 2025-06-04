@@ -28,7 +28,7 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
         shipper: {
             name: "CÔNG TY TNHH THƯƠNG MẠI VÀ DỊCH VỤ VẬN CHUYỂN QUỐC TẾ VIỆT NAM",
             address: "Số 1, Đường số 2, Phường 3, Quận 4, TP.HCM",
-            phone: "0123456789",
+            phone: "0123456789000",
             email: "info@example.com"
         },
 
@@ -202,13 +202,13 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
             ]),
             ["", "", "", "", "", "", "", "Total Value (in USD)", totalValue],
             ["", "SAMPLE", "", "", "", "", "", "", ""],
-            ["Reason for Export", "", "", "", "", "", "", "", ""],
-            ["I declare that the information is true and correct to the best of my knowledge,", "", "", "", "", "", "", "", ""],
-            ["and that the goods are of VIETNAM origin.", "", "", "", "", "", "", "", ""],
-            ["I (name)", "", "", "", "", "certify that the particulars and", "", "", ""],
-            ["quantity of goods specified in this document are goods which are submitted for", "", "", "", "", "", "", "", ""],
-            ["clearance for export out of Vietnam.", "", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "Signature/Title/Stamp", "", ""],
+            ["", "Reason for Export", "", "", "", "", "", "", ""],
+            ["", "I declare that the information is true and correct to the best of my knowledge,", "", "", "", "", "", "", ""],
+            ["", "and that the goods are of VIETNAM origin.", "", "", "", "", "", "", ""],
+            ["","I (name)", "_", "", "", "certify that the particulars and", "", "", ""],
+            ["", "quantity of goods specified in this document are goods which are submitted for", "", "", "", "", "", "", ""],
+            ["", "clearance for export out of Vietnam.", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", "Signature/Title/Stamp", ""],
             ["", "", "", "", "", "", "", "", ""],
             ["", "", "", "", "", "", "", "", ""],
         ];
