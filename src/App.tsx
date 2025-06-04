@@ -88,7 +88,7 @@ export default function App() {
         <ScrollToTop />
         <Routes>
           <Route element={
-            <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "EMPLOYEE"]}>
+            <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "EMPLOYEE", "CS", "TRANSPORTER"]}>
               <AppLayoutAdmin />
             </ProtectedRoute>
           }>
@@ -190,6 +190,7 @@ export default function App() {
           {/* Dashboard Layout */}
 
           <Route element={
+
             <ProtectedRoute allowedRoles={["ADMIN", "USER", "MANAGER", "TRANSPORTER", "CS", "ACCOUNTANT"]}>
               <AppLayoutAdmin />
             </ProtectedRoute>

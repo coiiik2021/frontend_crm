@@ -589,6 +589,7 @@ export default function ContentTable(props) {
                                         <div className="flex items-center space-x-2">
                                             <StatusBadge status={item.status_payment} />
 
+
                                             {authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER") ? (
                                                 <select
                                                     value={item.status_payment || "pending"}
