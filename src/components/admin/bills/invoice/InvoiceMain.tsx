@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
+import ExcelJS from 'exceljs';
+
 
 interface RecipientInfo {
   name: string;
@@ -296,14 +298,14 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
 
     // Border style dưới (gạch dưới)
     const borderBottom = {
-      bottom: { style: 'thin', color: { rgb: '000000' } }
+      bottom: { style: 'medium', color: { rgb: 'FF0000' } }
     };
     // Border quanh cho bảng sản phẩm
     const borderAll = {
-      top: { style: 'thin', color: { rgb: '000000' } },
-      bottom: { style: 'thin', color: { rgb: '000000' } },
-      left: { style: 'thin', color: { rgb: '000000' } },
-      right: { style: 'thin', color: { rgb: '000000' } }
+      top: { style: 'medium', color: { rgb: 'FF0000' } },
+      bottom: { style: 'medium', color: { rgb: 'FF0000' } },
+      left: { style: 'medium', color: { rgb: 'FF0000' } },
+      right: { style: 'medium', color: { rgb: 'FF0000' } }
     };
 
     // Set style cho các dòng cần gạch dưới
@@ -331,8 +333,8 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
       }
     }
     // Set border cho bảng sản phẩm
-    const startRow = 24;
-    const endRow = 24 + items.length;
+    const startRow = 21;
+    const endRow = 21 + items.length;
     for (let r = startRow; r < endRow; r++) {
       for (let c = 1; c < 9; c++) {
         const col = String.fromCharCode(65 + c);
@@ -392,23 +394,23 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
       ...Array(items.length).fill({ hpt: 60 }) // các dòng sản phẩm
     ];
 
+    // Thêm các dòng này vào cuối mảng `data` (có thể merge cell cho các dòng dài).
+    ws['!merges'].push(
+      { s: { r: endRow + 3, c: 1 }, e: { r: endRow + 3, c: 4 } }, // SAMPLE
+      { s: { r: endRow + 4, c: 1 }, e: { r: endRow + 4, c: 8 } }, // Reason for Export
+      { s: { r: endRow + 5, c: 1 }, e: { r: endRow + 5, c: 8 } }, // I declare...
+      { s: { r: endRow + 6, c: 1 }, e: { r: endRow + 6, c: 8 } }, // and that the goods...
+      { s: { r: endRow + 7, c: 1 }, e: { r: endRow + 7, c: 2 } }, // I (name)
+      { s: { r: endRow + 7, c: 6 }, e: { r: endRow + 7, c: 8 } }, // certify that...
+      { s: { r: endRow + 8, c: 1 }, e: { r: endRow + 8, c: 8 } }, // quantity of goods...
+      { s: { r: endRow + 9, c: 1 }, e: { r: endRow + 9, c: 8 } }, // clearance for export...
+      { s: { r: endRow + 10, c: 7 }, e: { r: endRow + 10, c: 8 } }, // Signature/Title/Stamp
+    );
+
     // Xuất file
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Invoice");
     XLSX.writeFile(wb, `invoice_${invoiceNo}.xlsx`);
-
-    // Thêm các dòng này vào cuối mảng `data` (có thể merge cell cho các dòng dài).
-    ws['!merges'].push(
-      { s: { r: endRow + 1, c: 1 }, e: { r: endRow + 1, c: 3 } }, // SAMPLE
-      { s: { r: endRow + 2, c: 1 }, e: { r: endRow + 2, c: 8 } }, // Reason for Export
-      { s: { r: endRow + 3, c: 1 }, e: { r: endRow + 3, c: 8 } }, // I declare...
-      { s: { r: endRow + 4, c: 1 }, e: { r: endRow + 4, c: 8 } }, // and that the goods...
-      { s: { r: endRow + 5, c: 1 }, e: { r: endRow + 5, c: 4 } }, // I (name)
-      { s: { r: endRow + 5, c: 5 }, e: { r: endRow + 5, c: 8 } }, // certify that...
-      { s: { r: endRow + 6, c: 1 }, e: { r: endRow + 6, c: 8 } }, // quantity of goods...
-      { s: { r: endRow + 7, c: 1 }, e: { r: endRow + 7, c: 8 } }, // clearance for export...
-      { s: { r: endRow + 8, c: 6 }, e: { r: endRow + 8, c: 8 } }, // Signature/Title/Stamp
-    );
   };
 
   return (
