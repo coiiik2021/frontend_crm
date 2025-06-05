@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
+import ExcelJS from 'exceljs';
+
 
 export default function FormDetailOrder({ recipientInfo, packages, products, productsTotal, selectedService, senderInfo, dataRequest, setDataRequest }) {
     const [showProductsForm, setShowProductsForm] = useState(true);
@@ -292,7 +294,7 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
             item.unitPrice,
             item.subtotal
           ]);
-          row.height = 60;
+          row.height = 250;
     
           worksheet.mergeCells(`B${row.number}:D${row.number}`);
     

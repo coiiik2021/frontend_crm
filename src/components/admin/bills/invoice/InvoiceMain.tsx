@@ -347,7 +347,7 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
         item.unitPrice,
         item.subtotal
       ]);
-      row.height = 60;
+      row.height = 250;
 
       worksheet.mergeCells(`B${row.number}:D${row.number}`);
 
