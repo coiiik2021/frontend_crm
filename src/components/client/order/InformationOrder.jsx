@@ -6,7 +6,7 @@ import Input from "../../admin/form/input/InputField.js";
 import Form from "../../admin/form/Form.js";
 import FormPackage from "./FormPackage.jsx";
 import DatePicker from "../../admin/form/date-picker.tsx";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { GetCodeByCompany } from "../../../service/api.service.jsx";
 import { DeleteConsigneeFavorite, GetAllConsigneeFavorite, GetZoneCountry, PostConsigneeFavorite } from "../../../service/api.admin.service.jsx";
 
@@ -34,9 +34,6 @@ export default function InformationOrder(props) {
     country: senderInfo?.country || ""
   });
 
-  // Các state khác giữ nguyên...
-
-  // Cập nhật senderForm khi senderInfo thay đổi
   useEffect(() => {
     if (senderInfo && Object.keys(senderInfo).length > 0) {
       setSenderForm({
@@ -139,7 +136,6 @@ export default function InformationOrder(props) {
   };
 
   const handleService = () => {
-    // Tính lại total.realVolume từ packages trước khi chuyển trang
     const recalculatedTotal = packages.reduce((acc, pkg) => ({
       ...acc,
       realVolume: acc.realVolume + (pkg.total?.realVolume || 0),
@@ -150,7 +146,6 @@ export default function InformationOrder(props) {
       totalPackage: 0
     });
 
-    // Cập nhật packages với total đã tính toán lại
     setPackages(packages.map(pkg => ({ ...pkg })));
 
     // Tiếp tục xử lý chuyển trang
@@ -333,11 +328,37 @@ export default function InformationOrder(props) {
     setTotal(newTotal);
   }, [packages]);
 
+  // Thêm refs để theo dõi các phần tử DOM
+  const savedPopupRef = useRef(null);
+  const savedButtonRef = useRef(null);
+
+  // Thêm useEffect để xử lý click bên ngoài
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (showSavedPopup &&
+        savedPopupRef.current &&
+        !savedPopupRef.current.contains(event.target) &&
+        savedButtonRef.current &&
+        !savedButtonRef.current.contains(event.target)) {
+        setShowSavedPopup(false);
+      }
+    }
+
+    // Thêm event listener
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup event listener khi component unmount
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showSavedPopup]);
+
   return (
     <div className="space-y-6">
       {/* Nút bên phải */}
       <div className="flex justify-end mb-4">
         <Button
+          ref={savedButtonRef}
           size="sm"
           onClick={() => setShowSavedPopup(prev => !prev)}
           className="flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 shadow-sm"
@@ -351,7 +372,10 @@ export default function InformationOrder(props) {
 
       {/* Popup nhỏ */}
       {showSavedPopup && (
-        <div className="absolute right-0 top-12 z-50 bg-white dark:bg-gray-800 border rounded-lg shadow-lg w-full max-w-md p-4 overflow-y-auto max-h-96">
+        <div
+          ref={savedPopupRef}
+          className="absolute right-0 top-12 z-50 bg-white dark:bg-gray-800 border rounded-lg shadow-lg w-full max-w-md p-4 overflow-y-auto max-h-96"
+        >
           <h4 className="text-base font-semibold mb-3">Danh sách người nhận</h4>
           <div className="space-y-3">
             {savedList.length === 0 && <p className="text-sm">Chưa có thông tin nào.</p>}
@@ -580,6 +604,18 @@ export default function InformationOrder(props) {
                       value={recipientForm.phone || ''}
                       onChange={handleRecipientChange}
                       className={`bg-white dark:bg-gray-800 ${recipientErrors.phone ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="recipient_taxCode" className="text-gray-700 dark:text-gray-300">Tax Code</Label>
+                    <Input
+                      type="text"
+                      id="recipient_taxCode"
+                      name="taxCode"
+                      value={recipientForm.taxCode || ''}
+                      onChange={handleRecipientChange}
+                      className={`bg-white dark:bg-gray-800 ${recipientErrors.taxCode ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
                     />
                   </div>
                 </div>
