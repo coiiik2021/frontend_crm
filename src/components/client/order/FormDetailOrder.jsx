@@ -43,6 +43,8 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
             country: recipientInfo.country
         },
 
+
+
         // Chuyển đổi products thành items
         items: products.map(product => ({
             description: product["Mô tả sản phẩm"] || "",
@@ -94,8 +96,8 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
         }
 
         const dataRequestAPI = {
-            senderInfo: senderInfo,
-            recipientInfo: recipientInfo,
+            consigneeFrom: senderInfo,
+            consigneeTo: recipientInfo,
             serviceSelectInfo: newServiceSelectInfo,
             products: newList,
             packages: newPackages,

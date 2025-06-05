@@ -23,7 +23,20 @@ export default function OrderPage() {
         loadSender();
     }, [currentStep]);
 
-    const [recipientInfo, setRecipientInfo] = useState({
+    const [consigneeFrom, setConsigneeFrom] = useState({
+        id: "1",
+        name: "",
+        company: "",
+        email: "",
+        phone: "",
+        street: "",
+        city: "",
+        state: "",
+        postCode: "",
+        country: ""
+    });
+
+    const [consigneeTo, setConsigneeTo] = useState({
         id: "1",
         name: "",
         company: "",
@@ -92,8 +105,10 @@ export default function OrderPage() {
     if (currentStep === 2) {
         content = (
             <InformationOrder
-                recipientInfo={recipientInfo}
-                setRecipientInfo={setRecipientInfo}
+                consigneeTo={consigneeTo}
+                consigneeFrom={consigneeFrom}
+                setConsigneeFrom={setConsigneeFrom}
+                setConsigneeTo={setConsigneeTo}
                 packages={packages}
                 setPackages={setPackages}
                 currentStep={currentStep}
@@ -119,8 +134,8 @@ export default function OrderPage() {
     else if (currentStep === 4) {
         content = (
             <FormDetailOrder
-                senderInfo={senderInfo}
-                recipientInfo={recipientInfo}
+                senderInfo={consigneeFrom}
+                recipientInfo={consigneeFrom}
                 packages={packages}
                 products={products}
                 productsTotal={productsTotal}
