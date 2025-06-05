@@ -349,6 +349,8 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
       ]);
       row.height = 60;
 
+      worksheet.mergeCells(`B${row.number}:D${row.number}`);
+
       row.eachCell((cell, colNumber) => {
         if (colNumber !== 1) {
           cell.font = { name: 'Times New Roman', size: 14 };

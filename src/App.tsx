@@ -191,7 +191,6 @@ export default function App() {
 
           <Route element={
               <AppLayoutAdmin />
-            </ProtectedRoute>
           }>
             <Route path="/quan-ly/shipment" element={<BillTable />} />
 
