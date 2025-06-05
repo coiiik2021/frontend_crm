@@ -435,7 +435,9 @@ export default function ContentTable(props) {
                                     { key: "payment_bill_real", label: "Thành tiền (Tạm tính)" },
                                     { key: "price_order", label: "Tiền order" },
                                     { key: "payment_bill_fake", label: "Thành tiền (chốt)" },
-                                    { key: "payments", label: "Thanh toán" },
+                                    { key: "payments", label: "Thanh toán Tiền mặt" },
+                                    { key: "payments", label: "Thanh toán  banking" },
+
                                     { key: "status", label: "TRẠNG THÁI" },
                                 ].map(({ key, label }) => (
                                     <TableCell
@@ -573,6 +575,27 @@ export default function ContentTable(props) {
                                                         {formatCurrency(item.pricePayment.payment_cash)} VNĐ
                                                     </span>
                                                 </div>
+
+                                            </div>
+                                        </div>
+                                    </TableCell>
+
+                                    <TableCell TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300" >
+                                        <div className="relative flex flex-col items-start space-y-2">
+                                            {/* Nút để mở modal thanh toán */}
+                                            {
+                                                (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleViewPaymentDetails(item)}
+                                                        className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                    >
+                                                        <PencilIcon className="w-5 h-5" />
+                                                    </button>)
+                                            }
+
+                                            {/* Giá trị tiền order */}
+                                            <div className="flex flex-col space-y-1 pt-6">
 
                                                 {/* Giá trị đỏ */}
                                                 <div className="flex items-center space-x-2">

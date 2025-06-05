@@ -21,18 +21,31 @@ import {
 } from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
 
-export default function ContentTable(props) {
-  const { users, setUsers } = props;
+export default function UserProfile() {
+  const { users, setUsers } = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const loadData = async () => {
+      const dataBaseUser = await GetAllBaseUser("user");
+      console.log(dataBaseUser);
+      setUsers(dataBaseUser);
+    };
+    loadData();
+  }, []);
+
+
   const calculateAge = (dob) => {
     const birthDate = new Date(dob);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const m = today.getMonth() - birthDate.getMonth();
+
+    // Nếu chưa đến ngày sinh nhật trong năm thì trừ đi 1
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
@@ -85,10 +98,13 @@ export default function ContentTable(props) {
   };
 
   const handleCreateUser = async () => {
-    const data = { ...newDataUser, nameRole: "TRANSPORTER" };
+    const data = { ...newDataUser, nameRole: "USER" };
+
+
 
     await PostBaseUser(data);
     setUsers([...users, newDataUser]);
+
     closeModal();
   };
 
@@ -99,7 +115,7 @@ export default function ContentTable(props) {
         className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
         onClick={openModal}
       >
-        ADD TRANSPORTER
+        ADD USER
       </Button>
 
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
