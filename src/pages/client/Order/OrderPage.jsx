@@ -16,7 +16,9 @@ export default function OrderPage() {
         const loadSender = async () => {
             const dataResponse = await GetBaseUserForSender();
             console.log(dataResponse);
-            setSenderInfo(dataResponse);
+            if (senderInfo === null) {
+                setSenderInfo(dataResponse);
+            }
         }
         loadSender();
     }, [currentStep]);
@@ -117,6 +119,7 @@ export default function OrderPage() {
     else if (currentStep === 4) {
         content = (
             <FormDetailOrder
+                senderInfo={senderInfo}
                 recipientInfo={recipientInfo}
                 packages={packages}
                 products={products}

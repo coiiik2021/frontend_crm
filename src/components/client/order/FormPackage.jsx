@@ -6,10 +6,70 @@ import { GetListPriceQuote } from "../../../service/api.admin.service.jsx";
 const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, zone, handleService, setSelectedService, isChangeCountry, setIsChangeCountry }) => {
     useEffect(() => {
         const fetchData = () => {
+            const recalculatedTotal = packages.reduce((acc, pkg) => ({
+                totalPackage: packages.length,
+                realVolume: acc.realVolume + (pkg.total?.realVolume || 0),
+                totalOverSize: acc.totalOverSize + (quaKhoMap.get(pkg.total?.OverSize)?.price || 0)
+            }), {
+                totalOverSize: 0,
+                realVolume: 0,
+                totalPackage: 0
+            });
 
+            setTotal(recalculatedTotal);
         }
 
         fetchData();
+    }, [packages]);
+
+    // Thêm useEffect mới để đảm bảo tính toán lại khi component mount
+    useEffect(() => {
+        // Kiểm tra và tính toán lại cho các package nếu cần
+        if (packages.some(pkg => !pkg.total || pkg.total.realVolume === 0)) {
+            const updatedPackages = packages.map(pkg => {
+                if (!pkg.total || pkg.total.realVolume === 0) {
+                    const { length, width, height, weight } = pkg;
+                    if (!length || !width || !height || !weight) return pkg;
+
+                    let dimValue = (parseFloat(length) || 0) *
+                        (parseFloat(width) || 0) *
+                        (parseFloat(height) || 0) / 5000;
+
+                    const decimalPart = dimValue % 1;
+                    if (decimalPart > 0 && decimalPart < 0.5) {
+                        dimValue = Math.floor(dimValue) + 0.5;
+                    } else if (decimalPart >= 0.5) {
+                        dimValue = Math.ceil(dimValue);
+                    }
+
+                    const overSizeUpdate = overSize(
+                        parseFloat(length) || 0,
+                        parseFloat(width) || 0,
+                        parseFloat(height) || 0,
+                        parseFloat(weight) || 0
+                    );
+
+                    let realVolumePkg = Math.max(dimValue, parseFloat(weight) || 0);
+                    if (realVolumePkg > 20) {
+                        realVolumePkg = Math.ceil(realVolumePkg);
+                    }
+
+                    return {
+                        ...pkg,
+                        dim: dimValue,
+                        total: {
+                            realVolume: realVolumePkg,
+                            totalPackage: 1,
+                            OverSize: overSizeUpdate,
+                            totalWeight: parseFloat(weight) || 0
+                        }
+                    };
+                }
+                return pkg;
+            });
+
+            setPackages(updatedPackages);
+        }
     }, []);
 
 
@@ -244,6 +304,68 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         setIsOpenFormPackage(!isOpenFormPackage);
     };
 
+    // Thêm useEffect để tính toán lại tổng mỗi khi component được render hoặc packages thay đổi
+    useEffect(() => {
+        // Tính toán lại tổng từ packages
+        const recalculatedTotal = packages.reduce((acc, pkg) => ({
+            totalPackage: packages.length,
+            realVolume: acc.realVolume + (pkg.total?.realVolume || 0),
+            totalOverSize: acc.totalOverSize + (quaKhoMap.get(pkg.total?.OverSize)?.price || 0)
+        }), {
+            totalOverSize: 0,
+            realVolume: 0,
+            totalPackage: 0
+        });
+
+        // Cập nhật state total
+        setTotal(recalculatedTotal);
+
+        // Đảm bảo mỗi package có total được tính đúng
+        if (packages.some(pkg => !pkg.total || pkg.total.realVolume === 0)) {
+            const updatedPackages = packages.map(pkg => {
+                if (!pkg.total || pkg.total.realVolume === 0) {
+                    const { length, width, height, weight } = pkg;
+                    let dimValue = (parseFloat(length) || 0) *
+                        (parseFloat(width) || 0) *
+                        (parseFloat(height) || 0) / 5000;
+
+                    const decimalPart = dimValue % 1;
+                    if (decimalPart > 0 && decimalPart < 0.5) {
+                        dimValue = Math.floor(dimValue) + 0.5;
+                    } else if (decimalPart >= 0.5) {
+                        dimValue = Math.ceil(dimValue);
+                    }
+
+                    const overSizeUpdate = overSize(
+                        parseFloat(length) || 0,
+                        parseFloat(width) || 0,
+                        parseFloat(height) || 0,
+                        parseFloat(weight) || 0
+                    );
+
+                    let realVolumePkg = Math.max(dimValue, parseFloat(weight) || 0);
+                    if (realVolumePkg > 20) {
+                        realVolumePkg = Math.ceil(realVolumePkg);
+                    }
+
+                    return {
+                        ...pkg,
+                        dim: dimValue,
+                        total: {
+                            realVolume: realVolumePkg,
+                            totalPackage: parseFloat(pkg.quantity) || 0,
+                            OverSize: overSizeUpdate,
+                            totalWeight: parseFloat(weight) || 0
+                        }
+                    };
+                }
+                return pkg;
+            });
+
+            setPackages(updatedPackages);
+        }
+    }, [packages]);
+
 
 
 
@@ -327,7 +449,6 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
 
     const handleSelectService = (quote) => {
         const [carrier, service] = quote.nameService.split(" ");
-
 
         console.log(quote);
         const selectedServiceInfo = {

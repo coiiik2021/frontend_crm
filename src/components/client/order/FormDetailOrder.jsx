@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 
-export default function FormDetailOrder({ recipientInfo, packages, products, productsTotal, selectedService, dataRequest, setDataRequest }) {
+export default function FormDetailOrder({ recipientInfo, packages, products, productsTotal, selectedService, senderInfo, dataRequest, setDataRequest }) {
     const [showProductsForm, setShowProductsForm] = useState(true);
     const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -91,20 +91,18 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
             priceOther: priceOtherConfirm
         }
 
-
-
-
         const dataRequestAPI = {
+            senderInfo: senderInfo,
             recipientInfo: recipientInfo,
             serviceSelectInfo: newServiceSelectInfo,
             products: newList,
             packages: newPackages,
             productsTotal: productsTotal,
+
+
         }
         setDataRequest(dataRequestAPI);
     }, [serviceSelectNew, priceNetConfirm, priceOtherConfirm]);
-
-
 
     const formatCurrency = (amount) => {
         const num = parseFloat(String(amount).replace(/[^0-9.]/g, ''));
