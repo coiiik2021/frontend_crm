@@ -191,6 +191,7 @@ export default function App() {
 
           <Route element={
             <AppLayoutAdmin />
+
           }>
             <Route path="/quan-ly/shipment" element={<BillTable />} />
 
@@ -233,7 +234,7 @@ export default function App() {
           <Route path="/five-zero-zero" element={<FiveZeroZero />} />
           <Route path="/five-zero-three" element={<FiveZeroThree />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
-        </Routes >
+        </Routes>
       </Router >
     </>
   );

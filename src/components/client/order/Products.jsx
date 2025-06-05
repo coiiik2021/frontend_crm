@@ -151,19 +151,19 @@ const Products = ({
             const worksheet = workbook.Sheets[sheetName];
             const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-            const productRows = jsonData.slice(23).filter(row => row.length >= 8);
+            const productRows = jsonData.slice(1).filter(row => row.length >= 8);
 
             let importedProducts = productRows
                 .filter(row => row.length >= 4)
                 .map((row, idx) => ({
                     id: idx + 1,
-                    "Mô tả sản phẩm": row[0] || "",
-                    "Xuất xứ": row[3] || "",
-                    "Số lượng": Number(row[4]) || 0,
-                    "Kiểu đơn vị": row[5] || "",
-                    "Giá trên 1 sản phẩm": Number(row[6]) || 0,
-                    "Giá Trị": (Number(row[4]) || 0) * (Number(row[6]) || 0),
-                    totalPrice: (Number(row[4]) || 0) * (Number(row[6]) || 0),
+                    "Mô tả sản phẩm": row[1] || "",
+                    "Xuất xứ": row[4] || "",
+                    "Số lượng": Number(row[5]) || 0,
+                    "Kiểu đơn vị": row[6] || "",
+                    "Giá trên 1 sản phẩm": Number(row[7]) || 0,
+                    "Giá Trị": (Number(row[5]) || 0) * (Number(row[7]) || 0),
+                    totalPrice: (Number(row[5]) || 0) * (Number(row[7]) || 0),
                 }));
 
             if (importedProducts.length > 0) {
