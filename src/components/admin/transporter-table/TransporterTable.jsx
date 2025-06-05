@@ -10,7 +10,6 @@ export default function TransporterTable() {
   useEffect(() => {
     const loadData = async () => {
       const dataBaseUser = await GetAllBaseUser("transporter");
-      console.log(dataBaseUser);
       setUsers(dataBaseUser);
     };
     loadData();
@@ -18,9 +17,9 @@ export default function TransporterTable() {
 
   return (
     <>
-      <PageBreadcrumb pageTitle="Tables Transpoter" />
+      <PageBreadcrumb pageTitle="Tables Transporter" />
       <div className="space-y-5 sm:space-y-6">
-        <ComponentCard title="Transpoter">
+        <ComponentCard title="Transporter">
           <ContentTable users={users} setUsers={setUsers} />
         </ComponentCard>
       </div>

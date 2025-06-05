@@ -41,7 +41,6 @@ export default function ContentTable(props) {
         if (token) {
             const decoded = jwtDecode(token);
             setAuthorities(decoded.authorities);
-            console.log("Thông tin trong token:", decoded.authorities);
         }
     }, [])
 
@@ -271,7 +270,7 @@ export default function ContentTable(props) {
                                     { key: "packageInfo_end", label: "PACKAGE CHỐT" },
 
                                     { key: "status", label: "TRẠNG THÁI" },
-                                    { key: "Action", label: "Cập nhật thông tin" }
+                                    { key: "Action", label: (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) ? "Cập nhật thông tin" : "" }
 
 
 
