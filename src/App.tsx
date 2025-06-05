@@ -190,8 +190,8 @@ export default function App() {
           {/* Dashboard Layout */}
 
           <Route element={
-              <AppLayoutAdmin />
-            </ProtectedRoute>
+            <AppLayoutAdmin />
+
           }>
             <Route path="/quan-ly/shipment" element={<BillTable />} />
 
