@@ -77,6 +77,9 @@ import ZoneCountryTable from "./components/admin/priceNet/zone-country/ZoneCount
 import BillTable from "./components/admin/bills/BillTable.jsx";
 import ProtectedRoute from './ProtectedRoute';
 import BillContent from "./components/admin/bills/BillContent.jsx";
+import CsTable from "./components/admin/cs-table/CsTable";
+import TransporterTable from "./components/admin/transporter-table/TransporterTable";
+import AccountantTable from "./components/admin/accountant-table/AccountantTable";
 
 export default function App() {
   return (
@@ -85,7 +88,7 @@ export default function App() {
         <ScrollToTop />
         <Routes>
           <Route element={
-            <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "EMPLOYEE"]}>
+            <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "EMPLOYEE", "CS", "TRANSPORTER"]}>
               <AppLayoutAdmin />
             </ProtectedRoute>
           }>
@@ -114,14 +117,7 @@ export default function App() {
               element={<ZoneCountryTable />}
             />
 
-            <Route path="/quan-ly/shipment" element={<BillTable />} />
 
-            <Route
-              path="/quan-ly/shipment-detail"
-              element={<ShipmentDetail />}
-            />
-
-            <Route path="/quan-ly/my-debits" element={<ShipmentTable />} />
 
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/invoice" element={<Invoices />} />
@@ -194,9 +190,7 @@ export default function App() {
           {/* Dashboard Layout */}
 
           <Route element={
-            <ProtectedRoute allowedRoles={["USER", "MANAGER", "EMPLOYEE"]}>
-              <AppLayoutAdmin />
-            </ProtectedRoute>
+            <AppLayoutAdmin />
           }>
             <Route path="/quan-ly/shipment" element={<BillTable />} />
 
@@ -214,10 +208,13 @@ export default function App() {
             </ProtectedRoute>
           }>
             <Route path="/quan-ly/user-table" element={<UserTable />} />
+
+            <Route path="/quan-ly/cs-table" element={<CsTable />} />
+            <Route path="/quan-ly/transporter-table" element={<TransporterTable />} />
+            <Route path="/quan-ly/accountant-table" element={<AccountantTable />} />
+
             {/* Others Page */}
             <Route path="/quan-ly/profile" element={<UserProfiles />} />
-
-
           </Route>
 
 
@@ -236,7 +233,7 @@ export default function App() {
           <Route path="/five-zero-zero" element={<FiveZeroZero />} />
           <Route path="/five-zero-three" element={<FiveZeroThree />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
-        </Routes>
+        </Routes >
       </Router >
     </>
   );

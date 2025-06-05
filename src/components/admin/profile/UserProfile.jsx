@@ -21,25 +21,47 @@ import {
 } from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
 
-export default function ContentTable(props) {
-  const { users, setUsers } = props;
+export default function UserProfile() {
+  const { users, setUsers } = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
 
+  useEffect(() => {
+    const loadData = async () => {
+      const dataBaseUser = await GetAllBaseUser("user");
+      console.log(dataBaseUser);
+      setUsers(dataBaseUser);
+    };
+    loadData();
+  }, []);
+
+
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+
+    // Nếu chưa đến ngày sinh nhật trong năm thì trừ đi 1
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
   const filteredAndSortedData = useMemo(() => {
-    console.log(users);
     return users
       .filter((item) =>
-        item.email.toLowerCase().includes(searchTerm.toLowerCase())
+        item.fullName.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => {
         if (sortKey === "name") {
           return sortOrder === "asc"
-            ? a.email.localeCompare(b.email)
-            : b.email.localeCompare(a.email);
+            ? a.fullName.localeCompare(b.fullName)
+            : b.fullName.localeCompare(a.fullName);
         }
 
         if (sortKey === "salary") {
@@ -76,9 +98,9 @@ export default function ContentTable(props) {
   };
 
   const handleCreateUser = async () => {
-    const data = { ...newDataUser, nameRole: "MANAGER" };
+    const data = { ...newDataUser, nameRole: "USER" };
 
-    console.log(data);
+
 
     await PostBaseUser(data);
     setUsers([...users, newDataUser]);
@@ -93,14 +115,14 @@ export default function ContentTable(props) {
         className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
         onClick={openModal}
       >
-        ADD MANAGER
+        ADD USER
       </Button>
 
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="relative w-full p-6 overflow-y-auto bg-white rounded-3xl dark:bg-gray-900 lg:p-8">
           <div className="flex items-center justify-between mb-6">
             <h4 className="text-2xl font-bold text-gray-800 dark:text-white/90">
-              Add New Manager
+              Add New User
             </h4>
             <button
               onClick={closeModal}
@@ -288,9 +310,8 @@ export default function ContentTable(props) {
                 type="submit"
                 size="lg"
                 className="w-full md:w-auto px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700"
-
               >
-                Save Manager
+                Save User
               </Button>
             </div>
           </form>
@@ -459,13 +480,13 @@ export default function ContentTable(props) {
                     {item.phone}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {18}
+                    {calculateAge(item.dateOfBirth)}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {item.dateOfBirth}
+                    {item.createdAt}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {1000}
+                    {item.kpi}
                   </TableCell>
                 </TableRow>
               ))}

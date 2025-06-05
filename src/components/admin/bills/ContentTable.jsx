@@ -41,7 +41,6 @@ export default function ContentTable(props) {
         if (token) {
             const decoded = jwtDecode(token);
             setAuthorities(decoded.authorities);
-            console.log("Thông tin trong token:", decoded.authorities);
         }
     }, [])
 
@@ -161,7 +160,7 @@ export default function ContentTable(props) {
                 }
             })
         }
-        if (authorities.includes("ROLE_CS") || authorities.includes("ADMIN")) {
+        if (authorities.includes("CS") || authorities.includes("ADMIN")) {
             const updatedBill = {
                 id: bill.bill_house,
                 bill_employee: bill.bill_employee,
@@ -269,8 +268,11 @@ export default function ContentTable(props) {
                                     { key: "country_name", label: "NƯỚC ĐẾN" },
                                     { key: "packageInfo_begin", label: "PACKAGE KHAI BÁO" },
                                     { key: "packageInfo_end", label: "PACKAGE CHỐT" },
+
                                     { key: "status", label: "TRẠNG THÁI" },
-                                    { key: "Action", label: "Cập nhật thông tin" },
+                                    { key: "Action", label: (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) ? "Cập nhật thông tin" : "" }
+
+
 
                                 ].map(({ key, label }) => (
                                     <TableCell
@@ -381,7 +383,7 @@ export default function ContentTable(props) {
                                         <StatusBadge status={item.status} />
                                     </TableCell>
                                     <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        {item.status !== "Hoàn thành" ? (
+                                        {item.status !== "Hoàn thành" && (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) ? (
                                             <Button
                                                 variant="primary"
                                                 className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
@@ -396,9 +398,6 @@ export default function ContentTable(props) {
 
                                     </TableCell>
                                 </TableRow>
-
-
-
                             ))}
                             <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[800px] m-4">
                                 <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
@@ -421,7 +420,7 @@ export default function ContentTable(props) {
 
                                         {/* Package Section */}
                                         {
-                                            (authorities.includes("ROLE_TRANSPORTER") || authorities.includes("ADMIN")) && (
+                                            (authorities.includes("TRANSPORTER") || authorities.includes("ADMIN")) && (
                                                 <div className="space-y-4">
                                                     <div className="flex items-center justify-between">
                                                         <div>
@@ -543,7 +542,7 @@ export default function ContentTable(props) {
                                             )
                                         }
                                         {
-                                            (authorities.includes("ROLE_CS") || authorities.includes("ADMIN")) && (
+                                            (authorities.includes("CS") || authorities.includes("ADMIN")) && (
                                                 (
                                                     <>
                                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

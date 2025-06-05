@@ -1,7 +1,7 @@
 import { CreateBill } from "../../../service/api.admin.service.jsx";
 import { useEffect } from "react";
 
-export default function Footer({ currentStep, setCurrentStep, products, productsErrors, setProductsErrors, dataRequest }) {
+export default function Footer({ currentStep, setCurrentStep, products, setProductsErrors, dataRequest }) {
     const handleBack = () => {
         if (currentStep > 1) {
             setCurrentStep(currentStep - 1);

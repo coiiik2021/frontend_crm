@@ -19,12 +19,10 @@ const Products = ({
     const popupRef = useRef(null);
     const buttonRef = useRef(null);
 
-    // Clear all errors when component mounts
     useEffect(() => {
         setProductsErrors({});
     }, []);
 
-    // Handle click outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (showSavedPopup &&
@@ -135,7 +133,6 @@ const Products = ({
             return updatedProducts;
         });
 
-        // Clear error when user starts typing
         setProductsErrors((prev) => ({
             ...prev,
             [`${id}-${field}`]: "",
@@ -169,7 +166,6 @@ const Products = ({
                     totalPrice: (Number(row[4]) || 0) * (Number(row[6]) || 0),
                 }));
 
-            // Remove the last product
             if (importedProducts.length > 0) {
                 importedProducts.pop();
             }
@@ -181,18 +177,6 @@ const Products = ({
             });
         };
         reader.readAsBinaryString(file);
-    };
-
-    const handleDownloadTemplate = () => {
-        const wb = XLSX.utils.book_new();
-        const data = [
-            ["Tên", "Mô tả sản phẩm", "Số lượng", "Giá trên 1 sản phẩm"],
-            ["Sản phẩm 1", "Mô tả sản phẩm 1", "2", "100"],
-            ["Sản phẩm 2", "Mô tả sản phẩm 2", "3", "200"],
-        ];
-        const ws = XLSX.utils.aoa_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, "Mẫu");
-        XLSX.writeFile(wb, "mau_nhap_san_pham.xlsx");
     };
 
     const isProductComplete = (product) => {
@@ -409,15 +393,7 @@ const Products = ({
                                         </label>
                                         <span className="text-sm text-gray-500">(.xlsx, .xls)</span>
                                     </div>
-                                    {/* <button
-                                        onClick={handleDownloadTemplate}
-                                        className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-                                    >
-                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                        </svg>
-                                        <span className="text-sm font-medium">Tải mẫu Excel</span>
-                                    </button> */}
+
                                 </div>
                                 <p className="mt-2 text-sm text-gray-500">
                                     Tải mẫu Excel để nhập dữ liệu sản phẩm theo định dạng chuẩn

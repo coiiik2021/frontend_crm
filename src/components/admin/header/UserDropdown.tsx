@@ -1,25 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { Link } from "react-router";
-
 import { jwtDecode } from "jwt-decode";
 
 interface MyJwtPayload {
-  sub: string;       // thường là email hoặc user id
-  authorities: string[];   // hoặc là any[]
-  exp: number;       // thời gian hết hạn
-  iat: number;       // issued at
-  [key: string]: any; // nếu có thêm field khác
+  sub: string;
+  authorities: string[];
+  exp: number;
+  iat: number;
+  [key: string]: any;
 }
-
-const token = localStorage.getItem('token');
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [decoded, setDecoded] = useState<MyJwtPayload | null>(null);
 
-  const decoded = token ? jwtDecode<MyJwtPayload>(token) : null;
-
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decodedToken = jwtDecode<MyJwtPayload>(token);
+        setDecoded(decodedToken);
+      } catch (error) {
+        console.error("Token decode error:", error);
+        setDecoded(null);
+      }
+    } else {
+      setDecoded(null);
+    }
+  }, []);
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -27,6 +37,11 @@ export default function UserDropdown() {
 
   function closeDropdown() {
     setIsOpen(false);
+  }
+
+  function handleSignOut() {
+    localStorage.removeItem("token");
+    window.location.href = "/signin";
   }
   return (
     <div className="relative">
@@ -65,7 +80,7 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {decoded?.authorities.includes("ADMIN") ? "Admin" : "Manager"}
+            {decoded?.authorities.includes("ADMIN") ? "Admin" : decoded?.authorities.includes("MANAGER") ? "Manager" : decoded?.authorities.includes("CS") ? "CS" : decoded?.authorities.includes("TRANSPORTER") ? "Transporter" : decoded?.authorities.includes("ACCOUNTANT") ? "Accountant" : "User"}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
             {decoded?.sub || "No email found"}
@@ -151,7 +166,7 @@ export default function UserDropdown() {
         </ul>
         <Link
           to="/signin"
-          onClick={() => localStorage.removeItem("token")}
+          onClick={handleSignOut}
           className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           <svg
