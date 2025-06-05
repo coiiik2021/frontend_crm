@@ -19,12 +19,10 @@ const Products = ({
     const popupRef = useRef(null);
     const buttonRef = useRef(null);
 
-    // Clear all errors when component mounts
     useEffect(() => {
         setProductsErrors({});
     }, []);
 
-    // Handle click outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (showSavedPopup &&
@@ -135,7 +133,6 @@ const Products = ({
             return updatedProducts;
         });
 
-        // Clear error when user starts typing
         setProductsErrors((prev) => ({
             ...prev,
             [`${id}-${field}`]: "",
@@ -169,7 +166,6 @@ const Products = ({
                     totalPrice: (Number(row[4]) || 0) * (Number(row[6]) || 0),
                 }));
 
-            // Remove the last product
             if (importedProducts.length > 0) {
                 importedProducts.pop();
             }

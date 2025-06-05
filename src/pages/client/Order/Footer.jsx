@@ -52,11 +52,11 @@ export default function Footer({ currentStep, setCurrentStep, products, setProdu
         if (currentStep === 4) {
 
             console.log(dataRequest);
-            // const response = await CreateBill(dataRequest);
-            // console.log(response);
-            // if (response === "created successfully") {
-            //     window.location.href = "/";
-            // }
+            const response = await CreateBill(dataRequest);
+            console.log(response);
+            if (response === "created successfully") {
+                window.location.href = "/";
+            }
         }
 
     };
