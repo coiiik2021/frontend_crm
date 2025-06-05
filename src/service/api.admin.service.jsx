@@ -41,8 +41,6 @@ const GetAllByServiceCompany = async (id) => {
   return await axios.get(API);
 };
 
-
-
 // service
 
 const GetNameService = async (name) => {
@@ -51,11 +49,11 @@ const GetNameService = async (name) => {
 };
 
 const GetNameServiceByUser = async (isAdmin) => {
-  const API = isAdmin ? `service-company/allByUser` : `service-company/allByManager`;
+  const API = isAdmin
+    ? `service-company/allByUser`
+    : `service-company/allByManager`;
   return await axios.get(API);
 };
-
-
 
 const PostNameService = async (data) => {
   const API = `service-company`;
@@ -78,11 +76,10 @@ const GetAllServiceCompany = async () => {
   return await axios.get(API);
 };
 
-
 const GetShipperServiceCompany = async (name, nameService) => {
   const API = `service-company/shipper?name=${name}&nameService=${nameService}`;
   return await axios.get(API);
-}
+};
 
 export {
   GetShipperServiceCompany,
@@ -205,16 +202,19 @@ const GetUserOfManager = async (manager_id) => {
   return await axios.get(API);
 };
 
-
 const GetConstUser = async (user_id) => {
   const API = `const_user/${user_id}`;
   return await axios.get(API);
 };
 
-
-
-
-export { PostBaseUser, GetAllBaseUser, GetBaseUserForSender, PutBaseUser, GetConstUser, GetUserOfManager };
+export {
+  PostBaseUser,
+  GetAllBaseUser,
+  GetBaseUserForSender,
+  PutBaseUser,
+  GetConstUser,
+  GetUserOfManager,
+};
 
 //const_user
 
@@ -247,10 +247,13 @@ const UpdateBillTRANSPORTER = async (data) => {
   return await axios.put(API, data);
 };
 
-
-
-export { GetAllBill, CreateBill, UpdateBillTRANSPORTER, UpdateBillCS, UpdateBillAccountant };
-
+export {
+  GetAllBill,
+  CreateBill,
+  UpdateBillTRANSPORTER,
+  UpdateBillCS,
+  UpdateBillAccountant,
+};
 
 // const user
 const GetConstsByUser = async (user_id) => {
@@ -273,43 +276,47 @@ const DeleteConstUser = async (data) => {
   return await axios.post(API, data);
 };
 
-
-
 export { GetConstsByUser, PostConstUser, PutConstUser, DeleteConstUser };
-
 
 // price net user by zone and weight
 
 const PostPriceNetUserByWeightAndZone = async (data) => {
-  const API = 'price-user-weight-zone';
+  const API = "price-user-weight-zone";
   return await axios.post(API, data);
-}
+};
 
 const DeletePriceNetUserByWeightAndZone = async (id) => {
   const API = `price-user-weight-zone/${id}`;
   return await axios.delete(API);
-}
+};
 
 const GetAllPriceNetForUserByZoneAndWeight = async (data) => {
   const API = "price-user-weight-zone/getPriceUserOfServiceCompany";
   return await axios.post(API, data);
-}
+};
 
 // invoice
 const GetInvoiceById = async (id) => {
   const API = `invoice/${id}`;
   return await axios.get(API);
 };
+const GetInvoicePdf = async () => {
+  const API = "invoice/export-pdf";
+  console.log("API", API);
+  return await axios.get(API, {
+    responseType: "blob",
+    transformResponse: [(data) => data], // bỏ qua interceptor JSON
+  });
+};
 
+export { GetInvoiceById, GetInvoicePdf };
 
-export { GetInvoiceById };
-
-// favorite 
+// favorite
 
 const GetAllConsigneeFavorite = async () => {
   const API = `consignee-favorite`;
   return await axios.get(API);
-}
+};
 
 const PostConsigneeFavorite = async (data) => {
   const API = `consignee-favorite`;
@@ -321,8 +328,11 @@ const DeleteConsigneeFavorite = async (id) => {
   return await axios.delete(API);
 };
 
-export { GetAllConsigneeFavorite, PostConsigneeFavorite, DeleteConsigneeFavorite };
-
+export {
+  GetAllConsigneeFavorite,
+  PostConsigneeFavorite,
+  DeleteConsigneeFavorite,
+};
 
 // price order
 
@@ -334,20 +344,18 @@ const GetAllPriceOrder = async (id) => {
 const PostPriceOrder = async (data) => {
   const API = `price-order`;
   return await axios.post(API, data);
-}
+};
 
 const PutPriceOrder = async (id) => {
   const API = `price-order/${id}`;
   return await axios.put(API);
-}
+};
 const DeletePriceOrder = async (id) => {
   const API = `price-order/${id}`;
   return await axios.delete(API);
-}
+};
 
 export { GetAllPriceOrder, PostPriceOrder, PutPriceOrder, DeletePriceOrder };
-
-
 
 export { GetOverSizeByName, PostOverSize, PutOverSize, DeleteOverSize };
 
@@ -364,7 +372,7 @@ export {
   DeletePriceGasonline,
   PostPriceNetUserByWeightAndZone,
   GetAllPriceNetForUserByZoneAndWeight,
-  DeletePriceNetUserByWeightAndZone
+  DeletePriceNetUserByWeightAndZone,
 };
 
 export { GetAllConstNet, GetConstNet, PutConstNet, PostConstNet };
@@ -404,5 +412,5 @@ export {
   GetUserPermissions,
   UpdateUserPermissions,
   GetPaymentDetails,
-  UpdatePaymentDetails
+  UpdatePaymentDetails,
 };
