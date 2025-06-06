@@ -4,20 +4,22 @@ import InvoiceHomeBill from "./invoice/InvoiceHomeBill";
 import ShippingDocumentContent from "./Shipping Document/ShippinggDocumentContent";
 import { useParams } from "react-router";
 
-const BillContent = () => {
+type BillContentProps = {
+  id?: string; // Có thể truyền hoặc không
+};
+const BillContent = ({ id: propId }: BillContentProps) => {
   const [activeTab, setActiveTab] = useState("homebill");
-  const { id } = useParams<{ id: string }>();
-
+  const { id: urlId } = useParams<{ id: string }>();
+  const id = propId || urlId; // Ưu tiên props, fallback sang URL
+  console.log("BillContent id:", id);
   const renderContent = () => {
     switch (activeTab) {
       case "homebill":
         return <InvoiceHomeBill />;
-      case "shipmark":
-        return <div>shipmark Content</div>;
       case "awb":
         return <div>awb Content</div>;
       case "invoice":
-        return <InvoiceContent />;
+        return <InvoiceContent bill_id={id || ""} />;
       case "invoiceOther":
         return <ShippingDocumentContent bill_id={id || ""} />; // Replace with actual bill_id as needed
       default:
@@ -37,18 +39,9 @@ const BillContent = () => {
               : "bg-gray-200 text-gray-700"
           }`}
         >
-          Home Bill
+          House Bill
         </button>
-        <button
-          onClick={() => setActiveTab("shipmark")}
-          className={`px-4 py-2 text-sm font-semibold rounded-lg ${
-            activeTab === "shipmark"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-gray-700"
-          }`}
-        >
-          shipping mark
-        </button>
+
         <button
           onClick={() => setActiveTab("awb")}
           className={`px-4 py-2 text-sm font-semibold rounded-lg ${
@@ -57,7 +50,7 @@ const BillContent = () => {
               : "bg-gray-200 text-gray-700"
           }`}
         >
-          awb
+          AWB
         </button>
         <button
           onClick={() => setActiveTab("invoice")}

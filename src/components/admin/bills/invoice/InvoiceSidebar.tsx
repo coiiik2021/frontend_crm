@@ -25,7 +25,10 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
           bill_id,
           type: "excel",
         };
-        const response = await axios.post("http://localhost:8080/api/files/get", dataRequest);
+        const response = await axios.post(
+          "http://localhost:8080/api/files/get",
+          dataRequest
+        );
         setUploadedFiles(response.data.data);
         console.log("Fetched uploaded files:", response.data.data);
       } catch (error) {
@@ -57,12 +60,14 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
       const dataRequest = {
         bill_id,
         url: fileUrl,
-        type: "excel",
+        type: "excel, pdf",
         name: "invoice " + bill_id.substring(0, 5),
       };
 
-      const newFile = await axios.post("http://localhost:8080/api/files", dataRequest);
-
+      const newFile = await axios.post(
+        "http://localhost:8080/api/files",
+        dataRequest
+      );
 
       setUploadedFiles((prev) => [
         ...prev,
@@ -71,7 +76,7 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
           url: newFile.data.url,
           created_at: newFile.data.created_at,
           bill_id: newFile.data.bill_id,
-          id: newFile.data.id
+          id: newFile.data.id,
         },
       ]);
 
@@ -87,7 +92,9 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
 
   const handleRemoveFile = async (file: UploadedFile) => {
     // Hiển thị hộp thoại xác nhận
-    const isConfirmed = window.confirm(`Bạn có chắc chắn muốn xóa file "${file.name}" không?`);
+    const isConfirmed = window.confirm(
+      `Bạn có chắc chắn muốn xóa file "${file.name}" không?`
+    );
 
     if (!isConfirmed) {
       // Nếu người dùng không xác nhận, hủy hành động xóa
@@ -96,7 +103,9 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
 
     try {
       // Gửi yêu cầu xóa file lên server
-      const response = await axios.delete(`http://localhost:8080/api/files/${file.id}`);
+      const response = await axios.delete(
+        `http://localhost:8080/api/files/${file.id}`
+      );
       console.log("Response from delete API:", response.data);
 
       if (response.status === 200) {

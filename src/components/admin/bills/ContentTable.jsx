@@ -26,6 +26,8 @@ import { PlusIcon, TrashIcon, XIcon, InfoIcon, EyeIcon } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import InvoiceHomeBill from "./invoice/InvoiceHomeBill.jsx";
 import Invoice from "../invoice/Invoice";
+import BillContent from "./BillContent";
+import { set } from "date-fns";
 
 // Thêm component OrderDetailModal với tabs
 const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
@@ -349,6 +351,7 @@ export default function ContentTable(props) {
   // Thêm state mới cho sidebar file
   const [selectedFile, setSelectedFile] = useState(null);
   const [showFileSidebar, setShowFileSidebar] = useState(false);
+  const [billContent, setBillContent] = useState(null);
   const sidebarRef = useRef(null);
 
   // Thêm state cho modal chi tiết đơn hàng
@@ -366,7 +369,7 @@ export default function ContentTable(props) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Thêm state để quản lý resize và hiển thị nút resize
-  const [sidebarWidth, setSidebarWidth] = useState(400);
+  const [sidebarWidth, setSidebarWidth] = useState(700);
   const [isResizing, setIsResizing] = useState(false);
 
   // Hàm xử lý resize đơn giản
@@ -379,9 +382,7 @@ export default function ContentTable(props) {
 
     const doDrag = (e) => {
       const newWidth = startWidth + (startX - e.clientX);
-      setSidebarWidth(
-        Math.max(250, Math.min(newWidth, window.innerWidth * 0.8))
-      );
+      setSidebarWidth(Math.max(700, Math.min(newWidth, 1250)));
     };
 
     const stopDrag = () => {
@@ -581,13 +582,14 @@ export default function ContentTable(props) {
       awb: item.awb || "Không có thông tin AWB",
     });
     setShowFileSidebar(true);
+    setBillContent(item);
     setHighlightedOrderId(item.bill_house);
   };
 
   // Hàm đóng sidebar file và bỏ highlight nếu không còn xem modal
   const handleCloseSidebar = () => {
     setShowFileSidebar(false);
-
+    setBillContent(null);
     // Chỉ bỏ highlight nếu không đang xem modal
     if (!showOrderDetail) {
       setHighlightedOrderId(null);
@@ -759,39 +761,43 @@ export default function ContentTable(props) {
 
       {/* File Sidebar - phiên bản đơn giản hóa */}
       {showFileSidebar && (
-        <div
-          style={{ width: `${sidebarWidth}px` }}
-          className="fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg border-l border-gray-200 dark:border-gray-700 z-50 overflow-auto pt-16"
-        >
-          {/* Resize handle đơn giản */}
+        <>
+          <div className="fixed inset-0  z-40" onClick={handleCloseSidebar} />
           <div
-            className="absolute top-0 bottom-0 left-0 w-4 bg-transparent cursor-ew-resize z-10"
-            onMouseDown={startResize}
+            style={{ width: `${sidebarWidth}px` }}
+            className="fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg border-l border-gray-200 dark:border-gray-700 z-50 overflow-auto pt-16"
           >
-            {/* Chỉ báo trực quan */}
-            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-20 bg-blue-500 opacity-70"></div>
-          </div>
-
-          <div className="p-4 h-full flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                AWB
-              </h3>
-              <button
-                onClick={handleCloseSidebar}
-                className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-              >
-                <XIcon className="w-5 h-5" />
-              </button>
+            {/* Resize handle đơn giản */}
+            <div
+              className="absolute top-0 bottom-0 left-0 w-4 bg-transparent cursor-ew-resize z-10"
+              onMouseDown={startResize}
+            >
+              {/* Chỉ báo trực quan */}
+              <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-20 bg-blue-500 opacity-70"></div>
             </div>
 
-            <div className="flex-1 p-4">
-              <p className="text-gray-700 dark:text-gray-300">
-                <InvoiceHomeBill></InvoiceHomeBill>
-              </p>
+            <div className="p-4 h-full flex flex-col">
+              <div className="flex items-center justify-end mb-4">
+                <button
+                  onClick={handleCloseSidebar}
+                  className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                >
+                  <XIcon className="w-5 h-5" />
+                </button>
+              </div>
+              {/*
+              <div className="flex-1 p-4">
+                <p className="text-gray-700 dark:text-gray-300">
+                  <InvoiceHomeBill></InvoiceHomeBill>
+                </p>
+              </div>{" "}
+              */}
+              <BillContent id={billContent?.bill_house}></BillContent>
+
+              {/* <BillContent /> */}
             </div>
           </div>
-        </div>
+        </>
       )}
 
       <div className="max-w-full overflow-x-auto custom-scrollbar">
@@ -985,6 +991,7 @@ export default function ContentTable(props) {
                                 awb: item.awb || "Không có thông tin AWB",
                               });
                               setShowFileSidebar(true);
+                              setBillContent(item);
                               setHighlightedOrderId(item.bill_house);
                             }}
                           >
