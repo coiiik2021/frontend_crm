@@ -382,7 +382,7 @@ export default function ContentTable(props) {
 
     const doDrag = (e) => {
       const newWidth = startWidth + (startX - e.clientX);
-      setSidebarWidth(Math.max(700, Math.min(newWidth, 1250)));
+      setSidebarWidth(Math.max(700, Math.min(newWidth, 1230)));
     };
 
     const stopDrag = () => {
