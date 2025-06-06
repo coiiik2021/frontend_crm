@@ -49,6 +49,17 @@ export default function OrderPage() {
         country: ""
     });
 
+    const [addressBackup, setAddressBackup] = useState({
+
+        id: "",
+        name: "",
+        date: "",
+        time: "",
+        address: "",
+        notes: ""
+
+    });
+
 
     const [packages, setPackages] = useState([
         {
@@ -116,6 +127,8 @@ export default function OrderPage() {
                 setSelectedService={setSelectedService}
                 senderInfo={senderInfo}
                 setSenderInfo={setSenderInfo}
+                addressBackup={addressBackup}
+                setAddressBackup={setAddressBackup}
             />
         );
     }

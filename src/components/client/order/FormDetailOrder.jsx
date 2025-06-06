@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import ExcelJS from 'exceljs';
 
 
-export default function FormDetailOrder({ recipientInfo, packages, products, productsTotal, selectedService, senderInfo, dataRequest, setDataRequest }) {
+export default function FormDetailOrder({ addressBackup, recipientInfo, packages, products, productsTotal, selectedService, senderInfo, dataRequest, setDataRequest }) {
     const [showProductsForm, setShowProductsForm] = useState(true);
     const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -96,8 +96,9 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
         }
 
         const dataRequestAPI = {
-            consigneeFrom: senderInfo,
-            consigneeTo: recipientInfo,
+            addressBackup: addressBackup,
+            senderInfo: senderInfo,
+            recipientInfo: recipientInfo,
             serviceSelectInfo: newServiceSelectInfo,
             products: newList,
             packages: newPackages,

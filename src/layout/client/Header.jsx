@@ -6,26 +6,16 @@ import { jwtDecode } from "jwt-decode";
 
 export default function Header() {
     const [isCollapse, setIsCollapse] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // State để kiểm tra trạng thái đăng nhập
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const location = useLocation();
     const path = location.pathname;
     const [authorities, setAuthorities] = useState([]);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        setIsLoggedIn(!!token); // true nếu có token
-
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                setAuthorities(decoded.authorities || []);
-            } catch (error) {
-                console.error("Token decode error:", error);
-                setAuthorities([]); // hoặc chuyển hướng đăng nhập lại
-            }
-        } else {
-            setAuthorities([]);
-        }
+        setIsLoggedIn(!!token);
+        const decoded = jwtDecode(token);
+        setAuthorities(decoded.authorities || []);
     }, []);
 
     const handleLogout = () => {
@@ -39,12 +29,10 @@ export default function Header() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16 md:h-20">
 
-                    {/* Logo */}
                     <div className="flex-shrink-0">
                         <BrandIcon className="h-8 w-auto md:h-10" />
                     </div>
 
-                    {/* Desktop Navigation */}
                     <nav className="hidden md:flex space-x-4">
                         {[
                             { href: "/", text: "Trang chủ" },

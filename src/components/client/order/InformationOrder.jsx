@@ -11,9 +11,9 @@ import { GetCodeByCompany } from "../../../service/api.service.jsx";
 import { DeleteConsigneeFavorite, GetAllConsigneeFavorite, GetZoneCountry, PostConsigneeFavorite } from "../../../service/api.admin.service.jsx";
 
 export default function InformationOrder(props) {
-    const { packages, setPackages, currentStep, setCurrentStep, setSelectedService } = props;
+    const { addressBackup, setAddressBackup,
+        packages, setPackages, currentStep, setCurrentStep, setSelectedService } = props;
 
-    // Thêm state total để lưu trữ thông tin tổng
 
     const recipientInfo = props.consigneeTo;
     const setRecipientInfo = props.setConsigneeTo;
@@ -24,6 +24,7 @@ export default function InformationOrder(props) {
         realVolume: 0,
         totalPackage: packages.length
     });
+
     // Khởi tạo senderForm với dữ liệu từ props
     const [senderForm, setSenderForm] = useState({
         fullName: senderInfo?.fullName || "",
@@ -67,13 +68,16 @@ export default function InformationOrder(props) {
     const [showQuote, setShowQuote] = useState(true);
 
     // Thêm state cho form nhận hàng
-    const [deliveryForm, setDeliveryForm] = useState({
-        receiverName: "",
-        deliveryDate: "",
-        deliveryTime: "",
-        deliveryAddress: "",
-        notes: ""
-    });
+
+    const [deliveryForm, setDeliveryForm] = useState(addressBackup || {});
+
+    // const [deliveryForm, setDeliveryForm] = useState({
+    //     receiverName: "",
+    //     deliveryDate: "",
+    //     deliveryTime: "",
+    //     deliveryAddress: "",
+    //     notes: ""
+    // });
 
     // Thêm state cho lỗi form nhận hàng
     const [deliveryErrors, setDeliveryErrors] = useState({
@@ -154,7 +158,7 @@ export default function InformationOrder(props) {
         setPackages(packages.map(pkg => ({ ...pkg })));
 
         // Tiếp tục xử lý chuyển trang
-        if (validateRecipientForm() && validateSenderForm() && validateDeliveryForm()) {
+        if (validateRecipientForm() && validateSenderForm()) {
             setRecipientInfo(recipientForm);
             setSenderInfo({
                 fullName: senderForm.fullName || "",
@@ -168,7 +172,12 @@ export default function InformationOrder(props) {
                 postCode: senderForm.postCode || "",
                 country: senderForm.country || ""
             });
-            setCurrentStep(3);
+
+            // Ensure the parent component has the latest addressBackup value
+            // by using a small timeout before changing tabs
+            setTimeout(() => {
+                setCurrentStep(3);
+            }, 0);
         } else {
             setShowForm(true);
         }
@@ -286,11 +295,9 @@ export default function InformationOrder(props) {
             // Cập nhật thông tin sender và recipient vào state chính
             setRecipientInfo(recipientForm);
             setSenderInfo(senderForm); // Cập nhật senderInfo với dữ liệu mới
+            setAddressBackup(deliveryForm);
             setShowForm(false); // Ẩn form sau khi xác nhận
-            console.log("Form hidden after confirmation");
-            console.log("Updated sender info:", senderForm);
         } else {
-            console.log("Validation failed, form still showing");
             setShowForm(true);
         }
     };
@@ -550,6 +557,7 @@ export default function InformationOrder(props) {
                                         </div>
                                     </div>
                                 </div>
+                                <button>save</button>
                             </div>
 
                             {/* Recipient Information - Right Column */}
@@ -692,6 +700,7 @@ export default function InformationOrder(props) {
                                         </div>
                                     </div>
                                 </div>
+                                <button>save</button>
                             </div>
                         </div>
 
@@ -801,18 +810,13 @@ export default function InformationOrder(props) {
                                         ></textarea>
                                     </div>
                                 </div>
+                                <button>save</button>
+
                             </div>
                         )}
 
                         {/* Action Buttons */}
                         <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <Button
-                                size="sm"
-                                type="submit"
-                                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
-                            >
-                                Save
-                            </Button>
                             <Button
                                 size="sm"
                                 variant="outline"
@@ -860,6 +864,7 @@ export default function InformationOrder(props) {
                 isChangeCountry={isChangeCountry}
                 setIsChangeCountry={setIsChangeCountry}
                 zone={zone}
+
             />
         </div>
     );
