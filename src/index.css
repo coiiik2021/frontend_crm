@@ -782,3 +782,14 @@ span.flatpickr-weekday,
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
 }
+
+/* Thêm vào file CSS của bạn */
+.resize-cursor {
+  cursor: ew-resize !important;
+}
+
+/* Tối ưu hóa hiệu suất khi resize */
+.resizing {
+  will-change: width;
+  transition: none !important;
+}
