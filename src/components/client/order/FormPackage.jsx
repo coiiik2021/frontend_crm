@@ -4,25 +4,37 @@ import Button from "../../admin/ui/button/Button.jsx";
 import { GetListPriceQuote } from "../../../service/api.admin.service.jsx";
 
 const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, zone, handleService, setSelectedService, isChangeCountry, setIsChangeCountry }) => {
-    useEffect(() => {
-        const fetchData = () => {
-            const recalculatedTotal = packages.reduce((acc, pkg) => ({
-                totalPackage: packages.length,
-                realVolume: acc.realVolume + (pkg.total?.realVolume || 0),
-                totalOverSize: acc.totalOverSize + (quaKhoMap.get(pkg.total?.OverSize)?.price || 0)
-            }), {
-                totalOverSize: 0,
-                realVolume: 0,
-                totalPackage: 0
-            });
+    // Khai báo state trước khi sử dụng trong useEffect
+    const [nameCountry, setNameCountry] = useState(initialNameCountry);
+    const [isOpenFormPackage, setIsOpenFormPackage] = useState(!isChangeCountry);
+    const [showQuote, setShowQuote] = useState(isChangeCountry);
+    const [errors, setErrors] = useState({});
+    const [quoteData, setQuoteData] = useState([]);
+    const [total, setTotal] = useState({
+        totalPackage: packages.length,
+        totalOverSize: 0,
+        realVolume: 0
+    });
 
-            setTotal(recalculatedTotal);
-        }
+    // Khai báo các biến và hàm khác
+    const quaKho = [
+        { code: "NO FEE", price: 0, note: "không dính phí quá khổ" },
+        { code: "AHC", price: 268715, note: "kiện hàng lớn hơn 25kg" },
+        { code: "LPS", price: 1602700, note: "Chu vi Package: dài + 2 x (rộng + cao) nằm trong [300, 399]" },
+        { code: "OMS", price: 6580000, note: ["Package trên 70KG bạn vui lòng liên hệ sales EbayExpress để được hướng dẫn gửi hàng", "Chu vi Package: dài + 2 x (rộng + cao) >= 400", "Package có chiều dài từ 274CM"] }
+    ];
 
-        fetchData();
-    }, [packages]);
+    const quoteRef = useRef(null);
 
-    // Thêm useEffect mới để đảm bảo tính toán lại khi component mount
+    const quaKhoMap = quaKho.reduce((map, item) => {
+        map.set(item.code, {
+            price: item.price,
+            note: item.note
+        });
+        return map;
+    }, new Map());
+
+    // Sau đó mới khai báo useEffect
     useEffect(() => {
         // Kiểm tra và tính toán lại cho các package nếu cần
         if (packages.some(pkg => !pkg.total || pkg.total.realVolume === 0)) {
@@ -68,21 +80,54 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                 return pkg;
             });
 
+            // Cập nhật packages một lần duy nhất
             setPackages(updatedPackages);
         }
-    }, []);
 
+        // Tính toán lại tổng từ packages
+        const recalculatedTotal = packages.reduce((acc, pkg) => ({
+            totalPackage: packages.length,
+            realVolume: acc.realVolume + (pkg.total?.realVolume || 0),
+            totalOverSize: acc.totalOverSize + (quaKhoMap.get(pkg.total?.OverSize)?.price || 0)
+        }), {
+            totalOverSize: 0,
+            realVolume: 0,
+            totalPackage: 0
+        });
 
-    const [nameCountry, setNameCountry] = useState(initialNameCountry);
-    const [isOpenFormPackage, setIsOpenFormPackage] = useState(!isChangeCountry);
-    const [showQuote, setShowQuote] = useState(isChangeCountry);
-    const [errors, setErrors] = useState({});
-    const [quoteData, setQuoteData] = useState([]);
-    const [total, setTotal] = useState({
-        totalPackage: packages.length,
-        totalOverSize: 0,
-        realVolume: 0
-    });
+        // Cập nhật state total
+        setTotal(recalculatedTotal);
+    }, []); // Chỉ chạy một lần khi component mount
+
+    // useEffect theo dõi thay đổi của packages - sử dụng useRef để tránh vòng lặp
+    const prevPackagesRef = useRef(packages);
+
+    useEffect(() => {
+        // So sánh packages hiện tại với packages trước đó
+        const packagesChanged = JSON.stringify(prevPackagesRef.current) !== JSON.stringify(packages);
+
+        // Chỉ cập nhật khi packages thực sự thay đổi
+        if (packagesChanged) {
+            // Cập nhật ref
+            prevPackagesRef.current = packages;
+
+            // Tính toán lại tổng từ packages
+            const recalculatedTotal = packages.reduce((acc, pkg) => ({
+                totalPackage: packages.length,
+                realVolume: acc.realVolume + (pkg.total?.realVolume || 0),
+                totalOverSize: acc.totalOverSize + (quaKhoMap.get(pkg.total?.OverSize)?.price || 0)
+            }), {
+                totalOverSize: 0,
+                realVolume: 0,
+                totalPackage: 0
+            });
+
+            // Cập nhật state total
+            setTotal(recalculatedTotal);
+        }
+    }, [packages]);
+
+    // Xóa bỏ useEffect ở dòng 294 nếu nó đang gây ra vòng lặp vô hạn
 
     const formatCurrency = (amount) => {
         const num = parseFloat(String(amount).replace(/[^0-9.]/g, ''));
@@ -204,15 +249,6 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
 
     }, [initialNameCountry]);
 
-    const quaKho = [
-        { code: "NO FEE", price: 0, note: "không dính phí quá khổ" },
-        { code: "AHC", price: 268715, note: "kiện hàng lớn hơn 25kg" },
-        { code: "LPS", price: 1602700, note: "Chu vi Package: dài + 2 x (rộng + cao) nằm trong [300, 399]" },
-        { code: "OMS", price: 6580000, note: ["Package trên 70KG bạn vui lòng liên hệ sales EbayExpress để được hướng dẫn gửi hàng", "Chu vi Package: dài + 2 x (rộng + cao) >= 400", "Package có chiều dài từ 274CM"] }
-    ];
-
-    const quoteRef = useRef(null);
-
     const scrollContainer = (direction) => {
         if (quoteRef.current) {
             const scrollAmount = window.innerWidth < 640 ? 240 : 300;
@@ -222,14 +258,6 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             });
         }
     };
-
-    const quaKhoMap = quaKho.reduce((map, item) => {
-        map.set(item.code, {
-            price: item.price,
-            note: item.note
-        });
-        return map;
-    }, new Map());
 
     const noteOverSize = (pkg) => {
         const overSizeItem = quaKhoMap.get(pkg.total?.OverSize);
@@ -305,6 +333,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
     };
 
     // Thêm useEffect để tính toán lại tổng mỗi khi component được render hoặc packages thay đổi
+    const didInitialCalculation = useRef(false);
     useEffect(() => {
         // Tính toán lại tổng từ packages
         const recalculatedTotal = packages.reduce((acc, pkg) => ({
@@ -317,54 +346,58 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             totalPackage: 0
         });
 
-        // Cập nhật state total
         setTotal(recalculatedTotal);
 
-        // Đảm bảo mỗi package có total được tính đúng
-        if (packages.some(pkg => !pkg.total || pkg.total.realVolume === 0)) {
-            const updatedPackages = packages.map(pkg => {
-                if (!pkg.total || pkg.total.realVolume === 0) {
-                    const { length, width, height, weight } = pkg;
-                    let dimValue = (parseFloat(length) || 0) *
-                        (parseFloat(width) || 0) *
-                        (parseFloat(height) || 0) / 5000;
+        // Only calculate and update packages if needed, but don't set state
+        const needsUpdate = packages.some(pkg => !pkg.total || pkg.total.realVolume === 0);
+        if (needsUpdate) {
+            // Use a ref to track if we need to update
+            if (!didInitialCalculation.current) {
+                const updatedPackages = packages.map(pkg => {
+                    if (!pkg.total || pkg.total.realVolume === 0) {
+                        const { length, width, height, weight } = pkg;
+                        let dimValue = (parseFloat(length) || 0) *
+                            (parseFloat(width) || 0) *
+                            (parseFloat(height) || 0) / 5000;
 
-                    const decimalPart = dimValue % 1;
-                    if (decimalPart > 0 && decimalPart < 0.5) {
-                        dimValue = Math.floor(dimValue) + 0.5;
-                    } else if (decimalPart >= 0.5) {
-                        dimValue = Math.ceil(dimValue);
-                    }
-
-                    const overSizeUpdate = overSize(
-                        parseFloat(length) || 0,
-                        parseFloat(width) || 0,
-                        parseFloat(height) || 0,
-                        parseFloat(weight) || 0
-                    );
-
-                    let realVolumePkg = Math.max(dimValue, parseFloat(weight) || 0);
-                    if (realVolumePkg > 20) {
-                        realVolumePkg = Math.ceil(realVolumePkg);
-                    }
-
-                    return {
-                        ...pkg,
-                        dim: dimValue,
-                        total: {
-                            realVolume: realVolumePkg,
-                            totalPackage: parseFloat(pkg.quantity) || 0,
-                            OverSize: overSizeUpdate,
-                            totalWeight: parseFloat(weight) || 0
+                        const decimalPart = dimValue % 1;
+                        if (decimalPart > 0 && decimalPart < 0.5) {
+                            dimValue = Math.floor(dimValue) + 0.5;
+                        } else if (decimalPart >= 0.5) {
+                            dimValue = Math.ceil(dimValue);
                         }
-                    };
-                }
-                return pkg;
-            });
 
-            setPackages(updatedPackages);
+                        const overSizeUpdate = overSize(
+                            parseFloat(length) || 0,
+                            parseFloat(width) || 0,
+                            parseFloat(height) || 0,
+                            parseFloat(weight) || 0
+                        );
+
+                        let realVolumePkg = Math.max(dimValue, parseFloat(weight) || 0);
+                        if (realVolumePkg > 20) {
+                            realVolumePkg = Math.ceil(realVolumePkg);
+                        }
+
+                        return {
+                            ...pkg,
+                            dim: dimValue,
+                            total: {
+                                realVolume: realVolumePkg,
+                                totalPackage: parseFloat(pkg.quantity) || 0,
+                                OverSize: overSizeUpdate,
+                                totalWeight: parseFloat(weight) || 0
+                            }
+                        };
+                    }
+                    return pkg;
+                });
+
+                didInitialCalculation.current = true;
+                setPackages(updatedPackages);
+            }
         }
-    }, [packages]);
+    }, [packages]); // We'll keep this dependency but prevent the loop
 
 
 
