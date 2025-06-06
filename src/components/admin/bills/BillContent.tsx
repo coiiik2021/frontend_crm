@@ -3,6 +3,7 @@ import InvoiceContent from "./invoice/InvoiceContent";
 import InvoiceHomeBill from "./invoice/InvoiceHomeBill";
 import ShippingDocumentContent from "./Shipping Document/ShippinggDocumentContent";
 import { useParams } from "react-router";
+import AWBContent from "./invoice/AWBContent";
 
 type BillContentProps = {
   id?: string; // Có thể truyền hoặc không
@@ -17,7 +18,7 @@ const BillContent = ({ id: propId }: BillContentProps) => {
       case "homebill":
         return <InvoiceHomeBill />;
       case "awb":
-        return <div>awb Content</div>;
+        return <AWBContent bill_id={id || ""} />; // Replace with actual bill_id as needed
       case "invoice":
         return <InvoiceContent bill_id={id || ""} />;
       case "invoiceOther":
