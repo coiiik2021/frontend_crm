@@ -409,9 +409,70 @@ export default function FormDetailOrder({ recipientInfo, packages, products, pro
             if (index !== 0) {
                 worksheet.getCell(startRow + index, colIndex).value = d;
                 worksheet.getCell(startRow + index, colIndex).border = {bottom: {style: 'thin'}}
-                
             }
         })
+
+        //Shipping Mark
+        dimensions.forEach((dim, index) => {
+            const sheetName = `ShippingMark ${index + 1}`;
+            const sheet = workbook.addWorksheet(sheetName);
+            const totalDimensions = dimensions.length;
+
+            sheet.pageSetup = {
+                paperSize: 9,
+                orientation: 'landscape',
+                fitToPage: true,
+                fitToWidth: 1,
+                fitToHeight: 0,
+                margins: {
+                left: 0.5, right: 0.5,
+                top: 0.75, bottom: 0.75,
+                header: 0.3, footer: 0.3
+                }
+            };
+
+            sheet.columns = [
+                { width: 20 },
+                { width: 50 }
+            ];
+
+            const rows = [
+                ['', 'SHIP TO', '','','','','','','','',''],
+                ['SHIP TO', consignee.company,'', '','','','','','','',''],
+                ['ADD', consignee.address, '','','','','','','','',''],
+                ['ATTN', consignee.company, '','','','','','','','',''],
+                ['CARTON', `${index + 1}/${totalDimensions}`, '','','','','','','','',''],
+                ['', shippingMethod, '','','','','','','','',''],
+                ['', '7777', '','','','','','','','','']
+            ];
+
+            rows.forEach((data, rowIndex) => {
+                const row = sheet.addRow(data);
+                row.eachCell((cell) => {
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' ,wrapText: true };
+                });
+            });
+
+            sheet.getColumn('A').font = { name: 'Times New Roman', size: 20 };
+            sheet.getColumn('B').font = { name: 'Times New Roman', size: 30, bold: true };
+            sheet.getCell('B1').font = {name: 'Times New Roman', size : 20}
+            sheet.getColumn('B').width = 40;
+            sheet.mergeCells('B1:K1');
+            sheet.mergeCells('B2:K2');
+            sheet.mergeCells('B3:K3');
+            sheet.mergeCells('B4:K4');
+            sheet.mergeCells('B5:K5');
+            sheet.mergeCells('B6:K6');
+            sheet.mergeCells('B7:K7');
+        });
+
+
 
         // Save file
         const buffer = await workbook.xlsx.writeBuffer();
