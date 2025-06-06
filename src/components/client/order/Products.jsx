@@ -162,11 +162,11 @@ const Products = ({
                     id: idx + 1,
                     "Mô tả sản phẩm": row[1] || "",
                     "Xuất xứ": row[4] || "",
-                    "Số lượng": Number(row[5]) || 0,
-                    "Kiểu đơn vị": row[6] || "",
-                    "Giá trên 1 sản phẩm": Number(row[7]) || 0,
-                    "Giá Trị": (Number(row[5]) || 0) * (Number(row[7]) || 0),
-                    totalPrice: (Number(row[5]) || 0) * (Number(row[7]) || 0),
+                    "Số lượng": Number(row[6]) || 0,
+                    "Kiểu đơn vị": row[7] || "",
+                    "Giá trên 1 sản phẩm": Number(row[8]) || 0,
+                    "Giá Trị": (Number(row[6]) || 0) * (Number(row[8]) || 0),
+                    totalPrice: (Number(row[6]) || 0) * (Number(row[8]) || 0),
                 }));
 
             // Remove the last product
