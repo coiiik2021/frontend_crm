@@ -52,7 +52,8 @@ export default function InformationOrder(props) {
                 city: senderInfo.city || "",
                 state: senderInfo.state || "",
                 postCode: senderInfo.postCode || "",
-                country: senderInfo.country || ""
+                country: senderInfo.country || "",
+                id: senderInfo.id || ""
             });
         }
     }, [senderInfo]);
@@ -138,11 +139,34 @@ export default function InformationOrder(props) {
     // Thêm hàm xử lý thay đổi cho form nhận hàng
     const handleDeliveryChange = (e) => {
         const { name, value } = e.target;
-        setDeliveryForm(prevForm => ({
-            ...prevForm,
-            [name]: value
-        }));
+        console.log(`Updating delivery form: ${name} = ${value}`); // Thêm log để debug
+
+        setDeliveryForm(prevForm => {
+            const updatedForm = {
+                ...prevForm,
+                [name]: value
+            };
+            console.log("Updated delivery form:", updatedForm); // Thêm log để debug
+            return updatedForm;
+        });
+
+        // Xóa lỗi khi người dùng nhập giá trị
+        if (deliveryErrors[name]) {
+            setDeliveryErrors(prev => ({
+                ...prev,
+                [name]: false
+            }));
+        }
     };
+
+    // Thêm useEffect để cuộn trang lên đầu khi component được render
+    useEffect(() => {
+        // Cuộn trang lên đầu khi component được render
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }, []);
 
     const handleService = () => {
         const recalculatedTotal = packages.reduce((acc, pkg) => ({
@@ -159,6 +183,7 @@ export default function InformationOrder(props) {
 
         // Tiếp tục xử lý chuyển trang
         if (validateRecipientForm() && validateSenderForm()) {
+            // Cập nhật thông tin người gửi và người nhận
             setRecipientInfo(recipientForm);
             setSenderInfo({
                 fullName: senderForm.fullName || "",
@@ -173,11 +198,30 @@ export default function InformationOrder(props) {
                 country: senderForm.country || ""
             });
 
+            // Cập nhật thông tin nhận hàng vào addressBackup
+            const updatedAddressBackup = {
+                id: deliveryForm.id || "",
+                name: deliveryForm.name || "",
+                date: deliveryForm.date || "",
+                time: deliveryForm.time || "",
+                address: deliveryForm.address || "",
+                notes: deliveryForm.notes || ""
+            };
+
+            console.log("Updating addressBackup before moving to next step:", updatedAddressBackup);
+            setAddressBackup(updatedAddressBackup);
+
             // Ensure the parent component has the latest addressBackup value
             // by using a small timeout before changing tabs
             setTimeout(() => {
+                console.log("Final addressBackup before changing step:", updatedAddressBackup);
                 setCurrentStep(3);
-            }, 0);
+                // Cuộn trang lên đầu khi chuyển sang bước tiếp theo
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+            }, 100);
         } else {
             setShowForm(true);
         }
@@ -264,7 +308,8 @@ export default function InformationOrder(props) {
     };
 
     const handleSave = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Ngăn chặn hành vi submit mặc định
+        e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
 
         if (validateRecipientForm() && validateSenderForm()) {
             const dataResponse = await PostConsigneeFavorite(recipientForm);
@@ -291,14 +336,26 @@ export default function InformationOrder(props) {
         // Thêm preventDefault để ngăn form submit nếu nút nằm trong form
         if (e) e.preventDefault();
 
-        if (validateRecipientForm() && validateSenderForm()) {
+        // Kiểm tra cả form nhận hàng nếu nó đang được hiển thị
+        const isDeliveryValid = showDeliveryForm ? validateDeliveryForm() : true;
+
+        if (validateRecipientForm() && validateSenderForm() && isDeliveryValid) {
             // Cập nhật thông tin sender và recipient vào state chính
             setRecipientInfo(recipientForm);
-            setSenderInfo(senderForm); // Cập nhật senderInfo với dữ liệu mới
+            setSenderInfo(senderForm);
+
+            // Cập nhật thông tin nhận hàng vào addressBackup
+            console.log("Saving delivery form to addressBackup:", deliveryForm);
             setAddressBackup(deliveryForm);
+
             setShowForm(false); // Ẩn form sau khi xác nhận
         } else {
             setShowForm(true);
+
+            // Hiển thị thông báo lỗi nếu form nhận hàng không hợp lệ
+            if (showDeliveryForm && !isDeliveryValid) {
+                alert("Vui lòng điền đầy đủ thông tin nhận hàng");
+            }
         }
     };
 
@@ -319,10 +376,24 @@ export default function InformationOrder(props) {
 
     // Thêm hàm xử lý thay đổi ngày
     const handleDateChange = (dates, dateString) => {
-        setDeliveryForm(prevForm => ({
-            ...prevForm,
-            deliveryDate: dateString
-        }));
+        console.log(`Date changed to: ${dateString}`); // Thêm log để debug
+
+        setDeliveryForm(prevForm => {
+            const updatedForm = {
+                ...prevForm,
+                date: dateString, // Cập nhật trường date thay vì deliveryDate
+            };
+            console.log("Updated delivery form with new date:", updatedForm); // Thêm log để debug
+            return updatedForm;
+        });
+
+        // Xóa lỗi khi người dùng chọn ngày
+        if (deliveryErrors.date) {
+            setDeliveryErrors(prev => ({
+                ...prev,
+                date: false
+            }));
+        }
     };
 
     // Cập nhật total khi packages thay đổi
@@ -364,6 +435,13 @@ export default function InformationOrder(props) {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [showSavedPopup]);
+
+    // Thêm useEffect để theo dõi thay đổi của deliveryForm
+    useEffect(() => {
+        console.log("deliveryForm updated:", deliveryForm);
+        // Đảm bảo addressBackup được cập nhật khi deliveryForm thay đổi
+        setAddressBackup(deliveryForm);
+    }, [deliveryForm]);
 
     return (
         <div className="space-y-6">
@@ -421,7 +499,10 @@ export default function InformationOrder(props) {
             {/* Form nhập liệu - Hiển thị khi showForm = true */}
             {showForm ? (
                 <ComponentCard title="Shipping Information" className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
-                    <Form onSubmit={async (e) => await handleSave(e)}>
+                    <Form onSubmit={(e) => {
+                        e.preventDefault(); // Ngăn chặn hành vi submit mặc định
+                        return false; // Không thực hiện submit
+                    }}>
                         <div className="grid gap-6 md:grid-cols-2">
                             {/* Sender Information - Left Column */}
                             <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-5 border border-gray-100 dark:border-gray-700">
@@ -708,8 +789,12 @@ export default function InformationOrder(props) {
                         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
                             <Button
                                 size="sm"
-                                type="button"
-                                onClick={() => setShowDeliveryForm(!showDeliveryForm)}
+                                type="button" // Đảm bảo type là "button" để không submit form
+                                onClick={(e) => {
+                                    e.preventDefault(); // Ngăn chặn hành vi mặc định
+                                    e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
+                                    setShowDeliveryForm(!showDeliveryForm);
+                                }}
                                 className={`flex items-center gap-1.5 ${showDeliveryForm
                                     ? "bg-red-100 text-red-700 hover:bg-red-200"
                                     : "bg-green-100 text-green-700 hover:bg-green-200"
@@ -749,33 +834,33 @@ export default function InformationOrder(props) {
 
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <Label htmlFor="receiver_name" className="text-gray-700 dark:text-gray-300">Tên người đưa</Label>
+                                        <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Tên người đưa</Label>
                                         <Input
                                             type="text"
-                                            id="receiver_name"
-                                            name="receiverName"
-                                            value={deliveryForm.receiverName || ''}
+                                            id="name"
+                                            name="name"
+                                            value={deliveryForm.name || ''}
                                             onChange={handleDeliveryChange}
                                             className={`bg-white dark:bg-gray-800 ${deliveryErrors.receiverName ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
                                         />
                                     </div>
                                     <div>
                                         <DatePicker
-                                            id="delivery_date_picker"
+                                            id="date"
                                             label="Ngày nhận"
                                             placeholder="Chọn ngày nhận"
                                             onChange={handleDateChange}
-                                            className={deliveryErrors.deliveryDate ? "border-red-500" : ""}
+                                            className={deliveryErrors.date ? "border-red-500" : ""}
                                         />
                                     </div>
                                     <div>
-                                        <Label htmlFor="delivery_time" className="text-gray-700 dark:text-gray-300">Giờ nhận</Label>
+                                        <Label htmlFor="time" className="text-gray-700 dark:text-gray-300">Giờ nhận</Label>
                                         <div className="relative">
                                             <Input
                                                 type="time"
-                                                id="delivery_time"
-                                                name="deliveryTime"
-                                                value={deliveryForm.deliveryTime || ''}
+                                                id="time"
+                                                name="time"
+                                                value={deliveryForm.time || ''}
                                                 onChange={handleDeliveryChange}
                                                 className={`bg-white dark:bg-gray-800 ${deliveryErrors.deliveryTime ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
                                             />
@@ -788,12 +873,12 @@ export default function InformationOrder(props) {
                                         </div>
                                     </div>
                                     <div className="sm:col-span-2">
-                                        <Label htmlFor="delivery_address" className="text-gray-700 dark:text-gray-300">Địa chỉ nhận hàng</Label>
+                                        <Label htmlFor="address" className="text-gray-700 dark:text-gray-300">Địa chỉ nhận hàng</Label>
                                         <Input
                                             type="text"
-                                            id="delivery_address"
-                                            name="deliveryAddress"
-                                            value={deliveryForm.deliveryAddress || ''}
+                                            id="address"
+                                            name="address"
+                                            value={deliveryForm.address || ''}
                                             onChange={handleDeliveryChange}
                                             className={`bg-white dark:bg-gray-800 ${deliveryErrors.deliveryAddress ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
                                         />
@@ -820,12 +905,16 @@ export default function InformationOrder(props) {
                             <Button
                                 size="sm"
                                 variant="outline"
-                                type="button"
-                                onClick={handleConfirm}
+                                type="button" // Đảm bảo type là "button" để không submit form
+                                onClick={(e) => {
+                                    e.preventDefault(); // Ngăn chặn hành vi mặc định
+                                    handleConfirm(e);
+                                }}
                                 className="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md"
                             >
                                 Confirm
                             </Button>
+
                         </div>
                     </Form>
                 </ComponentCard>

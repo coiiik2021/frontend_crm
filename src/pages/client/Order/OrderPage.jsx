@@ -9,6 +9,15 @@ import { GetBaseUserForSender } from "../../../service/api.admin.service";
 export default function OrderPage() {
     const [currentStep, setCurrentStep] = useState(2);
 
+    // Thêm useEffect để theo dõi thay đổi của currentStep và cuộn trang lên đầu
+    useEffect(() => {
+        // Cuộn trang lên đầu khi currentStep thay đổi
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }, [currentStep]);
+
     const [senderInfo, setSenderInfo] = useState({});
 
 
@@ -24,7 +33,7 @@ export default function OrderPage() {
     }, [currentStep]);
 
     const [consigneeFrom, setConsigneeFrom] = useState({
-        id: "1",
+        id: "",
         name: "",
         company: "",
         email: "",
@@ -37,7 +46,7 @@ export default function OrderPage() {
     });
 
     const [consigneeTo, setConsigneeTo] = useState({
-        id: "1",
+        id: "",
         name: "",
         company: "",
         email: "",
@@ -149,6 +158,7 @@ export default function OrderPage() {
             <FormDetailOrder
                 senderInfo={consigneeFrom}
                 recipientInfo={consigneeFrom}
+                addressBackup={addressBackup}
                 packages={packages}
                 products={products}
                 productsTotal={productsTotal}

@@ -13,11 +13,20 @@ export default function Header() {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        setIsLoggedIn(!!token);
-        const decoded = jwtDecode(token);
-        setAuthorities(decoded.authorities || []);
-    }, []);
+        setIsLoggedIn(!!token); // true nếu có token
 
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                setAuthorities(decoded.authorities || []);
+            } catch (error) {
+                console.error("Token decode error:", error);
+                setAuthorities([]); // hoặc chuyển hướng đăng nhập lại
+            }
+        } else {
+            setAuthorities([]);
+        }
+    }, []);
     const handleLogout = () => {
         localStorage.removeItem("token");
         setIsLoggedIn(false);

@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import ExcelJS from 'exceljs';
 
-
 export default function FormDetailOrder({ addressBackup, recipientInfo, packages, products, productsTotal, selectedService, senderInfo, dataRequest, setDataRequest }) {
+    // Thêm state để kiểm soát việc hiển thị form địa chỉ
+    const [showAddressForm, setShowAddressForm] = useState(true);
+
+    // Các state hiện có
     const [showProductsForm, setShowProductsForm] = useState(true);
     const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -97,14 +100,12 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
 
         const dataRequestAPI = {
             addressBackup: addressBackup,
-            senderInfo: senderInfo,
-            recipientInfo: recipientInfo,
+            consigneeFrom: senderInfo,
+            consigneeTo: recipientInfo,
             serviceSelectInfo: newServiceSelectInfo,
             products: newList,
             packages: newPackages,
             productsTotal: productsTotal,
-
-
         }
         setDataRequest(dataRequestAPI);
     }, [serviceSelectNew, priceNetConfirm, priceOtherConfirm]);
@@ -183,7 +184,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         ];
 
 
-        const titleRow = worksheet.addRow(['', 'INVOICE', '', '', '', '', '', '', '','']);
+        const titleRow = worksheet.addRow(['', 'INVOICE', '', '', '', '', '', '', '', '']);
         titleRow.height = 40;
         worksheet.mergeCells('B1:I1');
         const titleCell = worksheet.getCell('B1');
@@ -191,47 +192,47 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
 
-        const invoice_no = worksheet.addRow(['', '', 'Invoice No.:', invoiceNo, '', '', '', '', '','']);
+        const invoice_no = worksheet.addRow(['', '', 'Invoice No.:', invoiceNo, '', '', '', '', '', '']);
         invoice_no.getCell(3).font = { bold: true, italic: true }
         invoice_no.getCell(8).font = { bold: true, italic: true }
         invoice_no.getCell(4).font = { bold: true }
         invoice_no.getCell(9).font = { bold: true }
 
-        const shipperTitle = worksheet.addRow(['', 'SHIPPER', '', '', '', '','', '', 'Air waybill No.', airWaybillNo]);
+        const shipperTitle = worksheet.addRow(['', 'SHIPPER', '', '', '', '', '', '', 'Air waybill No.', airWaybillNo]);
         shipperTitle.getCell(2).font = { bold: true, underline: true };
         shipperTitle.getCell(10).font = { bold: true }
         shipperTitle.getCell(9).font = { bold: true }
 
-        const company = worksheet.addRow(['', 'Company Name', shipper.name, '', '', '','', '', '', shippingMethod]);
+        const company = worksheet.addRow(['', 'Company Name', shipper.name, '', '', '', '', '', '', shippingMethod]);
         company.getCell(3).font = { bold: true }
         company.getCell(10).font = { bold: true }
-        const noOfpkgs = worksheet.addRow(['', 'Address', shipper.address, '', '', '','', '', 'No. of pkgs', '1']);
-        noOfpkgs.getCell(9).font = {bold:true}
-        noOfpkgs.getCell(10).border = {bottom: {style: 'thin'}}
-        const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.address, '', '','', '', '', 'Weight', weight]);
-        rowWeight.getCell(9).font = {bold:true}
-        rowWeight.getCell(10).border = {bottom: {style: 'thin'}}
-        const rowDimensions = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '','', '', 'Dimensions', dimensions[0]]);
+        const noOfpkgs = worksheet.addRow(['', 'Address', shipper.address, '', '', '', '', '', 'No. of pkgs', '1']);
+        noOfpkgs.getCell(9).font = { bold: true }
+        noOfpkgs.getCell(10).border = { bottom: { style: 'thin' } }
+        const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.address, '', '', '', '', '', 'Weight', weight]);
+        rowWeight.getCell(9).font = { bold: true }
+        rowWeight.getCell(10).border = { bottom: { style: 'thin' } }
+        const rowDimensions = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '', '', '', 'Dimensions', dimensions[0]]);
         rowDimensions.getCell(3).font = { bold: true }
         rowDimensions.getCell(9).font = { bold: true }
-        rowDimensions.getCell(10).border = {bottom: {style: 'thin'}}
-        worksheet.addRow(['', 'Tax Code', '0399321378', '', '', '', '', '', '','']);
-        worksheet.addRow(['', 'Contact Name', shipper.name, '', '', '', '', '', '','']);
-        worksheet.addRow(['', 'Phone/Fax No.', shipper.phone, '', '', '', '', '', '','']);
-        worksheet.addRow(['', '', '', '', '', '', '', '', '','']);
+        rowDimensions.getCell(10).border = { bottom: { style: 'thin' } }
+        worksheet.addRow(['', 'Tax Code', '0399321378', '', '', '', '', '', '', '']);
+        worksheet.addRow(['', 'Contact Name', shipper.name, '', '', '', '', '', '', '']);
+        worksheet.addRow(['', 'Phone/Fax No.', shipper.phone, '', '', '', '', '', '', '']);
+        worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
 
-        const consigneeTitle = worksheet.addRow(['', 'CONSIGNEE', '', '', '', '', '', '', '','']);
+        const consigneeTitle = worksheet.addRow(['', 'CONSIGNEE', '', '', '', '', '', '', '', '']);
         consigneeTitle.getCell(2).font = { bold: true, underline: true };
 
-        const company_consignee = worksheet.addRow(['', 'Company Name', consignee.company, '', '', '', '', '', '','']);
+        const company_consignee = worksheet.addRow(['', 'Company Name', consignee.company, '', '', '', '', '', '', '']);
         company_consignee.getCell(3).font = { bold: true }
         worksheet.addRow(['', 'Address', consignee.address, '', '', '', '', '', '']);
         worksheet.addRow(['', 'Postal code', consignee.postCode, '', '', '', '', '', '']);
-        const countryConsignee = worksheet.addRow(['', 'State/ Country', consignee.country, '', '', '', '', '', '','']);
+        const countryConsignee = worksheet.addRow(['', 'State/ Country', consignee.country, '', '', '', '', '', '', '']);
         countryConsignee.getCell(3).font = { bold: true }
-        worksheet.addRow(['', 'Contact Name', consignee.name, '', '', '', '', '', '','']);
-        worksheet.addRow(['', 'Phone/Fax No.', consignee.phone, '', '', '', '', '', '','']);
-        worksheet.addRow(['', '', '', '', '', '', '', '', '','']);
+        worksheet.addRow(['', 'Contact Name', consignee.name, '', '', '', '', '', '', '']);
+        worksheet.addRow(['', 'Phone/Fax No.', consignee.phone, '', '', '', '', '', '', '']);
+        worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
 
 
         worksheet.mergeCells('C4:H4');
@@ -326,7 +327,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         });
 
 
-        const totalRow = worksheet.addRow(['', '', '', '','', '', 'Total Value (in USD)', '', '', totalValue]);
+        const totalRow = worksheet.addRow(['', '', '', '', '', '', 'Total Value (in USD)', '', '', totalValue]);
 
         totalRow.eachCell((cell, colNumber) => {
             if (colNumber === 7 || colNumber === 10) {
@@ -347,14 +348,14 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         // simple.font = { size: 14, bold: true };
         // simple.alignment = { horizontal: 'center', vertical: 'middle' };
 
-        worksheet.addRow(['', 'Reason for Export', '', '', '', '', '', '', '','']);
-        worksheet.addRow(['', 'I declare that the information is true and correct to the best of my knowledge,', '','', '', '', '', '', '', '']);
-        worksheet.addRow(['', 'and that the goods are of VIETNAM origin.', '', '', '', '', '', '', '','']);
-        worksheet.addRow(['', 'I (name)', '', '', '', '', 'certify that the particulars and', '', '','']);
-        worksheet.addRow(['', 'quantity of goods specified in this document are goods which are submitted for', '','', '', '', '', '', '', '']);
-        worksheet.addRow(['', 'clearance for export out of Vietnam.', '', '', '', '', '', '','', '']);
-        worksheet.addRow(['', '', '', '', '', '', 'Date: 01/04/2024', '', '','']);
-        worksheet.addRow(['', '', '', '', '', '', 'Signature/Title/Stamp', '','', '']);
+        worksheet.addRow(['', 'Reason for Export', '', '', '', '', '', '', '', '']);
+        worksheet.addRow(['', 'I declare that the information is true and correct to the best of my knowledge,', '', '', '', '', '', '', '', '']);
+        worksheet.addRow(['', 'and that the goods are of VIETNAM origin.', '', '', '', '', '', '', '', '']);
+        worksheet.addRow(['', 'I (name)', '', '', '', '', 'certify that the particulars and', '', '', '']);
+        worksheet.addRow(['', 'quantity of goods specified in this document are goods which are submitted for', '', '', '', '', '', '', '', '']);
+        worksheet.addRow(['', 'clearance for export out of Vietnam.', '', '', '', '', '', '', '', '']);
+        worksheet.addRow(['', '', '', '', '', '', 'Date: 01/04/2024', '', '', '']);
+        worksheet.addRow(['', '', '', '', '', '', 'Signature/Title/Stamp', '', '', '']);
 
         const lastRow = worksheet.lastRow?.number || 0;
         if (lastRow > 0) {
@@ -372,8 +373,8 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
 
         worksheet.getCell('G' + (lastRow - 1)).alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell('G' + lastRow).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell('D' + (lastRow - 7)).border = {bottom: {style: 'thin'}}
-        worksheet.getCell('C' + (lastRow - 4)).border = {bottom: {style: 'thin'}}
+        worksheet.getCell('D' + (lastRow - 7)).border = { bottom: { style: 'thin' } }
+        worksheet.getCell('C' + (lastRow - 4)).border = { bottom: { style: 'thin' } }
         // worksheet.eachRow((row) => {
         //     row.eachCell((cell) => {
         //         cell.font = {
@@ -395,9 +396,9 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         const col = 3;
 
         for (let row = sRow; row <= eRow; row++) {
-            if(row !== 11 && row !== 12){
+            if (row !== 11 && row !== 12) {
                 worksheet.getCell(row, col).border = {
-                    bottom: { style: 'thin'}
+                    bottom: { style: 'thin' }
                 };
             }
         }
@@ -409,7 +410,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         dimensions.forEach((d, index) => {
             if (index !== 0) {
                 worksheet.getCell(startRow + index, colIndex).value = d;
-                worksheet.getCell(startRow + index, colIndex).border = {bottom: {style: 'thin'}}
+                worksheet.getCell(startRow + index, colIndex).border = { bottom: { style: 'thin' } }
             }
         })
 
@@ -426,9 +427,9 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
                 fitToWidth: 1,
                 fitToHeight: 0,
                 margins: {
-                left: 0.5, right: 0.5,
-                top: 0.75, bottom: 0.75,
-                header: 0.3, footer: 0.3
+                    left: 0.5, right: 0.5,
+                    top: 0.75, bottom: 0.75,
+                    header: 0.3, footer: 0.3
                 }
             };
 
@@ -438,13 +439,13 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
             ];
 
             const rows = [
-                ['', 'SHIP TO', '','','','','','','','',''],
-                ['SHIP TO', consignee.company,'', '','','','','','','',''],
-                ['ADD', consignee.address, '','','','','','','','',''],
-                ['ATTN', consignee.company, '','','','','','','','',''],
-                ['CARTON', `${index + 1}/${totalDimensions}`, '','','','','','','','',''],
-                ['', shippingMethod, '','','','','','','','',''],
-                ['', '7777', '','','','','','','','','']
+                ['', 'SHIP TO', '', '', '', '', '', '', '', '', ''],
+                ['SHIP TO', consignee.company, '', '', '', '', '', '', '', '', ''],
+                ['ADD', consignee.address, '', '', '', '', '', '', '', '', ''],
+                ['ATTN', consignee.company, '', '', '', '', '', '', '', '', ''],
+                ['CARTON', `${index + 1}/${totalDimensions}`, '', '', '', '', '', '', '', '', ''],
+                ['', shippingMethod, '', '', '', '', '', '', '', '', ''],
+                ['', '7777', '', '', '', '', '', '', '', '', '']
             ];
 
             rows.forEach((data, rowIndex) => {
@@ -456,13 +457,13 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
                         bottom: { style: 'thin' },
                         right: { style: 'thin' }
                     };
-                    cell.alignment = { vertical: 'middle', horizontal: 'center' ,wrapText: true };
+                    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                 });
             });
 
             sheet.getColumn('A').font = { name: 'Times New Roman', size: 20 };
             sheet.getColumn('B').font = { name: 'Times New Roman', size: 30, bold: true };
-            sheet.getCell('B1').font = {name: 'Times New Roman', size : 20}
+            sheet.getCell('B1').font = { name: 'Times New Roman', size: 20 }
             sheet.getColumn('B').width = 40;
             sheet.mergeCells('B1:K1');
             sheet.mergeCells('B2:K2');
@@ -592,7 +593,71 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
                         </div>
                     </div>
                 </div>
+
             )}
+            {
+                addressBackup.name !== "" && (
+                    <div className="mt-8 bg-gradient-to-r from-purple-50 to-white rounded-lg shadow-sm border border-purple-100">
+                        <div className="p-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-2 bg-purple-100 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-800">Địa chỉ nhận hàng Backup</h3>
+                                </div>
+                                <button
+                                    onClick={() => setShowAddressForm(!showAddressForm)}
+                                    className="text-purple-600 hover:text-purple-700"
+                                >
+                                    <svg
+                                        className={`w-5 h-5 transform transition-transform duration-200 ${showAddressForm ? 'rotate-180' : ''}`}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {showAddressForm && (
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-white p-3 rounded-md shadow-sm">
+                                        <p className="text-xs text-purple-500 font-medium">Người nhận</p>
+                                        <p className="font-medium">{addressBackup.name}</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-md shadow-sm">
+                                        <p className="text-xs text-purple-500 font-medium">Số điện thoại</p>
+                                        <p className="font-medium">{addressBackup.phone}</p>
+                                    </div>
+                                    <div className="col-span-2 bg-white p-3 rounded-md shadow-sm">
+                                        <p className="text-xs text-purple-500 font-medium">Địa chỉ</p>
+                                        <p className="font-medium">{addressBackup.address}</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-md shadow-sm">
+                                        <p className="text-xs text-purple-500 font-medium">Thời gian</p>
+                                        <p className="font-medium">{addressBackup.time}</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-md shadow-sm">
+                                        <p className="text-xs text-purple-500 font-medium">Ngày</p>
+                                        <p className="font-medium">{addressBackup.date}</p>
+                                    </div>
+                                    {addressBackup.notes && (
+                                        <div className="col-span-2 bg-white p-3 rounded-md shadow-sm">
+                                            <p className="text-xs text-purple-500 font-medium">Ghi chú</p>
+                                            <p className="font-medium">{addressBackup.notes}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )
+            }
 
             {/* Thêm phần hiển thị thông tin dịch vụ */}
             {selectedService && (

@@ -11,6 +11,15 @@ const Products = ({
     productsErrors,
     setProductsErrors
 }) => {
+    // Thêm useEffect để cuộn trang lên đầu khi component được render
+    useEffect(() => {
+        // Cuộn trang lên đầu khi component được render
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }, []);
+
     const [isOpenFormPackage, setIsOpenFormPackage] = useState(true);
     const [favorites, setFavorites] = useState(favoriteProducts.favorites);
     const [showSavedPopup, setShowSavedPopup] = useState(false);

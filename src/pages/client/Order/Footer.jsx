@@ -5,6 +5,11 @@ export default function Footer({ currentStep, setCurrentStep, products, setProdu
     const handleBack = () => {
         if (currentStep > 1) {
             setCurrentStep(currentStep - 1);
+            // Cuộn trang lên đầu khi quay lại bước trước
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
         }
     };
 
@@ -48,18 +53,21 @@ export default function Footer({ currentStep, setCurrentStep, products, setProdu
             if (validateProducts()) {
                 console.log(dataRequest, dataRequest);
                 setCurrentStep(currentStep + 1);
+                // Cuộn trang lên đầu khi chuyển sang bước tiếp theo
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
             }
         }
         if (currentStep === 4) {
-
             console.log(dataRequest);
             const response = await CreateBill(dataRequest);
             console.log(response);
-            if (response === "created successfully") {
-                window.location.href = "/";
-            }
+            // if (response === "created successfully") {
+            //     window.location.href = "/";
+            // }
         }
-
     };
 
     const getButtonText = () => {

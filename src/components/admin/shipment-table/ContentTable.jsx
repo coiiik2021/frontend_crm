@@ -348,6 +348,48 @@ export default function ContentTable(props) {
 
     const statusPopoverRef = useRef(null);
 
+    // Thêm state để quản lý các cột hiển thị
+    const [visibleColumns, setVisibleColumns] = useState({
+        house_bill: true,
+        Date: true,
+        bill_employee: true,
+        awb: true,
+        company_service: true,
+        payment_bill_real: true,
+        price_order: true,
+        payment_bill_fake: true,
+        payments_cash: true,
+        payments_banking: true,
+        status: true
+    });
+
+    // Thêm state để quản lý hiển thị dropdown
+    const [showColumnSelector, setShowColumnSelector] = useState(false);
+
+    // Thêm useRef để theo dõi dropdown
+    const columnSelectorRef = useRef(null);
+    const columnButtonRef = useRef(null);
+
+    // Thêm useEffect để xử lý click bên ngoài
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (showColumnSelector &&
+                columnSelectorRef.current &&
+                !columnSelectorRef.current.contains(event.target) &&
+                columnButtonRef.current &&
+                !columnButtonRef.current.contains(event.target)) {
+                setShowColumnSelector(false);
+            }
+        }
+
+        // Thêm event listener
+        document.addEventListener("mousedown", handleClickOutside);
+
+        // Cleanup event listener khi component unmount
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showColumnSelector]);
 
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
@@ -391,6 +433,68 @@ export default function ContentTable(props) {
                         </span>
                     </div>
                     <span className="text-gray-500 dark:text-gray-400"> entries </span>
+
+                    {/* Thêm nút tùy chỉnh cột */}
+                    <button
+                        ref={columnButtonRef}
+                        onClick={() => setShowColumnSelector(!showColumnSelector)}
+                        className="ml-4 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 flex items-center"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Tùy chỉnh cột
+                    </button>
+
+                    {/* Dropdown tùy chỉnh cột */}
+                    {showColumnSelector && (
+                        <div
+                            ref={columnSelectorRef}
+                            className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-3 top-16 dark:bg-gray-800 dark:border-gray-700"
+                        >
+                            <h3 className="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Hiển thị cột</h3>
+                            <div className="space-y-2 max-h-60 overflow-y-auto">
+                                {Object.keys(visibleColumns).map((column) => (
+                                    <div key={column} className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            id={`col-${column}`}
+                                            checked={visibleColumns[column]}
+                                            onChange={() => {
+                                                // Nếu là house_bill thì không cho phép thay đổi
+                                                if (column === "house_bill") return;
+
+                                                setVisibleColumns({
+                                                    ...visibleColumns,
+                                                    [column]: !visibleColumns[column]
+                                                });
+                                            }}
+                                            disabled={column === "house_bill"} // Disable checkbox nếu là house_bill
+                                            className={`w-4 h-4 ${column === "house_bill"
+                                                ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
+                                                : "text-blue-600 bg-gray-100"} border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
+                                        />
+                                        <label htmlFor={`col-${column}`} className={`ml-2 text-sm ${column === "house_bill"
+                                            ? "text-gray-800 font-medium dark:text-gray-200"
+                                            : "text-gray-600 dark:text-gray-400"}`}>
+                                            {column === "house_bill" ? "HOUSE BILL" :
+                                                column === "Date" ? "NGÀY TẠO" :
+                                                    column === "bill_employee" ? "BILL PHỤ" :
+                                                        column === "awb" ? "AWB" :
+                                                            column === "company_service" ? "DỊCH VỤ" :
+                                                                column === "payment_bill_real" ? "THÀNH TIỀN (TẠM TÍNH)" :
+                                                                    column === "price_order" ? "TIỀN ORDER" :
+                                                                        column === "payment_bill_fake" ? "THÀNH TIỀN (CHỐT)" :
+                                                                            column === "payments_cash" ? "THANH TOÁN TIỀN MẶT" :
+                                                                                column === "payments_banking" ? "THANH TOÁN BANKING" :
+                                                                                    column === "status" ? "TRẠNG THÁI" : column}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="relative">
@@ -435,11 +539,10 @@ export default function ContentTable(props) {
                                     { key: "payment_bill_real", label: "Thành tiền (Tạm tính)" },
                                     { key: "price_order", label: "Tiền order" },
                                     { key: "payment_bill_fake", label: "Thành tiền (chốt)" },
-                                    { key: "payments", label: "Thanh toán Tiền mặt" },
-                                    { key: "payments", label: "Thanh toán  banking" },
-
+                                    { key: "payments_cash", label: "Thanh toán Tiền mặt" },
+                                    { key: "payments_banking", label: "Thanh toán banking" },
                                     { key: "status", label: "TRẠNG THÁI" },
-                                ].map(({ key, label }) => (
+                                ].filter(column => column.key === "house_bill" || visibleColumns[column.key]).map(({ key, label }) => (
                                     <TableCell
                                         key={key}
                                         isHeader
@@ -473,7 +576,7 @@ export default function ContentTable(props) {
                                     key={i + 1}
                                     className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                                 >
-                                    {/* House Bill */}
+                                    {/* House Bill - luôn hiển thị */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap">
                                         <NavLink
                                             to="/profile"
@@ -483,151 +586,160 @@ export default function ContentTable(props) {
                                         </NavLink>
                                     </TableCell>
 
-                                    {/* Thông tin người */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        {item.date_create}
-                                    </TableCell>
+                                    {/* Các cột khác chỉ hiển thị khi được chọn */}
+                                    {visibleColumns.Date && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap">
+                                            {item.date_create}
+                                        </TableCell>
+                                    )}
 
-                                    {/* Bill phụ */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                        {item.bill_employee}
-                                    </TableCell>
+                                    {visibleColumns.bill_employee && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.bill_employee || "..."}
+                                        </TableCell>
+                                    )}
 
-                                    {/* AWS */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                        {item.aws}
-                                    </TableCell>
+                                    {visibleColumns.awb && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.awb || "..."}
+                                        </TableCell>
+                                    )}
 
-                                    {/* Dịch vụ */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                                            {item.company_service}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                    {visibleColumns.company_service && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap">
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                                {item.company_service}
+                                            </span>
+                                        </TableCell>
+                                    )}
+
+                                    {visibleColumns.payment_bill_real && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                                             {formatCurrency(item.total_real)} VNĐ
-                                        </span>
-                                    </TableCell>
+                                        </TableCell>
+                                    )}
 
-                                    {/* Thành tiền */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        <div className="relative flex flex-col items-start space-y-2">
-                                            {
-                                                (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            openModal();
-                                                            setBillEdit(item);
-                                                        }}
-                                                        className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                                    >
-                                                        <PencilIcon className="w-5 h-5" />
-                                                    </button>)
-                                            }
+                                    {visibleColumns.price_order && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <div className="relative flex flex-col items-start space-y-2">
+                                                {
+                                                    (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                openModal();
+                                                                setBillEdit(item);
+                                                            }}
+                                                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5" />
+                                                        </button>)
+                                                }
 
-                                            {/* Giá trị tiền order */}
-                                            <div className="flex flex-col space-y-1 pt-6">
-                                                {/* Giá trị xanh */}
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
-                                                        {formatCurrency(item.priceOrder.total_complete)} VNĐ
-                                                    </span>
-                                                </div>
+                                                {/* Giá trị tiền order */}
+                                                <div className="flex flex-col space-y-1 pt-6">
+                                                    {/* Giá trị xanh */}
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                                                            {formatCurrency(item.priceOrder.total_complete)} VNĐ
+                                                        </span>
+                                                    </div>
 
-                                                {/* Giá trị đỏ */}
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
-                                                        {formatCurrency(item.priceOrder.total_process)} VNĐ
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        {formatCurrency(item.total_fake)} VNĐ
-                                    </TableCell>
-
-
-
-                                    {/* price payment */}
-                                    <TableCell TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300" >
-                                        <div className="relative flex flex-col items-start space-y-2">
-                                            {/* Nút để mở modal thanh toán */}
-                                            {
-                                                (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleViewPaymentDetails(item)}
-                                                        className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                                    >
-                                                        <PencilIcon className="w-5 h-5" />
-                                                    </button>)
-                                            }
-
-                                            {/* Giá trị tiền order */}
-                                            <div className="flex flex-col space-y-1 pt-6">
-                                                {/* Giá trị xanh */}
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
-                                                        {formatCurrency(item.pricePayment.payment_cash)} VNĐ
-                                                    </span>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300" >
-                                        <div className="relative flex flex-col items-start space-y-2">
-                                            {/* Nút để mở modal thanh toán */}
-                                            {
-                                                (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleViewPaymentDetails(item)}
-                                                        className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                                    >
-                                                        <PencilIcon className="w-5 h-5" />
-                                                    </button>)
-                                            }
-
-                                            {/* Giá trị tiền order */}
-                                            <div className="flex flex-col space-y-1 pt-6">
-
-                                                {/* Giá trị đỏ */}
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
-                                                        {formatCurrency(item.pricePayment.payment_card)} VNĐ
-                                                    </span>
+                                                    {/* Giá trị đỏ */}
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                                                            {formatCurrency(item.priceOrder.total_process)} VNĐ
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </TableCell>
+                                        </TableCell>
 
-                                    {/* Trạng thái */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center space-x-2">
-                                            <StatusBadge status={item.status_payment} />
+                                    )}
 
+                                    {visibleColumns.payment_bill_fake && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {formatCurrency(item.total_fake)} VNĐ
+                                        </TableCell>
+                                    )}
 
-                                            {authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER") ? (
-                                                <select
-                                                    value={item.status_payment || "pending"}
-                                                    onChange={(e) => handleUpdateStatus(item.bill_house, e.target.value)}
-                                                    className="ml-2 text-xs border border-gray-300 rounded p-1 bg-white dark:bg-gray-700 dark:border-gray-600"
-                                                >
-                                                    {availableStatuses.map((status) => (
-                                                        <option key={status.value} value={status.value}>
-                                                            {status.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            ) : null}
-                                        </div>
-                                    </TableCell>
+                                    {visibleColumns.payments_cash && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <div className="relative flex flex-col items-start space-y-2">
+                                                {/* Nút để mở modal thanh toán */}
+                                                {
+                                                    (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleViewPaymentDetails(item)}
+                                                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5" />
+                                                        </button>)
+                                                }
+
+                                                {/* Giá trị tiền order */}
+                                                <div className="flex flex-col space-y-1 pt-6">
+                                                    {/* Giá trị xanh */}
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                                                            {formatCurrency(item.pricePayment.payment_cash)} VNĐ
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                    )}
+
+                                    {visibleColumns.payments_banking && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <div className="relative flex flex-col items-start space-y-2">
+                                                {/* Nút để mở modal thanh toán */}
+                                                {
+                                                    (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleViewPaymentDetails(item)}
+                                                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5" />
+                                                        </button>)
+                                                }
+
+                                                {/* Giá trị tiền order */}
+                                                <div className="flex flex-col space-y-1 pt-6">
+                                                    {/* Giá trị xanh */}
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="px-2 py-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-md dark:bg-blue-900/50 dark:text-blue-300">
+                                                            {formatCurrency(item.pricePayment.payment_banking)} VNĐ
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                    )}
+
+                                    {visibleColumns.status && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center space-x-2">
+                                                <StatusBadge status={item.status_payment} />
+
+                                                {authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER") ? (
+                                                    <select
+                                                        value={item.status_payment || "pending"}
+                                                        onChange={(e) => handleUpdateStatus(item.bill_house, e.target.value)}
+                                                        className="ml-2 text-xs border border-gray-300 rounded p-1 bg-white dark:bg-gray-700 dark:border-gray-600"
+                                                    >
+                                                        {availableStatuses.map((status) => (
+                                                            <option key={status.value} value={status.value}>
+                                                                {status.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                ) : null}
+                                            </div>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))}
                         </TableBody>
