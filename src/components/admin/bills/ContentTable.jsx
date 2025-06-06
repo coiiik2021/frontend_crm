@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 
 import { NavLink } from "react-router";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
@@ -17,10 +17,260 @@ import {
     UpdateBillTRANSPORTER
 } from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
-import { PlusIcon, TrashIcon, XIcon } from "lucide-react";
+import { PlusIcon, TrashIcon, XIcon, InfoIcon, EyeIcon } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 
+// Thêm component OrderDetailModal với tabs
+const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
+    const [activeTab, setActiveTab] = useState("info");
 
+    if (!orderData) return null;
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} className="max-w-md m-4" showCloseButton={false}>
+            <div className="relative w-full p-4 bg-white rounded-xl dark:bg-gray-800 shadow-md">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                        EB{orderData.bill_house?.substring(0, 5)}
+                    </h3>
+                    <button
+                        onClick={onClose}
+                        className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                    >
+                        <XIcon className="w-5 h-5" />
+                    </button>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex border-b border-gray-200 dark:border-gray-700 mb-3">
+                    <button
+                        className={`px-3 py-2 text-xs font-medium ${activeTab === "info"
+                            ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+                            : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                            }`}
+                        onClick={() => setActiveTab("info")}
+                    >
+                        Thông tin người
+                    </button>
+                    <button
+                        className={`px-3 py-2 text-xs font-medium ${activeTab === "package"
+                            ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+                            : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                            }`}
+                        onClick={() => setActiveTab("package")}
+                    >
+                        Thông tin package
+                    </button>
+                    <button
+                        className={`px-3 py-2 text-xs font-medium ${activeTab === "other"
+                            ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+                            : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                            }`}
+                        onClick={() => setActiveTab("other")}
+                    >
+                        Thông tin khác
+                    </button>
+                </div>
+
+                {/* Tab Content */}
+                <div className="space-y-3 text-sm">
+                    {activeTab === "info" && (
+                        <div className="space-y-3">
+                            <div>
+                                <p className="text-gray-500 dark:text-gray-400">Người gửi:</p>
+                                <p className="font-medium">{orderData.information_human?.from || "N/A"}</p>
+                            </div>
+
+                            <div>
+                                <p className="text-gray-500 dark:text-gray-400">Người nhận:</p>
+                                <p className="font-medium">{orderData.information_human?.to || "N/A"}</p>
+                            </div>
+
+                            <div>
+                                <p className="text-gray-500 dark:text-gray-400">Địa chỉ gửi:</p>
+                                <p className="font-medium">{orderData.information_human?.address_from || "N/A"}</p>
+                            </div>
+
+                            <div>
+                                <p className="text-gray-500 dark:text-gray-400">Địa chỉ nhận:</p>
+                                <p className="font-medium">{orderData.information_human?.address_to || "N/A"}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === "package" && (
+                        <div className="space-y-3">
+                            <div className="border-b pb-2 mb-2 border-gray-200 dark:border-gray-700">
+                                <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">Package khai báo:</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <p className="text-gray-500 dark:text-gray-400">Số lượng:</p>
+                                        <p className="font-medium">{orderData.packageInfo_begin?.quantity || 0}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-gray-500 dark:text-gray-400">Cân nặng:</p>
+                                        <p className="font-medium">{orderData.packageInfo_begin?.total_weight || 0} KG</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">Package chốt:</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <p className="text-gray-500 dark:text-gray-400">Số lượng:</p>
+                                        <p className="font-medium">{orderData.packageInfo_end?.quantity || 0}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-gray-500 dark:text-gray-400">Cân nặng:</p>
+                                        <p className="font-medium">{orderData.packageInfo_end?.total_weight || 0} KG</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {orderData.packages && orderData.packages.length > 0 && (
+                                <div>
+                                    <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">Chi tiết package:</p>
+                                    <div className="space-y-2">
+                                        {orderData.packages.map((pkg, index) => (
+                                            <div key={index} className="text-xs bg-gray-50 dark:bg-gray-700/30 p-2 rounded">
+                                                <p>Package {index + 1}: {pkg.weight} KG</p>
+                                                <p>Kích thước: {pkg.length}x{pkg.width}x{pkg.height}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === "other" && (
+                        <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <p className="text-gray-500 dark:text-gray-400">Bill phụ:</p>
+                                    <p className="font-medium">{orderData.bill_employee || "N/A"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-500 dark:text-gray-400">AWB:</p>
+                                    <p className="font-medium">{orderData.awb || "N/A"}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <p className="text-gray-500 dark:text-gray-400">Dịch vụ:</p>
+                                    <p className="font-medium">{orderData.company_service || "N/A"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-500 dark:text-gray-400">Nước đến:</p>
+                                    <p className="font-medium">{orderData.country_name || "N/A"}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-gray-500 dark:text-gray-400">Trạng thái:</p>
+                                <p className="font-medium">{orderData.status || "N/A"}</p>
+                            </div>
+
+                            <div>
+                                <p className="text-gray-500 dark:text-gray-400">Ngày tạo:</p>
+                                <p className="font-medium">{orderData.created_at || "N/A"}</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <NavLink
+                        to={`/quan-ly/bill-content/${orderData.bill_house}`}
+                        className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                        Xem chi tiết đầy đủ →
+                    </NavLink>
+                </div>
+            </div>
+        </Modal>
+    );
+};
+
+// Thêm component cho tooltip thông tin nhanh
+const OrderInfoTooltip = ({ isVisible, orderData, position, onClose }) => {
+    if (!isVisible || !orderData) return null;
+
+    return (
+        <div
+            className="absolute z-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 w-80"
+            style={{
+                top: position.y + 10,
+                left: position.x + 10,
+                animation: 'fadeIn 0.2s ease-in-out'
+            }}
+        >
+            <div className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-semibold text-gray-800 dark:text-white">
+                        {orderData.bill_house ? `EB${orderData.bill_house.substring(0, 5)}` : 'Chi tiết'}
+                    </h4>
+                    <button
+                        onClick={onClose}
+                        className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                    >
+                        <XIcon className="w-4 h-4" />
+                    </button>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2">
+                        <div>
+                            <p className="text-gray-500 dark:text-gray-400">Bill phụ:</p>
+                            <p className="font-medium">{orderData.bill_employee || "N/A"}</p>
+                        </div>
+                        <div>
+                            <p className="text-gray-500 dark:text-gray-400">AWB:</p>
+                            <p className="font-medium">{orderData.awb || "N/A"}</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                        <div>
+                            <p className="text-gray-500 dark:text-gray-400">Dịch vụ:</p>
+                            <p className="font-medium">{orderData.company_service || "N/A"}</p>
+                        </div>
+                        <div>
+                            <p className="text-gray-500 dark:text-gray-400">Nước đến:</p>
+                            <p className="font-medium">{orderData.country_name || "N/A"}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p className="text-gray-500 dark:text-gray-400">Trạng thái:</p>
+                        <p className="font-medium">{orderData.status || "N/A"}</p>
+                    </div>
+
+                    <div>
+                        <p className="text-gray-500 dark:text-gray-400">Ngày tạo:</p>
+                        <p className="font-medium">{orderData.created_at || "N/A"}</p>
+                    </div>
+                </div>
+
+                <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                        onClick={() => {
+                            onClose();
+                            // Thêm logic để mở modal chi tiết đầy đủ ở đây
+                        }}
+                        className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                        Xem chi tiết đầy đủ →
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default function ContentTable(props) {
 
@@ -33,6 +283,38 @@ export default function ContentTable(props) {
 
     const [authorities, setAuthorities] = useState([]);
 
+    // Thêm state mới cho sidebar file
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [showFileSidebar, setShowFileSidebar] = useState(false);
+    const sidebarRef = useRef(null);
+
+    // Thêm state cho modal chi tiết đơn hàng
+    const [showOrderDetail, setShowOrderDetail] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+
+    // Thêm state cho tooltip thông tin nhanh
+    const [showTooltip, setShowTooltip] = useState(false);
+    const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+    // Thêm state để theo dõi đơn hàng đang được xem
+    const [highlightedOrderId, setHighlightedOrderId] = useState(null);
+
+    // Thêm state để theo dõi trạng thái modal sửa đơn hàng
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    // Xử lý click bên ngoài sidebar để đóng
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                setShowFileSidebar(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const [billEdit, setBillEdit] = useState({});
 
@@ -129,6 +411,80 @@ export default function ContentTable(props) {
 
     const { isOpen, openModal, closeModal } = useModal();
 
+    // Hàm mở modal chi tiết đơn hàng
+    const handleViewOrderDetail = (order) => {
+        // Bỏ highlight đơn hàng cũ (nếu có)
+        setHighlightedOrderId(null);
+
+        // Sau đó mới highlight đơn hàng mới
+        setSelectedOrder(order);
+        setShowOrderDetail(true);
+        setHighlightedOrderId(order.bill_house);
+    };
+
+    // Hàm hiển thị tooltip thông tin nhanh
+    const handleShowTooltip = (order, event) => {
+        // Nếu đang xem modal chi tiết, không thay đổi highlight
+        if (!showOrderDetail) {
+            setHighlightedOrderId(order.bill_house);
+        }
+
+        setSelectedOrder(order);
+        setTooltipPosition({ x: event.clientX, y: event.clientY });
+        setShowTooltip(true);
+    };
+
+    // Hàm đóng tooltip và bỏ highlight nếu không còn xem modal
+    const handleCloseTooltip = () => {
+        setShowTooltip(false);
+
+        // Chỉ bỏ highlight nếu không đang xem modal hoặc sidebar
+        if (!showOrderDetail && !showFileSidebar) {
+            setHighlightedOrderId(null);
+        } else if (showOrderDetail) {
+            // Nếu đang xem modal, đảm bảo highlight đúng đơn hàng đang xem
+            setHighlightedOrderId(selectedOrder?.bill_house || null);
+        } else if (showFileSidebar) {
+            // Nếu đang xem sidebar, giữ nguyên highlight
+        }
+    };
+
+    // Hàm đóng modal và bỏ highlight
+    const handleCloseModal = () => {
+        setShowOrderDetail(false);
+
+        // Chỉ bỏ highlight nếu không đang xem sidebar
+        if (!showFileSidebar) {
+            setHighlightedOrderId(null);
+        }
+    };
+
+    // Hàm xử lý khi xem file
+    const handleViewFile = (item) => {
+        // Bỏ highlight đơn hàng cũ (nếu có)
+        setHighlightedOrderId(null);
+
+        // Sau đó mới highlight đơn hàng mới
+        setSelectedFile({
+            name: `File ${item.bill_house}`,
+            awb: item.awb || "Không có thông tin AWB"
+        });
+        setShowFileSidebar(true);
+        setHighlightedOrderId(item.bill_house);
+    };
+
+    // Hàm đóng sidebar file và bỏ highlight nếu không còn xem modal
+    const handleCloseSidebar = () => {
+        setShowFileSidebar(false);
+
+        // Chỉ bỏ highlight nếu không đang xem modal
+        if (!showOrderDetail) {
+            setHighlightedOrderId(null);
+        } else {
+            // Nếu đang xem modal, đảm bảo highlight đúng đơn hàng đang xem
+            setHighlightedOrderId(selectedOrder?.bill_house || null);
+        }
+    };
 
     const handleSort = (key) => {
         if (sortKey === key) {
@@ -182,8 +538,49 @@ export default function ContentTable(props) {
 
     }
 
+    // Hàm mở modal sửa đơn hàng
+    const handleOpenEditModal = (item) => {
+        // Bỏ highlight đơn hàng cũ (nếu có)
+        setHighlightedOrderId(null);
+
+        // Sau đó mới highlight đơn hàng mới
+        setBillEdit(item);
+        openModal();
+        setIsEditModalOpen(true);
+        setHighlightedOrderId(item.bill_house);
+    };
+
+    // Hàm đóng modal sửa đơn hàng
+    const handleCloseEditModal = () => {
+        closeModal();
+        setIsEditModalOpen(false);
+
+        // Chỉ bỏ highlight nếu không đang xem modal chi tiết hoặc sidebar
+        if (!showOrderDetail && !showFileSidebar) {
+            setHighlightedOrderId(null);
+        } else if (showOrderDetail) {
+            // Nếu đang xem modal chi tiết, đảm bảo highlight đúng đơn hàng đang xem
+            setHighlightedOrderId(selectedOrder?.bill_house || null);
+        } else if (showFileSidebar) {
+            // Nếu đang xem sidebar, giữ nguyên highlight của đơn hàng đang xem file
+            setHighlightedOrderId(selectedFile?.name?.replace('File ', '') || null);
+        }
+    };
+
+    // Hàm lưu thay đổi
+    const handleSaveChanges = async () => {
+        await handleUpdateBill(billEdit);
+
+        // Đóng modal nhưng vẫn giữ highlight
+        closeModal();
+        setIsEditModalOpen(false);
+
+        // Giữ nguyên highlight sau khi lưu thay đổi
+        // Người dùng có thể thấy rõ đơn hàng vừa được cập nhật
+    };
+
     return (
-        <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
+        <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl relative">
 
             <div className="flex flex-col gap-2 px-4 py-4 border border-b-0 border-gray-100 dark:border-white/[0.05] rounded-t-xl sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
@@ -254,6 +651,34 @@ export default function ContentTable(props) {
                 </div>
             </div>
 
+            {/* File Sidebar */}
+            {showFileSidebar && (
+                <div
+                    ref={sidebarRef}
+                    className="fixed top-0 right-0 h-full w-2/5 bg-white dark:bg-gray-800 shadow-lg border-l border-gray-200 dark:border-gray-700 z-50 transition-all duration-300 ease-in-out overflow-auto pt-16" // Thêm pt-16 để tránh bị header che
+                >
+                    <div className="p-4 h-full flex flex-col">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                                AWB
+                            </h3>
+                            <button
+                                onClick={handleCloseSidebar}
+                                className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                            >
+                                <XIcon className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 p-4">
+                            <p className="text-gray-700 dark:text-gray-300">
+                                {selectedFile?.awb || "Không có thông tin AWB"}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="max-w-full overflow-x-auto custom-scrollbar">
                 <div>
                     <Table className="w-full rounded-lg overflow-hidden shadow-sm">
@@ -270,10 +695,9 @@ export default function ContentTable(props) {
                                     { key: "packageInfo_end", label: "PACKAGE CHỐT" },
 
                                     { key: "status", label: "TRẠNG THÁI" },
-                                    { key: "Action", label: (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) ? "Cập nhật thông tin" : "" }
-
-
-
+                                    { key: "Action", label: (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) ? "Cập nhật thông tin" : "" },
+                                    { key: "File", label: "File" },
+                                    { key: "Detail", label: "Chi tiết" } // Thêm cột mới
                                 ].map(({ key, label }) => (
                                     <TableCell
                                         key={key}
@@ -282,20 +706,22 @@ export default function ContentTable(props) {
                                     >
                                         <div className="flex items-center justify-between">
                                             <span>{label}</span>
-                                            <button
-                                                onClick={() => handleSort(key)}
-                                                className="ml-2 text-gray-400 hover:text-brand-500 transition-colors"
-                                            >
-                                                {sortKey === key ? (
-                                                    sortOrder === "asc" ? (
-                                                        <ChevronUpIcon className="h-4 w-4 text-brand-500" />
+                                            {key !== "Detail" && (
+                                                <button
+                                                    onClick={() => handleSort(key)}
+                                                    className="ml-2 text-gray-400 hover:text-brand-500 transition-colors"
+                                                >
+                                                    {sortKey === key ? (
+                                                        sortOrder === "asc" ? (
+                                                            <ChevronUpIcon className="h-4 w-4 text-brand-500" />
+                                                        ) : (
+                                                            <ChevronDownIcon className="h-4 w-4 text-brand-500" />
+                                                        )
                                                     ) : (
-                                                        <ChevronDownIcon className="h-4 w-4 text-brand-500" />
-                                                    )
-                                                ) : (
-                                                    <ArrowsUpDownIcon className="h-3 w-3" />
-                                                )}
-                                            </button>
+                                                        <ArrowsUpDownIcon className="h-3 w-3" />
+                                                    )}
+                                                </button>
+                                            )}
                                         </div>
                                     </TableCell>
                                 ))}
@@ -306,16 +732,24 @@ export default function ContentTable(props) {
                             {currentData.map((item, i) => (
                                 <TableRow
                                     key={i + 1}
-                                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                                    className={`transition-colors ${highlightedOrderId === item.bill_house
+                                        ? 'bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400'
+                                        : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                                        }`}
                                 >
                                     {/* House Bill */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <NavLink
-                                            to={`/quan-ly/bill-content/${item.bill_house}`}
-                                            className="font-medium text-brand-600 dark:text-brand-400 hover:underline"
+                                        <div
+                                            className={`font-medium hover:underline cursor-pointer ${highlightedOrderId === item.bill_house
+                                                ? 'text-blue-700 font-bold dark:text-blue-300'
+                                                : 'text-brand-600 dark:text-brand-400'
+                                                }`}
+                                            onMouseEnter={(e) => handleShowTooltip(item, e)}
+                                            onMouseLeave={handleCloseTooltip}
+                                            onClick={() => handleViewOrderDetail(item)}
                                         >
                                             EB{item.bill_house.substring(0, 5)}
-                                        </NavLink>
+                                        </div>
                                     </TableCell>
 
                                     {/* Thông tin người */}
@@ -387,15 +821,69 @@ export default function ContentTable(props) {
                                             <Button
                                                 variant="primary"
                                                 className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-                                                onClick={() => {
-                                                    setBillEdit(item);
-                                                    openModal();
-                                                }}
+                                                onClick={() => handleOpenEditModal(item)}
                                             >
                                                 Sửa
                                             </Button>
                                         ) : <></>}
 
+                                    </TableCell>
+
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex flex-col space-y-2">
+                                            {item.files && item.files.length > 0 ? (
+                                                item.files.map((file, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
+                                                            ? 'text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300'
+                                                            : 'text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400'
+                                                            }`}
+                                                        onClick={() => {
+                                                            console.log(`Clicked file: ${file.name || `File ${index + 1}`}`, file);
+                                                            setSelectedFile({
+                                                                name: file.name || `File ${index + 1}`,
+                                                                awb: item.awb || "Không có thông tin AWB"
+                                                            });
+                                                            setShowFileSidebar(true);
+                                                            setHighlightedOrderId(item.bill_house);
+                                                        }}
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                        </svg>
+                                                        <span className="truncate max-w-[120px]">{file.name || `File ${index + 1}`}</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div
+                                                    className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
+                                                        ? 'text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300'
+                                                        : 'text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400'
+                                                        }`}
+                                                    onClick={() => handleViewFile(item)}
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                    <span className="truncate max-w-[120px]">{`File 2`}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </TableCell>
+
+                                    {/* Thêm cell mới cho nút xem chi tiết */}
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        <button
+                                            onClick={() => handleViewOrderDetail(item)}
+                                            className={`inline-flex items-center justify-center w-7 h-7 transition-colors ${highlightedOrderId === item.bill_house
+                                                ? 'text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300'
+                                                : 'text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400'
+                                                }`}
+                                            title="Xem thông tin"
+                                        >
+                                            <InfoIcon className="w-5 h-5" />
+                                        </button>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -407,7 +895,7 @@ export default function ContentTable(props) {
                                             Hóa đơn: HB{billEdit.bill_house?.substring(0, 5)}
                                         </h3>
                                         <button
-                                            onClick={closeModal}
+                                            onClick={handleCloseEditModal}
                                             className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                                         >
                                             <XIcon className="w-5 h-5" />
@@ -602,16 +1090,14 @@ export default function ContentTable(props) {
                                         <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
                                             <button
                                                 type="button"
-                                                onClick={closeModal}
+                                                onClick={handleCloseEditModal}
                                                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
                                             >
                                                 Đóng
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={async () => {
-                                                    await handleUpdateBill(billEdit);
-                                                }}
+                                                onClick={handleSaveChanges}
                                                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             >
                                                 Lưu thay đổi
@@ -624,6 +1110,21 @@ export default function ContentTable(props) {
                     </Table >
                 </div >
             </div >
+
+            {/* Tooltip thông tin nhanh */}
+            <OrderInfoTooltip
+                isVisible={showTooltip}
+                orderData={selectedOrder}
+                position={tooltipPosition}
+                onClose={handleCloseTooltip}
+            />
+
+            {/* Modal chi tiết đơn hàng với tabs */}
+            <OrderDetailModal
+                isOpen={showOrderDetail}
+                onClose={handleCloseModal}
+                orderData={selectedOrder}
+            />
 
             <div className="border border-t-0 rounded-b-xl border-gray-100 py-4 pl-[18px] pr-4 dark:border-white/[0.05]">
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
@@ -643,3 +1144,21 @@ export default function ContentTable(props) {
         </div >
     );
 }
+
+{/* Thêm CSS cho animation */ }
+<style jsx>{`
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+        70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+    
+    .highlighted-row {
+        animation: pulse 2s infinite;
+    }
+`}</style>

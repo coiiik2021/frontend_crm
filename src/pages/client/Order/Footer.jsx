@@ -46,6 +46,7 @@ export default function Footer({ currentStep, setCurrentStep, products, setProdu
     const handleContinue = async () => {
         if (currentStep < 4) {
             if (validateProducts()) {
+                console.log(dataRequest, dataRequest);
                 setCurrentStep(currentStep + 1);
             }
         }
