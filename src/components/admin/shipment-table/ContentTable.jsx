@@ -434,7 +434,7 @@ export default function ContentTable(props) {
 
         // Định nghĩa mapping các cột
         const columnMapping = {
-            house_bill: { header: 'HOUSE BILL', width: 15 },
+            house_bill: { header: 'HOUSE BILL', width: 5 },
             Date: { header: 'NGÀY TẠO', width: 15 },
             bill_employee: { header: 'BILL PHỤ', width: 15 },
             awb: { header: 'AWB', width: 15 },
@@ -454,7 +454,6 @@ export default function ContentTable(props) {
 
         // Thiết lập cột cho worksheet
         worksheet.columns = columnsToExport.map(key => ({
-            header: columnMapping[key].header,
             key: key,
             width: columnMapping[key].width
         }));
