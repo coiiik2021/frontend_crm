@@ -86,6 +86,30 @@ export default function ContentTable(props) {
         );
     }
 
+    // Add this function to check if a date is today
+    function isToday(dateString) {
+        // Parse the input date string (format: "10:44:19 07:06:2025")
+        const parts = dateString.split(' ');
+        if (parts.length !== 2) return false;
+
+        const timePart = parts[0];
+        const datePart = parts[1];
+
+        const [day, month, year] = datePart.split(':');
+
+        // Create date object from the parsed components
+        const inputDate = new Date(year, month - 1, day);
+
+        // Get today's date with time set to 00:00:00
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Compare the dates (ignoring time)
+        return inputDate.getDate() === today.getDate() &&
+            inputDate.getMonth() === today.getMonth() &&
+            inputDate.getFullYear() === today.getFullYear();
+    }
+
     const filteredAndSortedData = useMemo(() => {
         return dataBill
             .filter((item) =>
@@ -578,12 +602,20 @@ export default function ContentTable(props) {
                                 >
                                     {/* House Bill - luôn hiển thị */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <NavLink
-                                            to="/profile"
-                                            className="font-medium text-brand-600 dark:text-brand-400 hover:underline"
-                                        >
-                                            EB{item.bill_house.substring(0, 5)}
-                                        </NavLink>
+                                        <div className="flex items-center">
+                                            <NavLink
+                                                to="/profile"
+                                                className="font-medium text-brand-600 dark:text-brand-400 hover:underline"
+                                            >
+                                                EB{item.bill_house.substring(0, 5)}
+                                            </NavLink>
+
+                                            {isToday(item.date_create) && (
+                                                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-md animate-pulse">
+                                                    NEW
+                                                </span>
+                                            )}
+                                        </div>
                                     </TableCell>
 
                                     {/* Các cột khác chỉ hiển thị khi được chọn */}

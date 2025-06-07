@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import PriceNetTable from "../../TableDataPrice/PriceNetTable";
 import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable";
-import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, GetShipperServiceCompany, PostNameService, PostPriceNet } from "../../../../service/api.admin.service";
+import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, GetShipperServiceCompany, PostNameService, PostPriceNet, PutService } from "../../../../service/api.admin.service";
 import Button from "../../../../elements/Button";
 import { useModal } from "../../../../hooks/useModal";
 import { Modal } from "../../ui/modal";
@@ -127,13 +127,12 @@ export default function ContentTable() {
                 country: editShipper.country,
                 contactName: editShipper.contactName,
                 phone: editShipper.phone,
-                tax: editShipper.tax
+                tax: editShipper.tax,
             }
         };
 
-        // await PutNameService(dataRequest);
+        await PutService(dataRequest);
 
-        // Update service list
         setServiceCompany((prev) => {
             return prev.map(service => service === tableType ? editNameService : service);
         });

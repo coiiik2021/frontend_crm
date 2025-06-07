@@ -3,13 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 
 import { NavLink } from "react-router";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHeader,
-    TableRow,
-} from "../ui/table";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import PaginationWithIcon from "../tables/DataTables/TableOne/PaginationWithIcon";
 import { Modal } from "../ui/modal/index.js";
 import Label from "../form/Label.js";
@@ -18,16 +12,13 @@ import { useModal } from "../../../hooks/useModal.js";
 import {
     GetAllBaseUser,
     PostBaseUser,
+
     UpdateBillCS,
-    UpdateBillTRANSPORTER,
+    UpdateBillTRANSPORTER
 } from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
 import { PlusIcon, TrashIcon, XIcon, InfoIcon, EyeIcon } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
-import InvoiceHomeBill from "./invoice/InvoiceHomeBill.jsx";
-import Invoice from "../invoice/Invoice";
-import BillContent from "./BillContent";
-import { set } from "date-fns";
 
 // Thêm component OrderDetailModal với tabs
 const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
@@ -36,12 +27,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
     if (!orderData) return null;
 
     return (
-        <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            className="max-w-md m-4"
-            showCloseButton={false}
-        >
+        <Modal isOpen={isOpen} onClose={onClose} className="max-w-md m-4" showCloseButton={false}>
             <div className="relative w-full p-4 bg-white rounded-xl dark:bg-gray-800 shadow-md">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-3">
@@ -93,32 +79,22 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
                         <div className="space-y-3">
                             <div>
                                 <p className="text-gray-500 dark:text-gray-400">Người gửi:</p>
-                                <p className="font-medium">
-                                    {orderData.information_human?.from || "N/A"}
-                                </p>
+                                <p className="font-medium">{orderData.information_human?.from || "N/A"}</p>
                             </div>
 
                             <div>
                                 <p className="text-gray-500 dark:text-gray-400">Người nhận:</p>
-                                <p className="font-medium">
-                                    {orderData.information_human?.to || "N/A"}
-                                </p>
+                                <p className="font-medium">{orderData.information_human?.to || "N/A"}</p>
                             </div>
 
                             <div>
                                 <p className="text-gray-500 dark:text-gray-400">Địa chỉ gửi:</p>
-                                <p className="font-medium">
-                                    {orderData.information_human?.addressFrom || "N/A"}
-                                </p>
+                                <p className="font-medium">{orderData.information_human?.address_from || "N/A"}</p>
                             </div>
 
                             <div>
-                                <p className="text-gray-500 dark:text-gray-400">
-                                    Địa chỉ nhận:
-                                </p>
-                                <p className="font-medium">
-                                    {orderData.information_human?.addressTo || "N/A"}
-                                </p>
+                                <p className="text-gray-500 dark:text-gray-400">Địa chỉ nhận:</p>
+                                <p className="font-medium">{orderData.information_human?.address_to || "N/A"}</p>
                             </div>
                         </div>
                     )}
@@ -126,70 +102,41 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
                     {activeTab === "package" && (
                         <div className="space-y-3">
                             <div className="border-b pb-2 mb-2 border-gray-200 dark:border-gray-700">
-                                <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Package khai báo:
-                                </p>
+                                <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">Package khai báo:</p>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <p className="text-gray-500 dark:text-gray-400">
-                                            Số lượng:
-                                        </p>
-                                        <p className="font-medium">
-                                            {orderData.packageInfo_begin?.quantity || 0}
-                                        </p>
+                                        <p className="text-gray-500 dark:text-gray-400">Số lượng:</p>
+                                        <p className="font-medium">{orderData.packageInfo_begin?.quantity || 0}</p>
                                     </div>
                                     <div>
-                                        <p className="text-gray-500 dark:text-gray-400">
-                                            Cân nặng:
-                                        </p>
-                                        <p className="font-medium">
-                                            {orderData.packageInfo_begin?.total_weight || 0} KG
-                                        </p>
+                                        <p className="text-gray-500 dark:text-gray-400">Cân nặng:</p>
+                                        <p className="font-medium">{orderData.packageInfo_begin?.total_weight || 0} KG</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div>
-                                <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Package chốt:
-                                </p>
+                                <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">Package chốt:</p>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <p className="text-gray-500 dark:text-gray-400">
-                                            Số lượng:
-                                        </p>
-                                        <p className="font-medium">
-                                            {orderData.packageInfo_end?.quantity || 0}
-                                        </p>
+                                        <p className="text-gray-500 dark:text-gray-400">Số lượng:</p>
+                                        <p className="font-medium">{orderData.packageInfo_end?.quantity || 0}</p>
                                     </div>
                                     <div>
-                                        <p className="text-gray-500 dark:text-gray-400">
-                                            Cân nặng:
-                                        </p>
-                                        <p className="font-medium">
-                                            {orderData.packageInfo_end?.total_weight || 0} KG
-                                        </p>
+                                        <p className="text-gray-500 dark:text-gray-400">Cân nặng:</p>
+                                        <p className="font-medium">{orderData.packageInfo_end?.total_weight || 0} KG</p>
                                     </div>
                                 </div>
                             </div>
 
                             {orderData.packages && orderData.packages.length > 0 && (
                                 <div>
-                                    <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Chi tiết package:
-                                    </p>
+                                    <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">Chi tiết package:</p>
                                     <div className="space-y-2">
                                         {orderData.packages.map((pkg, index) => (
-                                            <div
-                                                key={index}
-                                                className="text-xs bg-gray-50 dark:bg-gray-700/30 p-2 rounded"
-                                            >
-                                                <p>
-                                                    Package {index + 1}: {pkg.weight} KG
-                                                </p>
-                                                <p>
-                                                    Kích thước: {pkg.length}x{pkg.width}x{pkg.height}
-                                                </p>
+                                            <div key={index} className="text-xs bg-gray-50 dark:bg-gray-700/30 p-2 rounded">
+                                                <p>Package {index + 1}: {pkg.weight} KG</p>
+                                                <p>Kích thước: {pkg.length}x{pkg.width}x{pkg.height}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -203,28 +150,22 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <p className="text-gray-500 dark:text-gray-400">Bill phụ:</p>
-                                    <p className="font-medium">
-                                        {orderData.bill_employee || "Đang cập nhật..."}
-                                    </p>
+                                    <p className="font-medium">{orderData.bill_employee || "N/A"}</p>
                                 </div>
                                 <div>
                                     <p className="text-gray-500 dark:text-gray-400">AWB:</p>
-                                    <p className="font-medium">{orderData.awb || "Đang cập nhật..."}</p>
+                                    <p className="font-medium">{orderData.awb || "N/A"}</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <p className="text-gray-500 dark:text-gray-400">Dịch vụ:</p>
-                                    <p className="font-medium">
-                                        {orderData.company_service || "N/A"}
-                                    </p>
+                                    <p className="font-medium">{orderData.company_service || "N/A"}</p>
                                 </div>
                                 <div>
                                     <p className="text-gray-500 dark:text-gray-400">Nước đến:</p>
-                                    <p className="font-medium">
-                                        {orderData.country_name || "N/A"}
-                                    </p>
+                                    <p className="font-medium">{orderData.country_name || "N/A"}</p>
                                 </div>
                             </div>
 
@@ -235,7 +176,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
 
                             <div>
                                 <p className="text-gray-500 dark:text-gray-400">Ngày tạo:</p>
-                                <p className="font-medium">{orderData.date_create || "N/A"}</p>
+                                <p className="font-medium">{orderData.created_at || "N/A"}</p>
                             </div>
                         </div>
                     )}
@@ -265,15 +206,13 @@ const OrderInfoTooltip = ({ isVisible, orderData, position, onClose }) => {
             style={{
                 top: position.y + 10,
                 left: position.x + 10,
-                animation: "fadeIn 0.2s ease-in-out",
+                animation: 'fadeIn 0.2s ease-in-out'
             }}
         >
             <div className="p-3">
                 <div className="flex items-center justify-between mb-2">
                     <h4 className="text-sm font-semibold text-gray-800 dark:text-white">
-                        {orderData.bill_house
-                            ? `EB${orderData.bill_house.substring(0, 5)}`
-                            : "Chi tiết"}
+                        {orderData.bill_house ? `EB${orderData.bill_house.substring(0, 5)}` : 'Chi tiết'}
                     </h4>
                     <button
                         onClick={onClose}
@@ -298,9 +237,7 @@ const OrderInfoTooltip = ({ isVisible, orderData, position, onClose }) => {
                     <div className="grid grid-cols-2 gap-2">
                         <div>
                             <p className="text-gray-500 dark:text-gray-400">Dịch vụ:</p>
-                            <p className="font-medium">
-                                {orderData.company_service || "N/A"}
-                            </p>
+                            <p className="font-medium">{orderData.company_service || "N/A"}</p>
                         </div>
                         <div>
                             <p className="text-gray-500 dark:text-gray-400">Nước đến:</p>
@@ -336,6 +273,7 @@ const OrderInfoTooltip = ({ isVisible, orderData, position, onClose }) => {
 };
 
 export default function ContentTable(props) {
+
     const { dataBill } = props;
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -348,7 +286,6 @@ export default function ContentTable(props) {
     // Thêm state mới cho sidebar file
     const [selectedFile, setSelectedFile] = useState(null);
     const [showFileSidebar, setShowFileSidebar] = useState(false);
-    const [billContent, setBillContent] = useState(null);
     const sidebarRef = useRef(null);
 
     // Thêm state cho modal chi tiết đơn hàng
@@ -365,91 +302,19 @@ export default function ContentTable(props) {
     // Thêm state để theo dõi trạng thái modal sửa đơn hàng
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    // Thêm state để quản lý resize và hiển thị nút resize
-    const [sidebarWidth, setSidebarWidth] = useState(700);
-    const [isResizing, setIsResizing] = useState(false);
-
-    // Thêm state để quản lý các cột hiển thị
-    const [visibleColumns, setVisibleColumns] = useState({
-        house_bill: true,
-        information_human: true,
-        bill_employee: true,
-        awb: true,
-        company_service: true,
-        country_name: true,
-        packageInfo_begin: true,
-        packageInfo_end: true,
-        status: true,
-        Action: true,
-        File: true,
-        Detail: true
-    });
-
-    const [showColumnSelector, setShowColumnSelector] = useState(false);
-
-    // Thêm useRef để theo dõi dropdown
-    const columnSelectorRef = useRef(null);
-    const columnButtonRef = useRef(null);
-
-    // Thêm useEffect để xử lý click bên ngoài
+    // Xử lý click bên ngoài sidebar để đóng
     useEffect(() => {
         function handleClickOutside(event) {
-            if (showColumnSelector &&
-                columnSelectorRef.current &&
-                !columnSelectorRef.current.contains(event.target) &&
-                columnButtonRef.current &&
-                !columnButtonRef.current.contains(event.target)) {
-                setShowColumnSelector(false);
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                setShowFileSidebar(false);
             }
         }
 
-        // Thêm event listener
         document.addEventListener("mousedown", handleClickOutside);
-
-        // Cleanup event listener khi component unmount
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [showColumnSelector]);
-
-    // Hàm xử lý resize đơn giản
-    const startResize = (e) => {
-        e.preventDefault();
-        setIsResizing(true);
-
-        const startX = e.clientX;
-        const startWidth = sidebarWidth;
-
-        const doDrag = (e) => {
-            const newWidth = startWidth + (startX - e.clientX);
-            setSidebarWidth(Math.max(700, Math.min(newWidth, 1230)));
-        };
-
-        const stopDrag = () => {
-            setIsResizing(false);
-            document.removeEventListener("mousemove", doDrag);
-            document.removeEventListener("mouseup", stopDrag);
-        };
-
-        document.addEventListener("mousemove", doDrag);
-        document.addEventListener("mouseup", stopDrag);
-    };
-
-    // Thêm CSS khi đang resize
-    useEffect(() => {
-        if (isResizing) {
-            document.body.style.cursor = "ew-resize";
-            document.body.style.userSelect = "none";
-        } else {
-            document.body.style.cursor = "";
-            document.body.style.userSelect = "";
-        }
-
-        return () => {
-            document.body.style.cursor = "";
-            document.body.style.userSelect = "";
-        };
-    }, [isResizing]);
+    }, []);
 
     const [billEdit, setBillEdit] = useState({});
 
@@ -459,31 +324,26 @@ export default function ContentTable(props) {
             const decoded = jwtDecode(token);
             setAuthorities(decoded.authorities);
         }
-    }, []);
+    }, [])
 
     function StatusBadge({ status }) {
         // Kiểm tra nếu status là null/undefined thì gán giá trị mặc định
-        const safeStatus = status ? status.toLowerCase() : "";
+        const safeStatus = status ? status.toLowerCase() : '';
 
         const statusColors = {
-            completed:
-                "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300",
-            pending:
-                "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
-            processing:
-                "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
-            cancelled: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
-            unknown: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
-            default: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
+            completed: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+            pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+            processing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+            cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+            unknown: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+            default: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
         };
 
         const colorClass = statusColors[safeStatus] || statusColors.default;
 
         return (
-            <span
-                className={`px-2 py-1 text-xs font-medium rounded-full ${colorClass}`}
-            >
-                {status || "Unknown"}
+            <span className={`px-2 py-1 text-xs font-medium rounded-full ${colorClass}`}>
+                {status || 'Unknown'}
             </span>
         );
     }
@@ -492,11 +352,7 @@ export default function ContentTable(props) {
     function ChevronUpIcon({ className }) {
         return (
             <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-                <path
-                    fillRule="evenodd"
-                    d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                    clipRule="evenodd"
-                />
+                <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
             </svg>
         );
     }
@@ -504,11 +360,7 @@ export default function ContentTable(props) {
     function ChevronDownIcon({ className }) {
         return (
             <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-                <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                />
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
         );
     }
@@ -516,13 +368,36 @@ export default function ContentTable(props) {
     function ArrowsUpDownIcon({ className }) {
         return (
             <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-                <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414zM10 3a1 1 0 011 1v10a1 1 0 11-2 0V4a1 1 0 011-1z"
-                    clipRule="evenodd"
-                />
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414zM10 3a1 1 0 011 1v10a1 1 0 11-2 0V4a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
         );
+    }
+
+    // Add this function to check if a bill was created today
+    function isCreatedToday(dateCreate) {
+        if (!dateCreate) return false;
+
+        try {
+            // Parse the date_create string (format: "10:44:19 07:06:2025")
+            const parts = dateCreate.split(' ');
+            if (parts.length !== 2) return false;
+
+            const datePart = parts[1];
+            const [day, month, year] = datePart.split(':').map(Number);
+
+            // Get today's date
+            const today = new Date();
+
+            // Check if the date matches today
+            return (
+                day === today.getDate() &&
+                month - 1 === today.getMonth() && // JavaScript months are 0-indexed
+                year === today.getFullYear()
+            );
+        } catch (error) {
+            console.error("Error checking if date is today:", error);
+            return false;
+        }
     }
 
     const filteredAndSortedData = useMemo(() => {
@@ -554,7 +429,7 @@ export default function ContentTable(props) {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
-    const currentData = filteredAndSortedData.slice(startIndex, endIndex);
+    const currentData = (filteredAndSortedData.slice(startIndex, endIndex));
 
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const handlePageChange = (page) => {
@@ -619,17 +494,16 @@ export default function ContentTable(props) {
         // Sau đó mới highlight đơn hàng mới
         setSelectedFile({
             name: `File ${item.bill_house}`,
-            awb: item.awb || "Không có thông tin AWB",
+            awb: item.awb || "Không có thông tin AWB"
         });
         setShowFileSidebar(true);
-        setBillContent(item);
         setHighlightedOrderId(item.bill_house);
     };
 
     // Hàm đóng sidebar file và bỏ highlight nếu không còn xem modal
     const handleCloseSidebar = () => {
         setShowFileSidebar(false);
-        setBillContent(null);
+
         // Chỉ bỏ highlight nếu không đang xem modal
         if (!showOrderDetail) {
             setHighlightedOrderId(null);
@@ -648,7 +522,9 @@ export default function ContentTable(props) {
         }
     };
 
+
     const handleUpdateBill = async (bill) => {
+
         if (authorities.includes("TRANSPORTER") || authorities.includes("ADMIN")) {
             const dataRequest = {
                 id: bill.bill_house,
@@ -656,16 +532,16 @@ export default function ContentTable(props) {
                     weight: pkg.weight,
                     length: pkg.length,
                     height: pkg.height,
-                    width: pkg.width,
-                })),
-            };
+                    width: pkg.width
+                }))
+            }
             const dataResponse = await UpdateBillTRANSPORTER(dataRequest);
             console.log(dataResponse);
             currentData.map((item) => {
                 if (item.bill_house === bill.bill_house) {
                     item.packageInfo_end = dataResponse.packageInfo_end;
                 }
-            });
+            })
         }
         if (authorities.includes("CS") || authorities.includes("ADMIN")) {
             const updatedBill = {
@@ -673,7 +549,7 @@ export default function ContentTable(props) {
                 bill_employee: bill.bill_employee,
                 awb: bill.awb,
                 status: bill.status,
-            };
+            }
             await UpdateBillCS(updatedBill);
             currentData.map((item) => {
                 if (item.bill_house === bill.bill_house) {
@@ -682,10 +558,12 @@ export default function ContentTable(props) {
                     item.awb = bill.awb;
                     item.status = bill.status;
                 }
-            });
+            })
         }
         closeModal();
-    };
+
+
+    }
 
     // Hàm mở modal sửa đơn hàng
     const handleOpenEditModal = (item) => {
@@ -712,7 +590,7 @@ export default function ContentTable(props) {
             setHighlightedOrderId(selectedOrder?.bill_house || null);
         } else if (showFileSidebar) {
             // Nếu đang xem sidebar, giữ nguyên highlight của đơn hàng đang xem file
-            setHighlightedOrderId(selectedFile?.name?.replace("File ", "") || null);
+            setHighlightedOrderId(selectedFile?.name?.replace('File ', '') || null);
         }
     };
 
@@ -730,6 +608,7 @@ export default function ContentTable(props) {
 
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl relative">
+
             <div className="flex flex-col gap-2 px-4 py-4 border border-b-0 border-gray-100 dark:border-white/[0.05] rounded-t-xl sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                     <span className="text-gray-500 dark:text-gray-400"> Show </span>
@@ -769,69 +648,6 @@ export default function ContentTable(props) {
                         </span>
                     </div>
                     <span className="text-gray-500 dark:text-gray-400"> entries </span>
-
-                    {/* Thêm nút tùy chỉnh cột */}
-                    <button
-                        ref={columnButtonRef}
-                        onClick={() => setShowColumnSelector(!showColumnSelector)}
-                        className="ml-4 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 flex items-center"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        Tùy chỉnh cột
-                    </button>
-
-                    {/* Dropdown tùy chỉnh cột */}
-                    {showColumnSelector && (
-                        <div
-                            ref={columnSelectorRef}
-                            className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-3 top-16 dark:bg-gray-800 dark:border-gray-700"
-                        >
-                            <h3 className="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Hiển thị cột</h3>
-                            <div className="space-y-2 max-h-60 overflow-y-auto">
-                                {Object.keys(visibleColumns).map((column) => (
-                                    <div key={column} className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id={`col-${column}`}
-                                            checked={visibleColumns[column]}
-                                            onChange={() => {
-                                                // Nếu là house_bill thì không cho phép thay đổi
-                                                if (column === "house_bill") return;
-
-                                                setVisibleColumns({
-                                                    ...visibleColumns,
-                                                    [column]: !visibleColumns[column]
-                                                });
-                                            }}
-                                            disabled={column === "house_bill"} // Disable checkbox nếu là house_bill
-                                            className={`w-4 h-4 ${column === "house_bill"
-                                                ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
-                                                : "text-blue-600 bg-gray-100"} border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
-                                        />
-                                        <label htmlFor={`col-${column}`} className={`ml-2 text-sm ${column === "house_bill"
-                                            ? "text-gray-800 font-medium dark:text-gray-200"
-                                            : "text-gray-600 dark:text-gray-400"}`}>
-                                            {column === "house_bill" ? "HOUSE BILL" :
-                                                column === "information_human" ? "THÔNG TIN NGƯỜI" :
-                                                    column === "bill_employee" ? "BILL PHỤ" :
-                                                        column === "awb" ? "AWB" :
-                                                            column === "company_service" ? "DỊCH VỤ" :
-                                                                column === "country_name" ? "NƯỚC ĐẾN" :
-                                                                    column === "packageInfo_begin" ? "PACKAGE KHAI BÁO" :
-                                                                        column === "packageInfo_end" ? "PACKAGE CHỐT" :
-                                                                            column === "status" ? "TRẠNG THÁI" :
-                                                                                column === "Action" ? "CẬP NHẬT THÔNG TIN" :
-                                                                                    column === "File" ? "FILE" :
-                                                                                        column === "Detail" ? "CHI TIẾT" : column}
-                                        </label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 <div className="relative">
@@ -862,45 +678,32 @@ export default function ContentTable(props) {
                 </div>
             </div>
 
-            {/* File Sidebar - phiên bản đơn giản hóa */}
+            {/* File Sidebar */}
             {showFileSidebar && (
-                <>
-                    <div className="fixed inset-0  z-40" onClick={handleCloseSidebar} />
-                    <div
-                        style={{ width: `${sidebarWidth}px` }}
-                        className="fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg border-l border-gray-200 dark:border-gray-700 z-50 overflow-auto pt-16"
-                    >
-                        {/* Resize handle đơn giản */}
-                        <div
-                            className="absolute top-0 bottom-0 left-0 w-4 bg-transparent cursor-ew-resize z-10"
-                            onMouseDown={startResize}
-                        >
-                            {/* Chỉ báo trực quan */}
-                            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-20 bg-blue-500 opacity-70"></div>
+                <div
+                    ref={sidebarRef}
+                    className="fixed top-0 right-0 h-full w-2/5 bg-white dark:bg-gray-800 shadow-lg border-l border-gray-200 dark:border-gray-700 z-50 transition-all duration-300 ease-in-out overflow-auto pt-16" // Thêm pt-16 để tránh bị header che
+                >
+                    <div className="p-4 h-full flex flex-col">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                                AWB
+                            </h3>
+                            <button
+                                onClick={handleCloseSidebar}
+                                className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                            >
+                                <XIcon className="w-5 h-5" />
+                            </button>
                         </div>
 
-                        <div className="p-4 h-full flex flex-col">
-                            <div className="flex items-center justify-end mb-4">
-                                <button
-                                    onClick={handleCloseSidebar}
-                                    className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                                >
-                                    <XIcon className="w-5 h-5" />
-                                </button>
-                            </div>
-                            {/*
-              <div className="flex-1 p-4">
-                <p className="text-gray-700 dark:text-gray-300">
-                  <InvoiceHomeBill></InvoiceHomeBill>
-                </p>
-              </div>{" "}
-              */}
-                            <BillContent id={billContent?.bill_house}></BillContent>
-
-                            {/* <BillContent /> */}
+                        <div className="flex-1 p-4">
+                            <p className="text-gray-700 dark:text-gray-300">
+                                {selectedFile?.awb || "Không có thông tin AWB"}
+                            </p>
                         </div>
                     </div>
-                </>
+                </div>
             )}
 
             <div className="max-w-full overflow-x-auto custom-scrollbar">
@@ -917,32 +720,25 @@ export default function ContentTable(props) {
                                     { key: "country_name", label: "NƯỚC ĐẾN" },
                                     { key: "packageInfo_begin", label: "PACKAGE KHAI BÁO" },
                                     { key: "packageInfo_end", label: "PACKAGE CHỐT" },
+
                                     { key: "status", label: "TRẠNG THÁI" },
-                                    {
-                                        key: "Action",
-                                        label:
-                                            authorities.includes("ADMIN") ||
-                                                authorities.includes("CS") ||
-                                                authorities.includes("TRANSPORTER")
-                                                ? "Cập nhật thông tin"
-                                                : "",
-                                    },
+                                    { key: "Action", label: (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) ? "Cập nhật thông tin" : "" },
                                     { key: "File", label: "File" },
-                                    { key: "Detail", label: "Chi tiết" },
-                                ].filter(column => column.key === "house_bill" || visibleColumns[column.key]).map((column, i) => (
+                                    { key: "Detail", label: "Chi tiết" } // Thêm cột mới
+                                ].map(({ key, label }) => (
                                     <TableCell
-                                        key={column.key}
+                                        key={key}
                                         isHeader
                                         className="px-6 py-4 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs"
                                     >
                                         <div className="flex items-center justify-between">
-                                            <span>{column.label}</span>
-                                            {column.key !== "Detail" && (
+                                            <span>{label}</span>
+                                            {key !== "Detail" && (
                                                 <button
-                                                    onClick={() => handleSort(column.key)}
+                                                    onClick={() => handleSort(key)}
                                                     className="ml-2 text-gray-400 hover:text-brand-500 transition-colors"
                                                 >
-                                                    {sortKey === column.key ? (
+                                                    {sortKey === key ? (
                                                         sortOrder === "asc" ? (
                                                             <ChevronUpIcon className="h-4 w-4 text-brand-500" />
                                                         ) : (
@@ -964,224 +760,169 @@ export default function ContentTable(props) {
                                 <TableRow
                                     key={i + 1}
                                     className={`transition-colors ${highlightedOrderId === item.bill_house
-                                        ? "bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400"
-                                        : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                                        ? 'bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400'
+                                        : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
                                         }`}
                                 >
-                                    {/* House Bill - luôn hiển thị */}
+                                    {/* House Bill */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <div
-                                            className={`font-medium hover:underline cursor-pointer ${highlightedOrderId === item.bill_house
-                                                ? "text-blue-700 font-bold dark:text-blue-300"
-                                                : "text-brand-600 dark:text-brand-400"
-                                                }`}
-                                            onMouseEnter={(e) => handleShowTooltip(item, e)}
-                                            onMouseLeave={handleCloseTooltip}
-                                            onClick={() => handleViewOrderDetail(item)}
-                                        >
-                                            EB{item.bill_house.substring(0, 5)}
+                                        <div className="flex items-center">
+                                            <div
+                                                className={`font-medium hover:underline cursor-pointer ${highlightedOrderId === item.bill_house
+                                                    ? 'text-blue-700 font-bold dark:text-blue-300'
+                                                    : 'text-brand-600 dark:text-brand-400'
+                                                    }`}
+                                                onMouseEnter={(e) => handleShowTooltip(item, e)}
+                                                onMouseLeave={handleCloseTooltip}
+                                                onClick={() => handleViewOrderDetail(item)}
+                                            >
+                                                EB{item.bill_house.substring(0, 5)}
+                                            </div>
+
+                                            {isCreatedToday(item.date_create) && (
+                                                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-md animate-pulse">
+                                                    NEW
+                                                </span>
+                                            )}
                                         </div>
                                     </TableCell>
 
-                                    {/* Các cột khác chỉ hiển thị khi được chọn */}
-                                    {visibleColumns.information_human && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap">
-                                            <div className="space-y-1">
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    <span className="font-medium">Người gửi:</span>{" "}
-                                                    {item.information_human.from}
-                                                </p>
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    <span className="font-medium">Người nhận:</span>{" "}
-                                                    {item.information_human.to}
-                                                </p>
-                                            </div>
-                                        </TableCell>
-                                    )}
+                                    {/* Thông tin người */}
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                <span className="font-medium">Người gửi:</span> {item.information_human.from}
+                                            </p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                <span className="font-medium">Người nhận:</span> {item.information_human.to}
+                                            </p>
+                                        </div>
+                                    </TableCell>
 
                                     {/* Bill phụ */}
-                                    {visibleColumns.bill_employee && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                            {item?.bill_employee || "..."}
-                                        </TableCell>
-                                    )}
+                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                        {item.bill_employee}
+                                    </TableCell>
 
-                                    {/* AWB */}
-                                    {visibleColumns.awb && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                            {item?.awb || "..."}
-                                        </TableCell>
-                                    )}
+                                    {/* AWS */}
+                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                        {item.awb}
+                                    </TableCell>
 
                                     {/* Dịch vụ */}
-                                    {visibleColumns.company_service && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap">
-                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                                                {item.company_service}
-                                            </span>
-                                        </TableCell>
-                                    )}
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                            {item.company_service}
+                                        </span>
+                                    </TableCell>
 
                                     {/* Nước đến */}
-                                    {visibleColumns.country_name && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {item.country_name}
-                                        </TableCell>
-                                    )}
+                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        {item.country_name}
+                                    </TableCell>
 
                                     {/* Package khai báo */}
-                                    {visibleColumns.packageInfo_begin && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap">
-                                            <div className="space-y-1">
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    <span className="font-medium">SL:</span>{" "}
-                                                    {item.packageInfo_begin.quantity}
-                                                </p>
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    <span className="font-medium">Cân nặng:</span>{" "}
-                                                    {item.packageInfo_begin.total_weight} KG
-                                                </p>
-                                            </div>
-                                        </TableCell>
-                                    )}
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                <span className="font-medium">SL:</span> {item.packageInfo_begin.quantity}
+                                            </p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                <span className="font-medium">Cân nặng:</span> {item.packageInfo_begin.total_weight} KG
+                                            </p>
+                                        </div>
+                                    </TableCell>
 
                                     {/* Package chốt */}
-                                    {visibleColumns.packageInfo_end && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap">
-                                            <div className="space-y-1">
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    <span className="font-medium">SL:</span>{" "}
-                                                    {item?.packageInfo_end?.quantity}
-                                                </p>
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    <span className="font-medium">Cân nặng:</span>{" "}
-                                                    {item?.packageInfo_end?.total_weight} KG
-                                                </p>
-                                            </div>
-                                        </TableCell>
-                                    )}
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                <span className="font-medium">SL:</span> {item?.packageInfo_end?.quantity}
+                                            </p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                <span className="font-medium">Cân nặng:</span> {item?.packageInfo_end?.total_weight} KG
+                                            </p>
+                                        </div>
+                                    </TableCell>
+
+
 
                                     {/* Trạng thái */}
-                                    {visibleColumns.status && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap">
-                                            <StatusBadge status={item.status} />
-                                        </TableCell>
-                                    )}
-
-                                    {/* Cập nhật thông tin */}
-                                    {visibleColumns.Action && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap">
-                                            {item.status !== "Hoàn thành" &&
-                                                (authorities.includes("ADMIN") ||
-                                                    authorities.includes("CS") ||
-                                                    authorities.includes("TRANSPORTER")) ? (
-                                                <Button
-                                                    variant="primary"
-                                                    className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-                                                    onClick={() => handleOpenEditModal(item)}
-                                                >
-                                                    Sửa
-                                                </Button>
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </TableCell>
-                                    )}
-
-                                    {/* File */}
-                                    {visibleColumns.File && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex flex-col space-y-2">
-                                                {item.files && item.files.length > 0 ? (
-                                                    item.files.map((file, index) => (
-                                                        <div
-                                                            key={index}
-                                                            className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
-                                                                ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                                                : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
-                                                                }`}
-                                                            onClick={() => {
-                                                                console.log(
-                                                                    `Clicked file: ${file.name || `File ${index + 1}`
-                                                                    }`,
-                                                                    file
-                                                                );
-                                                                setSelectedFile({
-                                                                    name: file.name || `File ${index + 1}`,
-                                                                    awb: item.awb || "Không có thông tin AWB",
-                                                                });
-                                                                setShowFileSidebar(true);
-                                                                setBillContent(item);
-                                                                setHighlightedOrderId(item.bill_house);
-                                                            }}
-                                                        >
-                                                            <svg
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                className="h-5 w-5"
-                                                                fill="none"
-                                                                viewBox="0 0 24 24"
-                                                                stroke="currentColor"
-                                                            >
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={2}
-                                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                                />
-                                                            </svg>
-                                                            <span className="truncate max-w-[120px]">
-                                                                {file.name || `File ${index + 1}`}
-                                                            </span>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <div
-                                                        className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
-                                                            ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                                            : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
-                                                            }`}
-                                                        onClick={() => handleViewFile(item)}
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            className="h-5 w-5"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                            stroke="currentColor"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                            />
-                                                        </svg>
-                                                        <span className="truncate max-w-[120px]">{`File 2`}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                    )}
-
-                                    {/* Chi tiết */}
-                                    {visibleColumns.Detail && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap">
-                                            <button
-                                                onClick={() => handleViewOrderDetail(item)}
-                                                className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        <StatusBadge status={item.status} />
+                                    </TableCell>
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        {item.status !== "Hoàn thành" && (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) ? (
+                                            <Button
+                                                variant="primary"
+                                                className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+                                                onClick={() => handleOpenEditModal(item)}
                                             >
-                                                <InfoIcon className="w-4 h-4" />
-                                                <span>Chi tiết</span>
-                                            </button>
-                                        </TableCell>
-                                    )}
+                                                Sửa
+                                            </Button>
+                                        ) : <></>}
+
+                                    </TableCell>
+
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex flex-col space-y-2">
+                                            {item.files && item.files.length > 0 ? (
+                                                item.files.map((file, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
+                                                            ? 'text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300'
+                                                            : 'text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400'
+                                                            }`}
+                                                        onClick={() => {
+                                                            console.log(`Clicked file: ${file.name || `File ${index + 1}`}`, file);
+                                                            setSelectedFile({
+                                                                name: file.name || `File ${index + 1}`,
+                                                                awb: item.awb || "Không có thông tin AWB"
+                                                            });
+                                                            setShowFileSidebar(true);
+                                                            setHighlightedOrderId(item.bill_house);
+                                                        }}
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                        </svg>
+                                                        <span className="truncate max-w-[120px]">{file.name || `File ${index + 1}`}</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div
+                                                    className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
+                                                        ? 'text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300'
+                                                        : 'text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400'
+                                                        }`}
+                                                    onClick={() => handleViewFile(item)}
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                    <span className="truncate max-w-[120px]">{`File 2`}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </TableCell>
+
+                                    {/* Thêm cell mới cho nút xem chi tiết */}
+                                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                                        <button
+                                            onClick={() => handleViewOrderDetail(item)}
+                                            className={`inline-flex items-center justify-center w-7 h-7 transition-colors ${highlightedOrderId === item.bill_house
+                                                ? 'text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300'
+                                                : 'text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400'
+                                                }`}
+                                            title="Xem thông tin"
+                                        >
+                                            <InfoIcon className="w-5 h-5" />
+                                        </button>
+                                    </TableCell>
                                 </TableRow>
                             ))}
-                            <Modal
-                                isOpen={isOpen}
-                                onClose={closeModal}
-                                className="max-w-[800px] m-4"
-                            >
+                            <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[800px] m-4">
                                 <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
                                     {/* Header */}
                                     <div className="flex items-center justify-between mb-6">
@@ -1198,15 +939,16 @@ export default function ContentTable(props) {
 
                                     {/* Form */}
                                     <form className="space-y-6">
+
+
                                         {/* Package Section */}
-                                        {(authorities.includes("TRANSPORTER") ||
-                                            authorities.includes("ADMIN")) && (
+                                        {
+                                            (authorities.includes("TRANSPORTER") || authorities.includes("ADMIN")) && (
                                                 <div className="space-y-4">
                                                     <div className="flex items-center justify-between">
                                                         <div>
                                                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                KG Chốt (SL:{" "}
-                                                                {billEdit.packageInfo_end?.quantity || 0} /{" "}
+                                                                KG Chốt (SL: {billEdit.packageInfo_end?.quantity || 0} /{" "}
                                                                 {billEdit.packageInfo_end?.total_weight || 0} KG)
                                                             </h4>
                                                         </div>
@@ -1217,14 +959,11 @@ export default function ContentTable(props) {
                                                                     weight: "",
                                                                     length: "",
                                                                     height: "",
-                                                                    width: "",
+                                                                    width: ""
                                                                 };
                                                                 setBillEdit({
                                                                     ...billEdit,
-                                                                    packages: [
-                                                                        ...(billEdit.packages || []),
-                                                                        newPackage,
-                                                                    ],
+                                                                    packages: [...(billEdit.packages || []), newPackage]
                                                                 });
                                                             }}
                                                             className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
@@ -1248,15 +987,9 @@ export default function ContentTable(props) {
                                                                         type="number"
                                                                         value={pkg.weight || ""}
                                                                         onChange={(e) => {
-                                                                            const updatedPackages = [
-                                                                                ...billEdit.packages,
-                                                                            ];
-                                                                            updatedPackages[index].weight =
-                                                                                e.target.value;
-                                                                            setBillEdit({
-                                                                                ...billEdit,
-                                                                                packages: updatedPackages,
-                                                                            });
+                                                                            const updatedPackages = [...billEdit.packages];
+                                                                            updatedPackages[index].weight = e.target.value;
+                                                                            setBillEdit({ ...billEdit, packages: updatedPackages });
                                                                         }}
                                                                         placeholder="0.00"
                                                                         className="w-full"
@@ -1270,15 +1003,9 @@ export default function ContentTable(props) {
                                                                         type="number"
                                                                         value={pkg.length || ""}
                                                                         onChange={(e) => {
-                                                                            const updatedPackages = [
-                                                                                ...billEdit.packages,
-                                                                            ];
-                                                                            updatedPackages[index].length =
-                                                                                e.target.value;
-                                                                            setBillEdit({
-                                                                                ...billEdit,
-                                                                                packages: updatedPackages,
-                                                                            });
+                                                                            const updatedPackages = [...billEdit.packages];
+                                                                            updatedPackages[index].length = e.target.value;
+                                                                            setBillEdit({ ...billEdit, packages: updatedPackages });
                                                                         }}
                                                                         placeholder="0.00"
                                                                         className="w-full"
@@ -1291,15 +1018,9 @@ export default function ContentTable(props) {
                                                                         type="number"
                                                                         value={pkg.height || ""}
                                                                         onChange={(e) => {
-                                                                            const updatedPackages = [
-                                                                                ...billEdit.packages,
-                                                                            ];
-                                                                            updatedPackages[index].height =
-                                                                                e.target.value;
-                                                                            setBillEdit({
-                                                                                ...billEdit,
-                                                                                packages: updatedPackages,
-                                                                            });
+                                                                            const updatedPackages = [...billEdit.packages];
+                                                                            updatedPackages[index].height = e.target.value;
+                                                                            setBillEdit({ ...billEdit, packages: updatedPackages });
                                                                         }}
                                                                         placeholder="0.00"
                                                                         className="w-full"
@@ -1312,15 +1033,9 @@ export default function ContentTable(props) {
                                                                         type="number"
                                                                         value={pkg.width || ""}
                                                                         onChange={(e) => {
-                                                                            const updatedPackages = [
-                                                                                ...billEdit.packages,
-                                                                            ];
-                                                                            updatedPackages[index].width =
-                                                                                e.target.value;
-                                                                            setBillEdit({
-                                                                                ...billEdit,
-                                                                                packages: updatedPackages,
-                                                                            });
+                                                                            const updatedPackages = [...billEdit.packages];
+                                                                            updatedPackages[index].width = e.target.value;
+                                                                            setBillEdit({ ...billEdit, packages: updatedPackages });
                                                                         }}
                                                                         placeholder="0.00"
                                                                         className="w-full"
@@ -1333,14 +1048,8 @@ export default function ContentTable(props) {
                                                                         <button
                                                                             type="button"
                                                                             onClick={() => {
-                                                                                const updatedPackages =
-                                                                                    billEdit.packages.filter(
-                                                                                        (_, i) => i !== index
-                                                                                    );
-                                                                                setBillEdit({
-                                                                                    ...billEdit,
-                                                                                    packages: updatedPackages,
-                                                                                });
+                                                                                const updatedPackages = billEdit.packages.filter((_, i) => i !== index);
+                                                                                setBillEdit({ ...billEdit, packages: updatedPackages });
                                                                             }}
                                                                             className="flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:hover:text-red-400"
                                                                         >
@@ -1353,79 +1062,64 @@ export default function ContentTable(props) {
                                                         ))}
                                                     </div>
                                                 </div>
-                                            )}
-                                        {(authorities.includes("CS") ||
-                                            authorities.includes("ADMIN")) && (
-                                                <>
-                                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                                        {/* Bill Phụ */}
-                                                        <div className="space-y-2" hidden>
-                                                            <Label className="text-sm font-medium">
-                                                                Bill Phụ
-                                                            </Label>
-                                                            <Input type="text" value={billEdit.id || ""} />
+                                            )
+                                        }
+                                        {
+                                            (authorities.includes("CS") || authorities.includes("ADMIN")) && (
+                                                (
+                                                    <>
+                                                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                                            {/* Bill Phụ */}
+                                                            <div className="space-y-2" hidden>
+                                                                <Label className="text-sm font-medium">Bill Phụ</Label>
+                                                                <Input
+                                                                    type="text"
+                                                                    value={billEdit.id || ""}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-sm font-medium">Bill Phụ</Label>
+                                                                <Input
+                                                                    type="text"
+                                                                    value={billEdit.bill_employee || ""}
+                                                                    onChange={(e) => setBillEdit({ ...billEdit, bill_employee: e.target.value })}
+                                                                    placeholder="Nhập Bill Phụ"
+                                                                    className="w-full"
+                                                                />
+                                                            </div>
+
+                                                            {/* AWB */}
+                                                            <div className="space-y-2">
+                                                                <Label className="text-sm font-medium">AWB</Label>
+                                                                <Input
+                                                                    type="text"
+                                                                    value={billEdit.awb || ""}
+                                                                    onChange={(e) => setBillEdit({ ...billEdit, awb: e.target.value })}
+                                                                    placeholder="Nhập AWB"
+                                                                    className="w-full"
+                                                                />
+                                                            </div>
                                                         </div>
+                                                        {/* Status */}
                                                         <div className="space-y-2">
-                                                            <Label className="text-sm font-medium">
-                                                                Bill Phụ
-                                                            </Label>
-                                                            <Input
-                                                                type="text"
-                                                                value={billEdit.bill_employee || ""}
-                                                                onChange={(e) =>
-                                                                    setBillEdit({
-                                                                        ...billEdit,
-                                                                        bill_employee: e.target.value,
-                                                                    })
-                                                                }
-                                                                placeholder="Nhập Bill Phụ"
-                                                                className="w-full"
-                                                            />
+                                                            <Label className="text-sm font-medium">Trạng thái</Label>
+                                                            <select
+                                                                value={billEdit.status || ""}
+                                                                onChange={(e) => setBillEdit({ ...billEdit, status: e.target.value })}
+                                                                className="w-full px-3 py-2 text-sm border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            >
+                                                                <option value="complete">Hoàn thành</option>
+                                                                <option value="waiting">Chờ xử lý</option>
+                                                                <option value="processing">Đã tiếp nhận hàng</option>
+                                                                <option value="shipping">Vận chuyển</option>
+                                                                <option value="cancelled">Đã hủy</option>
+                                                            </select>
                                                         </div>
 
-                                                        {/* AWB */}
-                                                        <div className="space-y-2">
-                                                            <Label className="text-sm font-medium">AWB</Label>
-                                                            <Input
-                                                                type="text"
-                                                                value={billEdit.awb || ""}
-                                                                onChange={(e) =>
-                                                                    setBillEdit({
-                                                                        ...billEdit,
-                                                                        awb: e.target.value,
-                                                                    })
-                                                                }
-                                                                placeholder="Nhập AWB"
-                                                                className="w-full"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    {/* Status */}
-                                                    <div className="space-y-2">
-                                                        <Label className="text-sm font-medium">
-                                                            Trạng thái
-                                                        </Label>
-                                                        <select
-                                                            value={billEdit.status || ""}
-                                                            onChange={(e) =>
-                                                                setBillEdit({
-                                                                    ...billEdit,
-                                                                    status: e.target.value,
-                                                                })
-                                                            }
-                                                            className="w-full px-3 py-2 text-sm border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                        >
-                                                            <option value="complete">Hoàn thành</option>
-                                                            <option value="waiting">Chờ xử lý</option>
-                                                            <option value="processing">
-                                                                Đã tiếp nhận hàng
-                                                            </option>
-                                                            <option value="shipping">Vận chuyển</option>
-                                                            <option value="cancelled">Đã hủy</option>
-                                                        </select>
-                                                    </div>
-                                                </>
-                                            )}
+                                                    </>
+                                                )
+                                            )
+                                        }
 
                                         {/* Action Buttons */}
                                         <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
@@ -1448,9 +1142,9 @@ export default function ContentTable(props) {
                                 </div>
                             </Modal>
                         </TableBody>
-                    </Table>
-                </div>
-            </div>
+                    </Table >
+                </div >
+            </div >
 
             {/* Tooltip thông tin nhanh */}
             <OrderInfoTooltip
@@ -1460,7 +1154,6 @@ export default function ContentTable(props) {
                 onClose={handleCloseTooltip}
             />
 
-            {/* Modal chi tiết đơn hàng với tabs */}
             <OrderDetailModal
                 isOpen={showOrderDetail}
                 onClose={handleCloseModal}
@@ -1482,38 +1175,24 @@ export default function ContentTable(props) {
                     />
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
-{
-    /* Thêm CSS cho animation */
-}
+{/* Thêm CSS cho animation */ }
 <style jsx>{`
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+        70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
     }
-  }
-
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+    
+    .highlighted-row {
+        animation: pulse 2s infinite;
     }
-    70% {
-      box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-    }
-  }
-
-  .highlighted-row {
-    animation: pulse 2s infinite;
-  }
-`}</style>;
+`}</style>
