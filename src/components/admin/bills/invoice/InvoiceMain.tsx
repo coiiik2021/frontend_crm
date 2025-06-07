@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ExcelJS from 'exceljs';
+import { GetShipperServiceCompany } from "../../../../service/api.admin.service.jsx"
 
 
 interface RecipientInfo {
@@ -59,6 +60,25 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
   const [showProductsForm, setShowProductsForm] = useState(true);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
+  const [dataShipper, setDataShipper] = useState({
+
+
+  });
+
+  useEffect(() => {
+    const loadData = async () => {
+      const dataResponse = await GetShipperServiceCompany(selectedService.carrier, selectedService.service);
+      console.log("shipper", dataResponse);
+
+      setDataShipper(dataResponse);
+    }
+
+    loadData();
+    if (Object.keys(dataShipper).length > 0) {
+      invoiceData.shipper = dataShipper;
+    }
+  }, []);
+
   // Tạo invoiceData từ props
   const invoiceData = {
     invoiceNo: "INVOICE",
@@ -82,21 +102,12 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
 
 
 
-    shipper: {
-      name: "CÔNG TY TNHH THƯƠNG MẠI VÀ DỊCH VỤ VẬN CHUYỂN QUỐC TẾ VIỆT NAM",
-      address: "Số 1, Đường số 2, Phường 3, Quận 4, TP.HCM",
-      phone: "0123456789",
-      email: "info@example.com",
-      areaCode: "12345",
-      country: "VIETNAM",
-      tax: "0399321378",
-      contactName: "CÔNG TY TNHH THƯƠNG MẠI VÀ DỊCH VỤ VẬN CHUYỂN QUỐC TẾ VIỆT NAM"
-    },
+    shipper: dataShipper,
 
     consignee: {
       name: recipientInfo.name,
       company: recipientInfo.company,
-      address: `${recipientInfo.street}, ${recipientInfo.city}, ${recipientInfo.state} ${recipientInfo.postCode}`,
+      address: `${recipientInfo.street}, ${recipientInfo.city}, ${recipientInfo.state}, ${recipientInfo.country}`,
       phone: recipientInfo.phone,
       email: recipientInfo.email,
       country: recipientInfo.country,

@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import ExcelJS from 'exceljs';
+import { GetShipperServiceCompany } from "../../../service/api.admin.service.jsx";
 
 export default function FormDetailOrder({ addressBackup, recipientInfo, packages, products, productsTotal, selectedService, senderInfo, dataRequest, setDataRequest }) {
     // Thêm state để kiểm soát việc hiển thị form địa chỉ
     const [showAddressForm, setShowAddressForm] = useState(true);
+
+    const [shipper, setShipper] = useState({});
 
     // Các state hiện có
     const [showProductsForm, setShowProductsForm] = useState(true);
@@ -30,20 +33,17 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         insuranceValue: "9.5",
 
         // Thông tin người gửi (cố định)
-        shipper: {
-            name: "CÔNG TY TNHH THƯƠNG MẠI VÀ DỊCH VỤ VẬN CHUYỂN QUỐC TẾ VIỆT NAM",
-            address: "Số 1, Đường số 2, Phường 3, Quận 4, TP.HCM",
-            phone: "0123456789000",
-            email: "info@example.com"
-        },
+        shipper: shipper,
 
         consignee: {
             name: recipientInfo.name,
             company: recipientInfo.company,
-            address: `${recipientInfo.street}, ${recipientInfo.city}, ${recipientInfo.state} ${recipientInfo.postCode}`,
+            address: `${recipientInfo.street}, ${recipientInfo.city}, ${recipientInfo.state}, ${recipientInfo.country}`,
             phone: recipientInfo.phone,
             email: recipientInfo.email,
-            country: recipientInfo.country
+            country: recipientInfo.country,
+            postCode: recipientInfo.postCode,
+            contactName: recipientInfo.fullName
         },
 
 
@@ -121,13 +121,25 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
     };
 
     useEffect(() => {
-        console.log("recipientInfo", recipientInfo);
-        console.log("packages", packages);
-        console.log("products", products);
-        console.log("productsTotal", productsTotal);
-        console.log("selectedService", selectedService);
-        console.log("dataRequest", dataRequest);
-        console.log("setDataRequest", setDataRequest);
+
+        const loadData = async () => {
+
+            const dataResponse = await GetShipperServiceCompany(selectedService.carrier, selectedService.service);
+            console.log("shipper", dataResponse);
+
+            setShipper(dataResponse);
+        }
+
+        loadData();
+        invoiceData.shipper = shipper;
+        // invoiceData.shipper = dataResponse;
+        // console.log("recipientInfo", recipientInfo);
+        // console.log("packages", packages);
+        // console.log("products", products);
+        // console.log("productsTotal", productsTotal);
+        // console.log("selectedService", selectedService);
+        // console.log("dataRequest", dataRequest);
+        // console.log("setDataRequest", setDataRequest);
     }, [])
 
     const [priceNet, setPriceNet] = useState(selectedService.totalPrice);
@@ -503,11 +515,39 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
             {/* Invoice Info */}
             <div className="flex justify-between mb-8">
                 <div className="w-1/2">
-                    <p className="font-semibold">SHIPPER</p>
-                    <p>Company Name: {invoiceData.shipper.name}</p>
-                    <p>Address: {invoiceData.shipper.address}</p>
-                    <p>Phone: {invoiceData.shipper.phone}</p>
-                    <p>Email: {invoiceData.shipper.email}</p>
+                    <p className="font-semibold mb-2">SHIPPER</p>
+                    <table className="w-full text-left border-collapse">
+                        <tbody>
+                            <tr className="border-b border-gray-100">
+                                <td className="py-1 pr-1 text-gray-600 w-28 text-sm">Company Name:</td>
+                                <td className="py-1 italic text-xs">{invoiceData.shipper.companyName}</td>
+                            </tr>
+                            <tr className="border-b border-gray-100">
+                                <td className="py-1 pr-1 text-gray-600 text-sm">Address:</td>
+                                <td className="py-1 italic text-xs">{invoiceData.shipper.address}</td>
+                            </tr>
+                            <tr className="border-b border-gray-100">
+                                <td className="py-1 pr-1 text-gray-600 text-sm">Area Code:</td>
+                                <td className="py-1 italic text-xs">{invoiceData.shipper.areaCode}</td>
+                            </tr>
+                            <tr className="border-b border-gray-100">
+                                <td className="py-1 pr-1 text-gray-600 text-sm">State/Country:</td>
+                                <td className="py-1 italic text-xs">{invoiceData.shipper.country}</td>
+                            </tr>
+                            <tr className="border-b border-gray-100">
+                                <td className="py-1 pr-1 text-gray-600 text-sm">Tax code:</td>
+                                <td className="py-1 italic text-xs">{invoiceData.shipper.tax}</td>
+                            </tr>
+                            <tr className="border-b border-gray-100">
+                                <td className="py-1 pr-1 text-gray-600 text-sm">Contact Name:</td>
+                                <td className="py-1 italic text-xs">{invoiceData.shipper.contactName}</td>
+                            </tr>
+                            <tr className="border-b border-gray-100">
+                                <td className="py-1 pr-1 text-gray-600 text-sm">Phone:</td>
+                                <td className="py-1 italic text-xs">{invoiceData.shipper.phone}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <div className="w-1/2 text-right">
@@ -527,11 +567,35 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
 
             {/* Consignee */}
             <div className="mb-8">
-                <p className="font-semibold">CONSIGNEE</p>
-                <p>Company Name: {invoiceData.consignee.company}</p>
-                <p>Address: {invoiceData.consignee.address}</p>
-                <p>Email: {invoiceData.consignee.email}</p>
-                <p>Phone: {invoiceData.consignee.phone}</p>
+                <p className="font-semibold mb-2">CONSIGNEE</p>
+                <table className="w-full text-left border-collapse">
+                    <tbody>
+                        <tr className="border-b border-gray-100">
+                            <td className="py-1 pr-1 text-gray-600 w-28 text-sm">Company Name:</td>
+                            <td className="py-1 italic text-xs">{invoiceData.consignee.company}</td>
+                        </tr>
+                        <tr className="border-b border-gray-100">
+                            <td className="py-1 pr-1 text-gray-600 text-sm">Address:</td>
+                            <td className="py-1 italic text-xs">{invoiceData.consignee.address}</td>
+                        </tr>
+                        <tr className="border-b border-gray-100">
+                            <td className="py-1 pr-1 text-gray-600 text-sm">Postal code:</td>
+                            <td className="py-1 italic text-xs">{invoiceData.consignee.postCode}</td>
+                        </tr>
+                        <tr className="border-b border-gray-100">
+                            <td className="py-1 pr-1 text-gray-600 text-sm">State/Country:</td>
+                            <td className="py-1 italic text-xs">{invoiceData.consignee.country}</td>
+                        </tr>
+                        <tr className="border-b border-gray-100">
+                            <td className="py-1 pr-1 text-gray-600 text-sm">Contact Name:</td>
+                            <td className="py-1 italic text-xs">{invoiceData.consignee.contactName}</td>
+                        </tr>
+                        <tr className="border-b border-gray-100">
+                            <td className="py-1 pr-1 text-gray-600 text-sm">Phone/Fax No.:</td>
+                            <td className="py-1 italic text-xs">{invoiceData.consignee.phone}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             {/* Products Form Toggle Button */}
@@ -669,16 +733,14 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
                             <p className="font-medium">{selectedService.carrier}</p>
                         </div>
                         <div>
+                            <p className="text-sm text-gray-600">Nước đến</p>
+                            <p className="font-medium">{invoiceData.consignee.country}</p>
+                        </div>
+                        <div>
                             <p className="text-sm text-gray-600">Dịch vụ</p>
                             <p className="font-medium">{selectedService.service}</p>
                         </div>
-                        <div>
-                            {/*<p className="text-sm text-gray-600">Thời gian giao hàng</p>*/}
-                            {/*<p className="font-medium">{selectedService.deliveryTime}</p>*/}
-                            {/*<p className="text-xs text-gray-500">*/}
-                            {/*    {selectedService.deliveryDateBegin} - {selectedService.deliveryDateEnd}*/}
-                            {/*</p>*/}
-                        </div>
+
                         <div>
                             <p className="text-sm text-gray-600">Khu vực</p>
                             <p className="font-medium">{selectedService.zone}</p>

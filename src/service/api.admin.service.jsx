@@ -55,6 +55,11 @@ const GetNameServiceByUser = async (isAdmin) => {
   return await axios.get(API);
 };
 
+const PutService = async (data) => {
+  const API = `service-company`;
+  return await axios.put(API, data);
+};
+
 const PostNameService = async (data) => {
   const API = `service-company`;
 
@@ -89,6 +94,7 @@ export {
   UpdateNameService,
   DeleteServiceCompany,
   GetNameServiceByUser,
+  PutService
 };
 
 const GetAPriceNet = async (name, zone, weight) => {
