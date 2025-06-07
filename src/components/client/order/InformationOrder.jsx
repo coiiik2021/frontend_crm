@@ -184,7 +184,18 @@ export default function InformationOrder(props) {
         // Tiếp tục xử lý chuyển trang
         if (validateRecipientForm() && validateSenderForm()) {
             // Cập nhật thông tin người gửi và người nhận
-            setRecipientInfo(recipientForm);
+            setRecipientInfo({
+                name: recipientForm.name || "",
+                company: recipientForm.company || "",
+                email: recipientForm.email || "",
+                phone: recipientForm.phone || "",
+                street: recipientForm.street || "",
+                city: recipientForm.city || "",
+                state: recipientForm.state || "",
+                postCode: recipientForm.postCode || "",
+                country: recipientForm.country || "",
+                id: recipientForm.id || "",
+            });
             setSenderInfo({
                 fullName: senderForm.fullName || "",
                 company: senderForm.company || "",
@@ -195,7 +206,8 @@ export default function InformationOrder(props) {
                 city: senderForm.city || "",
                 state: senderForm.state || "",
                 postCode: senderForm.postCode || "",
-                country: senderForm.country || ""
+                country: senderForm.country || "",
+                id: senderForm.id || "",
             });
 
             // Cập nhật thông tin nhận hàng vào addressBackup

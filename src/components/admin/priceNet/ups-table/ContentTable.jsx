@@ -477,6 +477,24 @@ export default function ContentTable() {
                             </div>
 
                             <div>
+                                <Label>Nước</Label>
+                                <Input
+                                    type="text"
+                                    value={newShipper.country || ""}
+                                    onChange={(e) => setNewShipper({ ...newShipper, country: e.target.value })}
+                                    placeholder="Nhập nước"
+                                />
+                            </div>
+                            <div>
+                                <Label>Area Code(Town)</Label>
+                                <Input
+                                    type="text"
+                                    value={newShipper.areaCode || ""}
+                                    onChange={(e) => setNewShipper({ ...newShipper, areaCode: e.target.value })}
+                                    placeholder="Nhập Area Code(Town)"
+                                />
+                            </div>
+                            <div>
                                 <Label>Người liên hệ</Label>
                                 <Input
                                     type="text"
@@ -573,6 +591,25 @@ export default function ContentTable() {
                                     value={editShipper.tax || ""}
                                     onChange={(e) => setEditShipper({ ...editShipper, tax: e.target.value })}
                                     placeholder="Nhập mã số thuế"
+                                />
+                            </div>
+
+                            <div>
+                                <Label>Nước</Label>
+                                <Input
+                                    type="text"
+                                    value={editShipper.country || ""}
+                                    onChange={(e) => setEditShipper({ ...editShipper, country: e.target.value })}
+                                    placeholder="Nhập nước"
+                                />
+                            </div>
+                            <div>
+                                <Label>Area Code(Town)</Label>
+                                <Input
+                                    type="text"
+                                    value={editShipper.areaCode || ""}
+                                    onChange={(e) => setEditShipper({ ...editShipper, areaCode: e.target.value })}
+                                    placeholder="Nhập Area Code(Town)"
                                 />
                             </div>
 
