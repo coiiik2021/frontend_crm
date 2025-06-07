@@ -13,6 +13,7 @@ interface RecipientInfo {
   phone: string;
   email: string;
   country: string;
+  fullName: string;
 }
 
 interface Package {
@@ -111,17 +112,18 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
       phone: recipientInfo.phone,
       email: recipientInfo.email,
       country: recipientInfo.country,
-      postCode: recipientInfo.postCode
+      postCode: recipientInfo.postCode,
+      contactName: recipientInfo.fullName
     },
 
     // Chuyển đổi products thành items
     items: products.map(product => ({
-      description: product["Mô tả sản phẩm"] || product.description || "",
-      origin: product["Xuất xứ"] || "",
-      quantity: product["Số lượng"] || 0,
-      unit: product["Kiểu đơn vị"] || "",
-      unitPrice: product["Giá trên 1 sản phẩm"] || 0,
-      subtotal: product["Giá Trị"] || 0
+      description: product.description || "",
+      origin: product.origin || "",
+      quantity: product.quantity || 0,
+      unit: product.unit || "",
+      unitPrice: product.unitPrice || 0,
+      subtotal: product.quantity * product.unitPrice
     })),
 
     totalValue: productsTotal.priceProduct,
@@ -137,45 +139,45 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
 
 
 
-  useEffect(() => {
-    const newList = products.map(product => ({
-      id: product.id,
-      description: product["Mô tả sản phẩm"],
-      origin: product["Xuất xứ"],
-      unit: product["Kiểu đơn vị"],
-      quantity: product["Số lượng"],
-      totalPrice: product.totalPrice,
-      price: product["Giá trên 1 sản phẩm"],
-    }));
+  // useEffect(() => {
+  //   const newList = products.map(product => ({
+  //     id: product.id,
+  //     description: product["Mô tả sản phẩm"],
+  //     origin: product["Xuất xứ"],
+  //     unit: product["Kiểu đơn vị"],
+  //     quantity: product["Số lượng"],
+  //     totalPrice: product.totalPrice,
+  //     price: product["Giá trên 1 sản phẩm"],
+  //   }));
 
-    const newPackages = packages.map(p => (
-      {
-        weight: p.weight,
-        length: p.length,
-        width: p.width,
-        height: p.height,
-      }
-    ))
+  //   const newPackages = packages.map(p => (
+  //     {
+  //       weight: p.weight,
+  //       length: p.length,
+  //       width: p.width,
+  //       height: p.height,
+  //     }
+  //   ))
 
-    const newServiceSelectInfo = {
-      ...serviceSelectNew,
-      priceNetReal: selectedService.priceNet,
-      priceNetFake: priceNetConfirm,
-      priceOther: priceOtherConfirm
-    }
-
-
+  //   const newServiceSelectInfo = {
+  //     ...serviceSelectNew,
+  //     priceNetReal: selectedService.priceNet,
+  //     priceNetFake: priceNetConfirm,
+  //     priceOther: priceOtherConfirm
+  //   }
 
 
-    const dataRequestAPI = {
-      recipientInfo: recipientInfo,
-      serviceSelectInfo: newServiceSelectInfo,
-      products: newList,
-      packages: newPackages,
-      productsTotal: productsTotal,
-    }
-    // setDataRequest(dataRequestAPI);
-  }, [serviceSelectNew, priceNetConfirm, priceOtherConfirm]);
+
+
+  //   const dataRequestAPI = {
+  //     recipientInfo: recipientInfo,
+  //     serviceSelectInfo: newServiceSelectInfo,
+  //     products: newList,
+  //     packages: newPackages,
+  //     productsTotal: productsTotal,
+  //   }
+  //   // setDataRequest(dataRequestAPI);
+  // }, [serviceSelectNew, priceNetConfirm, priceOtherConfirm]);
 
 
 
@@ -257,7 +259,6 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
     const titleCell = worksheet.getCell('B1');
     titleCell.font = { size: 28, bold: true };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
 
     const invoice_no = worksheet.addRow(['', '', 'Invoice No.:', invoiceNo, '', '', '', '', '', '']);
     invoice_no.getCell(3).font = { bold: true, italic: true }
@@ -509,18 +510,39 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
       {/* Invoice Info */}
       <div className="flex justify-between mb-8">
         <div className="w-1/2">
-          <p className="font-semibold">SHIPPER</p>
-          <p>Company Name: {invoiceData.shipper.name}</p>
-          <p>Address: {invoiceData.shipper.address}</p>
-
-          <p>Town/Area Code: {invoiceData.shipper.areaCode}</p>
-          <p>State/ Country: {invoiceData.shipper.country}</p>
-          <p>Tax Code: {invoiceData.shipper.tax}</p>
-          <p>Contact Name: {invoiceData.shipper.contactName}</p>
-
-
-          <p>Phone: {invoiceData.shipper.phone}</p>
-
+          <p className="font-semibold mb-2">SHIPPER</p>
+          <table className="w-full text-left border-collapse">
+            <tbody>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 w-28 text-sm">Company Name:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.companyName}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">Address:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.address}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">Area Code:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.areaCode}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">State/Country:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.country}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">Tax code:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.tax}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">Contact Name:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.contactName}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">Phone:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.phone}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div className="w-1/2 text-right">
@@ -529,18 +551,48 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
           <p className="mt-4 font-semibold">Air waybill No.: {invoiceData.airWaybillNo}</p>
           <p>Shipping Method: {selectedService.carrier}</p>
           <p>Weight: {invoiceData.weight} kg</p>
-          <p>Dimensions: {invoiceData.dimensions} cm</p>
+          <p>Dimensions:  </p>
+          {
+            invoiceData.dimensions.map(d => (
+              <p key={d}>{d} cm</p>
+            ))
+          }
         </div>
       </div>
 
       {/* Consignee */}
       <div className="mb-8">
-        <p className="font-semibold">CONSIGNEE</p>
-        <p>Company Name: {invoiceData.consignee.company}</p>
-        <p>Address: {invoiceData.consignee.address}</p>
-        <p>Email: {invoiceData.consignee.email}</p>
-        <p>Phone: {invoiceData.consignee.phone}</p>
+        <p className="font-semibold mb-2">CONSIGNEE</p>
+        <table className="w-full text-left border-collapse">
+          <tbody>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 w-28 text-sm">Company Name:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.company}</td>
+            </tr>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 text-sm">Address:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.address}</td>
+            </tr>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 text-sm">Postal code:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.postCode}</td>
+            </tr>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 text-sm">State/Country:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.country}</td>
+            </tr>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 text-sm">Contact Name:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.contactName}</td>
+            </tr>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 text-sm">Phone/Fax No.:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.phone}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
 
       {/* Products Form Toggle Button */}
       <div className="mb-4">

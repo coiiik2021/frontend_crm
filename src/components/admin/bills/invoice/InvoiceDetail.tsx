@@ -90,6 +90,9 @@ export default function InvoiceDetail({ bill_id }: { bill_id: string }) {
         }
         console.log("Recipient Info:", data.recipientInfo);
         console.log("Packages:", data.selectService);
+        console.log("Products:", data.products);
+        console.log("Products Total:", data.productsTotal);
+        console.log("Selected Service:", data.selectService);
       } catch (error) {
         console.error("Error fetching invoice data:", error);
       }
@@ -99,25 +102,29 @@ export default function InvoiceDetail({ bill_id }: { bill_id: string }) {
   }, []);
 
   return (
-    <div className="flex flex-col h-full gap-6 sm:gap-5 xl:flex-row">
+    <div className="flex flex-col w-full h-full gap-6 sm:gap-5 xl:flex-row">
       {/* <!-- Invoice Sidebar Start --> */}
-      <InvoiceSidebar bill_id={id || ""} />
+      <div className="w-full xl:w-64 flex-shrink-0">
+        <InvoiceSidebar bill_id={id || ""} />
+      </div>
       {/* <!-- Invoice Sidebar End --> */}
 
       {/* <!-- Invoice Mainbox Start --> */}
-      {recipientInfo && selectService ? (
-        <InvoiceMain
-          recipientInfo={recipientInfo}
-          packages={packages}
-          products={products}
-          productsTotal={productsTotal}
-          selectedService={selectService}
-        />
-      ) : (
-        <div className="flex items-center justify-center w-full h-full">
-          <p className="text-gray-500">Loading invoice details...</p>
-        </div>
-      )}
+      <div className="w-full overflow-x-auto">
+        {recipientInfo && selectService ? (
+          <InvoiceMain
+            recipientInfo={recipientInfo}
+            packages={packages}
+            products={products}
+            productsTotal={productsTotal}
+            selectedService={selectService}
+          />
+        ) : (
+          <div className="flex items-center justify-center w-full h-full min-h-[200px]">
+            <p className="text-gray-500">Loading invoice details...</p>
+          </div>
+        )}
+      </div>
       {/* <!-- Invoice Mainbox End --> */}
     </div>
   );
