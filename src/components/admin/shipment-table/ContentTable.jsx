@@ -10,6 +10,7 @@ import { useModal } from "../../../hooks/useModal.js";
 import { DeletePriceOrder, GetAllBaseUser, GetAllPriceOrder, GetPaymentDetails, PostBaseUser, PostPriceOrder, PutPriceOrder, UpdateBillAccountant, UpdatePaymentDetails } from "../../../service/api.admin.service.jsx";
 import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
+import ExcelJS from 'exceljs';
 
 export default function ContentTable(props) {
     const { dataBill } = props;
@@ -415,6 +416,286 @@ export default function ContentTable(props) {
         };
     }, [showColumnSelector]);
 
+    const exportToExcel = async () => {
+        const dataToExport = currentData;
+
+        if (!dataToExport || dataToExport.length === 0) {
+            alert('Không có dữ liệu để xuất!');
+            return;
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Shipment Report');
+
+        workbook.creator = 'Shipment Management System';
+        workbook.created = new Date();
+
+        const columnMapping = {
+            house_bill: { header: 'HOUSE BILL', width: 12 },
+            Date: { header: 'NGÀY TẠO', width: 20 },
+            bill_employee: { header: 'BILL PHỤ', width: 15 },
+            awb: { header: 'AWB', width: 15 },
+            company_service: { header: 'DỊCH VỤ', width: 15 },
+            payment_bill_real: { header: 'THÀNH TIỀN (TẠM TÍNH)', width: 24 },
+            price_order: { header: 'TIỀN ORDER', width: 38 },
+            payment_bill_fake: { header: 'THÀNH TIỀN (CHỐT)', width: 25 },
+            payments_cash: { header: 'THANH TOÁN TIỀN MẶT', width: 25 },
+            payments_banking: { header: 'THANH TOÁN BANKING', width: 25 },
+            status: { header: 'TRẠNG THÁI', width: 15 }
+        };
+
+        const columnsToExport = Object.keys(columnMapping).filter(key =>
+            key === 'house_bill' || visibleColumns[key]
+        );
+
+        worksheet.columns = columnsToExport.map(key => ({
+            key: key,
+            width: columnMapping[key].width,
+        }));
+
+        // Thêm tiêu đề
+        const titleRow = worksheet.insertRow(1, ['BÁO CÁO SHIPMENT']);
+        worksheet.mergeCells(1, 1, 1, columnsToExport.length);
+        titleRow.height = 60;
+
+        const titleCell = worksheet.getCell(1, 1);
+        titleCell.font = { size: 30, bold: true, color: { argb: 'FF000000' }, name : 'Arial' };
+        titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+
+        // Thêm thông tin ngày xuất
+        const dateRow = worksheet.insertRow(2, [`Ngày xuất: ${new Date().toLocaleString('vi-VN')}`]);
+        worksheet.mergeCells(2, 1, 2, columnsToExport.length);
+        dateRow.height = 20;
+
+        const dateCell = worksheet.getCell(2, 1);
+        dateCell.font = { size: 14, italic: true };
+        dateCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+        const headerRow = worksheet.getRow(4);
+        headerRow.height = 45;
+
+        columnsToExport.forEach((key, index) => {
+            const cell = headerRow.getCell(index + 1);
+            cell.value = columnMapping[key].header;
+            cell.font = { bold: true, color: { argb: 'FF000000' } , size: 12};
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFA6A6A7' }
+            };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+
+        // Thêm dữ liệu
+        dataToExport.forEach((item, rowIndex) => {
+            const rowData = {};
+
+            columnsToExport.forEach(key => {
+                switch (key) {
+                    case 'house_bill':
+                        rowData[key] = `EB${item.bill_house.substring(0, 5)}`;
+                        break;
+                    case 'Date':
+                        rowData[key] = item.date_create;
+                        break;
+                    case 'bill_employee':
+                        rowData[key] = item?.bill_employee || '';
+                        break;
+                    case 'awb':
+                        rowData[key] = item?.awb || '';
+                        break;
+                    case 'company_service':
+                        rowData[key] = item.company_service;
+                        break;
+                    case 'payment_bill_real':
+                        rowData[key] = `${formatCurrency(item.total_real)} VNĐ`;
+                        break;
+                    case 'price_order':
+                        // Xuất cả 2 giá trị: complete và process
+                        rowData[key] = `Hoàn thành: ${formatCurrency(item.priceOrder.total_complete)} VNĐ | Đang xử lý: ${formatCurrency(item.priceOrder.total_process)} VNĐ`;
+                        break;
+                    case 'payment_bill_fake':
+                        rowData[key] = `${formatCurrency(item.total_fake)} VNĐ`;
+                        break;
+                    case 'payments_cash':
+                        rowData[key] = `${formatCurrency(item.pricePayment.payment_cash)} VNĐ`;
+                        break;
+                    case 'payments_banking':
+                        rowData[key] = `${formatCurrency(item.pricePayment.payment_banking)} VNĐ`;
+                        break;
+                    case 'status':
+                        // Chuyển đổi status thành text dễ hiểu
+                        const statusText = {
+                            'pending': 'Chờ xử lý',
+                            'processing': 'Đang xử lý',
+                            'completed': 'Hoàn thành',
+                            'cancelled': 'Đã hủy'
+                        };
+                        rowData[key] = statusText[item.status_payment] || item.status_payment;
+                        break;
+                    default:
+                        rowData[key] = item[key] || '';
+                }
+            });
+
+            const dataRow = worksheet.addRow(rowData);
+            dataRow.height = 35;
+
+            // Định dạng cho từng cell trong dòng dữ liệu
+            dataRow.eachCell((cell, colNumber) => {
+                cell.border = {
+                    top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+                    left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+                    bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+                    right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+                };
+
+                if (rowIndex % 2 === 0) {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFF9FAFB' }
+                    };
+                }
+
+                // Căn giữa cho một số cột
+                if (columnsToExport[colNumber - 1] === 'Date' ||
+                    columnsToExport[colNumber - 1] === 'status' ||
+                    columnsToExport[colNumber - 1] === 'company_service') {
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                } else if (columnsToExport[colNumber - 1].includes('payment') ||
+                    columnsToExport[colNumber - 1].includes('price')) {
+                    // Căn phải cho các cột tiền
+                    cell.alignment = { horizontal: 'right', vertical: 'middle' };
+                    cell.font = { bold: true };
+                } else {
+                    cell.alignment = { vertical: 'middle' };
+                }
+            });
+        });
+
+        // Thêm tổng kết ở cuối (nếu có dữ liệu số)
+        if (dataToExport.length > 0) {
+            // Thêm dòng trống
+            worksheet.addRow([]);
+
+            // Tính tổng các giá trị tiền
+            let totalReal = 0;
+            let totalFake = 0;
+            let totalCash = 0;
+            let totalBanking = 0;
+            let totalComplete = 0;
+            let totalProcess = 0;
+
+            dataToExport.forEach(item => {
+                totalReal += item.total_real || 0;
+                totalFake += item.total_fake || 0;
+                totalCash += item.pricePayment?.payment_cash || 0;
+                totalBanking += item.pricePayment?.payment_banking || 0;
+                totalComplete += item.priceOrder?.total_complete || 0;
+                totalProcess += item.priceOrder?.total_process || 0;
+            });
+
+            // Thêm dòng tổng kết
+            const summaryData = {};
+            columnsToExport.forEach((key, index) => {
+                if (index === 0) {
+                    summaryData[key] = 'TỔNG CỘNG';
+                } else if (key === 'payment_bill_real' && visibleColumns[key]) {
+                    summaryData[key] = `${formatCurrency(totalReal)} VNĐ`;
+                } else if (key === 'payment_bill_fake' && visibleColumns[key]) {
+                    summaryData[key] = `${formatCurrency(totalFake)} VNĐ`;
+                } else if (key === 'payments_cash' && visibleColumns[key]) {
+                    summaryData[key] = `${formatCurrency(totalCash)} VNĐ`;
+                } else if (key === 'payments_banking' && visibleColumns[key]) {
+                    summaryData[key] = `${formatCurrency(totalBanking)} VNĐ`;
+                } else if (key === 'price_order' && visibleColumns[key]) {
+                    summaryData[key] = `HT: ${formatCurrency(totalComplete)} | XL: ${formatCurrency(totalProcess)} VNĐ`;
+                } else {
+                    summaryData[key] = '';
+                }
+            });
+
+            const summaryRow = worksheet.addRow(summaryData);
+            summaryRow.height = 35;
+
+
+            summaryRow.eachCell((cell, colNumber) => {
+
+                cell.font = { bold: true, size: 13 };
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFDBEAFE' }
+                };
+                cell.border = {
+                    top: { style: 'medium' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'medium' },
+                    right: { style: 'thin' }
+                };
+
+                if (colNumber === 1) {
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                } else {
+                    cell.alignment = { horizontal: 'right', vertical: 'middle' };
+                }
+            });
+
+            let mergeEndColumn = 1;
+            for (let i = 1; i <= columnsToExport.length; i++) {
+                // const key = columnsToExport[i - 1];
+                const value = summaryRow.getCell(i).value;
+                if (typeof value === 'string' && value.trim() !== 'TỔNG CỘNG' && value.trim() !== '') {
+                    mergeEndColumn = i - 1;
+                    break;
+                }
+            }
+            if (mergeEndColumn < 2) {
+                mergeEndColumn = columnsToExport.length;
+                worksheet.spliceRows(summaryRow.number, 1)
+            }
+
+            worksheet.mergeCells(summaryRow.number, 1, summaryRow.number, mergeEndColumn);
+        }
+
+
+        // Xuất file
+        try {
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+
+            // Tạo tên file với timestamp
+            const timestamp = new Date().toISOString().slice(0, 10);
+            a.download = `shipment_report_${timestamp}.xlsx`;
+
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            // Thông báo thành công
+            console.log('Xuất Excel thành công!');
+
+        } catch (error) {
+            console.error('Lỗi khi xuất Excel:', error);
+            alert('Có lỗi xảy ra khi xuất file Excel!');
+        }
+    };
+
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
 
@@ -458,6 +739,7 @@ export default function ContentTable(props) {
                     </div>
                     <span className="text-gray-500 dark:text-gray-400"> entries </span>
 
+
                     {/* Thêm nút tùy chỉnh cột */}
                     <button
                         ref={columnButtonRef}
@@ -470,6 +752,25 @@ export default function ContentTable(props) {
                         </svg>
                         Tùy chỉnh cột
                     </button>
+
+                    <button
+                    ref={columnButtonRef}
+                    onClick={() => exportToExcel()}
+                    className="ml-4 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 flex items-center transition-all duration-200"
+                    >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 16 16"
+                    >
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                        <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+                    </svg>
+                    Xuất Excel
+                    </button>
+
+
 
                     {/* Dropdown tùy chỉnh cột */}
                     {showColumnSelector && (
