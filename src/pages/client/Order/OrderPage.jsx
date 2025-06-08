@@ -42,7 +42,8 @@ export default function OrderPage() {
         city: "",
         state: "",
         postCode: "",
-        country: ""
+        country: "",
+        taxCode: ""
     });
 
     const [consigneeTo, setConsigneeTo] = useState({
@@ -55,7 +56,8 @@ export default function OrderPage() {
         city: "",
         state: "",
         postCode: "",
-        country: ""
+        country: "",
+        taxCode: ""
     });
 
     const [addressBackup, setAddressBackup] = useState({
@@ -157,7 +159,7 @@ export default function OrderPage() {
         content = (
             <FormDetailOrder
                 senderInfo={consigneeFrom}
-                recipientInfo={consigneeFrom}
+                recipientInfo={consigneeTo}
                 addressBackup={addressBackup}
                 packages={packages}
                 products={products}

@@ -242,7 +242,7 @@ export default function InformationOrder(props) {
     const [showDeliveryForm, setShowDeliveryForm] = useState(false);
 
     const [recipientErrors, setRecipientErrors] = useState({
-        name: false,
+        fullName: false,
         email: false,
         phone: false,
         street: false,
@@ -253,7 +253,7 @@ export default function InformationOrder(props) {
     });
 
     const [senderErrors, setSenderErrors] = useState({
-        name: false,
+        fullName: false,
         email: false,
         phone: false,
         street: false,
@@ -338,7 +338,7 @@ export default function InformationOrder(props) {
         if (validateRecipientForm() && validateSenderForm()) {
             // Cập nhật thông tin người gửi và người nhận
             setRecipientInfo({
-                name: recipientForm.name || "",
+                fullName: recipientForm.fullName || "",
                 company: recipientForm.company || "",
                 email: recipientForm.email || "",
                 phone: recipientForm.phone || "",
@@ -347,6 +347,7 @@ export default function InformationOrder(props) {
                 state: recipientForm.state || "",
                 postCode: recipientForm.postCode || "",
                 country: recipientForm.country || "",
+                taxCode: recipientForm.taxCode || "",
                 id: recipientForm.id || "",
             });
             setSenderInfo({
@@ -362,6 +363,9 @@ export default function InformationOrder(props) {
                 country: senderForm.country || "",
                 id: senderForm.id || "",
             });
+
+            console.log("Sender Info:", senderForm);
+            console.log("Recipient Info:", recipientForm);
 
             // Cập nhật thông tin nhận hàng vào addressBackup
             const updatedAddressBackup = {
@@ -1309,7 +1313,7 @@ export default function InformationOrder(props) {
                         <div>
                             <h3 className="text-lg font-medium text-gray-800 dark:text-white">Shipping Information</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Sender: {senderForm.fullName || 'N/A'} • Recipient: {recipientForm.name || 'N/A'}
+                                Sender: {senderForm.fullName || 'N/A'} • Recipient: {recipientForm.fullName || 'N/A'}
                                 {showDeliveryForm && deliveryForm.receiverName && ` • Delivery: ${deliveryForm.receiverName}`}
                             </p>
                         </div>
