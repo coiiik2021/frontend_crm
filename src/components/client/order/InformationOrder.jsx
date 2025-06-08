@@ -68,17 +68,167 @@ export default function InformationOrder(props) {
     const [isOpenFormPackage, setIsOpenFormPackage] = useState(false);
     const [showQuote, setShowQuote] = useState(true);
 
+    const [listSenderSave, setListSenderSave] = useState([]);
+    const [listRecipientSave, setListRecipientSave] = useState([]);
+    const [listDeliverySave, setListDeliverySave] = useState([]);
+
+
+    // Thêm các state để quản lý popover
+    const [showSenderPopover, setShowSenderPopover] = useState(false);
+    const [showRecipientPopover, setShowRecipientPopover] = useState(false);
+    const [showDeliveryPopover, setShowDeliveryPopover] = useState(false);
+
+    // Thêm refs để xử lý click outside
+    const senderPopoverRef = useRef(null);
+    const recipientPopoverRef = useRef(null);
+    const deliveryPopoverRef = useRef(null);
+
+    // Xử lý click outside cho các popover
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (showSenderPopover &&
+                senderPopoverRef.current &&
+                !senderPopoverRef.current.contains(event.target)) {
+                setShowSenderPopover(false);
+            }
+
+            if (showRecipientPopover &&
+                recipientPopoverRef.current &&
+                !recipientPopoverRef.current.contains(event.target)) {
+                setShowRecipientPopover(false);
+            }
+
+            if (showDeliveryPopover &&
+                deliveryPopoverRef.current &&
+                !deliveryPopoverRef.current.contains(event.target)) {
+                setShowDeliveryPopover(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showSenderPopover, showRecipientPopover, showDeliveryPopover]);
+
+    // Thêm dữ liệu mẫu cho sender
+
+
+
+
+    // Thêm dữ liệu mẫu cho delivery
+    const deliverySampleData = [
+        {
+            id: "d1",
+            name: "Lê Văn C",
+            address: "789 Đường Cách Mạng Tháng 8, Quận 10, TP.HCM",
+            date: "2023-06-15",
+            time: "14:30",
+            notes: "Gọi trước khi giao hàng"
+        },
+        {
+            id: "d2",
+            name: "Phạm Thị D",
+            address: "101 Đường Võ Văn Tần, Quận 3, TP.HCM",
+            date: "2023-06-16",
+            time: "09:00",
+            notes: "Để hàng tại lễ tân nếu không có người nhận"
+        }
+    ];
+
+    // Component Popover tái sử dụng với xử lý dữ liệu mẫu
+    const SavedItemsPopover = ({ isOpen, reference, title, items, onSelect, onDelete }) => {
+        if (!isOpen) return null;
+
+        return (
+            <div
+                ref={reference}
+                className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border rounded-lg shadow-lg w-72 p-3 overflow-y-auto max-h-80"
+            >
+                <h4 className="text-base font-semibold mb-3">{title}</h4>
+                <div className="space-y-3">
+                    {items.length === 0 && <p className="text-sm">Chưa có thông tin nào.</p>}
+                    {items.map((item, idx) => (
+                        <div key={idx} className="border rounded-md p-3 bg-gray-50 dark:bg-gray-700">
+                            {/* Hiển thị thông tin người gửi/người nhận */}
+                            {(item.fullName || item.name) && (
+                                <div className="font-medium">
+                                    {item.fullName || item.name}
+                                    {item.phone && <span> ({item.phone})</span>}
+                                </div>
+                            )}
+
+                            {/* Hiển thị email và công ty nếu có */}
+                            {(item.email || item.company) && (
+                                <div className="text-sm text-gray-600 dark:text-gray-300">
+                                    {item.email && <div>{item.email}</div>}
+                                    {item.company && <div>{item.company}</div>}
+                                </div>
+                            )}
+
+                            {/* Hiển thị địa chỉ */}
+                            {(item.street || item.address) && (
+                                <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                    {item.street ? (
+                                        <>
+                                            {item.street}, {item.city}, {item.state} {item.postCode}<br />
+                                            {item.country?.label || item.country}
+                                        </>
+                                    ) : (
+                                        <>{item.address}</>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Hiển thị thông tin giao hàng */}
+                            {(item.date || item.time) && (
+                                <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                    {item.date && <div>Ngày: {item.date}</div>}
+                                    {item.time && <div>Giờ: {item.time}</div>}
+                                    {item.notes && <div>Ghi chú: {item.notes}</div>}
+                                </div>
+                            )}
+
+                            <div className="mt-2 flex gap-2">
+                                <Button
+                                    size="sm"
+                                    onClick={() => onSelect(idx)}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
+                                >
+                                    Chọn
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    onClick={() => onDelete(idx, item.id)}
+                                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
+                                >
+                                    Xoá
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
+
+
     // Thêm state cho form nhận hàng
 
-    const [deliveryForm, setDeliveryForm] = useState(addressBackup || {});
+    // Khởi tạo ngày hiện tại theo định dạng YYYY-MM-DD
+    const getCurrentDate = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
-    // const [deliveryForm, setDeliveryForm] = useState({
-    //     receiverName: "",
-    //     deliveryDate: "",
-    //     deliveryTime: "",
-    //     deliveryAddress: "",
-    //     notes: ""
-    // });
+    const [deliveryForm, setDeliveryForm] = useState({
+        ...addressBackup,
+        date: addressBackup?.date || getCurrentDate()
+    });
 
     // Thêm state cho lỗi form nhận hàng
     const [deliveryErrors, setDeliveryErrors] = useState({
@@ -122,7 +272,10 @@ export default function InformationOrder(props) {
         if (!showDeliveryForm) return true;
 
         const newErrors = {};
-        const requiredFields = ['receiverName', 'deliveryDate', 'deliveryTime', 'deliveryAddress'];
+        const requiredFields = ['name', 'address'];
+
+        // Ngày và giờ sẽ luôn có giá trị mặc định
+        deliveryForm.date = deliveryForm.date || getCurrentDate();
 
         requiredFields.forEach(field => {
             if (!deliveryForm[field]) {
@@ -243,8 +396,7 @@ export default function InformationOrder(props) {
         const fetchData = async () => {
             try {
                 const data = await GetZoneCountry();
-                const dataResponse = await GetAllConsigneeFavorite();
-                setSavedList(dataResponse);
+
                 localStorage.setItem("savedRecipients", JSON.stringify(data));
 
                 const resCodeCompany = await GetCodeByCompany();
@@ -379,8 +531,75 @@ export default function InformationOrder(props) {
         console.log("Selected recipient:", savedList[idx]);
     };
 
+    const handleSaveSender = async (e) => {
+        e.preventDefault(); // Ngăn chặn hành vi submit mặc định
+        e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
+        if (validateSenderForm()) {
+            const dataReponse = { ...senderForm, isTo: 1 };
+            const dataResponse = await PostConsigneeFavorite(dataReponse);
+
+            if (dataResponse) {
+                const newList = [...savedList, dataResponse];
+                setSavedList(newList);
+                localStorage.setItem("savedRecipients", JSON.stringify(newList));
+                setSenderInfo(senderForm);
+                senderForm.id = dataResponse.id;
+                // setShowForm(false);
+                console.log("Saved sender info:", senderForm);
+            }
+        } else {
+            setShowForm(true);
+        }
+    };
+
+    const handleSaveRecipient = async (e) => {
+        e.preventDefault(); // Ngăn chặn hành vi submit mặc định
+        e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
+        console.log(recipientForm);
+
+
+        if (validateRecipientForm()) {
+
+            console.log(recipientForm);
+            const dataRequest = { ...recipientForm, isTo: 0 };
+
+            const dataResponse = await PostConsigneeFavorite(dataRequest);
+
+            if (dataResponse) {
+                const newList = [...savedList, dataResponse];
+                setSavedList(newList);
+                localStorage.setItem("savedRecipients", JSON.stringify(newList));
+
+                setRecipientInfo(recipientForm);
+                recipientForm.id = dataResponse.id;
+                console.log("Saved recipient info:", recipientForm);
+            }
+        } else {
+            setShowForm(true);
+        }
+    };
+
+    const handleSaveDeliveryBackup = async (e) => {
+        e.preventDefault(); // Ngăn chặn hành vi submit mặc định
+        e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
+        console.log(deliveryForm);
+        if (validateDeliveryForm()) {
+            console.log(deliveryForm);
+            // Cập nhật thông tin nhận hàng vào addressBackup
+            setAddressBackup(deliveryForm);
+            setShowForm(false);
+        } else {
+            setShowForm(true);
+        }
+    };
+
+
+
     const handleDeleteSaved = async (idx, id) => {
         const newList = savedList.filter((_, i) => i !== idx);
+
+        console.log("id", id);
+
         await DeleteConsigneeFavorite(id);
         setSavedList(newList);
         localStorage.setItem("savedRecipients", JSON.stringify(newList));
@@ -388,14 +607,14 @@ export default function InformationOrder(props) {
 
     // Thêm hàm xử lý thay đổi ngày
     const handleDateChange = (dates, dateString) => {
-        console.log(`Date changed to: ${dateString}`); // Thêm log để debug
+        console.log(`Date changed to: ${dateString}`);
 
         setDeliveryForm(prevForm => {
             const updatedForm = {
                 ...prevForm,
-                date: dateString, // Cập nhật trường date thay vì deliveryDate
+                date: dateString || getCurrentDate() // Sử dụng ngày hiện tại nếu không có ngày được chọn
             };
-            console.log("Updated delivery form with new date:", updatedForm); // Thêm log để debug
+            console.log("Updated delivery form with new date:", updatedForm);
             return updatedForm;
         });
 
@@ -454,6 +673,48 @@ export default function InformationOrder(props) {
         // Đảm bảo addressBackup được cập nhật khi deliveryForm thay đổi
         setAddressBackup(deliveryForm);
     }, [deliveryForm]);
+
+    // Cập nhật các hàm setup để sử dụng dữ liệu mẫu
+    const handleSetupSenderSave = async () => {
+        try {
+            // Trong thực tế, bạn sẽ gọi API để lấy dữ liệu
+            // const dataResponse = await GetAllSenderFavorite();
+            // setListSenderSave(dataResponse);
+
+            // Sử dụng dữ liệu mẫu cho demo
+            const dataResponse = await GetAllConsigneeFavorite(1);
+
+
+            setListSenderSave(dataResponse);
+            setShowSenderPopover(prev => !prev);
+        } catch (error) {
+            console.error("Error fetching sender data:", error);
+        }
+    };
+
+    const handleSetupRecipientSave = async () => {
+        try {
+            const dataResponse = await GetAllConsigneeFavorite(0);
+            setListRecipientSave(dataResponse);
+            setShowRecipientPopover(prev => !prev);
+        } catch (error) {
+            console.error("Error fetching recipient data:", error);
+        }
+    };
+
+    const handleSetupDeliverySave = async () => {
+        try {
+            // Trong thực tế, bạn sẽ gọi API để lấy dữ liệu
+            // const dataResponse = await GetAllDeliveryFavorite();
+            // setListDeliverySave(dataResponse);
+
+            // Sử dụng dữ liệu mẫu cho demo
+            setListDeliverySave(deliverySampleData);
+            setShowDeliveryPopover(prev => !prev);
+        } catch (error) {
+            console.error("Error fetching delivery data:", error);
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -527,6 +788,36 @@ export default function InformationOrder(props) {
                                     <h4 className="text-base font-medium text-gray-800 dark:text-white/90">
                                         Sender Information
                                     </h4>
+
+                                    <div className="relative">
+                                        <button
+                                            className="px-3 py-1.5 bg-blue-100 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-200 transition-colors"
+                                            onClick={handleSetupSenderSave}
+                                        >
+                                            <span className="flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                                </svg>
+                                                Danh sách đã lưu
+                                            </span>
+                                        </button>
+                                        <SavedItemsPopover
+                                            isOpen={showSenderPopover}
+                                            reference={senderPopoverRef}
+                                            title="Danh sách người gửi đã lưu"
+                                            items={listSenderSave}
+                                            onSelect={(idx) => {
+                                                setSenderForm(listSenderSave[idx]);
+                                                setSenderInfo(listSenderSave[idx]);
+                                                setShowSenderPopover(false);
+                                            }}
+                                            onDelete={async (idx, id) => {
+                                                const newList = listSenderSave.filter((_, i) => i !== idx);
+                                                await DeleteConsigneeFavorite(id);
+                                                setListSenderSave(newList);
+                                            }}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Sender Basic Info */}
@@ -650,7 +941,13 @@ export default function InformationOrder(props) {
                                         </div>
                                     </div>
                                 </div>
-                                <button>save</button>
+                                <button
+
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleSaveSender(e);
+                                    }}
+                                >save sender</button>
                             </div>
 
                             {/* Recipient Information - Right Column */}
@@ -664,6 +961,36 @@ export default function InformationOrder(props) {
                                     <h4 className="text-base font-medium text-gray-800 dark:text-white/90">
                                         Recipient Information
                                     </h4>
+
+                                    <div className="relative">
+                                        <button
+                                            className="px-3 py-1.5 bg-purple-100 text-purple-600 rounded-md text-sm font-medium hover:bg-purple-200 transition-colors"
+                                            onClick={handleSetupRecipientSave}
+                                        >
+                                            <span className="flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                                </svg>
+                                                Danh sách đã lưu
+                                            </span>
+                                        </button>
+                                        <SavedItemsPopover
+                                            isOpen={showRecipientPopover}
+                                            reference={recipientPopoverRef}
+                                            title="Danh sách người nhận đã lưu"
+                                            items={listRecipientSave}
+                                            onSelect={(idx) => {
+                                                setRecipientForm(listRecipientSave[idx]);
+                                                setRecipientInfo(listRecipientSave[idx]);
+                                                setShowRecipientPopover(false);
+                                            }}
+                                            onDelete={async (idx, id) => {
+                                                const newList = listRecipientSave.filter((_, i) => i !== idx);
+                                                await DeleteConsigneeFavorite(id);
+                                                setListRecipientSave(newList);
+                                            }}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Recipient Basic Info */}
@@ -673,10 +1000,10 @@ export default function InformationOrder(props) {
                                         <Input
                                             type="text"
                                             id="recipient_name"
-                                            name="name"
-                                            value={recipientForm.name || ''}
+                                            name="fullName"
+                                            value={recipientForm.fullName || ''}
                                             onChange={handleRecipientChange}
-                                            className={`bg-white dark:bg-gray-800 ${recipientErrors.name ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
+                                            className={`bg-white dark:bg-gray-800 ${recipientErrors.fullName ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
                                         />
                                     </div>
                                     <div>
@@ -793,7 +1120,14 @@ export default function InformationOrder(props) {
                                         </div>
                                     </div>
                                 </div>
-                                <button>save</button>
+                                <button
+
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleSaveRecipient(e);
+                                    }}
+
+                                >save recipient</button>
                             </div>
                         </div>
 
@@ -842,6 +1176,36 @@ export default function InformationOrder(props) {
                                     <h4 className="text-base font-medium text-gray-800 dark:text-white/90">
                                         Thông tin nhận hàng
                                     </h4>
+
+                                    <div className="relative">
+                                        <button
+                                            className="px-3 py-1.5 bg-green-100 text-green-600 rounded-md text-sm font-medium hover:bg-green-200 transition-colors"
+                                            onClick={handleSetupDeliverySave}
+                                        >
+                                            <span className="flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                                </svg>
+                                                Danh sách đã lưu
+                                            </span>
+                                        </button>
+                                        <SavedItemsPopover
+                                            isOpen={showDeliveryPopover}
+                                            reference={deliveryPopoverRef}
+                                            title="Danh sách địa chỉ giao hàng đã lưu"
+                                            items={listDeliverySave}
+                                            onSelect={(idx) => {
+                                                setDeliveryForm(listDeliverySave[idx]);
+                                                setAddressBackup(listDeliverySave[idx]);
+                                                setShowDeliveryPopover(false);
+                                            }}
+                                            onDelete={async (idx, id) => {
+                                                const newList = listDeliverySave.filter((_, i) => i !== idx);
+                                                // await DeleteConsigneeFavorite(id);
+                                                setListDeliverySave(newList);
+                                            }}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -861,6 +1225,7 @@ export default function InformationOrder(props) {
                                             id="date"
                                             label="Ngày nhận"
                                             placeholder="Chọn ngày nhận"
+                                            defaultDate={deliveryForm.date || getCurrentDate()} // Sử dụng ngày hiện tại làm mặc định
                                             onChange={handleDateChange}
                                             className={deliveryErrors.date ? "border-red-500" : ""}
                                         />
@@ -907,7 +1272,14 @@ export default function InformationOrder(props) {
                                         ></textarea>
                                     </div>
                                 </div>
-                                <button>save</button>
+                                <button
+
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleSaveDeliveryBackup(e);
+                                    }}
+
+                                >save delivery backup</button>
 
                             </div>
                         )}

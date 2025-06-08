@@ -319,25 +319,61 @@ export { GetInvoiceById, GetInvoicePdf };
 
 // favorite
 
-const GetAllConsigneeFavorite = async () => {
-  const API = `consignee-favorite`;
+const GetAllConsigneeFavorite = async (isTo) => {
+  const API = `favorite/consignee?isTo=${isTo}`;
   return await axios.get(API);
 };
-
 const PostConsigneeFavorite = async (data) => {
-  const API = `consignee-favorite`;
+  const API = `favorite/consignee`;
   return await axios.post(API, data);
 };
 
 const DeleteConsigneeFavorite = async (id) => {
-  const API = `consignee-favorite/${id}`;
+  const API = `favorite/consignee${id}`;
   return await axios.delete(API);
 };
+
+
+const GetAllDeliveryFavorite = async (isTo) => {
+  const API = `favorite/delivery?isTo=${isTo}`;
+  return await axios.get(API);
+};
+const PostDeliveryFavorite = async (data) => {
+  const API = `favorite/delivery`;
+  return await axios.post(API, data);
+};
+
+const DeleteDeliveryFavorite = async (id) => {
+  const API = `favorite/delivery${id}`;
+  return await axios.delete(API);
+};
+
+
+const GetAllProductFavorite = async (isTo) => {
+  const API = `favorite/product?isTo=${isTo}`;
+  return await axios.get(API);
+};
+const PostProductFavorite = async (data) => {
+  const API = `favorite/product`;
+  return await axios.post(API, data);
+};
+
+const DeleteProductFavorite = async (id) => {
+  const API = `favorite/product${id}`;
+  return await axios.delete(API);
+};
+
 
 export {
   GetAllConsigneeFavorite,
   PostConsigneeFavorite,
   DeleteConsigneeFavorite,
+  GetAllDeliveryFavorite,
+  PostDeliveryFavorite,
+  DeleteDeliveryFavorite,
+  GetAllProductFavorite,
+  PostProductFavorite,
+  DeleteProductFavorite,
 };
 
 // price order

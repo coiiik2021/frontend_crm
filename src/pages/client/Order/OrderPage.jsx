@@ -34,7 +34,7 @@ export default function OrderPage() {
 
     const [consigneeFrom, setConsigneeFrom] = useState({
         id: "",
-        name: "",
+        fullName: "",
         company: "",
         email: "",
         phone: "",
@@ -47,7 +47,7 @@ export default function OrderPage() {
 
     const [consigneeTo, setConsigneeTo] = useState({
         id: "",
-        name: "",
+        fullName: "",
         company: "",
         email: "",
         phone: "",

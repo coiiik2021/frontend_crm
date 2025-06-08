@@ -88,11 +88,7 @@ export default function InvoiceDetail({ bill_id }: { bill_id: string }) {
         } else {
           console.error("No data returned from API");
         }
-        console.log("Recipient Info:", data.recipientInfo);
-        console.log("Packages:", data.selectService);
-        console.log("Products:", data.products);
-        console.log("Products Total:", data.productsTotal);
-        console.log("Selected Service:", data.selectService);
+
       } catch (error) {
         console.error("Error fetching invoice data:", error);
       }
@@ -113,6 +109,7 @@ export default function InvoiceDetail({ bill_id }: { bill_id: string }) {
       <div className="w-full overflow-x-auto">
         {recipientInfo && selectService ? (
           <InvoiceMain
+            bill_id={bill_id}
             recipientInfo={recipientInfo}
             packages={packages}
             products={products}
