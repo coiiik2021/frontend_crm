@@ -94,7 +94,7 @@ export {
   UpdateNameService,
   DeleteServiceCompany,
   GetNameServiceByUser,
-  PutService
+  PutService,
 };
 
 const GetAPriceNet = async (name, zone, weight) => {
@@ -306,8 +306,8 @@ const GetInvoiceById = async (id) => {
   const API = `invoice/${id}`;
   return await axios.get(API);
 };
-const GetInvoicePdf = async () => {
-  const API = "invoice/export-pdf";
+const GetInvoicePdf = async (id) => {
+  const API = `house-bill/export-pdf/${id}`;
   console.log("API", API);
   return await axios.get(API, {
     responseType: "blob",
@@ -333,7 +333,6 @@ const DeleteConsigneeFavorite = async (id) => {
   return await axios.delete(API);
 };
 
-
 const GetAllDeliveryFavorite = async (isTo) => {
   const API = `favorite/delivery?isTo=${isTo}`;
   return await axios.get(API);
@@ -348,7 +347,6 @@ const DeleteDeliveryFavorite = async (id) => {
   return await axios.delete(API);
 };
 
-
 const GetAllProductFavorite = async (isTo) => {
   const API = `favorite/product?isTo=${isTo}`;
   return await axios.get(API);
@@ -362,7 +360,6 @@ const DeleteProductFavorite = async (id) => {
   const API = `favorite/product${id}`;
   return await axios.delete(API);
 };
-
 
 export {
   GetAllConsigneeFavorite,

@@ -1,7 +1,8 @@
 import { GetInvoicePdf } from "../../../../service/api.admin.service";
 import React, { useEffect, useState } from "react";
 
-const PdfViewer = () => {
+const PdfViewer = (bill_id) => {
+  const id = bill_id?.id || "";
   const [pdfUrl, setPdfUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
