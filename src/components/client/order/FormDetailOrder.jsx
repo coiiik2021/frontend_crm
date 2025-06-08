@@ -198,7 +198,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
 
         const titleRow = worksheet.addRow(['', 'INVOICE', '', '', '', '', '', '', '', '']);
         titleRow.height = 40;
-        worksheet.mergeCells('B1:I1');
+        worksheet.mergeCells('B1:J1');
         const titleCell = worksheet.getCell('B1');
         titleCell.font = { size: 28, bold: true };
         titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
