@@ -1,15 +1,40 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import InformationOrder from "../../../components/client/order/InformationOrder";
 import Products from "../../../components/client/order/Products";
 import FormDetailOrder from "../../../components/client/order/FormDetailOrder";
+import { GetBaseUserForSender } from "../../../service/api.admin.service";
 
 export default function OrderPage() {
     const [currentStep, setCurrentStep] = useState(2);
-    const [recipientInfo, setRecipientInfo] = useState({
-        id: "1",
-        name: "",
+
+    // Thêm useEffect để theo dõi thay đổi của currentStep và cuộn trang lên đầu
+    useEffect(() => {
+        // Cuộn trang lên đầu khi currentStep thay đổi
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }, [currentStep]);
+
+    const [senderInfo, setSenderInfo] = useState({});
+
+
+    useEffect(() => {
+        const loadSender = async () => {
+            const dataResponse = await GetBaseUserForSender();
+            console.log(dataResponse);
+            if (senderInfo === null) {
+                setSenderInfo(dataResponse);
+            }
+        }
+        loadSender();
+    }, [currentStep]);
+
+    const [consigneeFrom, setConsigneeFrom] = useState({
+        id: "",
+        fullName: "",
         company: "",
         email: "",
         phone: "",
@@ -17,8 +42,36 @@ export default function OrderPage() {
         city: "",
         state: "",
         postCode: "",
-        country: ""
+        country: "",
+        taxCode: ""
     });
+
+    const [consigneeTo, setConsigneeTo] = useState({
+        id: "",
+        fullName: "",
+        company: "",
+        email: "",
+        phone: "",
+        street: "",
+        city: "",
+        state: "",
+        postCode: "",
+        country: "",
+        taxCode: ""
+    });
+
+    const [addressBackup, setAddressBackup] = useState({
+
+        id: "",
+        name: "",
+        date: "",
+        time: "",
+        address: "",
+        notes: ""
+
+    });
+
+
     const [packages, setPackages] = useState([
         {
             id: 1,
@@ -74,13 +127,19 @@ export default function OrderPage() {
     if (currentStep === 2) {
         content = (
             <InformationOrder
-                recipientInfo={recipientInfo}
-                setRecipientInfo={setRecipientInfo}
+                consigneeTo={consigneeTo}
+                consigneeFrom={consigneeFrom}
+                setConsigneeFrom={setConsigneeFrom}
+                setConsigneeTo={setConsigneeTo}
                 packages={packages}
                 setPackages={setPackages}
                 currentStep={currentStep}
                 setCurrentStep={handleStepChange}
                 setSelectedService={setSelectedService}
+                senderInfo={senderInfo}
+                setSenderInfo={setSenderInfo}
+                addressBackup={addressBackup}
+                setAddressBackup={setAddressBackup}
             />
         );
     }
@@ -99,7 +158,9 @@ export default function OrderPage() {
     else if (currentStep === 4) {
         content = (
             <FormDetailOrder
-                recipientInfo={recipientInfo}
+                senderInfo={consigneeFrom}
+                recipientInfo={consigneeTo}
+                addressBackup={addressBackup}
                 packages={packages}
                 products={products}
                 productsTotal={productsTotal}

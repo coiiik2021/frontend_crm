@@ -7,12 +7,17 @@ import { jwtDecode } from "jwt-decode";
 export default function Header() {
     const [isCollapse, setIsCollapse] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false); // State để kiểm tra trạng thái đăng nhập
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const location = useLocation();
     const path = location.pathname;
     const [authorities, setAuthorities] = useState([]);
 
     useEffect(() => {
+        // Kiểm tra token trong localStorage
         const token = localStorage.getItem("token");
+        setIsLoggedIn(!!token); // Nếu có token, đặt isLoggedIn thành true
+        const decoded = jwtDecode(token);
+        setAuthorities(decoded.authorities || []);
         setIsLoggedIn(!!token); // true nếu có token
 
         if (token) {

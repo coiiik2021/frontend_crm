@@ -10,6 +10,7 @@ import { useModal } from "../../../hooks/useModal.js";
 import { DeletePriceOrder, GetAllBaseUser, GetAllPriceOrder, GetPaymentDetails, PostBaseUser, PostPriceOrder, PutPriceOrder, UpdateBillAccountant, UpdatePaymentDetails } from "../../../service/api.admin.service.jsx";
 import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
+import ExcelJS from 'exceljs';
 
 export default function ContentTable(props) {
     const { dataBill } = props;
@@ -84,6 +85,30 @@ export default function ContentTable(props) {
                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 111.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414zM10 3a1 1 0 011 1v10a1 1 11-2 0V4a1 1 011-1z" clipRule="evenodd" />
             </svg>
         );
+    }
+
+    // Add this function to check if a date is today
+    function isToday(dateString) {
+        // Parse the input date string (format: "10:44:19 07:06:2025")
+        const parts = dateString.split(' ');
+        if (parts.length !== 2) return false;
+
+        const timePart = parts[0];
+        const datePart = parts[1];
+
+        const [day, month, year] = datePart.split(':');
+
+        // Create date object from the parsed components
+        const inputDate = new Date(year, month - 1, day);
+
+        // Get today's date with time set to 00:00:00
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Compare the dates (ignoring time)
+        return inputDate.getDate() === today.getDate() &&
+            inputDate.getMonth() === today.getMonth() &&
+            inputDate.getFullYear() === today.getFullYear();
     }
 
     const filteredAndSortedData = useMemo(() => {
@@ -348,6 +373,328 @@ export default function ContentTable(props) {
 
     const statusPopoverRef = useRef(null);
 
+    // Thêm state để quản lý các cột hiển thị
+    const [visibleColumns, setVisibleColumns] = useState({
+        house_bill: true,
+        Date: true,
+        bill_employee: true,
+        awb: true,
+        company_service: true,
+        payment_bill_real: true,
+        price_order: true,
+        payment_bill_fake: true,
+        payments_cash: true,
+        payments_banking: true,
+        status: true
+    });
+
+    // Thêm state để quản lý hiển thị dropdown
+    const [showColumnSelector, setShowColumnSelector] = useState(false);
+
+    // Thêm useRef để theo dõi dropdown
+    const columnSelectorRef = useRef(null);
+    const columnButtonRef = useRef(null);
+
+    // Thêm useEffect để xử lý click bên ngoài
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (showColumnSelector &&
+                columnSelectorRef.current &&
+                !columnSelectorRef.current.contains(event.target) &&
+                columnButtonRef.current &&
+                !columnButtonRef.current.contains(event.target)) {
+                setShowColumnSelector(false);
+            }
+        }
+
+        // Thêm event listener
+        document.addEventListener("mousedown", handleClickOutside);
+
+        // Cleanup event listener khi component unmount
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showColumnSelector]);
+
+    const exportToExcel = async () => {
+        const dataToExport = currentData;
+
+        if (!dataToExport || dataToExport.length === 0) {
+            alert('Không có dữ liệu để xuất!');
+            return;
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Shipment Report');
+
+        workbook.creator = 'Shipment Management System';
+        workbook.created = new Date();
+
+        const columnMapping = {
+            house_bill: { header: 'HOUSE BILL', width: 5 },
+            Date: { header: 'NGÀY TẠO', width: 15 },
+            bill_employee: { header: 'BILL PHỤ', width: 15 },
+            awb: { header: 'AWB', width: 15 },
+            company_service: { header: 'DỊCH VỤ', width: 15 },
+            payment_bill_real: { header: 'THÀNH TIỀN (TẠM TÍNH)', width: 24 },
+            price_order: { header: 'TIỀN ORDER', width: 38 },
+            payment_bill_fake: { header: 'THÀNH TIỀN (CHỐT)', width: 25 },
+            payments_cash: { header: 'THANH TOÁN TIỀN MẶT', width: 25 },
+            payments_banking: { header: 'THANH TOÁN BANKING', width: 25 },
+            status: { header: 'TRẠNG THÁI', width: 15 }
+        };
+
+        const columnsToExport = Object.keys(columnMapping).filter(key =>
+            key === 'house_bill' || visibleColumns[key]
+        );
+
+        worksheet.columns = columnsToExport.map(key => ({
+            key: key,
+            width: columnMapping[key].width,
+        }));
+
+        // Thêm tiêu đề
+        const titleRow = worksheet.insertRow(1, ['BÁO CÁO SHIPMENT']);
+        worksheet.mergeCells(1, 1, 1, columnsToExport.length);
+        titleRow.height = 60;
+
+        const titleCell = worksheet.getCell(1, 1);
+        titleCell.font = { size: 30, bold: true, color: { argb: 'FF000000' }, name : 'Arial' };
+        titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+
+        // Thêm thông tin ngày xuất
+        const dateRow = worksheet.insertRow(2, [`Ngày xuất: ${new Date().toLocaleString('vi-VN')}`]);
+        worksheet.mergeCells(2, 1, 2, columnsToExport.length);
+        dateRow.height = 20;
+
+        const dateCell = worksheet.getCell(2, 1);
+        dateCell.font = { size: 14, italic: true };
+        dateCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+        const headerRow = worksheet.getRow(4);
+        headerRow.height = 45;
+
+        columnsToExport.forEach((key, index) => {
+            const cell = headerRow.getCell(index + 1);
+            cell.value = columnMapping[key].header;
+            cell.font = { bold: true, color: { argb: 'FF000000' } , size: 12};
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFA6A6A7' }
+            };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+
+        // Thêm dữ liệu
+        dataToExport.forEach((item, rowIndex) => {
+            const rowData = {};
+
+            columnsToExport.forEach(key => {
+                switch (key) {
+                    case 'house_bill':
+                        rowData[key] = `EB${item.bill_house.substring(0, 5)}`;
+                        break;
+                    case 'Date':
+                        rowData[key] = item.date_create;
+                        break;
+                    case 'bill_employee':
+                        rowData[key] = item?.bill_employee || '';
+                        break;
+                    case 'awb':
+                        rowData[key] = item?.awb || '';
+                        break;
+                    case 'company_service':
+                        rowData[key] = item.company_service;
+                        break;
+                    case 'payment_bill_real':
+                        rowData[key] = `${formatCurrency(item.total_real)} VNĐ`;
+                        break;
+                    case 'price_order':
+                        // Xuất cả 2 giá trị: complete và process
+                        rowData[key] = `Hoàn thành: ${formatCurrency(item.priceOrder.total_complete)} VNĐ | Đang xử lý: ${formatCurrency(item.priceOrder.total_process)} VNĐ`;
+                        break;
+                    case 'payment_bill_fake':
+                        rowData[key] = `${formatCurrency(item.total_fake)} VNĐ`;
+                        break;
+                    case 'payments_cash':
+                        rowData[key] = `${formatCurrency(item.pricePayment.payment_cash)} VNĐ`;
+                        break;
+                    case 'payments_banking':
+                        rowData[key] = `${formatCurrency(item.pricePayment.payment_banking)} VNĐ`;
+                        break;
+                    case 'status':
+                        // Chuyển đổi status thành text dễ hiểu
+                        const statusText = {
+                            'pending': 'Chờ xử lý',
+                            'processing': 'Đang xử lý',
+                            'completed': 'Hoàn thành',
+                            'cancelled': 'Đã hủy'
+                        };
+                        rowData[key] = statusText[item.status_payment] || item.status_payment;
+                        break;
+                    default:
+                        rowData[key] = item[key] || '';
+                }
+            });
+
+            const dataRow = worksheet.addRow(rowData);
+            dataRow.height = 35;
+
+            // Định dạng cho từng cell trong dòng dữ liệu
+            dataRow.eachCell((cell, colNumber) => {
+                cell.border = {
+                    top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+                    left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+                    bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+                    right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+                };
+
+                if (rowIndex % 2 === 0) {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFF9FAFB' }
+                    };
+                }
+
+                // Căn giữa cho một số cột
+                if (columnsToExport[colNumber - 1] === 'Date' ||
+                    columnsToExport[colNumber - 1] === 'status' ||
+                    columnsToExport[colNumber - 1] === 'company_service') {
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                } else if (columnsToExport[colNumber - 1].includes('payment') ||
+                    columnsToExport[colNumber - 1].includes('price')) {
+                    // Căn phải cho các cột tiền
+                    cell.alignment = { horizontal: 'right', vertical: 'middle' };
+                    cell.font = { bold: true };
+                } else {
+                    cell.alignment = { vertical: 'middle' };
+                }
+            });
+        });
+
+        // Thêm tổng kết ở cuối (nếu có dữ liệu số)
+        if (dataToExport.length > 0) {
+            // Thêm dòng trống
+            worksheet.addRow([]);
+
+            // Tính tổng các giá trị tiền
+            let totalReal = 0;
+            let totalFake = 0;
+            let totalCash = 0;
+            let totalBanking = 0;
+            let totalComplete = 0;
+            let totalProcess = 0;
+
+            dataToExport.forEach(item => {
+                totalReal += item.total_real || 0;
+                totalFake += item.total_fake || 0;
+                totalCash += item.pricePayment?.payment_cash || 0;
+                totalBanking += item.pricePayment?.payment_banking || 0;
+                totalComplete += item.priceOrder?.total_complete || 0;
+                totalProcess += item.priceOrder?.total_process || 0;
+            });
+
+            // Thêm dòng tổng kết
+            const summaryData = {};
+            columnsToExport.forEach((key, index) => {
+                if (index === 0) {
+                    summaryData[key] = 'TỔNG CỘNG';
+                } else if (key === 'payment_bill_real' && visibleColumns[key]) {
+                    summaryData[key] = `${formatCurrency(totalReal)} VNĐ`;
+                } else if (key === 'payment_bill_fake' && visibleColumns[key]) {
+                    summaryData[key] = `${formatCurrency(totalFake)} VNĐ`;
+                } else if (key === 'payments_cash' && visibleColumns[key]) {
+                    summaryData[key] = `${formatCurrency(totalCash)} VNĐ`;
+                } else if (key === 'payments_banking' && visibleColumns[key]) {
+                    summaryData[key] = `${formatCurrency(totalBanking)} VNĐ`;
+                } else if (key === 'price_order' && visibleColumns[key]) {
+                    summaryData[key] = `HT: ${formatCurrency(totalComplete)} | XL: ${formatCurrency(totalProcess)} VNĐ`;
+                } else {
+                    summaryData[key] = '';
+                }
+            });
+
+            const summaryRow = worksheet.addRow(summaryData);
+            summaryRow.height = 35;
+
+
+            summaryRow.eachCell((cell, colNumber) => {
+
+                cell.font = { bold: true, size: 13 };
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFDBEAFE' }
+                };
+                cell.border = {
+                    top: { style: 'medium' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'medium' },
+                    right: { style: 'thin' }
+                };
+
+                if (colNumber === 1) {
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                } else {
+                    cell.alignment = { horizontal: 'right', vertical: 'middle' };
+                }
+            });
+
+            let mergeEndColumn = 1;
+            for (let i = 1; i <= columnsToExport.length; i++) {
+                // const key = columnsToExport[i - 1];
+                const value = summaryRow.getCell(i).value;
+                if (typeof value === 'string' && value.trim() !== 'TỔNG CỘNG' && value.trim() !== '') {
+                    mergeEndColumn = i - 1;
+                    break;
+                }
+            }
+            if (mergeEndColumn < 2) {
+                mergeEndColumn = columnsToExport.length;
+                worksheet.spliceRows(summaryRow.number, 1)
+            }
+
+            worksheet.mergeCells(summaryRow.number, 1, summaryRow.number, mergeEndColumn);
+        }
+
+
+        // Xuất file
+        try {
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+
+            // Tạo tên file với timestamp
+            const timestamp = new Date().toISOString().slice(0, 10);
+            a.download = `shipment_report_${timestamp}.xlsx`;
+
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            // Thông báo thành công
+            console.log('Xuất Excel thành công!');
+
+        } catch (error) {
+            console.error('Lỗi khi xuất Excel:', error);
+            alert('Có lỗi xảy ra khi xuất file Excel!');
+        }
+    };
 
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
@@ -391,6 +738,88 @@ export default function ContentTable(props) {
                         </span>
                     </div>
                     <span className="text-gray-500 dark:text-gray-400"> entries </span>
+
+
+                    {/* Thêm nút tùy chỉnh cột */}
+                    <button
+                        ref={columnButtonRef}
+                        onClick={() => setShowColumnSelector(!showColumnSelector)}
+                        className="ml-4 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 flex items-center"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Tùy chỉnh cột
+                    </button>
+
+                    <button
+                    ref={columnButtonRef}
+                    onClick={() => exportToExcel()}
+                    className="ml-4 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 flex items-center transition-all duration-200"
+                    >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 16 16"
+                    >
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                        <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+                    </svg>
+                    Xuất Excel
+                    </button>
+
+
+
+                    {/* Dropdown tùy chỉnh cột */}
+                    {showColumnSelector && (
+                        <div
+                            ref={columnSelectorRef}
+                            className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-3 top-16 dark:bg-gray-800 dark:border-gray-700"
+                        >
+                            <h3 className="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Hiển thị cột</h3>
+                            <div className="space-y-2 max-h-60 overflow-y-auto">
+                                {Object.keys(visibleColumns).map((column) => (
+                                    <div key={column} className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            id={`col-${column}`}
+                                            checked={visibleColumns[column]}
+                                            onChange={() => {
+                                                // Nếu là house_bill thì không cho phép thay đổi
+                                                if (column === "house_bill") return;
+
+                                                setVisibleColumns({
+                                                    ...visibleColumns,
+                                                    [column]: !visibleColumns[column]
+                                                });
+                                            }}
+                                            disabled={column === "house_bill"} // Disable checkbox nếu là house_bill
+                                            className={`w-4 h-4 ${column === "house_bill"
+                                                ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
+                                                : "text-blue-600 bg-gray-100"} border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
+                                        />
+                                        <label htmlFor={`col-${column}`} className={`ml-2 text-sm ${column === "house_bill"
+                                            ? "text-gray-800 font-medium dark:text-gray-200"
+                                            : "text-gray-600 dark:text-gray-400"}`}>
+                                            {column === "house_bill" ? "HOUSE BILL" :
+                                                column === "Date" ? "NGÀY TẠO" :
+                                                    column === "bill_employee" ? "BILL PHỤ" :
+                                                        column === "awb" ? "AWB" :
+                                                            column === "company_service" ? "DỊCH VỤ" :
+                                                                column === "payment_bill_real" ? "THÀNH TIỀN (TẠM TÍNH)" :
+                                                                    column === "price_order" ? "TIỀN ORDER" :
+                                                                        column === "payment_bill_fake" ? "THÀNH TIỀN (CHỐT)" :
+                                                                            column === "payments_cash" ? "THANH TOÁN TIỀN MẶT" :
+                                                                                column === "payments_banking" ? "THANH TOÁN BANKING" :
+                                                                                    column === "status" ? "TRẠNG THÁI" : column}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="relative">
@@ -435,9 +864,10 @@ export default function ContentTable(props) {
                                     { key: "payment_bill_real", label: "Thành tiền (Tạm tính)" },
                                     { key: "price_order", label: "Tiền order" },
                                     { key: "payment_bill_fake", label: "Thành tiền (chốt)" },
-                                    { key: "payments", label: "Thanh toán" },
+                                    { key: "payments_cash", label: "Thanh toán Tiền mặt" },
+                                    { key: "payments_banking", label: "Thanh toán banking" },
                                     { key: "status", label: "TRẠNG THÁI" },
-                                ].map(({ key, label }) => (
+                                ].filter(column => column.key === "house_bill" || visibleColumns[column.key]).map(({ key, label }) => (
                                     <TableCell
                                         key={key}
                                         isHeader
@@ -471,139 +901,178 @@ export default function ContentTable(props) {
                                     key={i + 1}
                                     className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                                 >
-                                    {/* House Bill */}
+                                    {/* House Bill - luôn hiển thị */}
                                     <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <NavLink
-                                            to="/profile"
-                                            className="font-medium text-brand-600 dark:text-brand-400 hover:underline"
-                                        >
-                                            EB{item.bill_house.substring(0, 5)}
-                                        </NavLink>
+                                        <div className="flex items-center">
+                                            <NavLink
+                                                to="/profile"
+                                                className="font-medium text-brand-600 dark:text-brand-400 hover:underline"
+                                            >
+                                                EB{item.bill_house.substring(0, 5)}
+                                            </NavLink>
+
+                                            {isToday(item.date_create) && (
+                                                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-md animate-pulse">
+                                                    NEW
+                                                </span>
+                                            )}
+                                        </div>
                                     </TableCell>
 
-                                    {/* Thông tin người */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        {item.date_create}
-                                    </TableCell>
+                                    {/* Các cột khác chỉ hiển thị khi được chọn */}
+                                    {visibleColumns.Date && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap">
+                                            {item.date_create}
+                                        </TableCell>
+                                    )}
 
-                                    {/* Bill phụ */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                        {item.bill_employee}
-                                    </TableCell>
+                                    {visibleColumns.bill_employee && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.bill_employee || "..."}
+                                        </TableCell>
+                                    )}
 
-                                    {/* AWS */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                        {item.aws}
-                                    </TableCell>
+                                    {visibleColumns.awb && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.awb || "..."}
+                                        </TableCell>
+                                    )}
 
-                                    {/* Dịch vụ */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                                            {item.company_service}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                    {visibleColumns.company_service && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap">
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                                {item.company_service}
+                                            </span>
+                                        </TableCell>
+                                    )}
+
+                                    {visibleColumns.payment_bill_real && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                                             {formatCurrency(item.total_real)} VNĐ
-                                        </span>
-                                    </TableCell>
+                                        </TableCell>
+                                    )}
 
-                                    {/* Thành tiền */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        <div className="relative flex flex-col items-start space-y-2">
-                                            {
-                                                (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            openModal();
-                                                            setBillEdit(item);
-                                                        }}
-                                                        className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                                    >
-                                                        <PencilIcon className="w-5 h-5" />
-                                                    </button>)
-                                            }
+                                    {visibleColumns.price_order && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <div className="relative flex flex-col items-start space-y-2">
+                                                {
+                                                    (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                openModal();
+                                                                setBillEdit(item);
+                                                            }}
+                                                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5" />
+                                                        </button>)
+                                                }
 
-                                            {/* Giá trị tiền order */}
-                                            <div className="flex flex-col space-y-1 pt-6">
-                                                {/* Giá trị xanh */}
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
-                                                        {formatCurrency(item.priceOrder.total_complete)} VNĐ
-                                                    </span>
-                                                </div>
+                                                {/* Giá trị tiền order */}
+                                                <div className="flex flex-col space-y-1 pt-6">
+                                                    {/* Giá trị xanh */}
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                                                            {formatCurrency(item.priceOrder.total_complete)} VNĐ
+                                                        </span>
+                                                    </div>
 
-                                                {/* Giá trị đỏ */}
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
-                                                        {formatCurrency(item.priceOrder.total_process)} VNĐ
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        {formatCurrency(item.total_fake)} VNĐ
-                                    </TableCell>
-
-
-
-                                    {/* price payment */}
-                                    <TableCell TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300" >
-                                        <div className="relative flex flex-col items-start space-y-2">
-                                            {/* Nút để mở modal thanh toán */}
-                                            {
-                                                (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleViewPaymentDetails(item)}
-                                                        className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                                    >
-                                                        <PencilIcon className="w-5 h-5" />
-                                                    </button>)
-                                            }
-
-                                            {/* Giá trị tiền order */}
-                                            <div className="flex flex-col space-y-1 pt-6">
-                                                {/* Giá trị xanh */}
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
-                                                        {formatCurrency(item.pricePayment.payment_cash)} VNĐ
-                                                    </span>
-                                                </div>
-
-                                                {/* Giá trị đỏ */}
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
-                                                        {formatCurrency(item.pricePayment.payment_card)} VNĐ
-                                                    </span>
+                                                    {/* Giá trị đỏ */}
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                                                            {formatCurrency(item.priceOrder.total_process)} VNĐ
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </TableCell>
+                                        </TableCell>
 
-                                    {/* Trạng thái */}
-                                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center space-x-2">
-                                            <StatusBadge status={item.status_payment} />
+                                    )}
 
-                                            {authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER") ? (
-                                                <select
-                                                    value={item.status_payment || "pending"}
-                                                    onChange={(e) => handleUpdateStatus(item.bill_house, e.target.value)}
-                                                    className="ml-2 text-xs border border-gray-300 rounded p-1 bg-white dark:bg-gray-700 dark:border-gray-600"
-                                                >
-                                                    {availableStatuses.map((status) => (
-                                                        <option key={status.value} value={status.value}>
-                                                            {status.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            ) : null}
-                                        </div>
-                                    </TableCell>
+                                    {visibleColumns.payment_bill_fake && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {formatCurrency(item.total_fake)} VNĐ
+                                        </TableCell>
+                                    )}
+
+                                    {visibleColumns.payments_cash && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <div className="relative flex flex-col items-start space-y-2">
+                                                {/* Nút để mở modal thanh toán */}
+                                                {
+                                                    (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleViewPaymentDetails(item)}
+                                                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5" />
+                                                        </button>)
+                                                }
+
+                                                {/* Giá trị tiền order */}
+                                                <div className="flex flex-col space-y-1 pt-6">
+                                                    {/* Giá trị xanh */}
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                                                            {formatCurrency(item.pricePayment.payment_cash)} VNĐ
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                    )}
+
+                                    {visibleColumns.payments_banking && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <div className="relative flex flex-col items-start space-y-2">
+                                                {/* Nút để mở modal thanh toán */}
+                                                {
+                                                    (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleViewPaymentDetails(item)}
+                                                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5" />
+                                                        </button>)
+                                                }
+
+                                                {/* Giá trị tiền order */}
+                                                <div className="flex flex-col space-y-1 pt-6">
+                                                    {/* Giá trị xanh */}
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="px-2 py-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-md dark:bg-blue-900/50 dark:text-blue-300">
+                                                            {formatCurrency(item.pricePayment.payment_banking)} VNĐ
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                    )}
+
+                                    {visibleColumns.status && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center space-x-2">
+                                                <StatusBadge status={item.status_payment} />
+
+                                                {authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER") ? (
+                                                    <select
+                                                        value={item.status_payment || "pending"}
+                                                        onChange={(e) => handleUpdateStatus(item.bill_house, e.target.value)}
+                                                        className="ml-2 text-xs border border-gray-300 rounded p-1 bg-white dark:bg-gray-700 dark:border-gray-600"
+                                                    >
+                                                        {availableStatuses.map((status) => (
+                                                            <option key={status.value} value={status.value}>
+                                                                {status.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                ) : null}
+                                            </div>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))}
                         </TableBody>

@@ -157,6 +157,12 @@ const AppSidebar: React.FC = () => {
               icon: <ListIcon />,
               path: "/quan-ly/my-debits",
             },
+
+            {
+              name: "Thông tin tài khoản",
+              icon: <ListIcon />,
+              path: "/quan-ly/my-profile",
+            },
           ])
         } else {
           setNavItems(

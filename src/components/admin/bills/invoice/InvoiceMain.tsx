@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import * as XLSX from "xlsx";
+import ExcelJS from 'exceljs';
+import { GetShipperServiceCompany } from "../../../../service/api.admin.service.jsx"
+
 
 interface RecipientInfo {
   name: string;
@@ -11,6 +13,7 @@ interface RecipientInfo {
   phone: string;
   email: string;
   country: string;
+  fullName: string;
 }
 
 interface Package {
@@ -42,6 +45,8 @@ interface SelectedService {
   overSize?: { price: number };
   zone: string;
   service: string;
+  awb: string;
+  priceOther: number;
 }
 
 interface InvoiceMainProps {
@@ -54,15 +59,36 @@ interface InvoiceMainProps {
 
 
 
-export default function InvoiceMain({ recipientInfo, packages, products, productsTotal, selectedService }: InvoiceMainProps) {
+export default function InvoiceMain({ bill_id, recipientInfo, packages, products, productsTotal, selectedService }: InvoiceMainProps) {
   const [showProductsForm, setShowProductsForm] = useState(true);
   const [isConfirmed, setIsConfirmed] = useState(false);
+
+  const [dataShipper, setDataShipper] = useState({
+
+
+  });
+
+
+
+  useEffect(() => {
+    const loadData = async () => {
+      const dataResponse = await GetShipperServiceCompany(selectedService.carrier, selectedService.service);
+      console.log("shipper", dataResponse);
+
+      setDataShipper(dataResponse);
+    }
+
+    loadData();
+    if (Object.keys(dataShipper).length > 0) {
+      invoiceData.shipper = dataShipper;
+    }
+  }, []);
 
   // Tạo invoiceData từ props
   const invoiceData = {
     invoiceNo: "INVOICE",
     date: new Date().toLocaleDateString(),
-    airWaybillNo: "",
+    airWaybillNo: selectedService.awb,
 
     // Tính toán weight và dimensions từ packages
     weight: packages.reduce((sum, pkg) => {
@@ -74,35 +100,34 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
       const width = pkg.width || 0;
       const height = pkg.height || 0;
       return `${length}*${width}*${height}`;
-    }).join(", "),
+    }),
     insuranceValue: "9.5",
 
     // Thông tin người gửi (cố định)
-    shipper: {
-      name: "CÔNG TY TNHH THƯƠNG MẠI VÀ DỊCH VỤ VẬN CHUYỂN QUỐC TẾ VIỆT NAM",
-      address: "Số 1, Đường số 2, Phường 3, Quận 4, TP.HCM",
-      phone: "0123456789",
-      email: "info@example.com"
-    },
+
+
+
+    shipper: dataShipper,
 
     consignee: {
       name: recipientInfo.name,
       company: recipientInfo.company,
-      address: `${recipientInfo.street}, ${recipientInfo.city}, ${recipientInfo.state} ${recipientInfo.postCode}`,
+      address: `${recipientInfo.street}, ${recipientInfo.city}, ${recipientInfo.state}, ${recipientInfo.country}`,
       phone: recipientInfo.phone,
       email: recipientInfo.email,
       country: recipientInfo.country,
-      postCode: recipientInfo.postCode
+      postCode: recipientInfo.postCode,
+      contactName: recipientInfo.name
     },
 
     // Chuyển đổi products thành items
     items: products.map(product => ({
-      description: product["Mô tả sản phẩm"] || product.description || "",
-      origin: product["Xuất xứ"] || "",
-      quantity: product["Số lượng"] || 0,
-      unit: product["Kiểu đơn vị"] || "",
-      unitPrice: product["Giá trên 1 sản phẩm"] || 0,
-      subtotal: product["Giá Trị"] || 0
+      description: product.description || "",
+      origin: product.origin || "",
+      quantity: product.quantity || 0,
+      unit: product.unit || "",
+      unitPrice: product.unitPrice || 0,
+      subtotal: product.quantity * product.unitPrice
     })),
 
     totalValue: productsTotal.priceProduct,
@@ -118,45 +143,45 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
 
 
 
-  useEffect(() => {
-    const newList = products.map(product => ({
-      id: product.id,
-      description: product["Mô tả sản phẩm"],
-      origin: product["Xuất xứ"],
-      unit: product["Kiểu đơn vị"],
-      quantity: product["Số lượng"],
-      totalPrice: product.totalPrice,
-      price: product["Giá trên 1 sản phẩm"],
-    }));
+  // useEffect(() => {
+  //   const newList = products.map(product => ({
+  //     id: product.id,
+  //     description: product["Mô tả sản phẩm"],
+  //     origin: product["Xuất xứ"],
+  //     unit: product["Kiểu đơn vị"],
+  //     quantity: product["Số lượng"],
+  //     totalPrice: product.totalPrice,
+  //     price: product["Giá trên 1 sản phẩm"],
+  //   }));
 
-    const newPackages = packages.map(p => (
-      {
-        weight: p.weight,
-        length: p.length,
-        width: p.width,
-        height: p.height,
-      }
-    ))
+  //   const newPackages = packages.map(p => (
+  //     {
+  //       weight: p.weight,
+  //       length: p.length,
+  //       width: p.width,
+  //       height: p.height,
+  //     }
+  //   ))
 
-    const newServiceSelectInfo = {
-      ...serviceSelectNew,
-      priceNetReal: selectedService.priceNet,
-      priceNetFake: priceNetConfirm,
-      priceOther: priceOtherConfirm
-    }
-
-
+  //   const newServiceSelectInfo = {
+  //     ...serviceSelectNew,
+  //     priceNetReal: selectedService.priceNet,
+  //     priceNetFake: priceNetConfirm,
+  //     priceOther: priceOtherConfirm
+  //   }
 
 
-    const dataRequestAPI = {
-      recipientInfo: recipientInfo,
-      serviceSelectInfo: newServiceSelectInfo,
-      products: newList,
-      packages: newPackages,
-      productsTotal: productsTotal,
-    }
-    // setDataRequest(dataRequestAPI);
-  }, [serviceSelectNew, priceNetConfirm, priceOtherConfirm]);
+
+
+  //   const dataRequestAPI = {
+  //     recipientInfo: recipientInfo,
+  //     serviceSelectInfo: newServiceSelectInfo,
+  //     products: newList,
+  //     packages: newPackages,
+  //     productsTotal: productsTotal,
+  //   }
+  //   // setDataRequest(dataRequestAPI);
+  // }, [serviceSelectNew, priceNetConfirm, priceOtherConfirm]);
 
 
 
@@ -179,10 +204,10 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
   }, [])
 
   const [priceNet, setPriceNet] = useState(selectedService.totalPrice);
-  const [priceTransport, setPriceTransport] = useState(0);
+  const [priceTransport, setPriceTransport] = useState(selectedService.priceOther);
   const [originalTotal, setOriginalTotal] = useState(priceNet + priceTransport);
   const [isEdited, setIsEdited] = useState(false);
-  const [priceNetNew, setPriceNetNew] = useState(priceNet);
+  const [priceNetNew, setPriceNetNew] = useState(priceNet - priceTransport);
 
   const handlePriceChange = (value: any, setter: any) => {
     const numericValue = value.replace(/[^0-9]/g, '');
@@ -203,8 +228,24 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
     setIsEdited(true);
   };
 
-  const exportToExcel = () => {
-    // Lấy dữ liệu động
+  const handleUpdatePriceOrder = async () => {
+    try {
+      const dataRequest = {
+        id: bill_id,
+        priceNet: priceNetConfirm,
+        priceOther: priceTransport
+      };
+
+      console.log(dataRequest);
+
+      // const dataResponse = await PutPriceOrder(dataRequest);
+      // console.log("Price order updated:", dataResponse);
+    } catch (error) {
+      console.error("Error updating price order:", error);
+    }
+  };
+
+  const exportToExcel = async () => {
     const shipper = invoiceData.shipper;
     const consignee = invoiceData.consignee;
     const items = invoiceData.items;
@@ -216,181 +257,262 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
     const dimensions = invoiceData.dimensions;
     const totalValue = invoiceData.totalValue;
 
-    // Tạo mảng dữ liệu mô phỏng bố cục invoice.html
-    const data = [
-      ["", "", "", "", "INVOICE", "", "", "", ""], // B1-I1 merge
-      ["", "", "", "", "", "", "", "", ""],
-      ["", "", "Invoice No.:", invoiceNo, "", "", "", "Date:", date],
-      ["", "", "", "", "", "", "", "", ""],
-      ["", "SHIPPER", "", "", "", "", "", "Air waybill No.", airWaybillNo],
-      ["", "Company Name", shipper.name, "", "", "", "", "", shippingMethod],
-      ["", "Address", shipper.address, "", "", "", "", "", ""],
-      ["", "Town/ Area Code", shipper.address, "", "", "", "", "", ""],
-      ["", "State/ Country", "VIETNAM", "", "", "", "", "", ""],
-      ["", "Tax Code", "0399321378", "", "", "", "", "", "1"],
-      ["", "Contact Name", shipper.name, "", "", "", "", "", ""],
-      ["", "Phone/Fax No.", shipper.phone, "", "", "", "", "", weight],
-      ["", "", "", "", "", "", "", "", dimensions],
-      ["", "CONSIGNEE", "", "", "", "", "", "", ""],
-      ["", "Company Name", consignee.company, "", "", "", "", "", ""],
-      ["", "Address", consignee.address, "", "", "", "", "", ""],
-      ["", "Postal code", consignee.postCode, "", "", "", "", "", ""],
-      ["", "State/ Country", consignee.country, "", "", "", "", "", ""],
-      ["", "Contact Name", consignee.name, "", "", "", "", "", ""],
-      ["", "Phone/Fax No.", consignee.phone, "", "", "", "", "", ""],
-      [""],
-      ["", "Full Description of Goods", "", "", "Origin", "Q'Ty", "Unit", "Unit Price", "Subtotal"],
-      ["", "(Name of goods, composition of material, marks, etc)", "", "", "", "", "(pcs/sets)", "(in USD)", "(in USD)"],
-      ...items.map(p => [
-        "",
-        p.description,
-        "",
-        "",
-        p.origin,
-        p.quantity,
-        p.unit,
-        p.unitPrice,
-        p.subtotal
-      ]),
-      ["", "", "", "", "", "", "", "Total Value (in USD)", totalValue],
-      ["", "SAMPLE", "", "", "", "", "", "", ""],
-      ["Reason for Export", "", "", "", "", "", "", "", ""],
-      ["I declare that the information is true and correct to the best of my knowledge,", "", "", "", "", "", "", "", ""],
-      ["and that the goods are of VIETNAM origin.", "", "", "", "", "", "", "", ""],
-      ["I (name)", "", "", "", "", "certify that the particulars and", "", "", ""],
-      ["quantity of goods specified in this document are goods which are submitted for", "", "", "", "", "", "", "", ""],
-      ["clearance for export out of Vietnam.", "", "", "", "", "", "", "", ""],
-      ["", "", "", "", "", "", "Signature/Title/Stamp", "", ""],
-      ["", "", "", "", "", "", "", "", ""],
-      ["", "", "", "", "", "", "", "", ""],
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Invoice');
+
+    worksheet.columns = [
+      { width: 2 },    // A
+      { width: 15 },   // B
+      { width: 15 },   // C
+      { width: 30 },   // D
+      { width: 15 },   // E
+      { width: 15 },   // F
+      { width: 15 },   // G
+      { width: 15 },   // H
+      { width: 15 },   // I
+      { width: 15 }
     ];
 
-    const ws = XLSX.utils.aoa_to_sheet(data);
 
-    // Merge cell theo mẫu
-    ws['!merges'] = [
-      { s: { r: 0, c: 1 }, e: { r: 0, c: 8 } }, // INVOICE
-      { s: { r: 4, c: 1 }, e: { r: 4, c: 6 } }, // SHIPPER
-      { s: { r: 13, c: 1 }, e: { r: 13, c: 6 } }, // CONSIGNEE
-      { s: { r: 21, c: 1 }, e: { r: 21, c: 3 } }, // Full Description of Goods header
-      { s: { r: 22, c: 1 }, e: { r: 22, c: 3 } }, // (Name of goods...) subheader
-    ];
+    const titleRow = worksheet.addRow(['', 'INVOICE', '', '', '', '', '', '', '', '']);
+    titleRow.height = 40;
+    worksheet.mergeCells('B1:I1');
+    const titleCell = worksheet.getCell('B1');
+    titleCell.font = { size: 28, bold: true };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-    // Border style dưới (gạch dưới)
-    const borderBottom = {
-      bottom: { style: 'thin', color: { rgb: '000000' } }
-    };
-    // Border quanh cho bảng sản phẩm
-    const borderAll = {
-      top: { style: 'thin', color: { rgb: '000000' } },
-      bottom: { style: 'thin', color: { rgb: '000000' } },
-      left: { style: 'thin', color: { rgb: '000000' } },
-      right: { style: 'thin', color: { rgb: '000000' } }
-    };
+    const invoice_no = worksheet.addRow(['', '', 'Invoice No.:', invoiceNo, '', '', '', '', '', '']);
+    invoice_no.getCell(3).font = { bold: true, italic: true }
+    invoice_no.getCell(8).font = { bold: true, italic: true }
+    invoice_no.getCell(4).font = { bold: true }
+    invoice_no.getCell(9).font = { bold: true }
 
-    // Set style cho các dòng cần gạch dưới
-    const underlineRows = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20];
-    underlineRows.forEach(r => {
-      for (let c = 0; c < 9; c++) {
-        const col = String.fromCharCode(65 + c);
-        const cell = `${col}${r + 1}`;
-        if (ws[cell]) {
-          ws[cell].s = ws[cell].s || {};
-          ws[cell].s.border = borderBottom;
-        }
+    const shipperTitle = worksheet.addRow(['', 'SHIPPER', '', '', '', '', '', '', 'Air waybill No.', airWaybillNo]);
+    shipperTitle.getCell(2).font = { bold: true, underline: true };
+    shipperTitle.getCell(10).font = { bold: true }
+    shipperTitle.getCell(9).font = { bold: true }
+
+    const company = worksheet.addRow(['', 'Company Name', shipper.name, '', '', '', '', '', '', shippingMethod]);
+    company.getCell(3).font = { bold: true }
+    company.getCell(10).font = { bold: true }
+    const noOfpkgs = worksheet.addRow(['', 'Address', shipper.address, '', '', '', '', '', 'No. of pkgs', '1']);
+    noOfpkgs.getCell(9).font = { bold: true }
+    noOfpkgs.getCell(10).border = { bottom: { style: 'thin' } }
+    const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.address, '', '', '', '', '', 'Weight', weight]);
+    rowWeight.getCell(9).font = { bold: true }
+    rowWeight.getCell(10).border = { bottom: { style: 'thin' } }
+    const rowDimensions = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '', '', '', 'Dimensions', dimensions[0]]);
+    rowDimensions.getCell(3).font = { bold: true }
+    rowDimensions.getCell(9).font = { bold: true }
+    rowDimensions.getCell(10).border = { bottom: { style: 'thin' } }
+    worksheet.addRow(['', 'Tax Code', '0399321378', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'Contact Name', shipper.name, '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'Phone/Fax No.', shipper.phone, '', '', '', '', '', '', '']);
+    worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
+
+    const consigneeTitle = worksheet.addRow(['', 'CONSIGNEE', '', '', '', '', '', '', '', '']);
+    consigneeTitle.getCell(2).font = { bold: true, underline: true };
+
+    const company_consignee = worksheet.addRow(['', 'Company Name', consignee.company, '', '', '', '', '', '', '']);
+    company_consignee.getCell(3).font = { bold: true }
+    worksheet.addRow(['', 'Address', consignee.address, '', '', '', '', '', '']);
+    worksheet.addRow(['', 'Postal code', consignee.postCode, '', '', '', '', '', '']);
+    const countryConsignee = worksheet.addRow(['', 'State/ Country', consignee.country, '', '', '', '', '', '', '']);
+    countryConsignee.getCell(3).font = { bold: true }
+    worksheet.addRow(['', 'Contact Name', consignee.name, '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'Phone/Fax No.', consignee.phone, '', '', '', '', '', '', '']);
+    worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
+
+
+    worksheet.mergeCells('C4:H4');
+    worksheet.mergeCells('C5:H5');
+    worksheet.mergeCells('C6:H6');
+    worksheet.mergeCells('C7:H7');
+    worksheet.mergeCells('C8:H8');
+    worksheet.mergeCells('C9:H9');
+    worksheet.mergeCells('C10:H10');
+
+    worksheet.mergeCells('C13:H13');
+    worksheet.mergeCells('C14:H14');
+    worksheet.mergeCells('C15:H15');
+    worksheet.mergeCells('C16:H16');
+    worksheet.mergeCells('C17:H17');
+    worksheet.mergeCells('C18:H18');
+
+    const headerRow = worksheet.addRow([
+      '',
+      'Full Description of Goods\n(Name of goods, composition of material, marks, etc)',
+      '',
+      '',
+      'ORIGINAL',
+      'HS CODE',
+      'Q\'Ty\n(pcs)',
+      '',
+      'Unit Price\n(in USD)',
+      'Subtotal\n(in USD)'
+    ]);
+    headerRow.height = 45; // Tăng chiều cao để hiển thị xuống dòng
+
+    // Merge các ô tương ứng
+    worksheet.mergeCells('B20:D20'); // merge mô tả hàng hóa
+    worksheet.mergeCells('G20:H20');
+
+    headerRow.eachCell((cell, colNumber) => {
+      if (colNumber !== 1) {
+        cell.font = { bold: true };
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+          wrapText: true  // cho phép xuống dòng trong ô
+        };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF0F0F0' }
+        };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
       }
     });
 
-    // Set style cho header bảng sản phẩm
-    for (let c = 1; c < 9; c++) {
-      const col = String.fromCharCode(65 + c);
-      const cell = `${col}23`;
-      if (ws[cell]) {
-        ws[cell].s = ws[cell].s || {};
-        ws[cell].s.font = { bold: true };
-        ws[cell].s.alignment = { horizontal: 'center', vertical: 'center' };
-        ws[cell].s.border = borderAll;
-      }
-    }
-    // Set border cho bảng sản phẩm
-    const startRow = 24;
-    const endRow = 24 + items.length;
-    for (let r = startRow; r < endRow; r++) {
-      for (let c = 1; c < 9; c++) {
-        const col = String.fromCharCode(65 + c);
-        const cell = `${col}${r + 1}`;
-        if (ws[cell]) {
-          ws[cell].s = ws[cell].s || {};
-          ws[cell].s.border = borderAll;
-          // Wrap text cho mô tả sản phẩm
-          if (c === 1) {
-            ws[cell].s.alignment = { wrapText: true, vertical: 'top' };
+    items.forEach(item => {
+      const row = worksheet.addRow([
+        '',
+        item.description,
+        '',
+        '',
+        item.origin,
+        '',
+        item.quantity,
+        item.unit,
+        item.unitPrice,
+        item.subtotal
+      ]);
+      row.height = 250;
+
+      worksheet.mergeCells(`B${row.number}:D${row.number}`);
+
+      row.eachCell((cell, colNumber) => {
+        if (colNumber !== 1) {
+          cell.font = { name: 'Times New Roman', size: 14 };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+
+          if (colNumber === 2) {
+            cell.alignment = { wrapText: true, vertical: 'top' };
+          } else if (colNumber >= 5 && colNumber <= 10) {
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
           }
         }
-      }
-    }
-    // Set style cho dòng tổng
-    for (let c = 1; c < 9; c++) {
-      const col = String.fromCharCode(65 + c);
-      const cell = `${col}${endRow + 1}`;
-      if (ws[cell]) {
-        ws[cell].s = ws[cell].s || {};
-        ws[cell].s.font = { bold: true };
-        ws[cell].s.border = borderAll;
-      }
-    }
+      });
+    });
 
-    // Set font đậm cho các mục
-    [1, 5, 14].forEach(r => {
-      const cell = `B${r + 1}`;
-      if (ws[cell]) {
-        ws[cell].s = ws[cell].s || {};
-        ws[cell].s.font = { bold: true };
+
+    const totalRow = worksheet.addRow(['', '', '', '', '', '', 'Total Value (in USD)', '', '', totalValue]);
+
+    totalRow.eachCell((cell, colNumber) => {
+      if (colNumber === 7 || colNumber === 10) {
+        cell.font = { name: 'Times New Roman', size: 14, bold: true };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
       }
     });
-    // Set căn giữa cho tiêu đề
-    ws['B1'].s = ws['B1'].s || {};
-    ws['B1'].s.font = { bold: true, sz: 28 };
-    ws['B1'].s.alignment = { horizontal: 'center', vertical: 'center' };
 
-    // Độ rộng cột lớn cho bảng đẹp
-    ws['!cols'] = [
-      { wch: 5 },    // A
-      { wch: 60 },   // B - mô tả sản phẩm
-      { wch: 15 },   // C
-      { wch: 15 },   // D
-      { wch: 15 },   // E
-      { wch: 15 },   // F
-      { wch: 15 },   // G
-      { wch: 20 },   // H
-      { wch: 20 }    // I
-    ];
-    // Chiều cao dòng cho tiêu đề và bảng sản phẩm
-    ws['!rows'] = [
-      { hpt: 40 }, // dòng 1: INVOICE
-      null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-      { hpt: 30 }, // dòng header bảng sản phẩm
-      { hpt: 25 }, // dòng subheader bảng sản phẩm
-      ...Array(items.length).fill({ hpt: 60 }) // các dòng sản phẩm
-    ];
+    worksheet.mergeCells('G' + totalRow.number + ':I' + totalRow.number);
 
-    // Xuất file
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Invoice");
-    XLSX.writeFile(wb, `invoice_${invoiceNo}.xlsx`);
+    // const simple = worksheet.addRow(['', 'SAMPLE', '', '', '', '', '', '', '']);
+    // simple.font = { size: 14, bold: true };
+    // simple.alignment = { horizontal: 'center', vertical: 'middle' };
 
-    // Thêm các dòng này vào cuối mảng `data` (có thể merge cell cho các dòng dài).
-    ws['!merges'].push(
-      { s: { r: endRow + 1, c: 1 }, e: { r: endRow + 1, c: 3 } }, // SAMPLE
-      { s: { r: endRow + 2, c: 0 }, e: { r: endRow + 2, c: 8 } }, // Reason for Export
-      { s: { r: endRow + 3, c: 0 }, e: { r: endRow + 3, c: 8 } }, // I declare...
-      { s: { r: endRow + 4, c: 0 }, e: { r: endRow + 4, c: 8 } }, // and that the goods...
-      { s: { r: endRow + 5, c: 0 }, e: { r: endRow + 5, c: 4 } }, // I (name)
-      { s: { r: endRow + 5, c: 5 }, e: { r: endRow + 5, c: 8 } }, // certify that...
-      { s: { r: endRow + 6, c: 0 }, e: { r: endRow + 6, c: 8 } }, // quantity of goods...
-      { s: { r: endRow + 7, c: 0 }, e: { r: endRow + 7, c: 8 } }, // clearance for export...
-      { s: { r: endRow + 8, c: 6 }, e: { r: endRow + 8, c: 8 } }, // Signature/Title/Stamp
-    );
+    worksheet.addRow(['', 'Reason for Export', '', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'I declare that the information is true and correct to the best of my knowledge,', '', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'and that the goods are of VIETNAM origin.', '', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'I (name)', '', '', '', '', 'certify that the particulars and', '', '', '']);
+    worksheet.addRow(['', 'quantity of goods specified in this document are goods which are submitted for', '', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', 'clearance for export out of Vietnam.', '', '', '', '', '', '', '', '']);
+    worksheet.addRow(['', '', '', '', '', '', 'Date: 01/04/2024', '', '', '']);
+    worksheet.addRow(['', '', '', '', '', '', 'Signature/Title/Stamp', '', '', '']);
+
+    const lastRow = worksheet.lastRow?.number || 0;
+    if (lastRow > 0) {
+      worksheet.mergeCells('B' + (lastRow - 7) + ':C' + (lastRow - 7));
+      worksheet.mergeCells('D' + (lastRow - 7) + ':J' + (lastRow - 7));
+      worksheet.mergeCells('B' + (lastRow - 6) + ':J' + (lastRow - 6));
+      worksheet.mergeCells('B' + (lastRow - 5) + ':J' + (lastRow - 5));
+      worksheet.mergeCells('G' + (lastRow - 4) + ':J' + (lastRow - 4));
+      worksheet.mergeCells('C' + (lastRow - 4) + ':F' + (lastRow - 4));
+      worksheet.mergeCells('B' + (lastRow - 3) + ':J' + (lastRow - 3));
+      worksheet.mergeCells('B' + (lastRow - 2) + ':J' + (lastRow - 2));
+      worksheet.mergeCells('G' + (lastRow - 1) + ':J' + (lastRow - 1));
+      worksheet.mergeCells('G' + lastRow + ':J' + lastRow);
+    }
+
+    worksheet.getCell('G' + (lastRow - 1)).alignment = { vertical: 'middle', horizontal: 'center' };
+    worksheet.getCell('G' + lastRow).alignment = { vertical: 'middle', horizontal: 'center' };
+    worksheet.getCell('D' + (lastRow - 7)).border = { bottom: { style: 'thin' } }
+    worksheet.getCell('C' + (lastRow - 4)).border = { bottom: { style: 'thin' } }
+    // worksheet.eachRow((row) => {
+    //     row.eachCell((cell) => {
+    //         cell.font = {
+    //             name: 'Century Gothic',
+    //         };
+    //     });
+    // });
+
+    for (let rowNum = lastRow; rowNum >= lastRow - 7; rowNum--) {
+      const row = worksheet.getRow(rowNum);
+      row.eachCell((cell) => {
+        cell.font = {
+          name: 'Century Gothic',
+        };
+      });
+    }
+
+    const sRow = 4, eRow = 18;
+    const col = 3;
+
+    for (let row = sRow; row <= eRow; row++) {
+      if (row !== 11 && row !== 12) {
+        worksheet.getCell(row, col).border = {
+          bottom: { style: 'thin' }
+        };
+      }
+    }
+
+
+    const startRow = rowDimensions.number;
+    const colIndex = 10;
+
+    dimensions.forEach((d, index) => {
+      if (index !== 0) {
+        worksheet.getCell(startRow + index, colIndex).value = d;
+        worksheet.getCell(startRow + index, colIndex).border = { bottom: { style: 'thin' } }
+
+      }
+    })
+
+    // Save file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice_${invoiceNo}.xlsx`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -409,11 +531,39 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
       {/* Invoice Info */}
       <div className="flex justify-between mb-8">
         <div className="w-1/2">
-          <p className="font-semibold">SHIPPER</p>
-          <p>Company Name: {invoiceData.shipper.name}</p>
-          <p>Address: {invoiceData.shipper.address}</p>
-          <p>Phone: {invoiceData.shipper.phone}</p>
-          <p>Email: {invoiceData.shipper.email}</p>
+          <p className="font-semibold mb-2">SHIPPER</p>
+          <table className="w-full text-left border-collapse">
+            <tbody>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 w-28 text-sm">Company Name:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.companyName}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">Address:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.address}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">Area Code:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.areaCode}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">State/Country:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.country}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">Tax code:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.tax}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">Contact Name:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.contactName}</td>
+              </tr>
+              <tr className="border-b border-gray-100">
+                <td className="py-1 pr-1 text-gray-600 text-sm">Phone:</td>
+                <td className="py-1 italic text-xs">{invoiceData.shipper.phone}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div className="w-1/2 text-right">
@@ -422,18 +572,48 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
           <p className="mt-4 font-semibold">Air waybill No.: {invoiceData.airWaybillNo}</p>
           <p>Shipping Method: {selectedService.carrier}</p>
           <p>Weight: {invoiceData.weight} kg</p>
-          <p>Dimensions: {invoiceData.dimensions} cm</p>
+          <p>Dimensions:  </p>
+          {
+            invoiceData.dimensions.map(d => (
+              <p key={d}>{d} cm</p>
+            ))
+          }
         </div>
       </div>
 
       {/* Consignee */}
       <div className="mb-8">
-        <p className="font-semibold">CONSIGNEE</p>
-        <p>Company Name: {invoiceData.consignee.company}</p>
-        <p>Address: {invoiceData.consignee.address}</p>
-        <p>Email: {invoiceData.consignee.email}</p>
-        <p>Phone: {invoiceData.consignee.phone}</p>
+        <p className="font-semibold mb-2">CONSIGNEE</p>
+        <table className="w-full text-left border-collapse">
+          <tbody>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 w-28 text-sm">Company Name:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.company}</td>
+            </tr>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 text-sm">Address:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.address}</td>
+            </tr>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 text-sm">Postal code:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.postCode}</td>
+            </tr>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 text-sm">State/Country:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.country}</td>
+            </tr>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 text-sm">Contact Name:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.contactName}</td>
+            </tr>
+            <tr className="border-b border-gray-100">
+              <td className="py-1 pr-1 text-gray-600 text-sm">Phone/Fax No.:</td>
+              <td className="py-1 italic text-xs">{invoiceData.consignee.phone}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
 
       {/* Products Form Toggle Button */}
       <div className="mb-4">
@@ -506,16 +686,14 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
               <p className="font-medium">{selectedService.carrier}</p>
             </div>
             <div>
+              <p className="text-sm text-gray-600">Country</p>
+              <p className="font-medium">{invoiceData.consignee.country}</p>
+            </div>
+            <div>
               <p className="text-sm text-gray-600">Dịch vụ</p>
               <p className="font-medium">{selectedService.service}</p>
             </div>
-            <div>
-              {/*<p className="text-sm text-gray-600">Thời gian giao hàng</p>*/}
-              {/*<p className="font-medium">{selectedService.deliveryTime}</p>*/}
-              {/*<p className="text-xs text-gray-500">*/}
-              {/*    {selectedService.deliveryDateBegin} - {selectedService.deliveryDateEnd}*/}
-              {/*</p>*/}
-            </div>
+
             <div>
               <p className="text-sm text-gray-600">Khu vực</p>
               <p className="font-medium">{selectedService.zone}</p>
@@ -602,10 +780,11 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
           <div className="mt-6">
             <button
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200"
-              onClick={() => {
+              onClick={async () => {
                 setPriceNetConfirm(serviceSelectNew.priceNet);
                 setPriceOtherConfirm(priceTransport);
                 setIsConfirmed(true);
+                await handleUpdatePriceOrder();
               }}
             >
               Xác nhận thay đổi
