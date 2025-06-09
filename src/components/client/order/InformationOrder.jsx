@@ -111,10 +111,6 @@ export default function InformationOrder(props) {
         };
     }, [showSenderPopover, showRecipientPopover, showDeliveryPopover]);
 
-    // Thêm dữ liệu mẫu cho sender
-
-
-
 
     // Thêm dữ liệu mẫu cho delivery
     const deliverySampleData = [

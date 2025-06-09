@@ -9,9 +9,7 @@ import { GetBaseUserForSender } from "../../../service/api.admin.service";
 export default function OrderPage() {
     const [currentStep, setCurrentStep] = useState(2);
 
-    // Thêm useEffect để theo dõi thay đổi của currentStep và cuộn trang lên đầu
     useEffect(() => {
-        // Cuộn trang lên đầu khi currentStep thay đổi
         window.scrollTo({
             top: 0,
             behavior: "smooth"

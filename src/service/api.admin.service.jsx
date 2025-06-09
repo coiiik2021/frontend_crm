@@ -459,10 +459,28 @@ export {
 };
 
 // Thêm hàm DeletePeakSeason
-const DeletePeakSeason = async (id) => {
-  const API = `peak-season/${id}`;
-  return await axios.delete(API);
+const DeletePeakSeason = async (data) => {
+  const API = `peak-season/delete`;
+  return await axios.post(API, data);
 };
 
+const PostPeakSeason = async (data) => {
+  const API = `peak-season`;
+  console.log("data", data);
+  return await axios.post(API, data);
+};
+
+const GetAllPeakSeason = async (nameCompany) => {
+  const API = `peak-season?nameCompany=${nameCompany}`;
+  return await axios.get(API);
+}
+
+const PutPeakSeason = async (data) => {
+  const API = `peak-season`;
+  return await axios.put(API, data);
+}
+
+
+
 // Đảm bảo hàm được export
-export { DeletePeakSeason };
+export { DeletePeakSeason, PostPeakSeason, GetAllPeakSeason, PutPeakSeason };

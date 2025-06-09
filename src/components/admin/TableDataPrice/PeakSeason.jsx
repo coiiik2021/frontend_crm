@@ -1,4 +1,4 @@
-import { GetAllByServiceCompany, DeletePeakSeason } from "../../../service/api.admin.service";
+import { GetAllByServiceCompany, DeletePeakSeason, PostPeakSeason, GetAllPeakSeason } from "../../../service/api.admin.service";
 import { useEffect, useState, useRef } from "react";
 import {
     Table,
@@ -39,10 +39,14 @@ const PeakSeason = ({ nameHang }) => {
         try {
             const seasonToDelete = peakSeasons[index];
 
-            // Nếu có ID, gọi API xóa
-            if (seasonToDelete.id) {
-                await DeletePeakSeason(seasonToDelete.id);
+            console.log("Xóa Peak Season:", seasonToDelete);
+
+            const dataRequest = {
+                nameCompany: nameHang,
+                startDate: seasonToDelete.startDate,
+                endDate: seasonToDelete.endDate,
             }
+            await DeletePeakSeason(dataRequest);
 
             // Cập nhật state
             const updatedSeasons = [...peakSeasons];
@@ -80,14 +84,14 @@ const PeakSeason = ({ nameHang }) => {
         const loadData = async () => {
             setIsLoading(true);
             try {
-                const dataResponse = await GetAllByServiceCompany(nameHang);
-                console.log("dataResponse", dataResponse);
-                if (dataResponse) {
-                    setZoneCompany(dataResponse);
+                const dataResponseServiceCompany = await GetAllByServiceCompany(nameHang);
+                console.log("dataResponse", dataResponseServiceCompany);
+                if (dataResponseServiceCompany) {
+                    setZoneCompany(dataResponseServiceCompany);
 
                     // Initialize zoneValues with "0" values for each zone
                     const initialZoneValues = {};
-                    dataResponse.forEach(zone => {
+                    dataResponseServiceCompany.forEach(zone => {
                         initialZoneValues[zone] = "0";
                     });
                     setFormData(prev => ({
@@ -95,6 +99,24 @@ const PeakSeason = ({ nameHang }) => {
                         zoneValues: initialZoneValues
                     }));
                 }
+
+                const dataResponsePeakSeason = await GetAllPeakSeason(nameHang);
+                console.log("dataResponsePeakSeason", dataResponsePeakSeason);
+                if (dataResponsePeakSeason) {
+                    // Chuyển đổi dữ liệu từ mảng sang đối tượng nếu cần
+                    const formattedPeakSeasons = dataResponsePeakSeason.map(season => ({
+                        ...season,
+                        zoneValues: Array.isArray(season.zoneValues) ?
+                            season.zoneValues.map(item => ({
+                                id: item.id, // Lưu trữ id của ZoneValue
+                                zone: item.zone,
+                                price: item.price
+                            })) :
+                            season.zoneValues || {}
+                    }));
+                    setPeakSeasons(formattedPeakSeasons);
+                }
+
             } catch (error) {
                 console.error("Lỗi khi tải dữ liệu:", error);
             } finally {
@@ -113,19 +135,49 @@ const PeakSeason = ({ nameHang }) => {
             const parseStringToDate = (dateString) => {
                 if (!dateString) return new Date();
 
-                // Giả sử dateString có định dạng "DDMMYYYY"
-                const day = parseInt(dateString.substring(0, 2));
-                const month = parseInt(dateString.substring(2, 4)) - 1; // Tháng trong JS bắt đầu từ 0
-                const year = parseInt(dateString.substring(4, 8));
+                // Nếu dateString là chuỗi ISO (YYYY-MM-DD)
+                if (typeof dateString === 'string' && dateString.includes('-')) {
+                    const [year, month, day] = dateString.split('-');
+                    return new Date(year, parseInt(month) - 1, day);
+                }
 
-                return new Date(year, month, day);
+                // Nếu dateString có định dạng "DDMMYYYY"
+                if (typeof dateString === 'string' && dateString.length === 8) {
+                    const day = parseInt(dateString.substring(0, 2));
+                    const month = parseInt(dateString.substring(2, 4)) - 1; // Tháng trong JS bắt đầu từ 0
+                    const year = parseInt(dateString.substring(4, 8));
+                    return new Date(year, month, day);
+                }
+
+                return new Date(dateString);
             };
+
+            // Chuyển đổi zoneValues từ mảng sang đối tượng (nếu cần)
+            let zoneValuesObj = {};
+            if (peakSeason.zoneValues) {
+                if (Array.isArray(peakSeason.zoneValues)) {
+                    // Nếu zoneValues là mảng, chuyển thành đối tượng
+                    peakSeason.zoneValues.forEach(item => {
+                        // Lưu trữ cả id và price
+                        zoneValuesObj[item.zone] = {
+                            id: item.id,
+                            price: item.price.toString()
+                        };
+                    });
+                } else {
+                    // Nếu zoneValues đã là đối tượng, sử dụng trực tiếp
+                    zoneValuesObj = { ...peakSeason.zoneValues };
+                }
+            }
 
             setFormData({
                 startDate: typeof peakSeason.startDate === 'string' ? parseStringToDate(peakSeason.startDate) : new Date(),
                 endDate: typeof peakSeason.endDate === 'string' ? parseStringToDate(peakSeason.endDate) : new Date(),
-                zoneValues: { ...peakSeason.zoneValues }
+                zoneValues: zoneValuesObj,
+                id: peakSeason.id // Lưu trữ id của PeakSeason
             });
+
+            console.log("Editing peak season:", peakSeason);
             setEditingIndex(index);
         } else {
             // Add new peak season
@@ -151,50 +203,106 @@ const PeakSeason = ({ nameHang }) => {
         // Nếu giá trị rỗng, sử dụng "0"
         const newValue = value === "" ? "0" : value;
 
-        setFormData(prev => ({
-            ...prev,
-            zoneValues: {
-                ...prev.zoneValues,
-                [zone]: newValue
-            }
-        }));
+        setFormData(prev => {
+            const currentZoneValue = prev.zoneValues[zone];
+
+            // Nếu zoneValue là đối tượng có id, giữ lại id
+            const updatedZoneValue = typeof currentZoneValue === 'object' && currentZoneValue !== null
+                ? { ...currentZoneValue, price: newValue }
+                : newValue;
+
+            console.log(`Updating zone ${zone} with value:`, updatedZoneValue);
+
+            return {
+                ...prev,
+                zoneValues: {
+                    ...prev.zoneValues,
+                    [zone]: updatedZoneValue
+                }
+            };
+        });
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         // Chuyển đổi ngày tháng sang định dạng số
         const formatDateToNumber = (date) => {
             const d = new Date(date);
             const day = d.getDate().toString().padStart(2, '0');
             const month = (d.getMonth() + 1).toString().padStart(2, '0');
             const year = d.getFullYear();
-            return day + month + year; // Ví dụ: 09062025
+            return `${year}-${month}-${day}`;
         };
+
+        // Chuyển đổi zoneValues từ đối tượng sang mảng
+        const zoneValuesArray = Object.entries(formData.zoneValues).map(([zone, value]) => {
+            // Kiểm tra xem value có phải là đối tượng không
+            if (typeof value === 'object' && value !== null) {
+                return {
+                    id: value.id, // Giữ lại id nếu có
+                    zone: zone,
+                    price: parseFloat(value.price) // Chuyển đổi giá trị thành số
+                };
+            } else {
+                return {
+                    zone: zone,
+                    price: parseFloat(value) // Chuyển đổi giá trị thành số
+                };
+            }
+        });
 
         const newPeakSeason = {
-            nameService: nameHang,
+            nameCompany: nameHang,
             startDate: formatDateToNumber(formData.startDate),
             endDate: formatDateToNumber(formData.endDate),
-            zoneValues: formData.zoneValues
+            zoneValues: zoneValuesArray, // Sử dụng mảng thay vì đối tượng
+            id: formData.id // Gửi id nếu đang chỉnh sửa
         };
 
-        console.log("newPeakSeason", newPeakSeason);
+        console.log("Sending peak season data:", newPeakSeason);
 
-        if (editingIndex !== null) {
-            // Update existing peak season
-            const updatedPeakSeasons = [...peakSeasons];
-            updatedPeakSeasons[editingIndex] = newPeakSeason;
-            setPeakSeasons(updatedPeakSeasons);
-        } else {
-            // Add new peak season
-            setPeakSeasons([...peakSeasons, newPeakSeason]);
+        try {
+            const dataResponse = await PostPeakSeason(newPeakSeason);
+            if (!dataResponse) {
+                alert("Lỗi khi lưu dữ liệu. Vui lòng thử lại.");
+                return;
+            }
+
+            // Log the response for debugging
+            console.log("Peak Season saved:", newPeakSeason);
+            console.log("Peak Season dataResponse:", dataResponse);
+
+            // Tải lại dữ liệu từ server để đảm bảo hiển thị đúng
+            const refreshedData = await GetAllPeakSeason(nameHang);
+            if (refreshedData) {
+                const formattedPeakSeasons = refreshedData.map(season => ({
+                    ...season,
+                    zoneValues: Array.isArray(season.zoneValues) ?
+                        season.zoneValues.map(item => ({
+                            id: item.id,
+                            zone: item.zone,
+                            price: item.price
+                        })) :
+                        season.zoneValues || {}
+                }));
+                setPeakSeasons(formattedPeakSeasons);
+            }
+
+            // Close modal
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Error saving peak season:", error);
+            alert("Có lỗi xảy ra khi lưu dữ liệu: " + error.message);
         }
-
-        // Close modal
-        setIsModalOpen(false);
     };
 
     const formatDate = (dateString) => {
         if (!dateString) return "";
+
+        // Nếu dateString là chuỗi ISO (YYYY-MM-DD)
+        if (typeof dateString === 'string' && dateString.includes('-')) {
+            const [year, month, day] = dateString.split('-');
+            return `${day}/${month}/${year}`;
+        }
 
         // Nếu dateString là chuỗi số (DDMMYYYY)
         if (typeof dateString === 'string' && dateString.length === 8) {
@@ -288,7 +396,21 @@ const PeakSeason = ({ nameHang }) => {
                                                     key={zoneIndex}
                                                     className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05]"
                                                 >
-                                                    {season.zoneValues[zone] || "0"}
+                                                    {(() => {
+                                                        // Tìm giá trị zone trong zoneValues
+                                                        if (season.zoneValues && Array.isArray(season.zoneValues)) {
+                                                            const zoneValue = season.zoneValues.find(z => z.zone === zone);
+                                                            return zoneValue ? zoneValue.price : "0";
+                                                        } else if (season.zoneValues && typeof season.zoneValues === 'object') {
+                                                            const zoneValue = season.zoneValues[zone];
+                                                            if (typeof zoneValue === 'object' && zoneValue !== null) {
+                                                                return zoneValue.price || "0";
+                                                            } else {
+                                                                return zoneValue || "0";
+                                                            }
+                                                        }
+                                                        return "0";
+                                                    })()}
                                                 </TableCell>
                                             ))}
                                             <TableCell className="px-4 py-3 text-xs border border-gray-100 dark:border-white/[0.05]">
@@ -379,7 +501,11 @@ const PeakSeason = ({ nameHang }) => {
                                         <label className="block text-sm font-medium mb-1">Zone {zone}</label>
                                         <input
                                             type="number"
-                                            value={formData.zoneValues[zone] || ""}
+                                            value={
+                                                typeof formData.zoneValues[zone] === 'object'
+                                                    ? formData.zoneValues[zone]?.price || "0"
+                                                    : formData.zoneValues[zone] || "0"
+                                            }
                                             onChange={(e) => handleInputChange(zone, e.target.value)}
                                             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             placeholder="Nhập giá"
