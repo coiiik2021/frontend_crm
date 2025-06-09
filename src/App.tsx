@@ -80,6 +80,8 @@ import BillContent from "./components/admin/bills/BillContent.jsx";
 import CsTable from "./components/admin/cs-table/CsTable";
 import TransporterTable from "./components/admin/transporter-table/TransporterTable";
 import AccountantTable from "./components/admin/accountant-table/AccountantTable";
+import ChuyenTuyenTable from "./components/admin/priceNet/chuyen-tuyen-table/ChuyenTuyenTable";
+import SeaTable from "./components/admin/priceNet/sea-table/SeaTable";
 
 export default function App() {
   return (
@@ -108,6 +110,11 @@ export default function App() {
 
             <Route path="/quan-ly/ups-table" element={<UpsTable />} />
             <Route path="/quan-ly/dhl-table" element={<DhlTable />} />
+
+            <Route path="/quan-ly/chuyen-tuyen-table" element={<ChuyenTuyenTable />} />
+            <Route path="/quan-ly/sea-table" element={<SeaTable />} />
+
+
             <Route path="/quan-ly/fedex-table" element={<FedexTable />} />
             <Route path="/quan-ly/sf-table" element={<SfTable />} />
             <Route path="/quan-ly/bill-content/:id" element={<BillContent />} />
@@ -190,7 +197,7 @@ export default function App() {
           {/* Dashboard Layout */}
 
           <Route element={
-              <AppLayoutAdmin />
+            <AppLayoutAdmin />
           }>
             <Route path="/quan-ly/shipment" element={<BillTable />} />
 

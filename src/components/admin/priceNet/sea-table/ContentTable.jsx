@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
-import PriceNetTable from "../../TableDataPrice/PriceNetTable";
-import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable";
-import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, GetShipperServiceCompany, PostNameService, PostPriceNet, PutService } from "../../../../service/api.admin.service";
-import Button from "../../../../elements/Button";
-import { useModal } from "../../../../hooks/useModal";
-import { Modal } from "../../ui/modal";
-import Label from "../../form/Label";
-import Input from "../../form/input/InputField";
+import PriceNetTable from "../../TableDataPrice/PriceNetTable.jsx";
+import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable.jsx";
+import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, GetShipperServiceCompany, PostNameService, PostPriceNet, PutService } from "../../../../service/api.admin.service.jsx";
+import Button from "../../../../elements/Button/index.jsx";
+import { useModal } from "../../../../hooks/useModal.js";
+import { Modal } from "../../ui/modal/index.js";
+import Label from "../../form/Label.js";
+import Input from "../../form/input/InputField.js";
 import OverSizeTable from "../../TableDataPrice/OverSizeTable.jsx";
-import PeakSeason from "../../TableDataPrice/PeakSeason";
+import PeakSeason from "../../TableDataPrice/PeakSeason.jsx";
 
 
 export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }) {
@@ -33,7 +33,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
     const [editShipper, setEditShipper] = useState({});
     const [editNameService, setEditNameService] = useState("");
 
-    const nameHang = "ups";
+    const nameHang = "sea";
 
     // Add modals for add and edit
     const { isOpen: isAddModalOpen, openModal: openAddModal, closeModal: closeAddModal } = useModal();
@@ -102,7 +102,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
         setTableType(newNameService);
 
         setConstNet({
-            dim: 5000,
+            dim: 6000,
             ppxd: 100,
             vat: 8,
             overSize: 100
@@ -421,7 +421,8 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                     <OverSizeTable />
                 ) : (
                     <PeakSeason
-                        nameHang={nameHang}
+
+
                     />
                 )}
             </div>

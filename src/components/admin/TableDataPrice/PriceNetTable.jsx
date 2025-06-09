@@ -1,4 +1,4 @@
-import {  useState } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,7 +8,7 @@ import {
 } from "../ui/table";
 import { PutConstNet } from "../../../service/api.admin.service.jsx";
 
-const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet }) => {
+const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet, isPriceNetPackage, setIsPriceNetPackage }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValues, setEditValues] = useState(constNet);
 
@@ -44,6 +44,27 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet }) => {
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-medium">Cấu hình giá Net</h3>
+
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setIsPriceNetPackage(true)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${isPriceNetPackage
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300"
+                }`}
+            >
+              Giá Packages
+            </button>
+            <button
+              onClick={() => setIsPriceNetPackage(false)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${!isPriceNetPackage
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300"
+                }`}
+            >
+              Giá Document
+            </button>
+          </div>
           {isEditing ? (
             <div className="space-x-2">
               <button

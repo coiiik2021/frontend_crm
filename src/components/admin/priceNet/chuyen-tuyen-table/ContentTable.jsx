@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
-import PriceNetTable from "../../TableDataPrice/PriceNetTable";
-import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable";
-import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, GetShipperServiceCompany, PostNameService, PostPriceNet, PutService } from "../../../../service/api.admin.service";
-import Button from "../../../../elements/Button";
-import { useModal } from "../../../../hooks/useModal";
-import { Modal } from "../../ui/modal";
-import Label from "../../form/Label";
-import Input from "../../form/input/InputField";
+import PriceNetTable from "../../TableDataPrice/PriceNetTable.jsx";
+import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable.jsx";
+import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, GetShipperServiceCompany, PostNameService, PostPriceNet, PutService } from "../../../../service/api.admin.service.jsx";
+import Button from "../../../../elements/Button/index.jsx";
+import { useModal } from "../../../../hooks/useModal.js";
+import { Modal } from "../../ui/modal/index.js";
+import Label from "../../form/Label.js";
+import Input from "../../form/input/InputField.js";
 import OverSizeTable from "../../TableDataPrice/OverSizeTable.jsx";
-import PeakSeason from "../../TableDataPrice/PeakSeason";
+import PeakSeason from "../../TableDataPrice/PeakSeason.jsx";
 
 
-export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }) {
+export default function ContentTable() {
     // Existing states
     const [dataByDate, setDataByDate] = useState({});
     const [selectedDate, setSelectedDate] = useState(null);
@@ -33,7 +33,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
     const [editShipper, setEditShipper] = useState({});
     const [editNameService, setEditNameService] = useState("");
 
-    const nameHang = "ups";
+    const nameHang = "Dedicated line";
 
     // Add modals for add and edit
     const { isOpen: isAddModalOpen, openModal: openAddModal, closeModal: closeAddModal } = useModal();
@@ -42,7 +42,6 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
     useEffect(() => {
         const fetchData = async () => {
             try {
-                console.log("Đang lấy dữ liệu với isPriceNetPackage:", isPriceNetPackage);
                 const dataGasOline = await GetPriceAllGasoline(nameHang);
                 setPriceGasoline(dataGasOline);
 
@@ -53,7 +52,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                     const firstService = dataServiceCompany.nameService[0];
                     setTableType(firstService);
                     // Đảm bảo truyền isPriceNetPackage vào đây
-                    const dataNet = await GetPriceNet(nameHang, firstService, isPriceNetPackage);
+                    const dataNet = await GetPriceNet(nameHang, firstService, true);
                     if (dataNet) {
                         setDataByDate(dataNet);
 
@@ -73,7 +72,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
         };
 
         fetchData();
-    }, [isPriceNetPackage]); // Đảm bảo isPriceNetPackage nằm trong mảng dependencies
+    }, []); // Đảm bảo isPriceNetPackage nằm trong mảng dependencies
 
     const handleCreateService = async () => {
         const dataRequest = {
@@ -102,7 +101,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
         setTableType(newNameService);
 
         setConstNet({
-            dim: 5000,
+            dim: 6000,
             ppxd: 100,
             vat: 8,
             overSize: 100
@@ -175,7 +174,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
         setTableType(type);
 
         // Thêm isPriceNetPackage vào cuộc gọi API
-        const data = await GetPriceNet(nameHang, type, isPriceNetPackage);
+        const data = await GetPriceNet(nameHang, type, true);
         console.log("Dữ liệu từ API:", data);
         setDataByDate(data);
         const firstDate = Object.keys(data)[0];
@@ -230,7 +229,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
     };
 
     const handleSaveData = async () => {
-        await PostPriceNet(nameHang, tableType, dataByDate, isPriceNetPackage);
+        await PostPriceNet(nameHang, tableType, dataByDate, true);
         alert("Thông tin đã được lưu thành công!");
         setIsImported(false);
     };
@@ -408,8 +407,8 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                         selectedDate={selectedDate}
                         constNet={constNet}
                         setConstNet={setConstNet}
-                        isPriceNetPackage={isPriceNetPackage}
-                        setIsPriceNetPackage={setIsPriceNetPackage}
+                        isPriceNetPackage={true}
+                        setIsPriceNetPackage={setIsImported}
                     />
                 ) : currentPage === 2 ? (
                     <PriceGasolineTable
