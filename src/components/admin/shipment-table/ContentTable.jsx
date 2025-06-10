@@ -746,12 +746,75 @@ export default function ContentTable(props) {
     };
 
     // Thêm state để quản lý các cột hiển thị
-    const [visibleColumns, setVisibleColumns] = useState(
-        Object.keys(columnLabels).reduce((acc, key) => {
-            acc[key] = true;
+    // Thêm state để quản lý các cột hiển thị
+    const [visibleColumns, setVisibleColumns] = useState(() => {
+        // Danh sách các cột mặc định hiển thị
+        const defaultVisibleColumns = [
+            "house_bill",      // Luôn hiển thị
+            "customer",        // Customer
+            "country",         // Country
+            "master_tracking", // Mastertracking
+            "cw",              // CW
+            "company_service", // Service
+            "inwh_date",       // In-WH date
+            "total",           // TOTAL(TOTAL AR)
+            "order_grand_total", // Order(GRAND TOTAL)
+            "grand_total",     // GRAND TOTAL(GRAND TOTAL)
+            "payments_cash",   // TIỀN MẶT(PAYMENT)
+            "payments_banking", // CHUYỂN KHOẢN(PAYMENT)
+            "payments_remaining" // CÒN LẠI(PAYMENT)
+        ];
+
+        // Tạo object với tất cả các cột là false, sau đó đặt các cột mặc định là true
+        const initialVisibleColumns = Object.keys(columnLabels).reduce((acc, key) => {
+            acc[key] = defaultVisibleColumns.includes(key);
             return acc;
-        }, {})
-    );
+        }, {});
+
+        return initialVisibleColumns;
+    });
+
+    // Add this state to track section visibility
+    const [sectionVisibility, setSectionVisibility] = useState({
+        PRICE: true,
+        DEBIT: true,
+        TOTAL_AR: true,
+        GRAND_TOTAL: true,
+        PAYMENT: true,
+        PROFIT: true,
+        HH: true,
+        LUONG_THUONG: true
+    });
+
+    // Add this function to toggle section visibility
+    const toggleSection = (section) => {
+        setSectionVisibility(prev => ({
+            ...prev,
+            [section]: !prev[section]
+        }));
+
+        // Update column visibility based on section
+        const sectionColumns = {
+            PRICE: ['price_price', 'fsc_price', 'surge_fee_price'],
+            DEBIT: ['afr_debit', 'oversize_debit', 'surge_fee_debit', 'other_charges_debit', 'fsc_debit', 'gw_debit', 'cw_debit', 'bill', 'reconcile'],
+            TOTAL_AR: ['total_ar', 'vat', 'total'],
+            GRAND_TOTAL: ['order_grand_total', 'other_charges_total', 'grand_total'],
+            PAYMENT: ['cash', 'banking', 'total_payment'],
+            PROFIT: ['price_diff', 'packing', 'pickup', 'other_costs', 'profit'],
+            HH: ['hh1', 'hh2', 'hh3', 'hh4'],
+            LUONG_THUONG: ['base_salary', 'kpi_bonus', 'bonus_1_2_3', 'allowance', 'other_bonus']
+        };
+
+        const newVisibility = !sectionVisibility[section];
+
+        // Update all columns in this section
+        sectionColumns[section].forEach(column => {
+            setColumnVisibility(prev => ({
+                ...prev,
+                [column]: newVisibility
+            }));
+        });
+    };
 
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
@@ -833,37 +896,309 @@ export default function ContentTable(props) {
                     {showColumnSelector && (
                         <div
                             ref={columnSelectorRef}
-                            className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-3 top-16 dark:bg-gray-800 dark:border-gray-700"
+                            className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-3 top-16 w-72 dark:bg-gray-800 dark:border-gray-700"
                         >
                             <h3 className="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Hiển thị cột</h3>
-                            <div className="space-y-2 max-h-60 overflow-y-auto">
-                                {Object.keys(visibleColumns).map((column) => (
-                                    <div key={column} className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id={`col-${column}`}
-                                            checked={visibleColumns[column]}
-                                            onChange={() => {
-                                                // Nếu là house_bill thì không cho phép thay đổi
-                                                if (column === "house_bill") return;
 
-                                                setVisibleColumns({
-                                                    ...visibleColumns,
-                                                    [column]: !visibleColumns[column]
-                                                });
-                                            }}
-                                            disabled={column === "house_bill"} // Disable checkbox nếu là house_bill
-                                            className={`w-4 h-4 ${column === "house_bill"
-                                                ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
-                                                : "text-blue-600 bg-gray-100"} border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
-                                        />
-                                        <label htmlFor={`col-${column}`} className={`ml-2 text-sm ${column === "house_bill"
-                                            ? "text-gray-800 font-medium dark:text-gray-200"
-                                            : "text-gray-600 dark:text-gray-400"}`}>
-                                            {columnLabels[column] || column}
-                                        </label>
+                            {/* Thêm nút Chọn tất cả/Bỏ chọn tất cả */}
+                            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                                <button
+                                    onClick={() => {
+                                        const newVisibleColumns = { ...visibleColumns };
+                                        Object.keys(newVisibleColumns).forEach(column => {
+                                            if (column !== "house_bill") { // Giữ nguyên house_bill
+                                                newVisibleColumns[column] = true;
+                                            }
+                                        });
+                                        setVisibleColumns(newVisibleColumns);
+                                    }}
+                                    className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                                >
+                                    Chọn tất cả
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const newVisibleColumns = { ...visibleColumns };
+                                        Object.keys(newVisibleColumns).forEach(column => {
+                                            if (column !== "house_bill") { // Giữ nguyên house_bill
+                                                newVisibleColumns[column] = false;
+                                            }
+                                        });
+                                        setVisibleColumns(newVisibleColumns);
+                                    }}
+                                    className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                >
+                                    Bỏ chọn tất cả
+                                </button>
+                            </div>
+
+                            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                                {/* Cột luôn hiển thị */}
+                                <div className="flex items-center mb-2">
+                                    <input
+                                        type="checkbox"
+                                        id="col-house_bill"
+                                        checked={true}
+                                        disabled={true}
+                                        className="w-4 h-4 bg-blue-600 text-blue-600 cursor-not-allowed opacity-70 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                    />
+                                    <label htmlFor="col-house_bill" className="ml-2 text-sm font-medium text-gray-800 dark:text-gray-200">
+                                        HOUSE BILL
+                                    </label>
+                                </div>
+
+                                {/* Cột thông tin cơ bản */}
+                                <div className="mb-2">
+                                    <div className="flex items-center mb-1">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Thông tin cơ bản</span>
                                     </div>
-                                ))}
+                                    {["Date", "customer", "country", "master_tracking", "ctns", "gw", "cw", "company_service", "inwh_date"].map((column) => (
+                                        <div key={column} className="flex items-center ml-2 mt-1">
+                                            <input
+                                                type="checkbox"
+                                                id={`col-${column}`}
+                                                checked={visibleColumns[column]}
+                                                onChange={() => {
+                                                    setVisibleColumns({
+                                                        ...visibleColumns,
+                                                        [column]: !visibleColumns[column]
+                                                    });
+                                                }}
+                                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label htmlFor={`col-${column}`} className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                {columnLabels[column] || column}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Nhóm PRICE */}
+                                <div className="mb-2">
+                                    <div className="flex items-center mb-1">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">PRICE</span>
+                                    </div>
+                                    {["price_price", "fsc_price", "surge_fee_price"].map((column) => (
+                                        <div key={column} className="flex items-center ml-2 mt-1">
+                                            <input
+                                                type="checkbox"
+                                                id={`col-${column}`}
+                                                checked={visibleColumns[column]}
+                                                onChange={() => {
+                                                    setVisibleColumns({
+                                                        ...visibleColumns,
+                                                        [column]: !visibleColumns[column]
+                                                    });
+                                                }}
+                                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label htmlFor={`col-${column}`} className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                {columnLabels[column].replace(" (PRICE)", "")}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Nhóm DEBIT */}
+                                <div className="mb-2">
+                                    <div className="flex items-center mb-1">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">DEBIT</span>
+                                    </div>
+                                    {["afr_debit", "oversize_debit", "surge_fee_debit", "other_charges_debit", "fsc_debit", "gw_debit", "cw_debit", "bill", "reconcile"].map((column) => (
+                                        <div key={column} className="flex items-center ml-2 mt-1">
+                                            <input
+                                                type="checkbox"
+                                                id={`col-${column}`}
+                                                checked={visibleColumns[column]}
+                                                onChange={() => {
+                                                    setVisibleColumns({
+                                                        ...visibleColumns,
+                                                        [column]: !visibleColumns[column]
+                                                    });
+                                                }}
+                                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label htmlFor={`col-${column}`} className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                {columnLabels[column].replace(" (DEBIT)", "")}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Nhóm TOTAL AR */}
+                                <div className="mb-2">
+                                    <div className="flex items-center mb-1">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">TOTAL AR</span>
+                                    </div>
+                                    {["total_ar", "vat", "total"].map((column) => (
+                                        <div key={column} className="flex items-center ml-2 mt-1">
+                                            <input
+                                                type="checkbox"
+                                                id={`col-${column}`}
+                                                checked={visibleColumns[column]}
+                                                onChange={() => {
+                                                    setVisibleColumns({
+                                                        ...visibleColumns,
+                                                        [column]: !visibleColumns[column]
+                                                    });
+                                                }}
+                                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label htmlFor={`col-${column}`} className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                {columnLabels[column].replace(" (TOTAL AR)", "")}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Nhóm GRAND TOTAL */}
+                                <div className="mb-2">
+                                    <div className="flex items-center mb-1">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">GRAND TOTAL</span>
+                                    </div>
+                                    {["order_grand_total", "other_charges_total", "grand_total"].map((column) => (
+                                        <div key={column} className="flex items-center ml-2 mt-1">
+                                            <input
+                                                type="checkbox"
+                                                id={`col-${column}`}
+                                                checked={visibleColumns[column]}
+                                                onChange={() => {
+                                                    setVisibleColumns({
+                                                        ...visibleColumns,
+                                                        [column]: !visibleColumns[column]
+                                                    });
+                                                }}
+                                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label htmlFor={`col-${column}`} className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                {columnLabels[column].replace(" (GRAND TOTAL)", "")}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Nhóm PAYMENT */}
+                                <div className="mb-2">
+                                    <div className="flex items-center mb-1">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">PAYMENT</span>
+                                    </div>
+                                    {["payments_cash", "payments_banking", "payments_remaining"].map((column) => (
+                                        <div key={column} className="flex items-center ml-2 mt-1">
+                                            <input
+                                                type="checkbox"
+                                                id={`col-${column}`}
+                                                checked={visibleColumns[column]}
+                                                onChange={() => {
+                                                    setVisibleColumns({
+                                                        ...visibleColumns,
+                                                        [column]: !visibleColumns[column]
+                                                    });
+                                                }}
+                                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label htmlFor={`col-${column}`} className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                {columnLabels[column].replace(" (PAYMENT)", "")}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Nhóm PROFIT */}
+                                <div className="mb-2">
+                                    <div className="flex items-center mb-1">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">PROFIT</span>
+                                    </div>
+                                    {["price_diff", "packing", "pickup", "other_costs", "profit"].map((column) => (
+                                        <div key={column} className="flex items-center ml-2 mt-1">
+                                            <input
+                                                type="checkbox"
+                                                id={`col-${column}`}
+                                                checked={visibleColumns[column]}
+                                                onChange={() => {
+                                                    setVisibleColumns({
+                                                        ...visibleColumns,
+                                                        [column]: !visibleColumns[column]
+                                                    });
+                                                }}
+                                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label htmlFor={`col-${column}`} className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                {columnLabels[column].replace(" (PROFIT)", "")}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Nhóm HH */}
+                                <div className="mb-2">
+                                    <div className="flex items-center mb-1">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">HH</span>
+                                    </div>
+                                    {["hh1", "hh2", "hh3", "hh4"].map((column) => (
+                                        <div key={column} className="flex items-center ml-2 mt-1">
+                                            <input
+                                                type="checkbox"
+                                                id={`col-${column}`}
+                                                checked={visibleColumns[column]}
+                                                onChange={() => {
+                                                    setVisibleColumns({
+                                                        ...visibleColumns,
+                                                        [column]: !visibleColumns[column]
+                                                    });
+                                                }}
+                                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label htmlFor={`col-${column}`} className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                {columnLabels[column].replace(" (HH)", "")}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Nhóm LƯƠNG THƯỞNG */}
+                                <div className="mb-2">
+                                    <div className="flex items-center mb-1">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">LƯƠNG THƯỞNG</span>
+                                    </div>
+                                    {["base_salary", "kpi_bonus", "bonus_1_2_3", "allowance", "other_bonus"].map((column) => (
+                                        <div key={column} className="flex items-center ml-2 mt-1">
+                                            <input
+                                                type="checkbox"
+                                                id={`col-${column}`}
+                                                checked={visibleColumns[column]}
+                                                onChange={() => {
+                                                    setVisibleColumns({
+                                                        ...visibleColumns,
+                                                        [column]: !visibleColumns[column]
+                                                    });
+                                                }}
+                                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label htmlFor={`col-${column}`} className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                {columnLabels[column].replace(" (LƯƠNG THƯỞNG)", "")}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Trạng thái */}
+                                <div className="flex items-center mt-2">
+                                    <input
+                                        type="checkbox"
+                                        id="col-status"
+                                        checked={visibleColumns["status"]}
+                                        onChange={() => {
+                                            setVisibleColumns({
+                                                ...visibleColumns,
+                                                status: !visibleColumns["status"]
+                                            });
+                                        }}
+                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                    />
+                                    <label htmlFor="col-status" className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                        TRẠNG THÁI
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     )}
