@@ -105,7 +105,8 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
             dim: 5000,
             ppxd: 100,
             vat: 8,
-            overSize: 100
+            overSize: 100,
+            peakSeason: 100
         });
         setDataByDate({});
 

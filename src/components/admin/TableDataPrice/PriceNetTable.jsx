@@ -49,8 +49,8 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet, isPric
             <button
               onClick={() => setIsPriceNetPackage(true)}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${isPriceNetPackage
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300"
                 }`}
             >
               Giá Packages
@@ -58,8 +58,8 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet, isPric
             <button
               onClick={() => setIsPriceNetPackage(false)}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${!isPriceNetPackage
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300"
                 }`}
             >
               Giá Document
@@ -90,74 +90,114 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet, isPric
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Chỉ số Dim</label>
-            {isEditing ? (
-              <input
-                name="dim"
-                type="number"
-                step="0.01"
-                value={editValues.dim}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            ) : (
-              <div className="p-2 bg-gray-50 rounded">{constNet.dim}</div>
-            )}
-          </div>
+        <div className="mt-4">
+          <div className="grid grid-cols-1 gap-4">
+            {/* Giá Net */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center p-4">
+                <div className="w-full flex flex-wrap md:flex-nowrap gap-4">
+                  {/* Chỉ số Dim */}
+                  <div className="w-full md:w-1/5 flex flex-col">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Chỉ số Dim</span>
+                    {isEditing ? (
+                      <input
+                        id="dim"
+                        name="dim"
+                        type="number"
+                        step="0.01"
+                        value={editValues.dim}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-10 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                        <span className="font-medium">{constNet.dim}</span>
+                      </div>
+                    )}
+                  </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Chỉ số PPXD
-            </label>
-            {isEditing ? (
-              <input
-                name="ppxd"
-                type="number"
-                step="0.01"
-                value={editValues.ppxd}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            ) : (
-              <div className="p-2 bg-gray-50 rounded">{constNet.ppxd} %</div>
-            )}
-          </div>
+                  {/* Chỉ số PPXD */}
+                  <div className="w-full md:w-1/5 flex flex-col">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Chỉ số PPXD (%)</span>
+                    {isEditing ? (
+                      <input
+                        id="ppxd"
+                        name="ppxd"
+                        type="number"
+                        step="0.01"
+                        value={editValues.ppxd}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-10 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                        <span className="font-medium">{constNet.ppxd}</span>
+                      </div>
+                    )}
+                  </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Chỉ số VAT</label>
-            {isEditing ? (
-              <input
-                name="vat"
-                type="number"
-                step="0.01"
-                value={editValues.vat}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            ) : (
-              <div className="p-2 bg-gray-50 rounded">{constNet.vat} %</div>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Chỉ số Oversize
-            </label>
-            {isEditing ? (
-              <input
-                name="overSize"
-                type="number"
-                step="0.01"
-                value={editValues.overSize}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            ) : (
-              <div className="p-2 bg-gray-50 rounded">
-                {constNet.overSize} %
+                  {/* Chỉ số VAT */}
+                  <div className="w-full md:w-1/5 flex flex-col">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Chỉ số VAT (%)</span>
+                    {isEditing ? (
+                      <input
+                        id="vat"
+                        name="vat"
+                        type="number"
+                        step="0.01"
+                        value={editValues.vat}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-10 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                        <span className="font-medium">{constNet.vat}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Chỉ số Oversize */}
+                  <div className="w-full md:w-1/5 flex flex-col">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Chỉ số Oversize (%)</span>
+                    {isEditing ? (
+                      <input
+                        id="overSize"
+                        name="overSize"
+                        type="number"
+                        step="0.01"
+                        value={editValues.overSize}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-10 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                        <span className="font-medium">{constNet.overSize}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Chỉ số Peak Season */}
+                  <div className="w-full md:w-1/5 flex flex-col">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Chỉ số Peak Season (%)</span>
+                    {isEditing ? (
+                      <input
+                        id="peakSeason"
+                        name="peakSeason"
+                        type="number"
+                        step="0.01"
+                        value={editValues.peakSeason}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-10 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                        <span className="font-medium">{constNet.peakSeason}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
