@@ -225,6 +225,13 @@ export {
 
 //const_user
 
+//shipment
+const GetShipment = async () => {
+  const API = `shipment`;
+  return await axios.get(API);
+};
+export { GetShipment };
+
 // bill
 const GetAllBill = async () => {
   const API = `bill/all`;
