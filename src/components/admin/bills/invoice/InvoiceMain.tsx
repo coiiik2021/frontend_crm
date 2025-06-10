@@ -45,6 +45,8 @@ interface SelectedService {
   overSize?: { price: number };
   zone: string;
   service: string;
+  awb: string;
+  priceOther: number;
 }
 
 interface InvoiceMainProps {
@@ -57,7 +59,7 @@ interface InvoiceMainProps {
 
 
 
-export default function InvoiceMain({ recipientInfo, packages, products, productsTotal, selectedService }: InvoiceMainProps) {
+export default function InvoiceMain({ bill_id, recipientInfo, packages, products, productsTotal, selectedService }: InvoiceMainProps) {
   const [showProductsForm, setShowProductsForm] = useState(true);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -65,6 +67,8 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
 
 
   });
+
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -84,7 +88,7 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
   const invoiceData = {
     invoiceNo: "INVOICE",
     date: new Date().toLocaleDateString(),
-    airWaybillNo: "",
+    airWaybillNo: selectedService.awb,
 
     // Tính toán weight và dimensions từ packages
     weight: packages.reduce((sum, pkg) => {
@@ -113,7 +117,7 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
       email: recipientInfo.email,
       country: recipientInfo.country,
       postCode: recipientInfo.postCode,
-      contactName: recipientInfo.fullName
+      contactName: recipientInfo.name
     },
 
     // Chuyển đổi products thành items
@@ -200,10 +204,10 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
   }, [])
 
   const [priceNet, setPriceNet] = useState(selectedService.totalPrice);
-  const [priceTransport, setPriceTransport] = useState(0);
+  const [priceTransport, setPriceTransport] = useState(selectedService.priceOther);
   const [originalTotal, setOriginalTotal] = useState(priceNet + priceTransport);
   const [isEdited, setIsEdited] = useState(false);
-  const [priceNetNew, setPriceNetNew] = useState(priceNet);
+  const [priceNetNew, setPriceNetNew] = useState(priceNet - priceTransport);
 
   const handlePriceChange = (value: any, setter: any) => {
     const numericValue = value.replace(/[^0-9]/g, '');
@@ -222,6 +226,23 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
   const handlePriceConfirm = () => {
     setOriginalTotal(priceNetNew + priceTransport);
     setIsEdited(true);
+  };
+
+  const handleUpdatePriceOrder = async () => {
+    try {
+      const dataRequest = {
+        id: bill_id,
+        priceNet: priceNetConfirm,
+        priceOther: priceTransport
+      };
+
+      console.log(dataRequest);
+
+      // const dataResponse = await PutPriceOrder(dataRequest);
+      // console.log("Price order updated:", dataResponse);
+    } catch (error) {
+      console.error("Error updating price order:", error);
+    }
   };
 
   const exportToExcel = async () => {
@@ -665,16 +686,14 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
               <p className="font-medium">{selectedService.carrier}</p>
             </div>
             <div>
+              <p className="text-sm text-gray-600">Country</p>
+              <p className="font-medium">{invoiceData.consignee.country}</p>
+            </div>
+            <div>
               <p className="text-sm text-gray-600">Dịch vụ</p>
               <p className="font-medium">{selectedService.service}</p>
             </div>
-            <div>
-              {/*<p className="text-sm text-gray-600">Thời gian giao hàng</p>*/}
-              {/*<p className="font-medium">{selectedService.deliveryTime}</p>*/}
-              {/*<p className="text-xs text-gray-500">*/}
-              {/*    {selectedService.deliveryDateBegin} - {selectedService.deliveryDateEnd}*/}
-              {/*</p>*/}
-            </div>
+
             <div>
               <p className="text-sm text-gray-600">Khu vực</p>
               <p className="font-medium">{selectedService.zone}</p>
@@ -761,10 +780,11 @@ export default function InvoiceMain({ recipientInfo, packages, products, product
           <div className="mt-6">
             <button
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200"
-              onClick={() => {
+              onClick={async () => {
                 setPriceNetConfirm(serviceSelectNew.priceNet);
                 setPriceOtherConfirm(priceTransport);
                 setIsConfirmed(true);
+                await handleUpdatePriceOrder();
               }}
             >
               Xác nhận thay đổi

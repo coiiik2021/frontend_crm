@@ -431,9 +431,8 @@ export default function ContentTable(props) {
         workbook.created = new Date();
 
         const columnMapping = {
-           
-            house_bill: { header: 'HOUSE BILL', width: 12 },
-            Date: { header: 'NGÀY TẠO', width: 20 },
+            house_bill: { header: 'HOUSE BILL', width: 5 },
+            Date: { header: 'NGÀY TẠO', width: 15 },
             bill_employee: { header: 'BILL PHỤ', width: 15 },
             awb: { header: 'AWB', width: 15 },
             company_service: { header: 'DỊCH VỤ', width: 15 },
