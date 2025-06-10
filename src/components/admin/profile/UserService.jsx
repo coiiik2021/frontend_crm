@@ -89,7 +89,13 @@ export default function UserService({ user }) {
 
   const handleSetupPriceNetUser = async (service) => {
     setIsOpenPrice(true);
-    const dataZone = await GetAllByServiceCompany(service.service_id);
+
+
+
+    const nameService = service.nameService.split("-")[0].trim();
+    console.log("Name Service:", nameService); // Kiểm tra giá trị nameService
+
+    const dataZone = await GetAllByServiceCompany(nameService);
     const zoneOptions = dataZone.map(zone => ({
       label: zone,
       value: zone

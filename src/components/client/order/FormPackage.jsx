@@ -310,8 +310,6 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             return;
         }
 
-        let dummyQuotes = [];
-
         const dataRequest = {
             nameCountry: initialNameCountry, // Tên quốc gia
             weight: total.realVolume, // Tổng cân nặng thực tế
@@ -492,7 +490,8 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             overSize: quote.overSize,
             constVAT: quote.constVAT,
             zone: quote.zone,
-            totalPrice: (quote.priceNet + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100)
+            pricePeakSeason: quote.pricePeakSeason,
+            totalPrice: (quote.priceNet + quote.pricePeakSeason + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100)
         };
         console.log("selectedServiceInfo", selectedServiceInfo);
         setSelectedService(selectedServiceInfo);
@@ -773,12 +772,22 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                     <div className="p-4 flex-grow">
                                         <div className="space-y-2">
                                             <div className="flex justify-between">
+                                                <span className="text-sm text-gray-600">Cân nặng báo giá:</span>
+                                                <span className="text-sm font-medium">{formatCurrency(quote.totalWeight)} KG</span>
+                                            </div>
+                                            <div className="flex justify-between">
                                                 <span className="text-sm text-gray-600">Phí cơ bản:</span>
                                                 <span className="text-sm font-medium">{formatCurrency(quote.priceNet)} đ</span>
                                             </div>
                                             <div className="flex justify-between">
+                                                <span className="text-sm text-gray-600">Phí mùa cao điểm:</span>
+                                                <span className="text-sm font-medium">{formatCurrency(quote.pricePeakSeason)} đ</span>
+                                            </div>
+                                            <hr />
+
+                                            <div className="flex justify-between">
                                                 <span className="text-sm text-gray-600">Phí xăng dầu ({quote.constPPXD}%):</span>
-                                                <span className="text-sm font-medium">{formatCurrency(quote.priceNet * quote.constPPXD / 100)} đ</span>
+                                                <span className="text-sm font-medium">{formatCurrency((quote.priceNet + quote.pricePeakSeason) * quote.constPPXD / 100)} đ</span>
                                             </div>
                                             {quote.overSize && (
                                                 <div className="flex justify-between">
@@ -788,7 +797,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                             )}
                                             <div className="flex justify-between">
                                                 <span className="text-sm text-gray-600">VAT ({quote.constVAT}%):</span>
-                                                <span className="text-sm font-medium">{formatCurrency((quote.priceNet + (quote.overSize ? quote.overSize.price : 0)) * quote.constVAT / 100)} đ</span>
+                                                <span className="text-sm font-medium">{formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * quote.constVAT / 100)} đ</span>
                                             </div>
                                         </div>
                                     </div>
@@ -797,7 +806,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="text-base font-bold text-gray-800">
-                                                    Tổng: {formatCurrency((quote.priceNet + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100))} đ
+                                                    Tổng: {formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100))} đ
                                                 </p>
                                             </div>
                                             <Button
