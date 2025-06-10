@@ -337,7 +337,7 @@ const PostConsigneeFavorite = async (data) => {
 };
 
 const DeleteConsigneeFavorite = async (id) => {
-  const API = `favorite/consignee${id}`;
+  const API = `favorite/consignee/${id}`;
   return await axios.delete(API);
 };
 

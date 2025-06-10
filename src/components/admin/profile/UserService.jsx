@@ -76,7 +76,9 @@ export default function UserService({ user }) {
       ppxd: newConst.ppxd,
       vat: newConst.vat,
       overSize: newConst.overSize,
+      peakSeason: newConst.peakSeason,
     };
+    console.log("newConstRequest:", newConstRequest); // Kiểm tra user ID
 
     console.log("Request Payload:", newConstRequest); // Kiểm tra payload
 
@@ -125,9 +127,6 @@ export default function UserService({ user }) {
     setSavedRows(newSavedRows);
   }
 
-
-
-
   const handleDelete = async (id) => {
 
     const deleteConst = {
@@ -151,7 +150,9 @@ export default function UserService({ user }) {
       account_id: user.id
     }
     console.log(updatedConst);
-    await PutConstUser(updatedConst);
+    const dataResponse = await PutConstUser(updatedConst);
+
+    console.log("Response from API:", dataResponse);
 
     setConstUsers((prev) =>
       prev.map((item) =>
@@ -167,6 +168,7 @@ export default function UserService({ user }) {
     ppxd: 100,
     vat: 8,
     overSize: 100,
+    peakSeason: 100,
   });
 
   const handlePrice = (row) => {
@@ -358,6 +360,12 @@ export default function UserService({ user }) {
                         </TableCell>
                         <TableCell
                           isHeader
+                          className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
+                        >
+                          Peak Season
+                        </TableCell>
+                        <TableCell
+                          isHeader
                           className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
                         >
                           Actions
@@ -384,6 +392,9 @@ export default function UserService({ user }) {
                               </TableCell>
                               <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
                                 {row.overSize}
+                              </TableCell>
+                              <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
+                                {row.peakSeason}
                               </TableCell>
                               <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <button
@@ -501,6 +512,17 @@ export default function UserService({ user }) {
                     value={newConst.overSize}
                     onChange={(e) =>
                       setNewConst({ ...newConst, overSize: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <Label>Peak Season</Label>
+                  <Input
+                    type="text"
+                    value={newConst.peakSeason}
+                    onChange={(e) =>
+                      setNewConst({ ...newConst, peakSeason: e.target.value })
                     }
                   />
                 </div>
@@ -816,6 +838,17 @@ export default function UserService({ user }) {
                     value={editConst?.overSize || ""}
                     onChange={(e) =>
                       setEditConst({ ...editConst, overSize: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <Label>Peak season</Label>
+                  <Input
+                    type="text"
+                    value={editConst?.peakSeason || ""}
+                    onChange={(e) =>
+                      setEditConst({ ...editConst, peakSeason: e.target.value })
                     }
                   />
                 </div>
