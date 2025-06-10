@@ -947,10 +947,38 @@ export default function ContentTable(props) {
                                     </label>
                                 </div>
 
-                                {/* Cột thông tin cơ bản */}
+                                {/* Nhóm THÔNG TIN CƠ BẢN */}
                                 <div className="mb-2">
-                                    <div className="flex items-center mb-1">
-                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Thông tin cơ bản</span>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">THÔNG TIN CƠ BẢN</span>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["house_bill", "Date", "customer", "country", "master_tracking", "ctns", "gw", "cw", "company_service", "inwh_date"].forEach(column => {
+                                                        newVisibleColumns[column] = true;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                                            >
+                                                Chọn
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["Date", "customer", "country", "master_tracking", "ctns", "gw", "cw", "company_service", "inwh_date"].forEach(column => {
+                                                        if (column !== "house_bill") { // Giữ nguyên house_bill
+                                                            newVisibleColumns[column] = false;
+                                                        }
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                            >
+                                                Bỏ chọn
+                                            </button>
+                                        </div>
                                     </div>
                                     {["Date", "customer", "country", "master_tracking", "ctns", "gw", "cw", "company_service", "inwh_date"].map((column) => (
                                         <div key={column} className="flex items-center ml-2 mt-1">
@@ -975,8 +1003,34 @@ export default function ContentTable(props) {
 
                                 {/* Nhóm PRICE */}
                                 <div className="mb-2">
-                                    <div className="flex items-center mb-1">
+                                    <div className="flex items-center justify-between mb-1">
                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">PRICE</span>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["price_price", "fsc_price", "surge_fee_price"].forEach(column => {
+                                                        newVisibleColumns[column] = true;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                                            >
+                                                Chọn
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["price_price", "fsc_price", "surge_fee_price"].forEach(column => {
+                                                        newVisibleColumns[column] = false;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                            >
+                                                Bỏ chọn
+                                            </button>
+                                        </div>
                                     </div>
                                     {["price_price", "fsc_price", "surge_fee_price"].map((column) => (
                                         <div key={column} className="flex items-center ml-2 mt-1">
@@ -1001,8 +1055,34 @@ export default function ContentTable(props) {
 
                                 {/* Nhóm DEBIT */}
                                 <div className="mb-2">
-                                    <div className="flex items-center mb-1">
+                                    <div className="flex items-center justify-between mb-1">
                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">DEBIT</span>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["afr_debit", "oversize_debit", "surge_fee_debit", "other_charges_debit", "fsc_debit", "gw_debit", "cw_debit", "bill", "reconcile"].forEach(column => {
+                                                        newVisibleColumns[column] = true;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                                            >
+                                                Chọn
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["afr_debit", "oversize_debit", "surge_fee_debit", "other_charges_debit", "fsc_debit", "gw_debit", "cw_debit", "bill", "reconcile"].forEach(column => {
+                                                        newVisibleColumns[column] = false;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                            >
+                                                Bỏ chọn
+                                            </button>
+                                        </div>
                                     </div>
                                     {["afr_debit", "oversize_debit", "surge_fee_debit", "other_charges_debit", "fsc_debit", "gw_debit", "cw_debit", "bill", "reconcile"].map((column) => (
                                         <div key={column} className="flex items-center ml-2 mt-1">
@@ -1027,8 +1107,34 @@ export default function ContentTable(props) {
 
                                 {/* Nhóm TOTAL AR */}
                                 <div className="mb-2">
-                                    <div className="flex items-center mb-1">
+                                    <div className="flex items-center justify-between mb-1">
                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">TOTAL AR</span>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["total_ar", "vat", "total"].forEach(column => {
+                                                        newVisibleColumns[column] = true;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                                            >
+                                                Chọn
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["total_ar", "vat", "total"].forEach(column => {
+                                                        newVisibleColumns[column] = false;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                            >
+                                                Bỏ chọn
+                                            </button>
+                                        </div>
                                     </div>
                                     {["total_ar", "vat", "total"].map((column) => (
                                         <div key={column} className="flex items-center ml-2 mt-1">
@@ -1053,8 +1159,34 @@ export default function ContentTable(props) {
 
                                 {/* Nhóm GRAND TOTAL */}
                                 <div className="mb-2">
-                                    <div className="flex items-center mb-1">
+                                    <div className="flex items-center justify-between mb-1">
                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">GRAND TOTAL</span>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["order_grand_total", "other_charges_total", "grand_total"].forEach(column => {
+                                                        newVisibleColumns[column] = true;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                                            >
+                                                Chọn
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["order_grand_total", "other_charges_total", "grand_total"].forEach(column => {
+                                                        newVisibleColumns[column] = false;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                            >
+                                                Bỏ chọn
+                                            </button>
+                                        </div>
                                     </div>
                                     {["order_grand_total", "other_charges_total", "grand_total"].map((column) => (
                                         <div key={column} className="flex items-center ml-2 mt-1">
@@ -1079,8 +1211,34 @@ export default function ContentTable(props) {
 
                                 {/* Nhóm PAYMENT */}
                                 <div className="mb-2">
-                                    <div className="flex items-center mb-1">
+                                    <div className="flex items-center justify-between mb-1">
                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">PAYMENT</span>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["payments_cash", "payments_banking", "payments_remaining"].forEach(column => {
+                                                        newVisibleColumns[column] = true;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                                            >
+                                                Chọn
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["payments_cash", "payments_banking", "payments_remaining"].forEach(column => {
+                                                        newVisibleColumns[column] = false;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                            >
+                                                Bỏ chọn
+                                            </button>
+                                        </div>
                                     </div>
                                     {["payments_cash", "payments_banking", "payments_remaining"].map((column) => (
                                         <div key={column} className="flex items-center ml-2 mt-1">
@@ -1105,8 +1263,34 @@ export default function ContentTable(props) {
 
                                 {/* Nhóm PROFIT */}
                                 <div className="mb-2">
-                                    <div className="flex items-center mb-1">
+                                    <div className="flex items-center justify-between mb-1">
                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">PROFIT</span>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["price_diff", "packing", "pickup", "other_costs", "profit"].forEach(column => {
+                                                        newVisibleColumns[column] = true;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                                            >
+                                                Chọn
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["price_diff", "packing", "pickup", "other_costs", "profit"].forEach(column => {
+                                                        newVisibleColumns[column] = false;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                            >
+                                                Bỏ chọn
+                                            </button>
+                                        </div>
                                     </div>
                                     {["price_diff", "packing", "pickup", "other_costs", "profit"].map((column) => (
                                         <div key={column} className="flex items-center ml-2 mt-1">
@@ -1131,8 +1315,34 @@ export default function ContentTable(props) {
 
                                 {/* Nhóm HH */}
                                 <div className="mb-2">
-                                    <div className="flex items-center mb-1">
+                                    <div className="flex items-center justify-between mb-1">
                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">HH</span>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["hh1", "hh2", "hh3", "hh4"].forEach(column => {
+                                                        newVisibleColumns[column] = true;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                                            >
+                                                Chọn
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["hh1", "hh2", "hh3", "hh4"].forEach(column => {
+                                                        newVisibleColumns[column] = false;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                            >
+                                                Bỏ chọn
+                                            </button>
+                                        </div>
                                     </div>
                                     {["hh1", "hh2", "hh3", "hh4"].map((column) => (
                                         <div key={column} className="flex items-center ml-2 mt-1">
@@ -1157,8 +1367,34 @@ export default function ContentTable(props) {
 
                                 {/* Nhóm LƯƠNG THƯỞNG */}
                                 <div className="mb-2">
-                                    <div className="flex items-center mb-1">
+                                    <div className="flex items-center justify-between mb-1">
                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">LƯƠNG THƯỞNG</span>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["base_salary", "kpi_bonus", "bonus_1_2_3", "allowance", "other_bonus"].forEach(column => {
+                                                        newVisibleColumns[column] = true;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                                            >
+                                                Chọn
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const newVisibleColumns = { ...visibleColumns };
+                                                    ["base_salary", "kpi_bonus", "bonus_1_2_3", "allowance", "other_bonus"].forEach(column => {
+                                                        newVisibleColumns[column] = false;
+                                                    });
+                                                    setVisibleColumns(newVisibleColumns);
+                                                }}
+                                                className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                            >
+                                                Bỏ chọn
+                                            </button>
+                                        </div>
                                     </div>
                                     {["base_salary", "kpi_bonus", "bonus_1_2_3", "allowance", "other_bonus"].map((column) => (
                                         <div key={column} className="flex items-center ml-2 mt-1">
