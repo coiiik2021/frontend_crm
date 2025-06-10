@@ -373,20 +373,6 @@ export default function ContentTable(props) {
 
     const statusPopoverRef = useRef(null);
 
-    // Thêm state để quản lý các cột hiển thị
-    const [visibleColumns, setVisibleColumns] = useState({
-        house_bill: true,
-        Date: true,
-        bill_employee: true,
-        awb: true,
-        company_service: true,
-        payment_bill_real: true,
-        price_order: true,
-        payment_bill_fake: true,
-        payments_cash: true,
-        payments_banking: true,
-        status: true
-    });
 
     // Thêm state để quản lý hiển thị dropdown
     const [showColumnSelector, setShowColumnSelector] = useState(false);
@@ -459,7 +445,7 @@ export default function ContentTable(props) {
         titleRow.height = 60;
 
         const titleCell = worksheet.getCell(1, 1);
-        titleCell.font = { size: 30, bold: true, color: { argb: 'FF000000' }, name : 'Arial' };
+        titleCell.font = { size: 30, bold: true, color: { argb: 'FF000000' }, name: 'Arial' };
         titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
 
@@ -478,7 +464,7 @@ export default function ContentTable(props) {
         columnsToExport.forEach((key, index) => {
             const cell = headerRow.getCell(index + 1);
             cell.value = columnMapping[key].header;
-            cell.font = { bold: true, color: { argb: 'FF000000' } , size: 12};
+            cell.font = { bold: true, color: { argb: 'FF000000' }, size: 12 };
             cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
@@ -696,6 +682,77 @@ export default function ContentTable(props) {
         }
     };
 
+    const columnLabels = {
+        house_bill: "HOUSE BILL",
+        Date: "NGÀY TẠO",
+        customer: "CUSTOMER",
+        country: "COUNTRY",
+        master_tracking: "MASTERTRACKING",
+        ctns: "CTNS",
+        gw: "GW",
+        cw: "CW",
+        company_service: "DỊCH VỤ",
+        inwh_date: "In-WH DATE",
+        // Price
+        price_price: "PRICE (PRICE)",
+        fsc_price: "FSC (PRICE)",
+        surge_fee_price: "SURGE FEE (PRICE)",
+        // Debit
+        afr_debit: "AFR (DEBIT)",
+        oversize_debit: "OVERSIZE (DEBIT)",
+        surge_fee_debit: "SURGE FEE (DEBIT)",
+        other_charges_debit: "OTHER CHARGES (DEBIT)",
+        fsc_debit: "FSC (DEBIT)",
+        // Total AR
+        total_ar: "TOTAL AR (TOTAL AR)",
+        vat: "VAT (TOTAL AR)",
+        total: "TOTAL (TOTAL AR)",
+        // Grand Total
+        order_grand_total: "ORDER ((GRAND TOTAL))",
+        other_charges_total: "OTHER CHARGES (GRAND TOTAL)",
+        grand_total: "GRAND TOTAL (GRAND TOTAL)",
+        // Thanh toan
+        payments_cash: "TIỀN MẶT (PAYMENT)",
+        payments_banking: "CHUYỂN KHOẢN (PAYMENT)",
+        payments_remaining: "CÒN LẠI (PAYMENT)",
+        // payment_bill_real: "THÀNH TIỀN (TẠM TÍNH)",
+        // payment_bill_fake: "THÀNH TIỀN (CHỐT)",
+
+        // DEBIT
+        gw_debit: "GW (DEBIT)",
+        cw_debit: "CW (DEBIT)",
+        bill: "THÀNH TIỀN (DEBIT)",
+        reconcile: "ĐỐI SOÁT (DEBIT)",
+        // Lợi nhuận
+        price_diff: "CHÊNH LỆCH GIÁ (PROFIT)",
+        packing: "ĐÓNG GÓI (PROFIT)",
+        pickup: "PICK UP (PROFIT)",
+        other_costs: "CHI PHÍ KHÁC (PROFIT)",
+        profit: "LỢI NHUẬN (PROFIT)",
+        // HH
+        hh1: "HH 1 (HH)",
+        hh2: "HH 2 (HH)",
+        hh3: "HH 3 (HH)",
+        hh4: "HH 4 (HH)",
+        // Lương thưởng
+        base_salary: "LƯƠNG CĂN BẢN (LƯƠNG THƯỞNG)",
+        kpi_bonus: "THƯỞNG KPI (LƯƠNG THƯỞNG)",
+        bonus_1_2_3: "THƯỞNG 1\nTHƯỞNG 2\nTHƯỞNG 3 (LƯƠNG THƯỞNG)",
+        allowance: "PHỤ CẤP (LƯƠNG THƯỞNG)",
+        other_bonus: "THƯỞNG KHÁC (LƯƠNG THƯỞNG)",
+
+        // Trang thai
+        status: "TRẠNG THÁI"
+    };
+
+    // Thêm state để quản lý các cột hiển thị
+    const [visibleColumns, setVisibleColumns] = useState(
+        Object.keys(columnLabels).reduce((acc, key) => {
+            acc[key] = true;
+            return acc;
+        }, {})
+    );
+
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
 
@@ -803,17 +860,7 @@ export default function ContentTable(props) {
                                         <label htmlFor={`col-${column}`} className={`ml-2 text-sm ${column === "house_bill"
                                             ? "text-gray-800 font-medium dark:text-gray-200"
                                             : "text-gray-600 dark:text-gray-400"}`}>
-                                            {column === "house_bill" ? "HOUSE BILL" :
-                                                column === "Date" ? "NGÀY TẠO" :
-                                                    column === "bill_employee" ? "BILL PHỤ" :
-                                                        column === "awb" ? "AWB" :
-                                                            column === "company_service" ? "DỊCH VỤ" :
-                                                                column === "payment_bill_real" ? "THÀNH TIỀN (TẠM TÍNH)" :
-                                                                    column === "price_order" ? "TIỀN ORDER" :
-                                                                        column === "payment_bill_fake" ? "THÀNH TIỀN (CHỐT)" :
-                                                                            column === "payments_cash" ? "THANH TOÁN TIỀN MẶT" :
-                                                                                column === "payments_banking" ? "THANH TOÁN BANKING" :
-                                                                                    column === "status" ? "TRẠNG THÁI" : column}
+                                            {columnLabels[column] || column}
                                         </label>
                                     </div>
                                 ))}
@@ -855,43 +902,33 @@ export default function ContentTable(props) {
                     <Table className="w-full rounded-lg overflow-hidden shadow-sm">
                         <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                             <TableRow>
-                                {[
-                                    { key: "house_bill", label: "HOUSE BILL" },
-                                    { key: "Date", label: "Ngày tạo" },
-                                    { key: "bill_employee", label: "BILL PHỤ" },
-                                    { key: "awb", label: "AWB " },
-                                    { key: "company_service", label: "DỊCH VỤ" },
-                                    { key: "payment_bill_real", label: "Thành tiền (Tạm tính)" },
-                                    { key: "price_order", label: "Tiền order" },
-                                    { key: "payment_bill_fake", label: "Thành tiền (chốt)" },
-                                    { key: "payments_cash", label: "Thanh toán Tiền mặt" },
-                                    { key: "payments_banking", label: "Thanh toán banking" },
-                                    { key: "status", label: "TRẠNG THÁI" },
-                                ].filter(column => column.key === "house_bill" || visibleColumns[column.key]).map(({ key, label }) => (
-                                    <TableCell
-                                        key={key}
-                                        isHeader
-                                        className="px-6 py-4 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <span>{label}</span>
-                                            <button
-                                                onClick={() => handleSort(key)}
-                                                className="ml-2 text-gray-400 hover:text-brand-500 transition-colors"
-                                            >
-                                                {sortKey === key ? (
-                                                    sortOrder === "asc" ? (
-                                                        <ChevronUpIcon className="h-4 w-4 text-brand-500" />
+                                {Object.entries(columnLabels)
+                                    .filter(([key]) => key === "house_bill" || visibleColumns[key])
+                                    .map(([key, label]) => (
+                                        <TableCell
+                                            key={key}
+                                            isHeader
+                                            className="px-6 py-4 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span>{label}</span>
+                                                <button
+                                                    onClick={() => handleSort(key)}
+                                                    className="ml-2 text-gray-400 hover:text-brand-500 transition-colors"
+                                                >
+                                                    {sortKey === key ? (
+                                                        sortOrder === "asc" ? (
+                                                            <ChevronUpIcon className="h-4 w-4 text-brand-500" />
+                                                        ) : (
+                                                            <ChevronDownIcon className="h-4 w-4 text-brand-500" />
+                                                        )
                                                     ) : (
-                                                        <ChevronDownIcon className="h-4 w-4 text-brand-500" />
-                                                    )
-                                                ) : (
-                                                    <ArrowsUpDownIcon className="h-3 w-3" />
-                                                )}
-                                            </button>
-                                        </div>
-                                    </TableCell>
-                                ))}
+                                                        <ArrowsUpDownIcon className="h-3 w-3" />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </TableCell>
+                                    ))}
                             </TableRow>
                         </TableHeader>
 
@@ -926,18 +963,36 @@ export default function ContentTable(props) {
                                         </TableCell>
                                     )}
 
-                                    {visibleColumns.bill_employee && (
+                                    {visibleColumns.customer && (
                                         <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                            {item?.bill_employee || "..."}
+                                            {item?.customer || "..."}
                                         </TableCell>
                                     )}
-
-                                    {visibleColumns.awb && (
+                                    {visibleColumns.country && (
                                         <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                            {item?.awb || "..."}
+                                            {item?.country || "..."}
                                         </TableCell>
                                     )}
-
+                                    {visibleColumns.master_tracking && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.master_tracking || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.ctns && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.ctns || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.gw && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.gw || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.cw && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.cw || "..."}
+                                        </TableCell>
+                                    )}
                                     {visibleColumns.company_service && (
                                         <TableCell className="px-6 py-4 whitespace-nowrap">
                                             <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
@@ -945,56 +1000,91 @@ export default function ContentTable(props) {
                                             </span>
                                         </TableCell>
                                     )}
-
-                                    {visibleColumns.payment_bill_real && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {formatCurrency(item.total_real)} VNĐ
+                                    {visibleColumns.inwh_date && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.inwh_date || "..."}
                                         </TableCell>
                                     )}
-
-                                    {visibleColumns.price_order && (
-                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            <div className="relative flex flex-col items-start space-y-2">
-                                                {
-                                                    (authorities.includes("ADMIN") || authorities.includes("CS") || authorities.includes("TRANSPORTER")) && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                openModal();
-                                                                setBillEdit(item);
-                                                            }}
-                                                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                                        >
-                                                            <PencilIcon className="w-5 h-5" />
-                                                        </button>)
-                                                }
-
-                                                {/* Giá trị tiền order */}
-                                                <div className="flex flex-col space-y-1 pt-6">
-                                                    {/* Giá trị xanh */}
-                                                    <div className="flex items-center space-x-2">
-                                                        <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
-                                                            {formatCurrency(item.priceOrder.total_complete)} VNĐ
-                                                        </span>
-                                                    </div>
-
-                                                    {/* Giá trị đỏ */}
-                                                    <div className="flex items-center space-x-2">
-                                                        <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
-                                                            {formatCurrency(item.priceOrder.total_process)} VNĐ
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    {visibleColumns.price_price && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.price_price || "..."}
                                         </TableCell>
-
                                     )}
-
-                                    {visibleColumns.payment_bill_fake && (
+                                    {visibleColumns.fsc_price && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.fsc_price || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.surge_fee_price && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.surge_fee_price || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.afr_debit && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.afr_debit || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.oversize_debit && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.oversize_debit || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.surge_fee_debit && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.surge_fee_debit || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.other_charges_debit && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.other_charges_debit || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.fsc_debit && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.fsc_debit || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.total_ar && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.total_ar || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.vat && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.vat || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.total && (
                                         <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                                             {formatCurrency(item.total_fake)} VNĐ
                                         </TableCell>
                                     )}
+                                    {visibleColumns.order_grand_total && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.order_grand_total || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.other_charges_total && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.other_charges_total || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.grand_total && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.grand_total || "..."}
+                                        </TableCell>
+                                    )}
+                                    {/* {visibleColumns.payments_cash && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.payments_cash || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.payments_banking && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.payments_banking || "..."}
+                                        </TableCell>
+                                    )} */}
 
                                     {visibleColumns.payments_cash && (
                                         <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1049,6 +1139,102 @@ export default function ContentTable(props) {
                                                     </div>
                                                 </div>
                                             </div>
+                                        </TableCell>
+                                    )}
+
+                                    {visibleColumns.payments_remaining && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.payments_remaining || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.gw_debit && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.gw_debit || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.cw_debit && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.cw_debit || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.bill && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.bill || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.reconcile && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.reconcile || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.price_diff && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.price_diff || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.packing && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.packing || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.pickup && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.pickup || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.other_costs && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.other_costs || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.profit && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.profit || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.hh1 && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.hh1 || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.hh2 && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.hh2 || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.hh3 && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.hh3 || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.hh4 && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.hh4 || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.base_salary && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.base_salary || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.kpi_bonus && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.kpi_bonus || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.bonus_1_2_3 && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.bonus_1_2_3 || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.allowance && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.allowance || "..."}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.other_bonus && (
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                            {item?.other_bonus || "..."}
                                         </TableCell>
                                     )}
 
