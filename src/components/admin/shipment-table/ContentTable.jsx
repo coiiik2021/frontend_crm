@@ -417,7 +417,6 @@ export default function ContentTable(props) {
     }, [showColumnSelector]);
 
     const exportToExcel = async () => {
-        // Lấy dữ liệu hiện tại (đã filter và sort)
         const dataToExport = currentData;
 
         if (!dataToExport || dataToExport.length === 0) {
@@ -428,49 +427,42 @@ export default function ContentTable(props) {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Shipment Report');
 
-        // Thiết lập thông tin workbook
         workbook.creator = 'Shipment Management System';
         workbook.created = new Date();
 
-        // Định nghĩa mapping các cột
         const columnMapping = {
-            house_bill: { header: 'HOUSE BILL', width: 5 },
-            Date: { header: 'NGÀY TẠO', width: 15 },
+           
+            house_bill: { header: 'HOUSE BILL', width: 12 },
+            Date: { header: 'NGÀY TẠO', width: 20 },
             bill_employee: { header: 'BILL PHỤ', width: 15 },
             awb: { header: 'AWB', width: 15 },
-            company_service: { header: 'DỊCH VỤ', width: 20 },
-            payment_bill_real: { header: 'THÀNH TIỀN (TẠM TÍNH)', width: 25 },
-            price_order: { header: 'TIỀN ORDER', width: 20 },
+            company_service: { header: 'DỊCH VỤ', width: 15 },
+            payment_bill_real: { header: 'THÀNH TIỀN (TẠM TÍNH)', width: 24 },
+            price_order: { header: 'TIỀN ORDER', width: 38 },
             payment_bill_fake: { header: 'THÀNH TIỀN (CHỐT)', width: 25 },
             payments_cash: { header: 'THANH TOÁN TIỀN MẶT', width: 25 },
             payments_banking: { header: 'THANH TOÁN BANKING', width: 25 },
             status: { header: 'TRẠNG THÁI', width: 15 }
         };
 
-        // Lọc các cột cần xuất (house_bill luôn xuất, các cột khác dựa vào visibleColumns)
         const columnsToExport = Object.keys(columnMapping).filter(key =>
             key === 'house_bill' || visibleColumns[key]
         );
 
-        // Thiết lập cột cho worksheet
         worksheet.columns = columnsToExport.map(key => ({
             key: key,
-            width: columnMapping[key].width
+            width: columnMapping[key].width,
         }));
 
         // Thêm tiêu đề
         const titleRow = worksheet.insertRow(1, ['BÁO CÁO SHIPMENT']);
         worksheet.mergeCells(1, 1, 1, columnsToExport.length);
-        titleRow.height = 35;
+        titleRow.height = 60;
 
         const titleCell = worksheet.getCell(1, 1);
-        titleCell.font = { size: 18, bold: true, color: { argb: 'FF2563EB' } };
+        titleCell.font = { size: 30, bold: true, color: { argb: 'FF000000' }, name : 'Arial' };
         titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-        titleCell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFF8FAFC' }
-        };
+
 
         // Thêm thông tin ngày xuất
         const dateRow = worksheet.insertRow(2, [`Ngày xuất: ${new Date().toLocaleString('vi-VN')}`]);
@@ -478,24 +470,20 @@ export default function ContentTable(props) {
         dateRow.height = 20;
 
         const dateCell = worksheet.getCell(2, 1);
-        dateCell.font = { size: 12, italic: true };
+        dateCell.font = { size: 14, italic: true };
         dateCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-        // Thêm dòng trống
-        worksheet.addRow([]);
-
-        // Thiết lập header row (dòng 4)
         const headerRow = worksheet.getRow(4);
-        headerRow.height = 25;
+        headerRow.height = 45;
 
         columnsToExport.forEach((key, index) => {
             const cell = headerRow.getCell(index + 1);
             cell.value = columnMapping[key].header;
-            cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            cell.font = { bold: true, color: { argb: 'FF000000' } , size: 12};
             cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: 'FF2563EB' }
+                fgColor: { argb: 'FFA6A6A7' }
             };
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
             cell.border = {
@@ -559,7 +547,7 @@ export default function ContentTable(props) {
             });
 
             const dataRow = worksheet.addRow(rowData);
-            dataRow.height = 20;
+            dataRow.height = 35;
 
             // Định dạng cho từng cell trong dòng dữ liệu
             dataRow.eachCell((cell, colNumber) => {
@@ -570,7 +558,6 @@ export default function ContentTable(props) {
                     right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
                 };
 
-                // Màu nền xen kẽ cho dễ đọc
                 if (rowIndex % 2 === 0) {
                     cell.fill = {
                         type: 'pattern',
@@ -638,10 +625,12 @@ export default function ContentTable(props) {
             });
 
             const summaryRow = worksheet.addRow(summaryData);
-            summaryRow.height = 25;
+            summaryRow.height = 35;
+
 
             summaryRow.eachCell((cell, colNumber) => {
-                cell.font = { bold: true, size: 12 };
+
+                cell.font = { bold: true, size: 13 };
                 cell.fill = {
                     type: 'pattern',
                     pattern: 'solid',
@@ -660,19 +649,24 @@ export default function ContentTable(props) {
                     cell.alignment = { horizontal: 'right', vertical: 'middle' };
                 }
             });
+
+            let mergeEndColumn = 1;
+            for (let i = 1; i <= columnsToExport.length; i++) {
+                // const key = columnsToExport[i - 1];
+                const value = summaryRow.getCell(i).value;
+                if (typeof value === 'string' && value.trim() !== 'TỔNG CỘNG' && value.trim() !== '') {
+                    mergeEndColumn = i - 1;
+                    break;
+                }
+            }
+            if (mergeEndColumn < 2) {
+                mergeEndColumn = columnsToExport.length;
+                worksheet.spliceRows(summaryRow.number, 1)
+            }
+
+            worksheet.mergeCells(summaryRow.number, 1, summaryRow.number, mergeEndColumn);
         }
 
-        // Auto-fit columns
-        worksheet.columns.forEach(column => {
-            let maxLength = 0;
-            column.eachCell({ includeEmpty: true }, (cell) => {
-                const columnLength = cell.value ? cell.value.toString().length : 10;
-                if (columnLength > maxLength) {
-                    maxLength = columnLength;
-                }
-            });
-            column.width = Math.max(maxLength + 2, 12);
-        });
 
         // Xuất file
         try {
@@ -761,11 +755,23 @@ export default function ContentTable(props) {
                     </button>
 
                     <button
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200 text-sm"
-                        onClick={exportToExcel}
+                    ref={columnButtonRef}
+                    onClick={() => exportToExcel()}
+                    className="ml-4 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 flex items-center transition-all duration-200"
                     >
-                        Xuất Excel
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 16 16"
+                    >
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                        <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+                    </svg>
+                    Xuất Excel
                     </button>
+
+
 
                     {/* Dropdown tùy chỉnh cột */}
                     {showColumnSelector && (
