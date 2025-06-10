@@ -9,11 +9,14 @@ import DatePicker from "../../admin/form/date-picker.tsx";
 import { useState, useEffect, useRef } from "react";
 import { GetCodeByCompany } from "../../../service/api.service.jsx";
 import { DeleteConsigneeFavorite, GetAllConsigneeFavorite, GetAllDeliveryFavorite, GetZoneCountry, PostConsigneeFavorite } from "../../../service/api.admin.service.jsx";
+import Document from "./Document.jsx";
+import { FileTextIcon, PackageIcon } from "lucide-react";
 
 export default function InformationOrder(props) {
     const { addressBackup, setAddressBackup,
         packages, setPackages, currentStep, setCurrentStep, setSelectedService } = props;
 
+    const [isPackage, setIsPackage] = useState(true);
 
     const recipientInfo = props.consigneeTo;
     const setRecipientInfo = props.setConsigneeTo;
@@ -1324,18 +1327,63 @@ export default function InformationOrder(props) {
                 </div>
             )}
 
-            <FormPackage
-                packages={packages}
-                setPackages={setPackages}
-                nameCountry={recipientForm.country}
-                handleService={handleService}
-                setSelectedService={setSelectedService}
-                initialNameCountry={initialNameCountry}
-                isChangeCountry={isChangeCountry}
-                setIsChangeCountry={setIsChangeCountry}
-                zone={zone}
+            <div className="inline-flex rounded-md shadow-sm" role="group">
+                <button
+                    onClick={() => setIsPackage(true)}
+                    className={`px-4 py-2 text-sm font-medium rounded-l-lg border focus:z-10 focus:ring-2 focus:ring-purple-300 transition-colors ${isPackage
+                        ? "bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        }`}
+                >
+                    <div className="flex items-center">
+                        <PackageIcon className="w-4 h-4 mr-2" />
+                        Packages
+                    </div>
+                </button>
 
-            />
+                <button
+                    onClick={() => setIsPackage(false)}
+                    className={`px-4 py-2 text-sm font-medium rounded-r-lg border focus:z-10 focus:ring-2 focus:ring-purple-300 transition-colors ${!isPackage
+                        ? "bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        }`}
+                >
+                    <div className="flex items-center">
+                        <FileTextIcon className="w-4 h-4 mr-2" />
+                        Document
+                    </div>
+                </button>
+            </div>
+
+
+            {
+                isPackage ? (
+                    <FormPackage
+                        packages={packages}
+                        setPackages={setPackages}
+                        nameCountry={recipientForm.country}
+                        handleService={handleService}
+                        setSelectedService={setSelectedService}
+                        initialNameCountry={initialNameCountry}
+                        isChangeCountry={isChangeCountry}
+                        setIsChangeCountry={setIsChangeCountry}
+                        zone={zone}
+
+                    />
+                ) : (
+                    <Document
+                        packages={packages}
+                        setPackages={setPackages}
+                        nameCountry={recipientForm.country}
+                        handleService={handleService}
+                        setSelectedService={setSelectedService}
+                        initialNameCountry={initialNameCountry}
+                        isChangeCountry={isChangeCountry}
+                        setIsChangeCountry={setIsChangeCountry}
+                        zone={zone}
+                    />
+                )
+            }
         </div>
     );
 }

@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion"; // Thêm framer-motion
 import React, { useEffect, useRef, useState } from "react";
 import Button from "../../admin/ui/button/Button.jsx";
 import { GetListPriceQuote } from "../../../service/api.admin.service.jsx";
+import { PackageIcon, Truck } from "lucide-react";
 
 const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, zone, handleService, setSelectedService, isChangeCountry, setIsChangeCountry }) => {
     // Khai báo state trước khi sử dụng trong useEffect
@@ -508,6 +509,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                 }}
                 className="flex items-center cursor-pointer mb-6"
             >
+                <PackageIcon className="text-xl sm:text-2xl font-bold text-purple-700 mr-2" />
                 <h2 className="text-xl sm:text-2xl font-bold text-purple-700 mr-2">Thông Tin Kiện Hàng</h2>
                 <motion.span
                     className="text-purple-700 text-xl"
@@ -738,83 +740,108 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                             {quoteData.map((quote, index) => (
                                 <motion.div
                                     key={index}
-                                    className="snap-start flex-shrink-0 w-72 bg-white rounded-lg shadow-md border border-gray-200 flex flex-col"
+                                    className="snap-start flex-shrink-0 w-80 bg-white rounded-xl shadow-lg border border-gray-100 flex flex-col overflow-hidden"
                                     variants={cardAnimation}
                                     initial="hidden"
                                     animate="visible"
                                     custom={index}
-                                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                                    whileHover={{ y: -5, transition: { duration: 0.2 }, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
                                 >
-                                    <div className="p-4 border-b">
+                                    {/* Header with carrier info */}
+                                    <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-gray-50">
                                         <div className="flex items-start justify-between">
                                             <div>
-                                                <h2 className="text-base font-bold text-gray-800 flex items-center">
-                                                    {(() => {
-                                                        const [carrierName] = quote.nameService.split(" ");
-                                                        return carrierName;
-                                                    })()}
-                                                </h2>
-                                                <p className="text-sm text-gray-600 mt-1">
-                                                    {(() => {
-                                                        const parts = quote.nameService.split(" ");
-                                                        return parts.slice(1).join(" ");
-                                                    })()}
-                                                </p>
+                                                <div className="flex items-center">
+                                                    <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center mr-3">
+                                                        <Truck className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                    <div>
+                                                        <h2 className="text-lg font-bold text-gray-900">
+                                                            {(() => {
+                                                                const [carrierName] = quote.nameService.split(" ");
+                                                                return carrierName;
+                                                            })()}
+                                                        </h2>
+                                                        <p className="text-sm text-gray-500 mt-1">
+                                                            {(() => {
+                                                                const parts = quote.nameService.split(" ");
+                                                                return parts.slice(1).join(" ");
+                                                            })()}
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div className="flex items-center">
-                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    {quote.zone}
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                                                    Zone {quote.zone}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="p-4 flex-grow">
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-600">Cân nặng báo giá:</span>
-                                                <span className="text-sm font-medium">{formatCurrency(quote.totalWeight)} KG</span>
+                                    {/* Pricing details */}
+                                    <div className="p-5 flex-grow">
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center py-1">
+                                                <span className="text-sm text-gray-500">Cân nặng:</span>
+                                                <span className="text-sm font-medium text-gray-700">{formatCurrency(quote.totalWeight)} KG</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-600">Phí cơ bản:</span>
-                                                <span className="text-sm font-medium">{formatCurrency(quote.priceNet)} đ</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-600">Phí mùa cao điểm:</span>
-                                                <span className="text-sm font-medium">{formatCurrency(quote.pricePeakSeason)} đ</span>
-                                            </div>
-                                            <hr />
 
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-600">Phí xăng dầu ({quote.constPPXD}%):</span>
-                                                <span className="text-sm font-medium">{formatCurrency((quote.priceNet + quote.pricePeakSeason) * quote.constPPXD / 100)} đ</span>
+                                            <div className="flex justify-between items-center py-1">
+                                                <span className="text-sm text-gray-500">Phí cơ bản:</span>
+                                                <span className="text-sm font-medium text-gray-700">{formatCurrency(quote.priceNet)} đ</span>
                                             </div>
+
+                                            <div className="flex justify-between items-center py-1">
+                                                <span className="text-sm text-gray-500">Phí mùa cao điểm:</span>
+                                                <span className="text-sm font-medium text-gray-700">{formatCurrency(quote.pricePeakSeason)} đ</span>
+                                            </div>
+
+                                            <div className="border-t border-gray-100 my-2"></div>
+
+                                            <div className="flex justify-between items-center py-1">
+                                                <span className="text-sm text-gray-500">Phí xăng dầu ({quote.constPPXD}%):</span>
+                                                <span className="text-sm font-medium text-blue-600">
+                                                    {formatCurrency((quote.priceNet + quote.pricePeakSeason) * quote.constPPXD / 100)} đ
+                                                </span>
+                                            </div>
+
                                             {quote.overSize && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-sm text-gray-600">Phí quá khổ:</span>
-                                                    <span className="text-sm font-medium">{formatCurrency(quote.overSize.price)} đ</span>
-                                                </div>
+                                                <>
+                                                    <div className="flex justify-between items-center py-1">
+                                                        <span className="text-sm text-gray-500">Phí quá khổ ({quote.overSize.name}):</span>
+                                                        <span className="text-sm font-medium text-red-500">{formatCurrency(quote.overSize.price)} đ</span>
+                                                    </div>
+                                                    <div className="text-xs text-gray-400 italic mt-1">
+                                                        {quote.overSize.description}
+                                                    </div>
+                                                </>
                                             )}
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-600">VAT ({quote.constVAT}%):</span>
-                                                <span className="text-sm font-medium">{formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * quote.constVAT / 100)} đ</span>
+
+                                            <div className="flex justify-between items-center py-1">
+                                                <span className="text-sm text-gray-500">VAT ({quote.constVAT}%):</span>
+                                                <span className="text-sm font-medium text-purple-600">
+                                                    {formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * quote.constVAT / 100)} đ
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="p-4 bg-gray-50 border-t">
+                                    {/* Footer with total and CTA */}
+                                    <div className="p-5 bg-gray-50 border-t border-gray-100">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-base font-bold text-gray-800">
-                                                    Tổng: {formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100))} đ
+                                                <p className="text-xs text-gray-500 mb-1">Tổng cộng</p>
+                                                <p className="text-xl font-bold text-gray-900">
+                                                    {formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100))} đ
                                                 </p>
                                             </div>
                                             <Button
                                                 type="button"
                                                 onClick={() => handleSelectService(quote)}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 px-3 rounded transition-colors mt-2 sm:mt-0"
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
+                                                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-all shadow-sm"
+                                                whileHover={{ scale: 1.03, boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)" }}
+                                                whileTap={{ scale: 0.98 }}
                                             >
                                                 Đặt ngay
                                             </Button>

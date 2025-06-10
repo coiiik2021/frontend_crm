@@ -13,6 +13,7 @@ import { jwtDecode } from "jwt-decode";
 import ExcelJS from 'exceljs';
 
 export default function ContentTable(props) {
+
     const { dataBill } = props;
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -744,6 +745,7 @@ export default function ContentTable(props) {
         // Trang thai
         status: "TRẠNG THÁI"
     };
+
 
     // Thêm state để quản lý các cột hiển thị
     // Thêm state để quản lý các cột hiển thị
