@@ -8,7 +8,7 @@ import FormPackage from "./FormPackage.jsx";
 import DatePicker from "../../admin/form/date-picker.tsx";
 import { useState, useEffect, useRef } from "react";
 import { GetCodeByCompany } from "../../../service/api.service.jsx";
-import { DeleteConsigneeFavorite, GetAllConsigneeFavorite, GetZoneCountry, PostConsigneeFavorite } from "../../../service/api.admin.service.jsx";
+import { DeleteConsigneeFavorite, GetAllConsigneeFavorite, GetAllDeliveryFavorite, GetZoneCountry, PostConsigneeFavorite } from "../../../service/api.admin.service.jsx";
 
 export default function InformationOrder(props) {
     const { addressBackup, setAddressBackup,
@@ -705,11 +705,11 @@ export default function InformationOrder(props) {
     const handleSetupDeliverySave = async () => {
         try {
             // Trong thực tế, bạn sẽ gọi API để lấy dữ liệu
-            // const dataResponse = await GetAllDeliveryFavorite();
-            // setListDeliverySave(dataResponse);
+            const dataResponse = await GetAllDeliveryFavorite();
+            setListDeliverySave(dataResponse);
 
             // Sử dụng dữ liệu mẫu cho demo
-            setListDeliverySave(deliverySampleData);
+            // setListDeliverySave(deliverySampleData);
             setShowDeliveryPopover(prev => !prev);
         } catch (error) {
             console.error("Error fetching delivery data:", error);
@@ -1201,7 +1201,7 @@ export default function InformationOrder(props) {
                                             }}
                                             onDelete={async (idx, id) => {
                                                 const newList = listDeliverySave.filter((_, i) => i !== idx);
-                                                // await DeleteConsigneeFavorite(id);
+                                                await DeleteConsigneeFavorite(id);
                                                 setListDeliverySave(newList);
                                             }}
                                         />

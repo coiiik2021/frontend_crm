@@ -342,8 +342,8 @@ const DeleteConsigneeFavorite = async (id) => {
 };
 
 
-const GetAllDeliveryFavorite = async (isTo) => {
-  const API = `favorite/delivery?isTo=${isTo}`;
+const GetAllDeliveryFavorite = async () => {
+  const API = `favorite/delivery`;
   return await axios.get(API);
 };
 const PostDeliveryFavorite = async (data) => {
@@ -352,13 +352,13 @@ const PostDeliveryFavorite = async (data) => {
 };
 
 const DeleteDeliveryFavorite = async (id) => {
-  const API = `favorite/delivery${id}`;
+  const API = `favorite/delivery/${id}`;
   return await axios.delete(API);
 };
 
 
-const GetAllProductFavorite = async (isTo) => {
-  const API = `favorite/product?isTo=${isTo}`;
+const GetAllProductFavorite = async () => {
+  const API = `favorite/product}`;
   return await axios.get(API);
 };
 const PostProductFavorite = async (data) => {
