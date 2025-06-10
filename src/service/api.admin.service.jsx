@@ -337,13 +337,13 @@ const PostConsigneeFavorite = async (data) => {
 };
 
 const DeleteConsigneeFavorite = async (id) => {
-  const API = `favorite/consignee${id}`;
+  const API = `favorite/consignee/${id}`;
   return await axios.delete(API);
 };
 
 
-const GetAllDeliveryFavorite = async (isTo) => {
-  const API = `favorite/delivery?isTo=${isTo}`;
+const GetAllDeliveryFavorite = async () => {
+  const API = `favorite/delivery`;
   return await axios.get(API);
 };
 const PostDeliveryFavorite = async (data) => {
@@ -357,8 +357,8 @@ const DeleteDeliveryFavorite = async (id) => {
 };
 
 
-const GetAllProductFavorite = async (isTo) => {
-  const API = `favorite/product?isTo=${isTo}`;
+const GetAllProductFavorite = async () => {
+  const API = `favorite/product}`;
   return await axios.get(API);
 };
 const PostProductFavorite = async (data) => {

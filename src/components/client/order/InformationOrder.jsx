@@ -83,7 +83,6 @@ export default function InformationOrder(props) {
     const recipientPopoverRef = useRef(null);
     const deliveryPopoverRef = useRef(null);
 
-    // Xử lý click outside cho các popover
     useEffect(() => {
         function handleClickOutside(event) {
             if (showSenderPopover &&
@@ -91,13 +90,11 @@ export default function InformationOrder(props) {
                 !senderPopoverRef.current.contains(event.target)) {
                 setShowSenderPopover(false);
             }
-
             if (showRecipientPopover &&
                 recipientPopoverRef.current &&
                 !recipientPopoverRef.current.contains(event.target)) {
                 setShowRecipientPopover(false);
             }
-
             if (showDeliveryPopover &&
                 deliveryPopoverRef.current &&
                 !deliveryPopoverRef.current.contains(event.target)) {
