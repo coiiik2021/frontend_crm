@@ -1,6 +1,6 @@
 import PageBreadcrumb from "../common/PageBreadCrumb.tsx";
 import ComponentCard from "../common/ComponentCard.tsx";
-import { GetAllBill } from "../../../service/api.admin.service.jsx";
+import { GetAllBill, GetShipment } from "../../../service/api.admin.service.jsx";
 import { useEffect, useState } from "react";
 import ContentTable from "./ContentTable.jsx";
 
@@ -10,7 +10,7 @@ export default function ShipmentTable() {
 
     useEffect(() => {
         const loadData = async () => {
-            const dataBill = await GetAllBill();
+            const dataBill = await GetShipment();
             console.log(dataBill);
             setDataBill(dataBill);
         }
