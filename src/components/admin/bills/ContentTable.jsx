@@ -932,11 +932,11 @@ export default function ContentTable(props) {
           <div className="fixed inset-0  z-40" onClick={handleCloseSidebar} />
           <div
             style={{ width: `${sidebarWidth}px`, willChange: "width" }}
-            className="fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg border-l border-gray-200 dark:border-gray-700 z-50 overflow-auto pt-16"
+            className="fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg border-l border-gray-200 dark:border-gray-700 z-50 overflow-auto pt-16 group"
           >
-            {/* Resize handle đơn giản */}
+            {/* Nút resize chỉ hiện khi hover vào sidebar */}
             <div
-              className="absolute top-[55%] left-0 -translate-y-1/2 z-50"
+              className="absolute top-[55%] left-0 -translate-y-1/2 z-50 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200"
               style={{ cursor: "ew-resize" }}
               onMouseDown={startResize}
               title="Kéo để thay đổi chiều rộng"

@@ -31,7 +31,7 @@ const PdfViewer = ({ bill_id }) => {
 
       {!loading && pdfUrl && (
         <iframe
-          src={pdfUrl}
+          src={pdfUrl ? `${pdfUrl}#zoom=100` : ""}
           title="PDF Viewer"
           width="100%"
           height="800px"
