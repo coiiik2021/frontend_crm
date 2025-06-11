@@ -750,32 +750,50 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                 >
                                     {/* Header with carrier info */}
                                     <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-gray-50">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <div className="flex items-center">
-                                                    <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center mr-3">
-                                                        <Truck className="w-5 h-5 text-blue-600" />
-                                                    </div>
-                                                    <div>
-                                                        <h2 className="text-lg font-bold text-gray-900">
-                                                            {(() => {
-                                                                const [carrierName] = quote.nameService.split(" ");
-                                                                return carrierName;
-                                                            })()}
-                                                        </h2>
-                                                        <p className="text-sm text-gray-500 mt-1">
-                                                            {(() => {
-                                                                const parts = quote.nameService.split(" ");
-                                                                return parts.slice(1).join(" ");
-                                                            })()}
-                                                        </p>
+                                        <div className="flex flex-col">
+                                            {/* Dòng 1: Tên hãng vận chuyển */}
+                                            <div className="flex items-center mb-3">
+                                                <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center mr-3">
+                                                    <Truck className="w-5 h-5 text-blue-600" />
+                                                </div>
+                                                <h2 className="text-lg font-bold text-gray-900">
+                                                    {(() => {
+                                                        const [carrierName] = quote.nameService.split(" ");
+                                                        return carrierName;
+                                                    })()}
+                                                </h2>
+                                            </div>
+
+                                            {/* Dòng 2: Thông tin chi tiết */}
+                                            <div className="flex justify-between items-end">
+                                                {/* Thông tin dịch vụ */}
+                                                <p className="text-sm text-gray-500">
+                                                    {(() => {
+                                                        const parts = quote.nameService.split(" ");
+                                                        return parts.slice(1).join(" ");
+                                                    })()}
+                                                </p>
+
+                                                {/* Thông tin zone và tuyến đường - đặt ở dưới cùng */}
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="text-xs font-medium text-gray-700 bg-blue-50 px-2 py-1 rounded">
+                                                        Zone {quote.zone}
+                                                    </span>
+
+                                                    <div className="flex items-center text-xs">
+                                                        <span className="font-medium">HCM</span>
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            className="h-3 w-3 mx-1 text-gray-500"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                        >
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                                        </svg>
+                                                        <span className="font-medium">HK</span>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-center">
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                                                    Zone {quote.zone}
-                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -785,7 +803,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center py-1">
                                                 <span className="text-sm text-gray-500">Cân nặng:</span>
-                                                <span className="text-sm font-medium text-gray-700">{formatCurrency(quote.totalWeight)} KG</span>
+                                                <span className="text-sm font-medium text-gray-700">{quote.totalWeight} KG</span>
                                             </div>
 
                                             <div className="flex justify-between items-center py-1">
@@ -811,7 +829,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                                 <>
                                                     <div className="flex justify-between items-center py-1">
                                                         <span className="text-sm text-gray-500">Phí quá khổ ({quote.overSize.name}):</span>
-                                                        <span className="text-sm font-medium text-red-500">{formatCurrency(quote.overSize.price)} đ</span>
+                                                        <span className="text-sm font-medium text-red-500">{(quote.overSize.price)} đ</span>
                                                     </div>
                                                     <div className="text-xs text-gray-400 italic mt-1">
                                                         {quote.overSize.description}

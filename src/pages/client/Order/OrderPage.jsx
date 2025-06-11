@@ -119,8 +119,6 @@ export default function OrderPage() {
 
 
 
-
-
     let content = null;
     if (currentStep === 2) {
         content = (
@@ -150,6 +148,7 @@ export default function OrderPage() {
                 setProductsTotal={setProductsTotal}
                 productsErrors={productsErrors}
                 setProductsErrors={setProductsErrors}
+                priceShipment={selectedService.totalPrice}
             />
         );
     }
