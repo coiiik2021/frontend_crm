@@ -95,7 +95,7 @@ export {
   UpdateNameService,
   DeleteServiceCompany,
   GetNameServiceByUser,
-  PutService
+  PutService,
 };
 
 const GetAPriceNet = async (name, zone, weight) => {
@@ -314,8 +314,8 @@ const GetInvoiceById = async (id) => {
   const API = `invoice/${id}`;
   return await axios.get(API);
 };
-const GetInvoicePdf = async () => {
-  const API = "invoice/export-pdf";
+const GetInvoicePdf = async (id) => {
+  const API = `house-bill/export-pdf/${id}`;
   console.log("API", API);
   return await axios.get(API, {
     responseType: "blob",
@@ -341,7 +341,6 @@ const DeleteConsigneeFavorite = async (id) => {
   return await axios.delete(API);
 };
 
-
 const GetAllDeliveryFavorite = async () => {
   const API = `favorite/delivery`;
   return await axios.get(API);
@@ -356,7 +355,6 @@ const DeleteDeliveryFavorite = async (id) => {
   return await axios.delete(API);
 };
 
-
 const GetAllProductFavorite = async () => {
   const API = `favorite/product}`;
   return await axios.get(API);
@@ -370,7 +368,6 @@ const DeleteProductFavorite = async (id) => {
   const API = `favorite/product${id}`;
   return await axios.delete(API);
 };
-
 
 export {
   GetAllConsigneeFavorite,
@@ -480,14 +477,12 @@ const PostPeakSeason = async (data) => {
 const GetAllPeakSeason = async (nameCompany) => {
   const API = `peak-season?nameCompany=${nameCompany}`;
   return await axios.get(API);
-}
+};
 
 const PutPeakSeason = async (data) => {
   const API = `peak-season`;
   return await axios.put(API, data);
-}
-
-
+};
 
 // Đảm bảo hàm được export
 export { DeletePeakSeason, PostPeakSeason, GetAllPeakSeason, PutPeakSeason };
