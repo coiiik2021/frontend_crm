@@ -16,7 +16,7 @@ const BillContent = ({ id: propId }: BillContentProps) => {
   const renderContent = () => {
     switch (activeTab) {
       case "homebill":
-        return <InvoiceHomeBill />;
+        return <InvoiceHomeBill bill_id={id || ""} />;
       case "awb":
         return <AWBContent bill_id={id || ""} />; // Replace with actual bill_id as needed
       case "invoice":
@@ -24,7 +24,7 @@ const BillContent = ({ id: propId }: BillContentProps) => {
       case "invoiceOther":
         return <ShippingDocumentContent bill_id={id || ""} />; // Replace with actual bill_id as needed
       default:
-        return <InvoiceHomeBill />;
+        return <InvoiceHomeBill bill_id={id || ""} />;
     }
   };
 

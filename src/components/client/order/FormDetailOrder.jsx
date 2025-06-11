@@ -36,7 +36,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         shipper: shipper,
 
         consignee: {
-            name: recipientInfo.name,
+            name: recipientInfo.fullName,
             company: recipientInfo.company,
             address: `${recipientInfo.street}, ${recipientInfo.city}, ${recipientInfo.state}, ${recipientInfo.country}`,
             phone: recipientInfo.phone,
