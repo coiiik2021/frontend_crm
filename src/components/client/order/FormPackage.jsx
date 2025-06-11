@@ -320,6 +320,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                 length: parseFloat(pkg.length) || 0,
                 height: parseFloat(pkg.height) || 0, // Chiều cao của kiện
             })),
+            isPackage: true
         };
         console.log("data request", dataRequest);
         const data = await GetListPriceQuote(dataRequest);

@@ -55,21 +55,16 @@ const Document = ({ packages, setPackages, nameCountry: initialNameCountry, zone
             return;
         }
 
-        if (!validateInputs()) {
-            setShowQuote(false);
-            setIsChangeCountry(true);
-            return;
-        }
+        // if (!validateInputs()) {
+        //     setShowQuote(false);
+        //     setIsChangeCountry(true);
+        //     return;
+        // }
 
         const dataRequest = {
             nameCountry: initialNameCountry,
             weight: realVolume,
-            packages: packages.map(pkg => ({
-                weight: parseFloat(pkg.weight) || 0,
-                width: parseFloat(pkg.width) || 0,
-                length: parseFloat(pkg.length) || 0,
-                height: parseFloat(pkg.height) || 0,
-            })),
+            isPackage: false
         };
         console.log("data request", dataRequest);
         const data = await GetListPriceQuote(dataRequest);
