@@ -380,12 +380,9 @@ export default function InformationOrder(props) {
             console.log("Updating addressBackup before moving to next step:", updatedAddressBackup);
             setAddressBackup(updatedAddressBackup);
 
-            // Ensure the parent component has the latest addressBackup value
-            // by using a small timeout before changing tabs
             setTimeout(() => {
                 console.log("Final addressBackup before changing step:", updatedAddressBackup);
                 setCurrentStep(3);
-                // Cuộn trang lên đầu khi chuyển sang bước tiếp theo
                 window.scrollTo({
                     top: 0,
                     behavior: "smooth"
