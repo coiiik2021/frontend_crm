@@ -67,30 +67,30 @@ export default function Footer({ currentStep, setCurrentStep, products, setProdu
                 const loadingToast = toast.loading("Đang tạo đơn hàng...");
 
                 console.log(dataRequest);
-                // const response = await CreateBill(dataRequest);
-                // console.log(response);
+                const response = await CreateBill(dataRequest);
+                console.log(response);
 
-                // Cập nhật toast khi có kết quả
-                // if (response === "created successfully") {
-                //     toast.update(loadingToast, {
-                //         render: "Đơn hàng đã được tạo thành công!",
-                //         type: "success",
-                //         isLoading: false,
-                //         autoClose: 3000
-                //     });
+                //Cập nhật toast khi có kết quả
+                if (response === "created successfully") {
+                    toast.update(loadingToast, {
+                        render: "Đơn hàng đã được tạo thành công!",
+                        type: "success",
+                        isLoading: false,
+                        autoClose: 3000
+                    });
 
-                //     // // Chuyển hướng sau khi hiển thị thông báo thành công
-                //     // setTimeout(() => {
-                //     //     window.location.href = "/";
-                //     // }, 2000);
-                // } else {
-                //     toast.update(loadingToast, {
-                //         render: "Có lỗi xảy ra khi tạo đơn hàng.",
-                //         type: "error",
-                //         isLoading: false,
-                //         autoClose: 3000
-                //     });
-                // }
+                    // // Chuyển hướng sau khi hiển thị thông báo thành công
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 2000);
+                } else {
+                    toast.update(loadingToast, {
+                        render: "Có lỗi xảy ra khi tạo đơn hàng.",
+                        type: "error",
+                        isLoading: false,
+                        autoClose: 3000
+                    });
+                }
             } catch (error) {
                 // Xử lý lỗi và hiển thị thông báo
                 console.error("Error creating order:", error);
