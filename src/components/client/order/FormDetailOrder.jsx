@@ -198,9 +198,9 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         ];
 
 
-        const titleRow = worksheet.addRow(['', 'INVOICE', '', '', '', '', '', '', '', '']);
+        const titleRow = worksheet.addRow(['', 'INVOICE', '', '', '', '', '', '', '', '', '']);
         titleRow.height = 40;
-        worksheet.mergeCells('B1:J1');
+        worksheet.mergeCells('B1:K1');
         const titleCell = worksheet.getCell('B1');
         titleCell.font = { size: 28, bold: true };
         titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -212,21 +212,21 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         invoice_no.getCell(4).font = { bold: true }
         invoice_no.getCell(9).font = { bold: true }
 
-        const shipperTitle = worksheet.addRow(['', 'SHIPPER', '', '', '', '', '', '', 'Air waybill No.', airWaybillNo]);
+        const shipperTitle = worksheet.addRow(['', 'SHIPPER', '', '', '', '', '', '', 'Air waybill No.', airWaybillNo, '']);
         shipperTitle.getCell(2).font = { bold: true, underline: true };
         shipperTitle.getCell(10).font = { bold: true }
         shipperTitle.getCell(9).font = { bold: true }
 
-        const company = worksheet.addRow(['', 'Company Name', shipper.companyName, '', '', '', '', '', '', shippingMethod]);
+        const company = worksheet.addRow(['', 'Company Name', shipper.companyName, '', '', '', '', '', '', shippingMethod, '']);
         company.getCell(3).font = { bold: true }
         company.getCell(10).font = { bold: true }
-        const noOfpkgs = worksheet.addRow(['', 'Address', shipper.address, '', '', '', '', '', 'No. of pkgs', '1']);
+        const noOfpkgs = worksheet.addRow(['', 'Address', shipper.address, '', '', '', '', '', 'No. of pkgs', '1','']);
         noOfpkgs.getCell(9).font = { bold: true }
         noOfpkgs.getCell(10).border = { bottom: { style: 'thin' } }
-        const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.areaCode, '', '', '', '', '', 'Weight', weight]);
+        const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.areaCode, '', '', '', '', '', 'Weight', weight,'']);
         rowWeight.getCell(9).font = { bold: true }
         rowWeight.getCell(10).border = { bottom: { style: 'thin' } }
-        const rowDimensions = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '', '', '', 'Dimensions', dimensions[0]]);
+        const rowDimensions = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '', '', '', 'Dimensions', dimensions[0],'']);
         rowDimensions.getCell(3).font = { bold: true }
         rowDimensions.getCell(9).font = { bold: true }
         rowDimensions.getCell(10).border = { bottom: { style: 'thin' } }
@@ -234,6 +234,12 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         worksheet.addRow(['', 'Contact Name', shipper.contactName, '', '', '', '', '', '', '']);
         worksheet.addRow(['', 'Phone/Fax No.', shipper.phone, '', '', '', '', '', '', '']);
         worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
+
+        worksheet.mergeCells('J3:K3');
+        worksheet.mergeCells('J4:K4');
+        worksheet.mergeCells('J5:K5');
+        worksheet.mergeCells('J6:K6');
+        worksheet.mergeCells('J7:K7');
 
         const consigneeTitle = worksheet.addRow(['', 'CONSIGNEE', '', '', '', '', '', '', '', '']);
         consigneeTitle.getCell(2).font = { bold: true, underline: true };
@@ -274,7 +280,8 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
             'Q\'Ty\n(pcs)',
             '',
             'Unit Price\n(in USD)',
-            'Subtotal\n(in USD)'
+            'Subtotal\n(in USD)',
+            'Uses\n(If any)'
         ]);
         headerRow.height = 45; // Tăng chiều cao để hiển thị xuống dòng
 
@@ -315,7 +322,8 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
                 item.quantity,
                 item.unit,
                 item.unitPrice,
-                item.subtotal
+                item.subtotal,
+                ''
             ]);
             row.height = 250;
 
@@ -374,15 +382,15 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         const lastRow = worksheet.lastRow?.number || 0;
         if (lastRow > 0) {
             worksheet.mergeCells('B' + (lastRow - 7) + ':C' + (lastRow - 7));
-            worksheet.mergeCells('D' + (lastRow - 7) + ':J' + (lastRow - 7));
-            worksheet.mergeCells('B' + (lastRow - 6) + ':J' + (lastRow - 6));
-            worksheet.mergeCells('B' + (lastRow - 5) + ':J' + (lastRow - 5));
-            worksheet.mergeCells('G' + (lastRow - 4) + ':J' + (lastRow - 4));
+            worksheet.mergeCells('D' + (lastRow - 7) + ':K' + (lastRow - 7));
+            worksheet.mergeCells('B' + (lastRow - 6) + ':K' + (lastRow - 6));
+            worksheet.mergeCells('B' + (lastRow - 5) + ':K' + (lastRow - 5));
+            worksheet.mergeCells('G' + (lastRow - 4) + ':K' + (lastRow - 4));
             worksheet.mergeCells('C' + (lastRow - 4) + ':F' + (lastRow - 4));
-            worksheet.mergeCells('B' + (lastRow - 3) + ':J' + (lastRow - 3));
-            worksheet.mergeCells('B' + (lastRow - 2) + ':J' + (lastRow - 2));
-            worksheet.mergeCells('G' + (lastRow - 1) + ':J' + (lastRow - 1));
-            worksheet.mergeCells('G' + lastRow + ':J' + lastRow);
+            worksheet.mergeCells('B' + (lastRow - 3) + ':K' + (lastRow - 3));
+            worksheet.mergeCells('B' + (lastRow - 2) + ':K' + (lastRow - 2));
+            worksheet.mergeCells('G' + (lastRow - 1) + ':K' + (lastRow - 1));
+            worksheet.mergeCells('G' + lastRow + ':K' + lastRow);
         }
 
         worksheet.getCell('G' + (lastRow - 1)).alignment = { vertical: 'middle', horizontal: 'center' };

@@ -601,6 +601,21 @@ export default function ContentTable(props) {
     });
     headerRow.height = 45;
 
+    // Hàm xử lý giá trị nhiều dòng
+    function processMultiLineValue(value) {
+      if (typeof value !== "string") return value;
+      // Tách các dòng và xử lý từng dòng
+      const lines = value.split("\n");
+      return lines.map(line => {
+        // Tìm số trong dòng
+        const matches = line.match(/-?\d+(\.\d+)?/g);
+        if (!matches) return line;
+        // Tính tổng các số trong dòng
+        const sum = matches.reduce((acc, num) => acc + parseFloat(num), 0);
+        return sum;
+      }).join("\n");
+    }
+
     // Thêm dữ liệu
     dataToExport.forEach((item, rowIndex) => {
       const rowData = {};
@@ -716,14 +731,14 @@ export default function ContentTable(props) {
           case "hh2":
           case "hh3":
           case "hh4":
-            rowData[key] = item?.[key] || "";
+            rowData[key] = processMultiLineValue(item?.[key] || "");
             break;
           case "base_salary":
           case "kpi_bonus":
           case "bonus_1_2_3":
           case "allowance":
           case "other_bonus":
-            rowData[key] = item?.[key] || "";
+            rowData[key] = processMultiLineValue(item?.[key] || "");
             break;
           case "status":
             const statusText = {
@@ -809,10 +824,15 @@ export default function ContentTable(props) {
       // Hàm cộng tổng cho từng giá trị trong ô có nhiều dòng
       function sumMultiLineCell(cellValue) {
         if (typeof cellValue !== "string") return 0;
-        // Tìm tất cả số trong chuỗi (có thể có nhiều dòng)
-        const matches = cellValue.match(/-?\d+(\.\d+)?/g);
-        if (!matches) return 0;
-        return matches.reduce((sum, num) => sum + parseFloat(num), 0);
+        // Tách các dòng và xử lý từng dòng
+        const lines = cellValue.split("\n");
+        return lines.reduce((sum, line) => {
+          // Tìm tất cả số trong dòng
+          const matches = line.match(/-?\d+(\.\d+)?/g);
+          if (!matches) return sum;
+          // Cộng tổng các số trong dòng
+          return sum + matches.reduce((lineSum, num) => lineSum + parseFloat(num), 0);
+        }, 0);
       }
 
       // Duyệt từng dòng dữ liệu để cộng tổng
@@ -871,7 +891,7 @@ export default function ContentTable(props) {
       });
 
       // Dòng tiêu đề khu vực tổng cộng
-      const summaryTitleRow = worksheet.addRow(["KHU VỰC TỔNG CỘNG"]);
+      const summaryTitleRow = worksheet.addRow(["TỔNG CỘNG"]);
       worksheet.mergeCells(
         summaryTitleRow.number,
         1,
@@ -880,116 +900,44 @@ export default function ContentTable(props) {
       );
       summaryTitleRow.height = 30;
       const summaryTitleCell = worksheet.getCell(summaryTitleRow.number, 1);
-      summaryTitleCell.font = { bold: true, size: 16, color: { argb: "FF1E293B" } };
+      summaryTitleCell.font = { bold: true, size: 14 };
       summaryTitleCell.alignment = { horizontal: "center", vertical: "middle" };
       summaryTitleCell.fill = {
         type: "pattern",
         pattern: "solid",
-        fgColor: { argb: "FFDBEAFE" },
+        fgColor: { argb: "FFE0E7EF" },
       };
 
-      // Dòng tổng cộng thực tế
-      const summaryData = {};
+      // Dòng tổng cộng
+      const summaryRow = worksheet.addRow([]);
+      summaryRow.height = 30;
+
+      // Thêm giá trị tổng cộng vào các cột tương ứng
       columnsToExport.forEach((key, index) => {
-        if (index === 0) {
-          summaryData[key] = "TỔNG CỘNG";
-        } else if (sumColumns.includes(key)) {
-          // Hiển thị tổng, định dạng số nếu là tiền
-          if (
-            [
-              "bill", "total_ar", "vat", "total",
-              "order_grand_total", "other_charges_total", "grand_total",
-              "payments_cash", "payments_banking", "payments_remaining",
-              "price_diff", "packing", "pickup", "other_costs", "profit",
-              "base_salary", "kpi_bonus", "bonus_1_2_3", "allowance", "other_bonus"
-            ].includes(key)
-          ) {
-            summaryData[key] = sumResult[key] ? `${formatCurrency(sumResult[key])}` : "";
-          } else {
-            // GW, CW, HH: chỉ hiển thị số, không format tiền
-            summaryData[key] = sumResult[key] ? sumResult[key] : "";
-          }
-        } else {
-          summaryData[key] = "";
-        }
-      });
-
-      const summaryRow = worksheet.addRow(summaryData);
-      summaryRow.height = 35;
-
-      summaryRow.eachCell((cell, colNumber) => {
-        cell.font = { bold: true, size: 13 };
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFDBEAFE" },
-        };
-        cell.border = {
-          top: { style: "medium" },
-          left: { style: "thin" },
-          bottom: { style: "medium" },
-          right: { style: "thin" },
-        };
-
-        if (colNumber === 1) {
-          cell.alignment = { horizontal: "center", vertical: "middle" };
-        } else {
+        const cell = summaryRow.getCell(index + 1);
+        if (sumColumns.includes(key)) {
+          cell.value = formatCurrency(sumResult[key]);
+          cell.font = { bold: true };
           cell.alignment = { horizontal: "right", vertical: "middle" };
         }
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
       });
-
-      // Merge các cell đầu nếu cần
-      let mergeEndColumn = 1;
-      for (let i = 1; i <= columnsToExport.length; i++) {
-        const value = summaryRow.getCell(i).value;
-        if (
-          typeof value === "string" &&
-          value.trim() !== "TỔNG CỘNG" &&
-          value.trim() !== ""
-        ) {
-          mergeEndColumn = i - 1;
-          break;
-        }
-      }
-      if (mergeEndColumn < 2) {
-        mergeEndColumn = columnsToExport.length;
-        worksheet.spliceRows(summaryRow.number, 1);
-      }
-
-      worksheet.mergeCells(
-        summaryRow.number,
-        1,
-        summaryRow.number,
-        mergeEndColumn
-      );
     }
 
-    // Xuất file
-    try {
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-
-      // Tạo tên file với timestamp
-      const timestamp = new Date().toISOString().slice(0, 10);
-      a.download = `shipment_report_${timestamp}.xlsx`;
-
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      // Thông báo thành công
-      console.log("Xuất Excel thành công!");
-    } catch (error) {
-      console.error("Lỗi khi xuất Excel:", error);
-      alert("Có lỗi xảy ra khi xuất file Excel!");
-    }
+    // Save file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `shipment_report_${new Date().toISOString().split("T")[0]}.xlsx`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   const columnLabels = {
@@ -1685,17 +1633,36 @@ export default function ContentTable(props) {
                           });
                           setVisibleColumns(newVisibleColumns);
                         }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                       >
-                        {columnLabels[column].replace(" (PAYMENT)", "")}
-                      </label>
+                        Bỏ chọn
+                      </button>
                     </div>
-                  ))}
+                  </div>
+                  {["order_grand_total", "other_charges_total", "grand_total"].map(
+                    (column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (GRAND TOTAL)", "")}
+                        </label>
+                      </div>
+                    )
+                  )}
                 </div>
 
                 {/* Nhóm PROFIT */}
