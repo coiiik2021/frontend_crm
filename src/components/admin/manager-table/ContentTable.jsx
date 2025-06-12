@@ -80,8 +80,14 @@ export default function ContentTable(props) {
 
     console.log(data);
 
-    await PostBaseUser(data);
-    setUsers([...users, newDataUser]);
+    const dataResponse = await PostBaseUser(data);
+
+    const dataInsert = {
+      ...newDataUser,
+      id: dataResponse
+    }
+
+    setUsers([...users, dataInsert]);
 
     closeModal();
   };

@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
-import PriceNetTable from "../../TableDataPrice/PriceNetTable.jsx";
-import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable.jsx";
-import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, GetShipperServiceCompany, PostNameService, PostPriceNet, PutService } from "../../../../service/api.admin.service.jsx";
-import Button from "../../../../elements/Button/index.jsx";
-import { useModal } from "../../../../hooks/useModal.js";
-import { Modal } from "../../ui/modal/index.js";
-import Label from "../../form/Label.js";
-import Input from "../../form/input/InputField.js";
+import PriceNetTable from "../../TableDataPrice/PriceNetTable";
+import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable";
+import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, GetShipperServiceCompany, PostNameService, PostPriceNet, PutService } from "../../../../service/api.admin.service";
+import Button from "../../../../elements/Button";
+import { useModal } from "../../../../hooks/useModal";
+import { Modal } from "../../ui/modal";
+import Label from "../../form/Label";
+import Input from "../../form/input/InputField";
 import OverSizeTable from "../../TableDataPrice/OverSizeTable.jsx";
-import PeakSeason from "../../TableDataPrice/PeakSeason.jsx";
+import PeakSeason from "../../TableDataPrice/PeakSeason";
 
 
-export default function ContentTable() {
+export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }) {
     // Existing states
     const [dataByDate, setDataByDate] = useState({});
     const [selectedDate, setSelectedDate] = useState(null);
@@ -24,6 +24,7 @@ export default function ContentTable() {
     const [isImported, setIsImported] = useState(false);
     const [newShipper, setNewShipper] = useState({});
     const [newNameService, setNewNameService] = useState("");
+    const [newCurrency, setNewCurrency] = useState("VND");
     const [serviceCompany, setServiceCompany] = useState([]);
     const [zone, setZone] = useState([]);
     const [constNet, setConstNet] = useState({});
@@ -42,17 +43,23 @@ export default function ContentTable() {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log("Đang lấy dữ liệu với isPriceNetPackage:", isPriceNetPackage);
                 const dataGasOline = await GetPriceAllGasoline(nameHang);
                 setPriceGasoline(dataGasOline);
 
                 const dataServiceCompany = await GetNameService(nameHang);
+
+
+
                 if (dataServiceCompany && Array.isArray(dataServiceCompany.nameService) && dataServiceCompany.nameService.length > 0) {
                     setServiceCompany(dataServiceCompany.nameService);
+                    console.log(dataServiceCompany);
+
 
                     const firstService = dataServiceCompany.nameService[0];
                     setTableType(firstService);
                     // Đảm bảo truyền isPriceNetPackage vào đây
-                    const dataNet = await GetPriceNet(nameHang, firstService, true);
+                    const dataNet = await GetPriceNet(nameHang, firstService, isPriceNetPackage);
                     if (dataNet) {
                         setDataByDate(dataNet);
 
@@ -72,12 +79,13 @@ export default function ContentTable() {
         };
 
         fetchData();
-    }, []); // Đảm bảo isPriceNetPackage nằm trong mảng dependencies
+    }, [isPriceNetPackage]); // Đảm bảo isPriceNetPackage nằm trong mảng dependencies
 
     const handleCreateService = async () => {
         const dataRequest = {
             name: nameHang,
             nameService: newNameService,
+            currency: newCurrency,
             shipperCompany: {
                 companyName: newShipper.companyName,
                 address: newShipper.address,
@@ -101,10 +109,11 @@ export default function ContentTable() {
         setTableType(newNameService);
 
         setConstNet({
-            dim: 6000,
+            dim: 5000,
             ppxd: 100,
             vat: 8,
-            overSize: 100
+            overSize: 100,
+            peakSeason: 100
         });
         setDataByDate({});
 
@@ -174,7 +183,7 @@ export default function ContentTable() {
         setTableType(type);
 
         // Thêm isPriceNetPackage vào cuộc gọi API
-        const data = await GetPriceNet(nameHang, type, true);
+        const data = await GetPriceNet(nameHang, type, isPriceNetPackage);
         console.log("Dữ liệu từ API:", data);
         setDataByDate(data);
         const firstDate = Object.keys(data)[0];
@@ -229,7 +238,7 @@ export default function ContentTable() {
     };
 
     const handleSaveData = async () => {
-        await PostPriceNet(nameHang, tableType, dataByDate, true);
+        await PostPriceNet(nameHang, tableType, dataByDate, isPriceNetPackage);
         alert("Thông tin đã được lưu thành công!");
         setIsImported(false);
     };
@@ -238,28 +247,28 @@ export default function ContentTable() {
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl shadow-lg">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                 {/* Tabs and controls - responsive layout */}
-                <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:justify-between lg:items-center">
+                <div className="flex flex-col space-y-4">
                     {/* Tabs section */}
-                    <div className="flex flex-wrap gap-2 sm:gap-4">
+                    <div className="flex flex-wrap gap-2">
                         <button
                             onClick={() => setCurrentPage(1)}
                             className={`px-3 py-2 sm:px-4 rounded-lg font-medium transition-all ${currentPage === 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"}`}
                         >
-                            Giá Net
+                            Bảng giá
                         </button>
 
                         <button
                             onClick={() => setCurrentPage(2)}
                             className={`px-3 py-2 sm:px-4 rounded-lg font-medium transition-all ${currentPage === 2 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"}`}
                         >
-                            Giá xăng dầu
+                            Phụ phí nhiên liệu
                         </button>
 
                         <button
                             onClick={() => setCurrentPage(3)}
                             className={`px-3 py-2 sm:px-4 rounded-lg font-medium transition-all ${currentPage === 3 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"}`}
                         >
-                            Phụ phí quá khổ
+                            Phụ phí khác
                         </button>
 
                         <button
@@ -268,40 +277,9 @@ export default function ContentTable() {
                         >
                             Phụ phí mùa cao điểm
                         </button>
-
-                        {currentPage === 1 && (
-                            <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
-                                <select
-                                    value={selectedDate || ""}
-                                    onChange={(e) => setSelectedDate(e.target.value)}
-                                    className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-                                >
-                                    <option value="" disabled>
-                                        Chọn ngày
-                                    </option>
-                                    {Object.keys(dataByDate).map((date) => (
-                                        <option key={date} value={date}>
-                                            {date}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <select
-                                    value={tableType}
-                                    onChange={(e) => handleTableTypeChange(e.target.value)}
-                                    className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-                                >
-                                    {serviceCompany?.map((name) => (
-                                        <option key={name} value={name}>
-                                            {name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
                     </div>
 
-                    {/* Action buttons - responsive layout */}
+                    {/* Action buttons */}
                     {currentPage === 1 && (
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                             <Button
@@ -360,43 +338,32 @@ export default function ContentTable() {
                                             <span className="hidden sm:inline">Xóa</span>
                                         </span>
                                     </Button>
-
-                                    <label
-                                        htmlFor="file-upload"
-                                        className="px-3 py-2 text-white bg-green-500 rounded-lg shadow cursor-pointer hover:bg-green-600 transition-all flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-                                            <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
-                                        </svg>
-                                        <span className="hidden sm:inline">Import Excel</span>
-                                        <span className="sm:hidden">Import</span>
-                                    </label>
-                                    <input
-                                        id="file-upload"
-                                        type="file"
-                                        accept=".xlsx, .xls"
-                                        onChange={handleFileUpload}
-                                        className="hidden"
-                                    />
                                 </>
-                            )}
-
-                            {isImported && (
-                                <button
-                                    onClick={handleSaveData}
-                                    className="px-3 py-2 text-white bg-indigo-500 rounded-lg shadow hover:bg-indigo-600 transition-all flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z" />
-                                    </svg>
-                                    <span className="hidden sm:inline">Lưu thông tin</span>
-                                    <span className="sm:hidden">Lưu</span>
-                                </button>
                             )}
                         </div>
                     )}
                 </div>
+
+                {/* Date selector - completely separate */}
+                {currentPage === 1 && (
+                    <div className="flex justify-end mt-4 mb-2">
+                        <select
+                            value={selectedDate || ""}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+                        >
+                            <option value="" disabled>
+                                Chọn ngày
+                            </option>
+                            {Object.keys(dataByDate).map((date) => (
+                                <option key={date} value={date}>
+                                    {date}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
             </div>
 
             {/* Table content */}
@@ -407,8 +374,8 @@ export default function ContentTable() {
                         selectedDate={selectedDate}
                         constNet={constNet}
                         setConstNet={setConstNet}
-                        isPriceNetPackage={true}
-                        setIsPriceNetPackage={setIsImported}
+                        isPriceNetPackage={isPriceNetPackage}
+                        setIsPriceNetPackage={setIsPriceNetPackage}
                     />
                 ) : currentPage === 2 ? (
                     <PriceGasolineTable
@@ -440,8 +407,8 @@ export default function ContentTable() {
                     </div>
                     <form className="flex flex-col">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            {/* Thông tin cơ bản */}
-                            <div className="sm:col-span-2">
+                            {/* Thông tin cơ bản - đặt trên cùng một hàng */}
+                            <div>
                                 <Label>Tên dịch vụ <span className="text-red-500">*</span></Label>
                                 <Input
                                     type="text"
@@ -449,6 +416,18 @@ export default function ContentTable() {
                                     onChange={(e) => setNewNameService(e.target.value)}
                                     placeholder="Nhập tên dịch vụ"
                                 />
+                            </div>
+
+                            <div>
+                                <Label>Loại tiền<span className="text-red-500">*</span></Label>
+                                <select
+                                    value={newCurrency}
+                                    onChange={(e) => setNewCurrency(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                                >
+                                    <option>VND</option>
+                                    <option>USD</option>
+                                </select>
                             </div>
 
                             {/* Thông tin công ty */}
@@ -568,6 +547,10 @@ export default function ContentTable() {
                                     placeholder="Nhập tên dịch vụ"
                                 />
                             </div>
+
+
+
+
 
                             {/* Thông tin công ty */}
                             <div>
