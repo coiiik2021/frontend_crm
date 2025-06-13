@@ -2010,14 +2010,14 @@ export default function ContentTable(props) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                          <button
-                            type="button"
-                            onClick={() => handleViewPaymentDetails(item)}
-                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => handleViewPaymentDetails(item)}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
@@ -2040,14 +2040,14 @@ export default function ContentTable(props) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                          <button
-                            type="button"
-                            onClick={() => handleViewPaymentDetails(item)}
-                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => handleViewPaymentDetails(item)}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
@@ -2166,8 +2166,8 @@ export default function ContentTable(props) {
                         <StatusBadge status={item.status_payment} />
 
                         {authorities.includes("ADMIN") ||
-                        authorities.includes("CS") ||
-                        authorities.includes("TRANSPORTER") ? (
+                          authorities.includes("CS") ||
+                          authorities.includes("TRANSPORTER") ? (
                           <select
                             value={item.status_payment || "pending"}
                             onChange={(e) =>
@@ -2254,9 +2254,8 @@ export default function ContentTable(props) {
                     type="button"
                     onClick={() => {
                       const currentDate = new Date();
-                      const formattedDate = `${currentDate.getDate()}/${
-                        currentDate.getMonth() + 1
-                      }/${currentDate.getFullYear()}`;
+                      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
+                        }/${currentDate.getFullYear()}`;
                       const newPriceOrder = {
                         id: "",
                         name: "",
@@ -2493,7 +2492,7 @@ export default function ContentTable(props) {
                       type="text"
                       value={
                         paymentDetails.cash === 0 &&
-                        document.activeElement ===
+                          document.activeElement ===
                           document.getElementById("cash-input")
                           ? ""
                           : paymentDetails.cash
@@ -2532,7 +2531,7 @@ export default function ContentTable(props) {
                       type="text"
                       value={
                         paymentDetails.banking === 0 &&
-                        document.activeElement ===
+                          document.activeElement ===
                           document.getElementById("banking-input")
                           ? ""
                           : paymentDetails.banking
