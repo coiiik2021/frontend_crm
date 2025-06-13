@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from "react";
 import Button from "../../admin/ui/button/Button.jsx";
 import { GetListPriceQuote } from "../../../service/api.admin.service.jsx";
 import { PackageIcon, Truck } from "lucide-react";
+import { toast } from "react-toastify";
+import { Spin } from "antd";
 
 const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, zone, handleService, setSelectedService, isChangeCountry, setIsChangeCountry }) => {
     // Khai báo state trước khi sử dụng trong useEffect
@@ -303,33 +305,57 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         }
         return quaKho[0].code;
     };
+
+    const [loading, setLoading] = useState(false);
+
+
     const handleGetQuote = async () => {
+
+        if (!isOpenFormPackage) {
+            setShowQuote(!showQuote);
+            setIsChangeCountry(true);
+            setIsOpenFormPackage(!isOpenFormPackage);
+            return;
+        }
 
         if (!validateInputs()) {
             setShowQuote(false);
             setIsChangeCountry(true);
             return;
         }
+        if (initialNameCountry === '') {
+            toast.error("Điền đầy đủ tên nước nhận");
+        } else {
+            const dataRequest = {
+                nameCountry: initialNameCountry, // Tên quốc gia
+                weight: total.realVolume, // Tổng cân nặng thực tế
+                packages: packages.map(pkg => ({
+                    weight: parseFloat(pkg.weight) || 0,
+                    width: parseFloat(pkg.width) || 0,
+                    length: parseFloat(pkg.length) || 0,
+                    height: parseFloat(pkg.height) || 0, // Chiều cao của kiện
+                })),
+                isPackage: true
+            };
+            try {
+                setLoading(true); // bắt đầu loading
+                console.log("data request", dataRequest);
 
-        const dataRequest = {
-            nameCountry: initialNameCountry, // Tên quốc gia
-            weight: total.realVolume, // Tổng cân nặng thực tế
-            packages: packages.map(pkg => ({
-                weight: parseFloat(pkg.weight) || 0,
-                width: parseFloat(pkg.width) || 0,
-                length: parseFloat(pkg.length) || 0,
-                height: parseFloat(pkg.height) || 0, // Chiều cao của kiện
-            })),
-            isPackage: true
-        };
-        console.log("data request", dataRequest);
-        const data = await GetListPriceQuote(dataRequest);
-        console.log("dataResponse", data);
+                const data = await GetListPriceQuote(dataRequest);
 
-        setQuoteData(data);
-        setShowQuote(!showQuote);
-        setIsChangeCountry(true);
-        setIsOpenFormPackage(!isOpenFormPackage);
+                console.log("dataResponse", data);
+                setQuoteData(data);
+            } catch (error) {
+                console.error("Lỗi khi lấy dữ liệu:", error);
+            } finally {
+                setLoading(false); // kết thúc loading
+            }
+            setShowQuote(!showQuote);
+            setIsChangeCountry(true);
+            setIsOpenFormPackage(!isOpenFormPackage);
+        }
+
+
     };
 
     // Thêm useEffect để tính toán lại tổng mỗi khi component được render hoặc packages thay đổi
@@ -698,180 +724,183 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             </div>
 
             {/* Quote Section */}
-            <AnimatePresence>
-                {showQuote && isChangeCountry && (
-                    <motion.div
-                        className="mt-8 p-4 relative"
-                        variants={fadeIn}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                    >
-                        <h3 className="text-xl font-semibold mb-6 text-gray-800">
-                            Bảng giá dịch vụ
-                        </h3>
+            <Spin spinning={loading}>
 
-                        <motion.button
-                            onClick={() => scrollContainer("left")}
-                            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full p-2 z-10 hover:bg-gray-100"
-                            whileHover={{ scale: 1.1, x: -2 }}
-                            whileTap={{ scale: 0.95 }}
+                <AnimatePresence>
+                    {showQuote && isChangeCountry && (
+                        <motion.div
+                            className="mt-8 p-4 relative"
+                            variants={fadeIn}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
                         >
-                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </motion.button>
+                            <h3 className="text-xl font-semibold mb-6 text-gray-800">
+                                Bảng giá dịch vụ
+                            </h3>
 
-                        <motion.button
-                            onClick={() => scrollContainer("right")}
-                            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full p-2 z-10 hover:bg-gray-100"
-                            whileHover={{ scale: 1.1, x: 2 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </motion.button>
+                            <motion.button
+                                onClick={() => scrollContainer("left")}
+                                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full p-2 z-10 hover:bg-gray-100"
+                                whileHover={{ scale: 1.1, x: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </motion.button>
 
-                        <div
-                            ref={quoteRef}
-                            className="flex space-x-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-1 py-2"
-                            style={{ minWidth: "100%" }}
-                        >
-                            {quoteData.map((quote, index) => (
-                                <motion.div
-                                    key={index}
-                                    className="snap-start flex-shrink-0 w-80 bg-white rounded-xl shadow-lg border border-gray-100 flex flex-col overflow-hidden"
-                                    variants={cardAnimation}
-                                    initial="hidden"
-                                    animate="visible"
-                                    custom={index}
-                                    whileHover={{ y: -5, transition: { duration: 0.2 }, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
-                                >
-                                    {/* Header with carrier info */}
-                                    <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-gray-50">
-                                        <div className="flex flex-col">
-                                            {/* Dòng 1: Tên hãng vận chuyển */}
-                                            <div className="flex items-center mb-3">
-                                                <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center mr-3">
-                                                    <Truck className="w-5 h-5 text-blue-600" />
+                            <motion.button
+                                onClick={() => scrollContainer("right")}
+                                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full p-2 z-10 hover:bg-gray-100"
+                                whileHover={{ scale: 1.1, x: 2 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </motion.button>
+
+                            <div
+                                ref={quoteRef}
+                                className="flex space-x-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-1 py-2"
+                                style={{ minWidth: "100%" }}
+                            >
+                                {quoteData.map((quote, index) => (
+                                    <motion.div
+                                        key={index}
+                                        className="snap-start flex-shrink-0 w-80 bg-white rounded-xl shadow-lg border border-gray-100 flex flex-col overflow-hidden"
+                                        variants={cardAnimation}
+                                        initial="hidden"
+                                        animate="visible"
+                                        custom={index}
+                                        whileHover={{ y: -5, transition: { duration: 0.2 }, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
+                                    >
+                                        {/* Header with carrier info */}
+                                        <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-gray-50">
+                                            <div className="flex flex-col">
+                                                {/* Dòng 1: Tên hãng vận chuyển */}
+                                                <div className="flex items-center mb-3">
+                                                    <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center mr-3">
+                                                        <Truck className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                    <h2 className="text-lg font-bold text-gray-900">
+                                                        {(() => {
+                                                            const [carrierName] = quote.nameService.split(" ");
+                                                            return carrierName;
+                                                        })()}
+                                                    </h2>
                                                 </div>
-                                                <h2 className="text-lg font-bold text-gray-900">
-                                                    {(() => {
-                                                        const [carrierName] = quote.nameService.split(" ");
-                                                        return carrierName;
-                                                    })()}
-                                                </h2>
+
+                                                {/* Dòng 2: Thông tin chi tiết */}
+                                                <div className="flex justify-between items-end">
+                                                    {/* Thông tin dịch vụ */}
+                                                    <p className="text-sm text-gray-500">
+                                                        {(() => {
+                                                            const parts = quote.nameService.split(" ");
+                                                            return parts.slice(1).join(" ");
+                                                        })()}
+                                                    </p>
+
+                                                    {/* Thông tin zone và tuyến đường - đặt ở dưới cùng */}
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-xs font-medium text-gray-700 bg-blue-50 px-2 py-1 rounded">
+                                                            Zone {quote.zone}
+                                                        </span>
+
+                                                        <div className="flex items-center text-xs">
+                                                            <span className="font-medium">HCM</span>
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                className="h-3 w-3 mx-1 text-gray-500"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor"
+                                                            >
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                                            </svg>
+                                                            <span className="font-medium">HK</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
+                                        </div>
 
-                                            {/* Dòng 2: Thông tin chi tiết */}
-                                            <div className="flex justify-between items-end">
-                                                {/* Thông tin dịch vụ */}
-                                                <p className="text-sm text-gray-500">
-                                                    {(() => {
-                                                        const parts = quote.nameService.split(" ");
-                                                        return parts.slice(1).join(" ");
-                                                    })()}
-                                                </p>
+                                        {/* Pricing details */}
+                                        <div className="p-5 flex-grow">
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center py-1">
+                                                    <span className="text-sm text-gray-500">Cân nặng:</span>
+                                                    <span className="text-sm font-medium text-gray-700">{quote.totalWeight} KG</span>
+                                                </div>
 
-                                                {/* Thông tin zone và tuyến đường - đặt ở dưới cùng */}
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-xs font-medium text-gray-700 bg-blue-50 px-2 py-1 rounded">
-                                                        Zone {quote.zone}
+                                                <div className="flex justify-between items-center py-1">
+                                                    <span className="text-sm text-gray-500">Phí cơ bản:</span>
+                                                    <span className="text-sm font-medium text-gray-700">{formatCurrency(quote.priceNet)} đ</span>
+                                                </div>
+
+                                                <div className="flex justify-between items-center py-1">
+                                                    <span className="text-sm text-gray-500">Phí mùa cao điểm:</span>
+                                                    <span className="text-sm font-medium text-gray-700">{formatCurrency(quote.pricePeakSeason)} đ</span>
+                                                </div>
+
+                                                <div className="border-t border-gray-100 my-2"></div>
+
+                                                <div className="flex justify-between items-center py-1">
+                                                    <span className="text-sm text-gray-500">Phí xăng dầu ({quote.constPPXD}%):</span>
+                                                    <span className="text-sm font-medium text-blue-600">
+                                                        {formatCurrency((quote.priceNet + quote.pricePeakSeason) * quote.constPPXD / 100)} đ
                                                     </span>
+                                                </div>
 
-                                                    <div className="flex items-center text-xs">
-                                                        <span className="font-medium">HCM</span>
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            className="h-3 w-3 mx-1 text-gray-500"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                            stroke="currentColor"
-                                                        >
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                                                        </svg>
-                                                        <span className="font-medium">HK</span>
-                                                    </div>
+                                                {quote.overSize && (
+                                                    <>
+                                                        <div className="flex justify-between items-center py-1">
+                                                            <span className="text-sm text-gray-500">Phí quá khổ ({quote.overSize.name}):</span>
+                                                            <span className="text-sm font-medium text-red-500">{(quote.overSize.price)} đ</span>
+                                                        </div>
+                                                        <div className="text-xs text-gray-400 italic mt-1">
+                                                            {quote.overSize.description}
+                                                        </div>
+                                                    </>
+                                                )}
+
+                                                <div className="flex justify-between items-center py-1">
+                                                    <span className="text-sm text-gray-500">VAT ({quote.constVAT}%):</span>
+                                                    <span className="text-sm font-medium text-purple-600">
+                                                        {formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * quote.constVAT / 100)} đ
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* Pricing details */}
-                                    <div className="p-5 flex-grow">
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between items-center py-1">
-                                                <span className="text-sm text-gray-500">Cân nặng:</span>
-                                                <span className="text-sm font-medium text-gray-700">{quote.totalWeight} KG</span>
-                                            </div>
-
-                                            <div className="flex justify-between items-center py-1">
-                                                <span className="text-sm text-gray-500">Phí cơ bản:</span>
-                                                <span className="text-sm font-medium text-gray-700">{formatCurrency(quote.priceNet)} đ</span>
-                                            </div>
-
-                                            <div className="flex justify-between items-center py-1">
-                                                <span className="text-sm text-gray-500">Phí mùa cao điểm:</span>
-                                                <span className="text-sm font-medium text-gray-700">{formatCurrency(quote.pricePeakSeason)} đ</span>
-                                            </div>
-
-                                            <div className="border-t border-gray-100 my-2"></div>
-
-                                            <div className="flex justify-between items-center py-1">
-                                                <span className="text-sm text-gray-500">Phí xăng dầu ({quote.constPPXD}%):</span>
-                                                <span className="text-sm font-medium text-blue-600">
-                                                    {formatCurrency((quote.priceNet + quote.pricePeakSeason) * quote.constPPXD / 100)} đ
-                                                </span>
-                                            </div>
-
-                                            {quote.overSize && (
-                                                <>
-                                                    <div className="flex justify-between items-center py-1">
-                                                        <span className="text-sm text-gray-500">Phí quá khổ ({quote.overSize.name}):</span>
-                                                        <span className="text-sm font-medium text-red-500">{(quote.overSize.price)} đ</span>
-                                                    </div>
-                                                    <div className="text-xs text-gray-400 italic mt-1">
-                                                        {quote.overSize.description}
-                                                    </div>
-                                                </>
-                                            )}
-
-                                            <div className="flex justify-between items-center py-1">
-                                                <span className="text-sm text-gray-500">VAT ({quote.constVAT}%):</span>
-                                                <span className="text-sm font-medium text-purple-600">
-                                                    {formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * quote.constVAT / 100)} đ
-                                                </span>
+                                        {/* Footer with total and CTA */}
+                                        <div className="p-5 bg-gray-50 border-t border-gray-100">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-xs text-gray-500 mb-1">Tổng cộng</p>
+                                                    <p className="text-xl font-bold text-gray-900">
+                                                        {formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100))} đ
+                                                    </p>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    onClick={() => handleSelectService(quote)}
+                                                    className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-all shadow-sm"
+                                                    whileHover={{ scale: 1.03, boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)" }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                >
+                                                    Đặt ngay
+                                                </Button>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    {/* Footer with total and CTA */}
-                                    <div className="p-5 bg-gray-50 border-t border-gray-100">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-xs text-gray-500 mb-1">Tổng cộng</p>
-                                                <p className="text-xl font-bold text-gray-900">
-                                                    {formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100))} đ
-                                                </p>
-                                            </div>
-                                            <Button
-                                                type="button"
-                                                onClick={() => handleSelectService(quote)}
-                                                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-all shadow-sm"
-                                                whileHover={{ scale: 1.03, boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)" }}
-                                                whileTap={{ scale: 0.98 }}
-                                            >
-                                                Đặt ngay
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </Spin>
         </div>
     );
 };
