@@ -755,7 +755,7 @@ export default function ContentTable(props) {
       });
 
       const dataRow = worksheet.addRow(rowData);
-      dataRow.height = 35;
+      dataRow.height = 42;
 
       // Định dạng cho từng cell trong dòng dữ liệu
       dataRow.eachCell((cell, colNumber) => {
@@ -792,14 +792,12 @@ export default function ContentTable(props) {
           cell.alignment = { vertical: "middle" };
         }
 
-        // Luôn wrap text nếu có \n
-        if (
-          typeof cell.value === "string" &&
-          cell.value.includes("\n")
-        ) {
-          cell.alignment = { ...(cell.alignment || {}), wrapText: true };
+        if (typeof cell.value === "string" && cell.value.includes("\n")) {
+          cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+        } else {
+          cell.alignment = { horizontal: "center", vertical: "middle" };
         }
-      });
+          });
     });
 
     // Thêm tổng kết ở cuối (nếu có dữ liệu số)

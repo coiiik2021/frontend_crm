@@ -28,6 +28,7 @@ import InvoiceHomeBill from "./invoice/InvoiceHomeBill.jsx";
 import Invoice from "../invoice/Invoice";
 import BillContent from "./BillContent";
 import { set } from "date-fns";
+import * as ExcelJS from "exceljs";
 
 // Thêm component OrderDetailModal với tabs
 const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
@@ -754,6 +755,195 @@ export default function ContentTable(props) {
     // Người dùng có thể thấy rõ đơn hàng vừa được cập nhật
   };
 
+  const exportToExcel = async () => {
+    // Chỉ xuất các cột đang hiển thị
+    const columnsToExport = [
+      { key: "house_bill", label: "HOUSE BILL", width: 25 },
+      { key: "information_human", label: "THÔNG TIN NGƯỜI", width: 30 },
+      { key: "bill_employee", label: "BILL PHỤ", width: 15 },
+      { key: "awb", label: "AWB", width: 15 },
+      { key: "company_service", label: "DỊCH VỤ", width: 15 },
+      { key: "country_name", label: "NƯỚC ĐẾN", width: 20 },
+      { key: "packageInfo_begin", label: "PACKAGE KHAI BÁO", width: 23 },
+      { key: "packageInfo_end", label: "PACKAGE CHỐT", width: 20 },
+      { key: "status", label: "TRẠNG THÁI", width: 15 },
+    ].filter((col) => col.key === "house_bill" || visibleColumns[col.key]);
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Danh sách đơn hàng");
+
+    // Tiêu đề chính
+    const titleRow = worksheet.addRow(["DANH SÁCH ĐƠN HÀNG"]);
+    worksheet.mergeCells(1, 1, 1, columnsToExport.length);
+    titleRow.height = 50;
+    titleRow.getCell(1).font = { size: 23, bold: true };
+    titleRow.getCell(1).alignment = {
+      horizontal: "center",
+      vertical: "middle",
+    };
+
+    // Ngày xuất
+    const dateRow = worksheet.addRow([
+      `Ngày xuất: ${new Date().toLocaleString("vi-VN")}`,
+    ]);
+    worksheet.mergeCells(2, 1, 2, columnsToExport.length);
+    dateRow.getCell(1).font = { italic: true, size: 14 };
+    dateRow.getCell(1).alignment = {
+      horizontal: "center",
+      vertical: "middle",
+    };
+
+    // Header
+    worksheet.addRow(columnsToExport.map((col) => col.label));
+    const headerRow = worksheet.getRow(3);
+    headerRow.font = { bold: true, color: { argb: "FF000000" } , size: 12 };
+    headerRow.alignment = {
+      horizontal: "center",
+      vertical: "middle",
+      wrapText: true,
+    };
+    headerRow.height = 45;
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFA6A6A7" },  
+      };
+      cell.border = {
+        top: { style: "thin"},
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin"},
+      };
+    });
+
+    // Định nghĩa width cho từng cột
+    worksheet.columns = columnsToExport.map((col) => ({
+      key: col.key,
+      width: col.width,
+    }));
+
+    // Dữ liệu
+    currentData.forEach((item) => {
+      const row = {};
+      columnsToExport.forEach((col) => {
+        switch (col.key) {
+          case "house_bill":
+            row[col.key] = `EB${item.bill_house.substring(0, 5)}`;
+            break;
+          case "information_human":
+            row[col.key] =
+              `Người gửi: ${item.information_human?.from || ""}\n` +
+              `Người nhận: ${item.information_human?.to || ""}`;
+            break;
+          case "bill_employee":
+            row[col.key] = item.bill_employee || "";
+            break;
+          case "awb":
+            row[col.key] = item.awb || "";
+            break;
+          case "company_service":
+            row[col.key] = item.company_service || "";
+            break;
+          case "country_name":
+            row[col.key] = item.country_name || "";
+            break;
+          case "packageInfo_begin":
+            row[col.key] =
+              `SL: ${item.packageInfo_begin?.quantity || 0}\n` +
+              `Cân nặng: ${item.packageInfo_begin?.total_weight || 0} KG`;
+            break;
+          case "packageInfo_end":
+            row[col.key] =
+              `SL: ${item.packageInfo_end?.quantity || 0}\n` +
+              `Cân nặng: ${item.packageInfo_end?.total_weight || 0} KG`;
+            break;
+          case "status":
+            row[col.key] = item.status || "";
+            break;
+          default:
+            row[col.key] = item[col.key] || "";
+        }
+      });
+      const dataRow = worksheet.addRow(row);
+      dataRow.height = 42;
+      dataRow.eachCell((cell, colNumber) => {
+        cell.border = {
+          top: { style: "thin", color: { argb: "FFE5E7EB" } },
+          left: { style: "thin", color: { argb: "FFE5E7EB" } },
+          bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+          right: { style: "thin", color: { argb: "FFE5E7EB" } },
+        };
+        // Wrap text nếu có \n
+        if (typeof cell.value === "string" && cell.value.includes("\n")) {
+          cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+        } else {
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+        }
+        // Căn giữa cho status
+        if (columnsToExport[colNumber - 1]?.key === "status") {
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+        }
+      });
+    });
+
+    // Tổng cộng (ví dụ: tổng số đơn hàng)
+    worksheet.addRow([]);
+    const summaryRow = worksheet.addRow([
+      "TỔNG SỐ ĐƠN HÀNG",
+      currentData.length,
+      ...Array(columnsToExport.length - 2).fill(""),
+    ]);
+    summaryRow.font = { bold: true, size: 13 };
+    summaryRow.height = 30;
+    summaryRow.getCell(1).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFE0E7EF" },
+      };
+    summaryRow.getCell(1).border = {
+      top: { style: "thin"},
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+    summaryRow.getCell(2).fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFE0E7EF" },
+    };
+    summaryRow.getCell(2).border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin"},
+    };
+    summaryRow.getCell(1).alignment = {
+      horizontal: "center",
+      vertical: "middle",
+    };
+    summaryRow.getCell(2).alignment = {
+      horizontal: "center",
+      vertical: "middle",
+    };
+
+    // Xuất file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `danh_sach_don_hang_${new Date()
+      .toISOString()
+      .slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl relative">
       <div className="flex flex-col gap-2 px-4 py-4 border border-b-0 border-gray-100 dark:border-white/[0.05] rounded-t-xl sm:flex-row sm:items-center sm:justify-between">
@@ -823,6 +1013,23 @@ export default function ContentTable(props) {
               />
             </svg>
             Tùy chỉnh cột
+          </button>
+
+          <button
+            ref={columnButtonRef}
+            onClick={() => exportToExcel()}
+            className="ml-4 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 flex items-center transition-all duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-1"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .146-.354l3-3z" />
+            </svg>
+            Xuất Excel
           </button>
 
           {/* Dropdown tùy chỉnh cột */}
