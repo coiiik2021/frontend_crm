@@ -59,31 +59,28 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
         {/* Tabs */}
         <div className="flex border-b border-gray-200 dark:border-gray-700 mb-3">
           <button
-            className={`px-3 py-2 text-xs font-medium ${
-              activeTab === "info"
-                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-            }`}
+            className={`px-3 py-2 text-xs font-medium ${activeTab === "info"
+              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
             onClick={() => setActiveTab("info")}
           >
             Thông tin người
           </button>
           <button
-            className={`px-3 py-2 text-xs font-medium ${
-              activeTab === "package"
-                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-            }`}
+            className={`px-3 py-2 text-xs font-medium ${activeTab === "package"
+              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
             onClick={() => setActiveTab("package")}
           >
             Thông tin package
           </button>
           <button
-            className={`px-3 py-2 text-xs font-medium ${
-              activeTab === "other"
-                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-            }`}
+            className={`px-3 py-2 text-xs font-medium ${activeTab === "other"
+              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
             onClick={() => setActiveTab("other")}
           >
             Thông tin khác
@@ -176,7 +173,32 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
                 </div>
               </div>
 
-              {orderData.packages && orderData.packages.length > 0 && (
+
+              <div>
+                <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Package Kết thúc:
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Số lượng:
+                    </p>
+                    <p className="font-medium">
+                      {orderData.packageInfo_end?.quantity || 0}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Cân nặng:
+                    </p>
+                    <p className="font-medium">
+                      {orderData.packageInfo_end?.total_weight || 0} KG
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* {orderData.packages && orderData.packages.length > 0 && (
                 <div>
                   <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Chi tiết package:
@@ -197,7 +219,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           )}
 
@@ -384,6 +406,7 @@ export default function ContentTable(props) {
     country_name: true,
     packageInfo_begin: true,
     packageInfo_end: true,
+    packageInfo_finish: true,
     status: true,
     Action: true,
     File: true,
@@ -851,45 +874,47 @@ export default function ContentTable(props) {
                         });
                       }}
                       disabled={column === "house_bill"} // Disable checkbox nếu là house_bill
-                      className={`w-4 h-4 ${
-                        column === "house_bill"
-                          ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
-                          : "text-blue-600 bg-gray-100"
-                      } border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
+                      className={`w-4 h-4 ${column === "house_bill"
+                        ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
+                        : "text-blue-600 bg-gray-100"
+                        } border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
                     />
                     <label
                       htmlFor={`col-${column}`}
-                      className={`ml-2 text-sm ${
-                        column === "house_bill"
-                          ? "text-gray-800 font-medium dark:text-gray-200"
-                          : "text-gray-600 dark:text-gray-400"
-                      }`}
+                      className={`ml-2 text-sm ${column === "house_bill"
+                        ? "text-gray-800 font-medium dark:text-gray-200"
+                        : "text-gray-600 dark:text-gray-400"
+                        }`}
                     >
                       {column === "house_bill"
                         ? "HOUSE BILL"
                         : column === "information_human"
-                        ? "THÔNG TIN NGƯỜI"
-                        : column === "bill_employee"
-                        ? "BILL PHỤ"
-                        : column === "awb"
-                        ? "AWB"
-                        : column === "company_service"
-                        ? "DỊCH VỤ"
-                        : column === "country_name"
-                        ? "NƯỚC ĐẾN"
-                        : column === "packageInfo_begin"
-                        ? "PACKAGE KHAI BÁO"
-                        : column === "packageInfo_end"
-                        ? "PACKAGE CHỐT"
-                        : column === "status"
-                        ? "TRẠNG THÁI"
-                        : column === "Action"
-                        ? "CẬP NHẬT THÔNG TIN"
-                        : column === "File"
-                        ? "FILE"
-                        : column === "Detail"
-                        ? "CHI TIẾT"
-                        : column}
+                          ? "THÔNG TIN NGƯỜI"
+                          : column === "bill_employee"
+                            ? "BILL PHỤ"
+                            : column === "awb"
+                              ? "AWB"
+                              : column === "company_service"
+                                ? "DỊCH VỤ"
+                                : column === "country_name"
+                                  ? "NƯỚC ĐẾN"
+                                  : column === "packageInfo_begin"
+                                    ? "PACKAGE KHAI BÁO"
+                                    : column === "packageInfo_end"
+                                      ? "PACKAGE CHỐT"
+                                      :
+
+                                      column === "packageInfo_finish"
+                                        ? "PACKAGE KẾT THÚC"
+                                        : column === "status"
+                                          ? "TRẠNG THÁI"
+                                          : column === "Action"
+                                            ? "CẬP NHẬT THÔNG TIN"
+                                            : column === "File"
+                                              ? "FILE"
+                                              : column === "Detail"
+                                                ? "CHI TIẾT"
+                                                : column}
                     </label>
                   </div>
                 ))}
@@ -992,13 +1017,14 @@ export default function ContentTable(props) {
                   { key: "country_name", label: "NƯỚC ĐẾN" },
                   { key: "packageInfo_begin", label: "PACKAGE KHAI BÁO" },
                   { key: "packageInfo_end", label: "PACKAGE CHỐT" },
+                  { key: "packageInfo_finish", label: "PACKAGE KẾT THÚC" },
                   { key: "status", label: "TRẠNG THÁI" },
                   {
                     key: "Action",
                     label:
                       authorities.includes("ADMIN") ||
-                      authorities.includes("CS") ||
-                      authorities.includes("TRANSPORTER")
+                        authorities.includes("CS") ||
+                        authorities.includes("TRANSPORTER")
                         ? "Cập nhật thông tin"
                         : "",
                   },
@@ -1043,20 +1069,18 @@ export default function ContentTable(props) {
               {currentData.map((item, i) => (
                 <TableRow
                   key={i + 1}
-                  className={`transition-colors ${
-                    highlightedOrderId === item.bill_house
-                      ? "bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400"
-                      : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                  }`}
+                  className={`transition-colors ${highlightedOrderId === item.bill_house
+                    ? "bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    }`}
                 >
                   {/* House Bill - luôn hiển thị */}
                   <TableCell className="px-6 py-4 whitespace-nowrap">
                     <div
-                      className={`font-medium hover:underline cursor-pointer ${
-                        highlightedOrderId === item.bill_house
-                          ? "text-blue-700 font-bold dark:text-blue-300"
-                          : "text-brand-600 dark:text-brand-400"
-                      }`}
+                      className={`font-medium hover:underline cursor-pointer ${highlightedOrderId === item.bill_house
+                        ? "text-blue-700 font-bold dark:text-blue-300"
+                        : "text-brand-600 dark:text-brand-400"
+                        }`}
                       onMouseEnter={(e) => handleShowTooltip(item, e)}
                       onMouseLeave={handleCloseTooltip}
                       onClick={() => handleViewOrderDetail(item)}
@@ -1127,6 +1151,8 @@ export default function ContentTable(props) {
                     </TableCell>
                   )}
 
+
+
                   {/* Package chốt */}
                   {visibleColumns.packageInfo_end && (
                     <TableCell className="px-6 py-4 whitespace-nowrap">
@@ -1143,6 +1169,22 @@ export default function ContentTable(props) {
                     </TableCell>
                   )}
 
+
+                  {visibleColumns.packageInfo_finish && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                      <div className="space-y-1">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <span className="font-medium">SL:</span>{" "}
+                          {item.packageInfo_finish?.quantity || 0}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <span className="font-medium">Cân nặng:</span>{" "}
+                          {item.packageInfo_finish?.total_weight || 0} KG
+                        </p>
+                      </div>
+                    </TableCell>
+                  )}
+
                   {/* Trạng thái */}
                   {visibleColumns.status && (
                     <TableCell className="px-6 py-4 whitespace-nowrap">
@@ -1154,9 +1196,9 @@ export default function ContentTable(props) {
                   {visibleColumns.Action && (
                     <TableCell className="px-6 py-4 whitespace-nowrap">
                       {item.status !== "Hoàn thành" &&
-                      (authorities.includes("ADMIN") ||
-                        authorities.includes("CS") ||
-                        authorities.includes("TRANSPORTER")) ? (
+                        (authorities.includes("ADMIN") ||
+                          authorities.includes("CS") ||
+                          authorities.includes("TRANSPORTER")) ? (
                         <Button
                           variant="primary"
                           className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
@@ -1178,15 +1220,13 @@ export default function ContentTable(props) {
                           item.files.map((file, index) => (
                             <div
                               key={index}
-                              className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${
-                                highlightedOrderId === item.bill_house
-                                  ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                  : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
-                              }`}
+                              className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
+                                ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                                }`}
                               onClick={() => {
                                 console.log(
-                                  `Clicked file: ${
-                                    file.name || `File ${index + 1}`
+                                  `Clicked file: ${file.name || `File ${index + 1}`
                                   }`,
                                   file
                                 );
@@ -1220,11 +1260,10 @@ export default function ContentTable(props) {
                           ))
                         ) : (
                           <div
-                            className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${
-                              highlightedOrderId === item.bill_house
-                                ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
-                            }`}
+                            className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
+                              ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                              : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                              }`}
                             onClick={() => handleViewFile(item)}
                           >
                             <svg
@@ -1286,231 +1325,231 @@ export default function ContentTable(props) {
                     {/* Package Section */}
                     {(authorities.includes("TRANSPORTER") ||
                       authorities.includes("ADMIN")) && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              KG Chốt (SL:{" "}
-                              {billEdit.packageInfo_end?.quantity || 0} /{" "}
-                              {billEdit.packageInfo_end?.total_weight || 0} KG)
-                            </h4>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newPackage = {
-                                weight: "",
-                                length: "",
-                                height: "",
-                                width: "",
-                              };
-                              setBillEdit({
-                                ...billEdit,
-                                packages: [
-                                  ...(billEdit.packages || []),
-                                  newPackage,
-                                ],
-                              });
-                            }}
-                            className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                          >
-                            <PlusIcon className="w-4 h-4 mr-1" />
-                            Thêm Package
-                          </button>
-                        </div>
-
-                        {/* Package List */}
-                        <div className="space-y-3">
-                          {billEdit.packages?.map((pkg, index) => (
-                            <div
-                              key={index}
-                              className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 md:grid-cols-4"
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                KG Chốt (SL:{" "}
+                                {billEdit.packageInfo_end?.quantity || 0} /{" "}
+                                {billEdit.packageInfo_end?.total_weight || 0} KG)
+                              </h4>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newPackage = {
+                                  weight: "",
+                                  length: "",
+                                  height: "",
+                                  width: "",
+                                };
+                                setBillEdit({
+                                  ...billEdit,
+                                  packages: [
+                                    ...(billEdit.packages || []),
+                                    newPackage,
+                                  ],
+                                });
+                              }}
+                              className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
                             >
-                              {/* Weight */}
-                              <div className="space-y-1">
-                                <Label className="text-xs">Cân nặng (KG)</Label>
-                                <Input
-                                  type="number"
-                                  value={pkg.weight || ""}
-                                  onChange={(e) => {
-                                    const updatedPackages = [
-                                      ...billEdit.packages,
-                                    ];
-                                    updatedPackages[index].weight =
-                                      e.target.value;
-                                    setBillEdit({
-                                      ...billEdit,
-                                      packages: updatedPackages,
-                                    });
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-full"
-                                />
-                              </div>
+                              <PlusIcon className="w-4 h-4 mr-1" />
+                              Thêm Package
+                            </button>
+                          </div>
 
-                              {/* Dimensions */}
-                              <div className="space-y-1">
-                                <Label className="text-xs">Dài (cm)</Label>
-                                <Input
-                                  type="number"
-                                  value={pkg.length || ""}
-                                  onChange={(e) => {
-                                    const updatedPackages = [
-                                      ...billEdit.packages,
-                                    ];
-                                    updatedPackages[index].length =
-                                      e.target.value;
-                                    setBillEdit({
-                                      ...billEdit,
-                                      packages: updatedPackages,
-                                    });
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-full"
-                                />
-                              </div>
-
-                              <div className="space-y-1">
-                                <Label className="text-xs">Cao (cm)</Label>
-                                <Input
-                                  type="number"
-                                  value={pkg.height || ""}
-                                  onChange={(e) => {
-                                    const updatedPackages = [
-                                      ...billEdit.packages,
-                                    ];
-                                    updatedPackages[index].height =
-                                      e.target.value;
-                                    setBillEdit({
-                                      ...billEdit,
-                                      packages: updatedPackages,
-                                    });
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-full"
-                                />
-                              </div>
-
-                              <div className="space-y-1">
-                                <Label className="text-xs">Rộng (cm)</Label>
-                                <Input
-                                  type="number"
-                                  value={pkg.width || ""}
-                                  onChange={(e) => {
-                                    const updatedPackages = [
-                                      ...billEdit.packages,
-                                    ];
-                                    updatedPackages[index].width =
-                                      e.target.value;
-                                    setBillEdit({
-                                      ...billEdit,
-                                      packages: updatedPackages,
-                                    });
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-full"
-                                />
-                              </div>
-
-                              {/* Delete Button (only show if more than one package) */}
-                              {billEdit.packages.length > 1 && (
-                                <div className="flex items-end md:col-span-4">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const updatedPackages =
-                                        billEdit.packages.filter(
-                                          (_, i) => i !== index
-                                        );
+                          {/* Package List */}
+                          <div className="space-y-3">
+                            {billEdit.packages?.map((pkg, index) => (
+                              <div
+                                key={index}
+                                className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 md:grid-cols-4"
+                              >
+                                {/* Weight */}
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Cân nặng (KG)</Label>
+                                  <Input
+                                    type="number"
+                                    value={pkg.weight || ""}
+                                    onChange={(e) => {
+                                      const updatedPackages = [
+                                        ...billEdit.packages,
+                                      ];
+                                      updatedPackages[index].weight =
+                                        e.target.value;
                                       setBillEdit({
                                         ...billEdit,
                                         packages: updatedPackages,
                                       });
                                     }}
-                                    className="flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:hover:text-red-400"
-                                  >
-                                    <TrashIcon className="w-4 h-4 mr-1" />
-                                    Xóa Package
-                                  </button>
+                                    placeholder="0.00"
+                                    className="w-full"
+                                  />
                                 </div>
-                              )}
-                            </div>
-                          ))}
+
+                                {/* Dimensions */}
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Dài (cm)</Label>
+                                  <Input
+                                    type="number"
+                                    value={pkg.length || ""}
+                                    onChange={(e) => {
+                                      const updatedPackages = [
+                                        ...billEdit.packages,
+                                      ];
+                                      updatedPackages[index].length =
+                                        e.target.value;
+                                      setBillEdit({
+                                        ...billEdit,
+                                        packages: updatedPackages,
+                                      });
+                                    }}
+                                    placeholder="0.00"
+                                    className="w-full"
+                                  />
+                                </div>
+
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Cao (cm)</Label>
+                                  <Input
+                                    type="number"
+                                    value={pkg.height || ""}
+                                    onChange={(e) => {
+                                      const updatedPackages = [
+                                        ...billEdit.packages,
+                                      ];
+                                      updatedPackages[index].height =
+                                        e.target.value;
+                                      setBillEdit({
+                                        ...billEdit,
+                                        packages: updatedPackages,
+                                      });
+                                    }}
+                                    placeholder="0.00"
+                                    className="w-full"
+                                  />
+                                </div>
+
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Rộng (cm)</Label>
+                                  <Input
+                                    type="number"
+                                    value={pkg.width || ""}
+                                    onChange={(e) => {
+                                      const updatedPackages = [
+                                        ...billEdit.packages,
+                                      ];
+                                      updatedPackages[index].width =
+                                        e.target.value;
+                                      setBillEdit({
+                                        ...billEdit,
+                                        packages: updatedPackages,
+                                      });
+                                    }}
+                                    placeholder="0.00"
+                                    className="w-full"
+                                  />
+                                </div>
+
+                                {/* Delete Button (only show if more than one package) */}
+                                {billEdit.packages.length > 1 && (
+                                  <div className="flex items-end md:col-span-4">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const updatedPackages =
+                                          billEdit.packages.filter(
+                                            (_, i) => i !== index
+                                          );
+                                        setBillEdit({
+                                          ...billEdit,
+                                          packages: updatedPackages,
+                                        });
+                                      }}
+                                      className="flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:hover:text-red-400"
+                                    >
+                                      <TrashIcon className="w-4 h-4 mr-1" />
+                                      Xóa Package
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                     {(authorities.includes("CS") ||
                       authorities.includes("ADMIN")) && (
-                      <>
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                          {/* Bill Phụ */}
-                          <div className="space-y-2" hidden>
-                            <Label className="text-sm font-medium">
-                              Bill Phụ
-                            </Label>
-                            <Input type="text" value={billEdit.id || ""} />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-sm font-medium">
-                              Bill Phụ
-                            </Label>
-                            <Input
-                              type="text"
-                              value={billEdit.bill_employee || ""}
-                              onChange={(e) =>
-                                setBillEdit({
-                                  ...billEdit,
-                                  bill_employee: e.target.value,
-                                })
-                              }
-                              placeholder="Nhập Bill Phụ"
-                              className="w-full"
-                            />
-                          </div>
+                        <>
+                          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            {/* Bill Phụ */}
+                            <div className="space-y-2" hidden>
+                              <Label className="text-sm font-medium">
+                                Bill Phụ
+                              </Label>
+                              <Input type="text" value={billEdit.id || ""} />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">
+                                Bill Phụ
+                              </Label>
+                              <Input
+                                type="text"
+                                value={billEdit.bill_employee || ""}
+                                onChange={(e) =>
+                                  setBillEdit({
+                                    ...billEdit,
+                                    bill_employee: e.target.value,
+                                  })
+                                }
+                                placeholder="Nhập Bill Phụ"
+                                className="w-full"
+                              />
+                            </div>
 
-                          {/* AWB */}
+                            {/* AWB */}
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">AWB</Label>
+                              <Input
+                                type="text"
+                                value={billEdit.awb || ""}
+                                onChange={(e) =>
+                                  setBillEdit({
+                                    ...billEdit,
+                                    awb: e.target.value,
+                                  })
+                                }
+                                placeholder="Nhập AWB"
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                          {/* Status */}
                           <div className="space-y-2">
-                            <Label className="text-sm font-medium">AWB</Label>
-                            <Input
-                              type="text"
-                              value={billEdit.awb || ""}
+                            <Label className="text-sm font-medium">
+                              Trạng thái
+                            </Label>
+                            <select
+                              value={billEdit.status || ""}
                               onChange={(e) =>
                                 setBillEdit({
                                   ...billEdit,
-                                  awb: e.target.value,
+                                  status: e.target.value,
                                 })
                               }
-                              placeholder="Nhập AWB"
-                              className="w-full"
-                            />
+                              className="w-full px-3 py-2 text-sm border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="complete">Hoàn thành</option>
+                              <option value="waiting">Chờ xử lý</option>
+                              <option value="processing">
+                                Đã tiếp nhận hàng
+                              </option>
+                              <option value="shipping">Vận chuyển</option>
+                              <option value="cancelled">Đã hủy</option>
+                            </select>
                           </div>
-                        </div>
-                        {/* Status */}
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">
-                            Trạng thái
-                          </Label>
-                          <select
-                            value={billEdit.status || ""}
-                            onChange={(e) =>
-                              setBillEdit({
-                                ...billEdit,
-                                status: e.target.value,
-                              })
-                            }
-                            className="w-full px-3 py-2 text-sm border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="complete">Hoàn thành</option>
-                            <option value="waiting">Chờ xử lý</option>
-                            <option value="processing">
-                              Đã tiếp nhận hàng
-                            </option>
-                            <option value="shipping">Vận chuyển</option>
-                            <option value="cancelled">Đã hủy</option>
-                          </select>
-                        </div>
-                      </>
-                    )}
+                        </>
+                      )}
 
                     {/* Action Buttons */}
                     <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
