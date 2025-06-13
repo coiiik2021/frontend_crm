@@ -43,6 +43,10 @@ export default function ContentTable(props) {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
 
+  const [paymentCashList, setPaymentCashList] = useState([]);
+  const [paymentBankingList, setPaymentBankingList] = useState([]);
+  const [paymentTypeEdit, setPaymentTypeEdit] = useState(""); // "cash" hoặc "banking"
+
   const formatCurrency = (amount) => {
     const num = parseFloat(String(amount).replace(/[^0-9.]/g, ""));
     if (isNaN(num)) return "0";
@@ -227,9 +231,12 @@ export default function ContentTable(props) {
   };
 
   // Hàm xử lý khi người dùng bấm vào nút xem chi tiết thanh toán
-  const handleViewPaymentDetails = (item) => {
+  const handleViewPaymentDetails = (item, type) => {
     setBillEdit(item);
-    fetchPaymentDetails(item.bill_house);
+    setPaymentTypeEdit(type);
+    // Giả sử item.pricePayment.payment_cash_list là mảng các khoản thanh toán
+    setPaymentCashList(item.pricePayment.payment_cash_list || []);
+    setPaymentBankingList(item.pricePayment.payment_banking_list || []);
     setIsOpenFormPayment(true);
   };
 
@@ -2019,17 +2026,17 @@ export default function ContentTable(props) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              openModal();
-                              setBillEdit(item);
-                            }}
-                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                openModal();
+                                setBillEdit(item);
+                              }}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
@@ -2077,56 +2084,62 @@ export default function ContentTable(props) {
                   {visibleColumns.payments_cash && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                       <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán */}
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
                             <button
                               type="button"
-                              onClick={() => handleViewPaymentDetails(item)}
+                              onClick={() => handleViewPaymentDetails(item, "cash")}
                               className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                             >
                               <PencilIcon className="w-5 h-5" />
                             </button>
                           )}
-
-                        {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
-                              {formatCurrency(item.pricePayment.payment_cash)}{" "}
-                              VNĐ
+                              {formatCurrency(item.pricePayment.payment_cash)} VNĐ
+                            </span>
+                          </div>
+
+                          {/* Giá trị đỏ */}
+                          <div className="flex items-center space-x-2">
+                            <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                              {formatCurrency(item.pricePayment.payment_cash)} VNĐ
                             </span>
                           </div>
                         </div>
                       </div>
                     </TableCell>
                   )}
-
                   {visibleColumns.payments_banking && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                       <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán */}
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
                             <button
                               type="button"
-                              onClick={() => handleViewPaymentDetails(item)}
+                              onClick={() => handleViewPaymentDetails(item, "banking")}
                               className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                             >
                               <PencilIcon className="w-5 h-5" />
                             </button>
                           )}
 
-                        {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
-                            <span className="px-2 py-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-md dark:bg-blue-900/50 dark:text-blue-300">
-                              {formatCurrency(item.pricePayment.payment_card)}{" "}
-                              VNĐ
+                            <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                              {formatCurrency(item.pricePayment.payment_card)} VNĐ
+                            </span>
+                          </div>
+
+                          {/* Giá trị đỏ */}
+                          <div className="flex items-center space-x-2">
+                            <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                              {formatCurrency(item.pricePayment.payment_card)} VNĐ
                             </span>
                           </div>
                         </div>
@@ -2513,158 +2526,130 @@ export default function ContentTable(props) {
         className="max-w-[800px] m-4"
       >
         <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
-          {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-              Chi tiết thanh toán: HB{billEdit.bill_house?.substring(0, 5)}
+              Quản lý thanh toán: HB{billEdit.bill_house?.substring(0, 5)}
             </h3>
-            {authorities.includes("ADMIN") ||
-              (authorities.includes("CS") && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsOpenFormPayment(false);
-                    if (isDataChanged) {
-                      window.location.reload();
-                    }
-                  }}
-                  className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                >
-                  <XIcon className="w-5 h-5" />
-                </button>
-              ))}
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpenFormPayment(false);
+                if (isDataChanged) window.location.reload();
+              }}
+              className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+            >
+              <XIcon className="w-5 h-5" />
+            </button>
           </div>
-
-          {/* Form */}
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-            {/* Package Section */}
-            <div className="space-y-6">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                  Quản lý thanh toán
-                </h4>
-              </div>
-
-              {/* Payment Form */}
-              <div className="space-y-4">
-                {/* Tiền mặt */}
-                <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                  <div className="w-1/12 text-center">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      1
-                    </p>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Tiền mặt (VNĐ)
-                    </label>
-                    <input
-                      type="text"
-                      value={
-                        paymentDetails.cash === 0 &&
-                          document.activeElement ===
-                          document.getElementById("cash-input")
-                          ? ""
-                          : paymentDetails.cash
-                      }
-                      onChange={(e) =>
-                        handlePaymentInputChange("cash", e.target.value)
-                      }
-                      onFocus={(e) => {
-                        if (paymentDetails.cash === 0) {
-                          e.target.value = "";
-                        }
-                      }}
-                      onBlur={(e) => {
-                        if (e.target.value === "") {
-                          handlePaymentInputChange("cash", "0");
-                        }
-                      }}
-                      id="cash-input"
-                      className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                    />
-                  </div>
-                </div>
-
-                {/* Tiền chuyển khoản */}
-                <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                  <div className="w-1/12 text-center">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      2
-                    </p>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Tiền chuyển khoản (VNĐ)
-                    </label>
-                    <input
-                      type="text"
-                      value={
-                        paymentDetails.banking === 0 &&
-                          document.activeElement ===
-                          document.getElementById("banking-input")
-                          ? ""
-                          : paymentDetails.banking
-                      }
-                      onChange={(e) =>
-                        handlePaymentInputChange("banking", e.target.value)
-                      }
-                      onFocus={(e) => {
-                        if (paymentDetails.banking === 0) {
-                          e.target.value = "";
-                        }
-                      }}
-                      onBlur={(e) => {
-                        if (e.target.value === "") {
-                          handlePaymentInputChange("banking", "0");
-                        }
-                      }}
-                      id="banking-input"
-                      className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                    />
-                  </div>
-                </div>
-
-                {/* Tổng tiền */}
-                <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
-                  <div className="w-1/12 text-center">
-                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                      Σ
-                    </p>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-medium text-blue-700 dark:text-blue-300">
-                      Tổng tiền thanh toán (VNĐ)
-                    </label>
-                    <div className="w-full px-3 py-2 text-sm font-bold border rounded-md bg-white dark:bg-gray-800 dark:text-blue-300 dark:border-blue-800">
-                      {formatCurrency(
-                        paymentDetails.cash + paymentDetails.banking
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <form className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
+                {paymentTypeEdit === "cash" ? "Khoản thanh toán tiền mặt" : "Khoản thanh toán chuyển khoản"}
+              </h4>
+              <button
+                type="button"
+                onClick={() => {
+                  const currentDate = new Date();
+                  const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
+                  const newPayment = {
+                    id: "",
+                    amount: "",
+                    description: "",
+                    date: formattedDate,
+                  };
+                  if (paymentTypeEdit === "cash") {
+                    setPaymentCashList([...paymentCashList, newPayment]);
+                  } else {
+                    setPaymentBankingList([...paymentBankingList, newPayment]);
+                  }
+                }}
+                className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              >
+                <PlusIcon className="w-4 h-4 mr-1" />
+                Thêm khoản thanh toán
+              </button>
             </div>
-
-            {/* Action Buttons */}
+            <div className="space-y-4">
+              {(paymentTypeEdit === "cash" ? paymentCashList : paymentBankingList).map((pay, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                >
+                  <div className="w-1/12 text-center">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{idx + 1}</p>
+                  </div>
+                  <div className="w-full sm:w-1/4">
+                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Số tiền</label>
+                    <input
+                      type="number"
+                      value={pay.amount}
+                      onChange={e => {
+                        const list = paymentTypeEdit === "cash" ? [...paymentCashList] : [...paymentBankingList];
+                        list[idx].amount = e.target.value;
+                        paymentTypeEdit === "cash" ? setPaymentCashList(list) : setPaymentBankingList(list);
+                      }}
+                      className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                    />
+                  </div>
+                  <div className="w-full sm:w-1/4">
+                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Mô tả</label>
+                    <input
+                      type="text"
+                      value={pay.description}
+                      onChange={e => {
+                        const list = paymentTypeEdit === "cash" ? [...paymentCashList] : [...paymentBankingList];
+                        list[idx].description = e.target.value;
+                        paymentTypeEdit === "cash" ? setPaymentCashList(list) : setPaymentBankingList(list);
+                      }}
+                      className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                    />
+                  </div>
+                  <div className="w-full sm:w-1/4">
+                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Ngày tạo</label>
+                    <input
+                      type="text"
+                      value={pay.date}
+                      readOnly
+                      className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const list = paymentTypeEdit === "cash" ? [...paymentCashList] : [...paymentBankingList];
+                        list.splice(idx, 1);
+                        paymentTypeEdit === "cash" ? setPaymentCashList(list) : setPaymentBankingList(list);
+                        setIsDataChanged(true);
+                      }}
+                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
             <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
               <button
                 type="button"
                 onClick={() => {
                   setIsOpenFormPayment(false);
-                  if (isDataChanged) {
-                    window.location.reload();
-                  }
+                  if (isDataChanged) window.location.reload();
                 }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
               >
                 Đóng
               </button>
-
               <button
                 type="button"
-                onClick={handleUpdatePayment}
+                onClick={async () => {
+                  // Gọi API lưu danh sách khoản thanh toán
+                  // Ví dụ: await UpdatePaymentDetails({bill_id: billEdit.bill_house, cash_list: paymentCashList, banking_list: paymentBankingList})
+                  setIsOpenFormPayment(false);
+                  setIsDataChanged(true);
+                  window.location.reload();
+                }}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 Lưu thay đổi
