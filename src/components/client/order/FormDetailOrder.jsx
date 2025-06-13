@@ -186,7 +186,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
 
         worksheet.columns = [
             { width: 2 },    // A
-            { width: 15 },   // B
+            { width: 20 },   // B
             { width: 15 },   // C
             { width: 30 },   // D
             { width: 15 },   // E
@@ -194,58 +194,98 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
             { width: 15 },   // G
             { width: 15 },   // H
             { width: 15 },   // I
+            { width: 15 },
             { width: 15 }
         ];
 
+        // Set default font size for cells with values
+        worksheet.eachRow((row) => {
+            row.eachCell((cell) => {
+                if (cell.value && !cell.font) {
+                    cell.font = { size: 12 };
+                }
+            });
+        });
 
-        const titleRow = worksheet.addRow(['', 'INVOICE', '', '', '', '', '', '', '', '']);
+        const titleRow = worksheet.addRow(['', 'INVOICE', '', '', '', '', '', '', '', '', '']);
         titleRow.height = 40;
-        worksheet.mergeCells('B1:J1');
+        worksheet.mergeCells('B1:K1');
         const titleCell = worksheet.getCell('B1');
         titleCell.font = { size: 28, bold: true };
         titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
 
         const invoice_no = worksheet.addRow(['', '', 'Invoice No.:', invoiceNo, '', '', '', '', '', '']);
-        invoice_no.getCell(3).font = { bold: true, italic: true }
-        invoice_no.getCell(8).font = { bold: true, italic: true }
-        invoice_no.getCell(4).font = { bold: true }
-        invoice_no.getCell(9).font = { bold: true }
+        invoice_no.getCell(3).font = { bold: true, italic: true, size: 12 }
+        invoice_no.getCell(8).font = { bold: true, italic: true, size: 12 }
+        invoice_no.getCell(4).font = { bold: true, size: 12 }
+        invoice_no.getCell(9).font = { bold: true, size: 12 }
 
-        const shipperTitle = worksheet.addRow(['', 'SHIPPER', '', '', '', '', '', '', 'Air waybill No.', airWaybillNo]);
-        shipperTitle.getCell(2).font = { bold: true, underline: true };
-        shipperTitle.getCell(10).font = { bold: true }
-        shipperTitle.getCell(9).font = { bold: true }
+        const shipperTitle = worksheet.addRow(['', 'SHIPPER', '', '', '', '', '', '', 'Air waybill No.', airWaybillNo, '']);
+        shipperTitle.getCell(2).font = { bold: true, underline: true, size: 12 };
+        shipperTitle.getCell(10).font = { bold: true, size: 12 }
+        shipperTitle.getCell(9).font = { bold: true, size: 12 }
 
-        const company = worksheet.addRow(['', 'Company Name', shipper.companyName, '', '', '', '', '', '', shippingMethod]);
-        company.getCell(3).font = { bold: true }
-        company.getCell(10).font = { bold: true }
-        const noOfpkgs = worksheet.addRow(['', 'Address', shipper.address, '', '', '', '', '', 'No. of pkgs', '1']);
-        noOfpkgs.getCell(9).font = { bold: true }
+        const company = worksheet.addRow(['', 'Company Name', shipper.companyName, '', '', '', '', '', '', shippingMethod, '']);
+        company.getCell(3).font = { bold: true, size: 12 }
+        company.getCell(2).font = {size: 12 }
+        company.getCell(10).font = { bold: true, size: 12 }
+        const noOfpkgs = worksheet.addRow(['', 'Address', shipper.address, '', '', '', '', '', 'No. of pkgs', '1','']);
+        noOfpkgs.getCell(9).font = { bold: true, size: 12 }
+        noOfpkgs.getCell(2).font = {size: 12 }
+        noOfpkgs.getCell(3).font = {size: 12 }
         noOfpkgs.getCell(10).border = { bottom: { style: 'thin' } }
-        const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.areaCode, '', '', '', '', '', 'Weight', weight]);
-        rowWeight.getCell(9).font = { bold: true }
+        noOfpkgs.getCell(10).font = { size: 12 }
+        const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.areaCode, '', '', '', '', '', 'Weight', weight,'']);
+        rowWeight.getCell(9).font = { bold: true, size: 12 }
+        rowWeight.getCell(2).font = {size: 12 }
+        rowWeight.getCell(3).font = {size: 12 }
         rowWeight.getCell(10).border = { bottom: { style: 'thin' } }
-        const rowDimensions = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '', '', '', 'Dimensions', dimensions[0]]);
-        rowDimensions.getCell(3).font = { bold: true }
-        rowDimensions.getCell(9).font = { bold: true }
+        rowWeight.getCell(10).font = { size: 12 }
+        const rowDimensions = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '', '', '', 'Dimensions', dimensions[0],'']);
+        rowDimensions.getCell(3).font = { bold: true, size: 12 }
+        rowDimensions.getCell(2).font = {size: 12 }
+        rowDimensions.getCell(9).font = { bold: true, size: 12 }
         rowDimensions.getCell(10).border = { bottom: { style: 'thin' } }
-        worksheet.addRow(['', 'Tax Code', '0399321378', '', '', '', '', '', '', '']);
-        worksheet.addRow(['', 'Contact Name', shipper.contactName, '', '', '', '', '', '', '']);
-        worksheet.addRow(['', 'Phone/Fax No.', shipper.phone, '', '', '', '', '', '', '']);
+        rowDimensions.getCell(10).font = { size: 12 }
+        const tax = worksheet.addRow(['', 'Tax Code', '0399321278', '', '', '', '', '', '', '']);
+        tax.getCell(2).font = { size: 12 }
+        tax.getCell(3).font = { size: 12 }
+        const contact = worksheet.addRow(['', 'Contact Name', shipper.contactName, '', '', '', '', '', '', '']);
+        contact.getCell(3).font = { size: 12 }
+        contact.getCell(2).font = { size: 12 }
+        const fax = worksheet.addRow(['', 'Phone/Fax No.', shipper.phone, '', '', '', '', '', '', '']);
+        fax.getCell(3).font = { size: 12 }
+        fax.getCell(2).font = { size: 12 }
         worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
 
+        worksheet.mergeCells('J3:K3');
+        worksheet.mergeCells('J4:K4');
+        worksheet.mergeCells('J5:K5');
+        worksheet.mergeCells('J6:K6');
+        worksheet.mergeCells('J7:K7');
+
         const consigneeTitle = worksheet.addRow(['', 'CONSIGNEE', '', '', '', '', '', '', '', '']);
-        consigneeTitle.getCell(2).font = { bold: true, underline: true };
+        consigneeTitle.getCell(2).font = { bold: true, underline: true, size: 12 };
 
         const company_consignee = worksheet.addRow(['', 'Company Name', consignee.company, '', '', '', '', '', '', '']);
-        company_consignee.getCell(3).font = { bold: true }
-        worksheet.addRow(['', 'Address', consignee.address, '', '', '', '', '', '']);
-        worksheet.addRow(['', 'Postal code', consignee.postCode, '', '', '', '', '', '']);
+        company_consignee.getCell(2).font = { size: 12 }
+        company_consignee.getCell(3).font = { bold: true, size: 12 }
+        const add = worksheet.addRow(['', 'Address', consignee.address, '', '', '', '', '', '']);
+        add.getCell(2).font = { size: 12 }
+        add.getCell(3).font = { size: 12 }
+        const postal = worksheet.addRow(['', 'Postal code', consignee.postCode, '', '', '', '', '', '']);
+        postal.getCell(2).font = { size: 12 }
+        postal.getCell(3).font = { size: 12 }
         const countryConsignee = worksheet.addRow(['', 'State/ Country', consignee.country, '', '', '', '', '', '', '']);
-        countryConsignee.getCell(3).font = { bold: true }
-        worksheet.addRow(['', 'Contact Name', consignee.name, '', '', '', '', '', '', '']);
-        worksheet.addRow(['', 'Phone/Fax No.', consignee.phone, '', '', '', '', '', '', '']);
+        countryConsignee.getCell(2).font = { size: 12 }
+        countryConsignee.getCell(3).font = { bold: true, size: 12 }
+        const cont = worksheet.addRow(['', 'Contact Name', consignee.name, '', '', '', '', '', '', '']);
+        cont.getCell(2).font = { size: 12 }
+        cont.getCell(3).font = { size: 12 }
+        const phone = worksheet.addRow(['', 'Phone/Fax No.', consignee.phone, '', '', '', '', '', '', '']);
+        phone.getCell(2).font = { size: 12 }
+        phone.getCell(3).font = { size: 12 }
         worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
 
 
@@ -274,7 +314,8 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
             'Q\'Ty\n(pcs)',
             '',
             'Unit Price\n(in USD)',
-            'Subtotal\n(in USD)'
+            'Subtotal\n(in USD)',
+            'Uses\n(If any)'
         ]);
         headerRow.height = 45; // Tăng chiều cao để hiển thị xuống dòng
 
@@ -284,7 +325,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
 
         headerRow.eachCell((cell, colNumber) => {
             if (colNumber !== 1) {
-                cell.font = { bold: true };
+                cell.font = { bold: true, size: 12 };
                 cell.alignment = {
                     horizontal: 'center',
                     vertical: 'middle',
@@ -315,7 +356,8 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
                 item.quantity,
                 item.unit,
                 item.unitPrice,
-                item.subtotal
+                item.subtotal,
+                ''
             ]);
             row.height = 250;
 
@@ -374,15 +416,15 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         const lastRow = worksheet.lastRow?.number || 0;
         if (lastRow > 0) {
             worksheet.mergeCells('B' + (lastRow - 7) + ':C' + (lastRow - 7));
-            worksheet.mergeCells('D' + (lastRow - 7) + ':J' + (lastRow - 7));
-            worksheet.mergeCells('B' + (lastRow - 6) + ':J' + (lastRow - 6));
-            worksheet.mergeCells('B' + (lastRow - 5) + ':J' + (lastRow - 5));
-            worksheet.mergeCells('G' + (lastRow - 4) + ':J' + (lastRow - 4));
+            worksheet.mergeCells('D' + (lastRow - 7) + ':K' + (lastRow - 7));
+            worksheet.mergeCells('B' + (lastRow - 6) + ':K' + (lastRow - 6));
+            worksheet.mergeCells('B' + (lastRow - 5) + ':K' + (lastRow - 5));
+            worksheet.mergeCells('G' + (lastRow - 4) + ':K' + (lastRow - 4));
             worksheet.mergeCells('C' + (lastRow - 4) + ':F' + (lastRow - 4));
-            worksheet.mergeCells('B' + (lastRow - 3) + ':J' + (lastRow - 3));
-            worksheet.mergeCells('B' + (lastRow - 2) + ':J' + (lastRow - 2));
-            worksheet.mergeCells('G' + (lastRow - 1) + ':J' + (lastRow - 1));
-            worksheet.mergeCells('G' + lastRow + ':J' + lastRow);
+            worksheet.mergeCells('B' + (lastRow - 3) + ':K' + (lastRow - 3));
+            worksheet.mergeCells('B' + (lastRow - 2) + ':K' + (lastRow - 2));
+            worksheet.mergeCells('G' + (lastRow - 1) + ':K' + (lastRow - 1));
+            worksheet.mergeCells('G' + lastRow + ':K' + lastRow);
         }
 
         worksheet.getCell('G' + (lastRow - 1)).alignment = { vertical: 'middle', horizontal: 'center' };
@@ -402,6 +444,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
             row.eachCell((cell) => {
                 cell.font = {
                     name: 'Century Gothic',
+                    size: 12
                 };
             });
         }
@@ -423,10 +466,16 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
 
         dimensions.forEach((d, index) => {
             if (index !== 0) {
-                worksheet.getCell(startRow + index, colIndex).value = d;
-                worksheet.getCell(startRow + index, colIndex).border = { bottom: { style: 'thin' } }
+                const row = startRow + index;
+                const col = colIndex;
+
+                worksheet.getCell(row, col).value = d;
+                worksheet.getCell(row, col).border = { bottom: { style: 'thin' } };
+                worksheet.getCell(row, col).font = { size: 12 };
+                worksheet.mergeCells(row, col, row, col + 1);
             }
-        })
+        });
+
 
         //Shipping Mark
         dimensions.forEach((dim, index) => {
@@ -669,7 +718,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
                                 <div className="flex items-center gap-2">
                                     <div className="p-2 bg-purple-100 rounded-full">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L12.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
                                     </div>
@@ -855,7 +904,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
                                 title="Chỉnh sửa"
                             >
                                 <svg className="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m2-2l-6 6m2-2l6-6" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 12l6-6m2 2l-6 6m2-2l-6 6m2-2l6-6" />
                                 </svg>
                             </button>
                         </span>

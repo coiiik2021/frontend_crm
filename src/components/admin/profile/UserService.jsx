@@ -29,6 +29,8 @@ export default function UserService({ user }) {
 
   const { isOpen, openModal, closeModal } = useModal();
 
+  const [discountProfit, setDiscountProfit] = useState(150);
+
   const [priceNetUserByNameService, setPriceNetUserByNameService] = useState([]);
   const [savedRows, setSavedRows] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -36,6 +38,15 @@ export default function UserService({ user }) {
   const [rowToDelete, setRowToDelete] = useState(null);
 
   const [authorities, setAuthorities] = useState([]);
+
+  const [serviceSelect, setServiceSelect] = useState(null);
+
+  const [notification, setNotification] = useState({ open: false, message: "", type: "success" });
+
+  const showNotification = (message, type = "success") => {
+    setNotification({ open: true, message, type });
+    setTimeout(() => setNotification({ open: false, message: "", type }), 3000);
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -108,6 +119,9 @@ export default function UserService({ user }) {
       account_id: user?.id
     };
 
+
+    setDiscountProfit(service.profit);
+
     const dataPriceResponse = await GetAllPriceNetForUserByZoneAndWeight(dataRequest);
 
     const formattedResponse = dataPriceResponse.map(item => ({
@@ -116,7 +130,7 @@ export default function UserService({ user }) {
     }));
 
     setPriceNetUserByNameService(formattedResponse);
-    setServiceNamePriceEdit(service);
+    setServiceNamePriceEdit(serviceSelect);
 
     const newSavedRows = {};
     formattedResponse.forEach(item => {
@@ -169,6 +183,7 @@ export default function UserService({ user }) {
     vat: 8,
     overSize: 100,
     peakSeason: 100,
+    profit: 150
   });
 
   const handlePrice = (row) => {
@@ -296,10 +311,32 @@ export default function UserService({ user }) {
     }
   };
 
-  // Hàm hủy xóa
   const cancelDelete = () => {
     setDeleteConfirmOpen(false);
     setRowToDelete(null);
+  };
+
+  const handleUpdateProfit = async () => {
+    try {
+      const dataRequest = {
+        account_id: user?.id,
+        service_id: serviceSelect?.service_id,
+        profit: discountProfit
+      };
+
+      const res = await PutConstUser(dataRequest);
+
+      setConstUsers(prev =>
+        prev.map(item =>
+          item.service_id === serviceSelect?.service_id
+            ? { ...item, profit: discountProfit }
+            : item
+        )
+      );
+      showNotification("Cập nhật profit thành công!", "success");
+    } catch (error) {
+      showNotification("Cập nhật profit thất bại!", "error");
+    }
   };
 
 
@@ -364,6 +401,13 @@ export default function UserService({ user }) {
                         >
                           Peak Season
                         </TableCell>
+
+                        <TableCell
+                          isHeader
+                          className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
+                        >
+                          Profit
+                        </TableCell>
                         <TableCell
                           isHeader
                           className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
@@ -396,6 +440,9 @@ export default function UserService({ user }) {
                               <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
                                 {row.peakSeason}
                               </TableCell>
+                              <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
+                                {row.profit}
+                              </TableCell>
                               <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <button
                                   onClick={() => handleEdit(row)}
@@ -413,7 +460,10 @@ export default function UserService({ user }) {
 
                                 {authorities.includes("ADMIN") && (
                                   <button
-                                    onClick={async () => await handleSetupPriceNetUser(row)}
+                                    onClick={async () => {
+                                      setServiceSelect(row);
+                                      await handleSetupPriceNetUser(row);
+                                    }}
                                     className="inline-flex items-center px-3 py-1.5 ml-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:bg-red-700 dark:hover:bg-red-800"
                                   >
                                     Giá
@@ -526,6 +576,9 @@ export default function UserService({ user }) {
                     }
                   />
                 </div>
+
+
+
               </div>
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
@@ -562,24 +615,55 @@ export default function UserService({ user }) {
             </div>
           </div>
 
-          <div className="p-6">
-            <div className="flex justify-end mb-4">
-              <Button
-                onClick={() => {
-                  const newPriceNetUser = {
-                    id: Date.now(), // Tạo ID duy nhất
-                    kgMin: 0,
-                    kgMax: 0,
-                    zone: "",
-                    price: 0,
-                  };
 
-                  setPriceNetUserByNameService((prev) => [...prev, newPriceNetUser]);
-                }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-400"
-              >
-                Thêm
-              </Button>
+
+          <div className="p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              {/* Profit block */}
+              <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 rounded-xl shadow border border-gray-200 dark:border-gray-700 w-full md:w-auto md:min-w-[340px]">
+                <span className="font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-1 text-base">
+                  <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" />
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
+                  </svg>
+                  Profit
+                </span>
+                <input
+                  type="number"
+                  value={discountProfit}
+                  onChange={(e) => setDiscountProfit(e.target.value)}
+                  className="w-20 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200"
+                  placeholder="Profit"
+                  min={0}
+                />
+                <Button
+                  onClick={handleUpdateProfit}
+                  className="flex items-center gap-1 px-4 py-2 text-base font-medium text-white bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg shadow hover:from-blue-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Update
+                </Button>
+              </div>
+              {/* Add button */}
+              <div className="flex justify-end md:justify-end w-full md:w-auto">
+                <Button
+                  onClick={() => {
+                    const newPriceNetUser = {
+                      id: Date.now(),
+                      kgMin: 0,
+                      kgMax: 0,
+                      zone: "",
+                      price: 0,
+                    };
+                    setPriceNetUserByNameService((prev) => [...prev, newPriceNetUser]);
+                  }}
+                  className="px-6 py-2 text-base font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-400"
+                >
+                  Thêm
+                </Button>
+              </div>
             </div>
 
             <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm dark:border-gray-700">
@@ -852,6 +936,17 @@ export default function UserService({ user }) {
                     }
                   />
                 </div>
+
+                <div>
+                  <Label>Profit</Label>
+                  <Input
+                    type="text"
+                    value={editConst?.profit || ""}
+                    onChange={(e) =>
+                      setEditConst({ ...editConst, profit: e.target.value })
+                    }
+                  />
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
@@ -903,6 +998,15 @@ export default function UserService({ user }) {
           </div>
         </div>
       </Modal>
+
+      {notification.open && (
+        <div
+          className={`fixed top-6 right-6 z-50 px-6 py-3 rounded-lg shadow-lg text-white transition-all
+            ${notification.type === "success" ? "bg-green-500" : "bg-red-500"}`}
+        >
+          {notification.message}
+        </div>
+      )}
     </>
   );
 }
