@@ -55,21 +55,16 @@ const Document = ({ packages, setPackages, nameCountry: initialNameCountry, zone
             return;
         }
 
-        if (!validateInputs()) {
-            setShowQuote(false);
-            setIsChangeCountry(true);
-            return;
-        }
+        // if (!validateInputs()) {
+        //     setShowQuote(false);
+        //     setIsChangeCountry(true);
+        //     return;
+        // }
 
         const dataRequest = {
             nameCountry: initialNameCountry,
             weight: realVolume,
-            packages: packages.map(pkg => ({
-                weight: parseFloat(pkg.weight) || 0,
-                width: parseFloat(pkg.width) || 0,
-                length: parseFloat(pkg.length) || 0,
-                height: parseFloat(pkg.height) || 0,
-            })),
+            isPackage: false
         };
         console.log("data request", dataRequest);
         const data = await GetListPriceQuote(dataRequest);
@@ -134,7 +129,6 @@ const Document = ({ packages, setPackages, nameCountry: initialNameCountry, zone
             service: service,
             priceNet: quote.priceNet,
             constPPXD: quote.constPPXD,
-            overSize: quote.overSize,
             constVAT: quote.constVAT,
             zone: quote.zone,
             pricePeakSeason: quote.pricePeakSeason,
@@ -337,7 +331,7 @@ const Document = ({ packages, setPackages, nameCountry: initialNameCountry, zone
                                                 <div className="p-4 space-y-2">
                                                     <div className="flex justify-between text-sm">
                                                         <span className="text-gray-500">Cân nặng:</span>
-                                                        <span className="font-medium">{formatCurrency(quote.totalWeight)} kg</span>
+                                                        <span className="font-medium">{quote.totalWeight} kg</span>
                                                     </div>
                                                     <div className="flex justify-between text-sm">
                                                         <span className="text-gray-500">Phí cơ bản:</span>
@@ -351,7 +345,7 @@ const Document = ({ packages, setPackages, nameCountry: initialNameCountry, zone
                                                     <div className="flex justify-between text-sm">
                                                         <span className="text-gray-500">Phí xăng dầu ({quote.constPPXD}%):</span>
                                                         <span className="text-blue-600 font-medium">
-                                                            {formatCurrency((quote.priceNet + quote.pricePeakSeason) * quote.constPPXD / 100)} đ
+                                                            {((quote.priceNet + quote.pricePeakSeason) * quote.constPPXD / 100)} đ
                                                         </span>
                                                     </div>
                                                     <div className="flex justify-between text-sm">
@@ -368,7 +362,7 @@ const Document = ({ packages, setPackages, nameCountry: initialNameCountry, zone
                                                         <div>
                                                             <p className="text-xs text-gray-500">Tổng cộng</p>
                                                             <p className="font-bold text-gray-900">
-                                                                {formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100))} đ
+                                                                {(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * (1 + quote.constPPXD / 100) * (1 + quote.constVAT / 100))} đ
                                                             </p>
                                                         </div>
                                                         <button

@@ -229,9 +229,12 @@ export default function InformationOrder(props) {
     // Thêm state cho lỗi form nhận hàng
     const [deliveryErrors, setDeliveryErrors] = useState({
         receiverName: false,
+        receiverPhone: false,
+
         deliveryDate: false,
         deliveryTime: false,
-        deliveryAddress: false
+        deliveryAddress: false,
+
     });
 
     // Thêm state để kiểm soát hiển thị form nhận hàng
@@ -367,6 +370,7 @@ export default function InformationOrder(props) {
             const updatedAddressBackup = {
                 id: deliveryForm.id || "",
                 name: deliveryForm.name || "",
+                phone: deliveryForm.phone || "",
                 date: deliveryForm.date || "",
                 time: deliveryForm.time || "",
                 address: deliveryForm.address || "",
@@ -376,12 +380,9 @@ export default function InformationOrder(props) {
             console.log("Updating addressBackup before moving to next step:", updatedAddressBackup);
             setAddressBackup(updatedAddressBackup);
 
-            // Ensure the parent component has the latest addressBackup value
-            // by using a small timeout before changing tabs
             setTimeout(() => {
                 console.log("Final addressBackup before changing step:", updatedAddressBackup);
                 setCurrentStep(3);
-                // Cuộn trang lên đầu khi chuyển sang bước tiếp theo
                 window.scrollTo({
                     top: 0,
                     behavior: "smooth"
@@ -1220,6 +1221,21 @@ export default function InformationOrder(props) {
                                             className={`bg-white dark:bg-gray-800 ${deliveryErrors.receiverName ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
                                         />
                                     </div>
+
+
+                                    <div>
+                                        <Label htmlFor="phone" className="text-gray-700 dark:text-gray-300">Số điện thoại</Label>
+                                        <Input
+                                            type="text"
+                                            id="phone"
+                                            name="phone"
+                                            value={deliveryForm.phone || ''}
+                                            onChange={handleDeliveryChange}
+                                            className={`bg-white dark:bg-gray-800 ${deliveryErrors.receiverPhone ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
+                                        />
+                                    </div>
+
+
                                     <div>
                                         <DatePicker
                                             id="date"

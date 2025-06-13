@@ -21,13 +21,13 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
 
         // Tính toán weight và dimensions từ packages
         weight: packages.reduce((sum, pkg) => {
-            const weight = parseFloat(pkg.weight) || 0;
+            const weight = parseFloat(pkg.weight) || 0.5;
             return sum + weight;
         }, 0).toFixed(1),
         dimensions: packages.map(pkg => {
-            const length = pkg.length || 0;
-            const width = pkg.width || 0;
-            const height = pkg.height || 0;
+            const length = pkg.length || 0.5;
+            const width = pkg.width || 0.5;
+            const height = pkg.height || 0.5;
             return `${length}*${width}*${height}`;
         }),
         insuranceValue: "9.5",
@@ -132,6 +132,8 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
 
         loadData();
         invoiceData.shipper = shipper;
+
+
         // invoiceData.shipper = dataResponse;
         // console.log("recipientInfo", recipientInfo);
         // console.log("packages", packages);
@@ -215,13 +217,13 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         shipperTitle.getCell(10).font = { bold: true }
         shipperTitle.getCell(9).font = { bold: true }
 
-        const company = worksheet.addRow(['', 'Company Name', shipper.name, '', '', '', '', '', '', shippingMethod]);
+        const company = worksheet.addRow(['', 'Company Name', shipper.companyName, '', '', '', '', '', '', shippingMethod]);
         company.getCell(3).font = { bold: true }
         company.getCell(10).font = { bold: true }
         const noOfpkgs = worksheet.addRow(['', 'Address', shipper.address, '', '', '', '', '', 'No. of pkgs', '1']);
         noOfpkgs.getCell(9).font = { bold: true }
         noOfpkgs.getCell(10).border = { bottom: { style: 'thin' } }
-        const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.address, '', '', '', '', '', 'Weight', weight]);
+        const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.areaCode, '', '', '', '', '', 'Weight', weight]);
         rowWeight.getCell(9).font = { bold: true }
         rowWeight.getCell(10).border = { bottom: { style: 'thin' } }
         const rowDimensions = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '', '', '', 'Dimensions', dimensions[0]]);
@@ -229,7 +231,7 @@ export default function FormDetailOrder({ addressBackup, recipientInfo, packages
         rowDimensions.getCell(9).font = { bold: true }
         rowDimensions.getCell(10).border = { bottom: { style: 'thin' } }
         worksheet.addRow(['', 'Tax Code', '0399321378', '', '', '', '', '', '', '']);
-        worksheet.addRow(['', 'Contact Name', shipper.name, '', '', '', '', '', '', '']);
+        worksheet.addRow(['', 'Contact Name', shipper.contactName, '', '', '', '', '', '', '']);
         worksheet.addRow(['', 'Phone/Fax No.', shipper.phone, '', '', '', '', '', '', '']);
         worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
 

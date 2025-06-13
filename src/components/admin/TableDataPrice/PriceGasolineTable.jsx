@@ -4,15 +4,92 @@ import { DeletePriceGasonline, PostPriceGasoline, PutPriceGasoline } from "../..
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Modal } from "../ui/modal";
+import { CalenderIcon } from "../../../icons";
+import Notification from "../ui/notification/Notfication";
 
 const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedRow, setEditedRow] = useState({});
     const [isCreating, setIsCreating] = useState(false);
-    // Thêm state cho modal xác nhận xóa
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [rowToDeleteIndex, setRowToDeleteIndex] = useState(null);
 
+    // Thêm state cho thông báo
+    const [notification, setNotification] = useState({
+        show: false,
+        type: "",
+        message: "",
+    });
+
+    // Hàm hiển thị thông báo
+    const showNotification = (type, message) => {
+        setNotification({
+            show: true,
+            type,
+            message,
+        });
+
+        // Tự động ẩn thông báo sau 3 giây
+        setTimeout(() => {
+            setNotification({ show: false, type: "", message: "" });
+        }, 3000);
+    };
+
+    // Chuyển đổi định dạng ngày từ dd/MM/yyyy sang yyyy-MM-dd (định dạng ISO cho LocalDate trong Java)
+    const formatDateForBackend = (dateString) => {
+        if (!dateString) return "";
+
+        // Nếu đã đúng định dạng yyyy-MM-dd thì giữ nguyên
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+            return dateString;
+        }
+
+        // Nếu định dạng là dd/MM/yyyy
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+            const [day, month, year] = dateString.split('/');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Xử lý các trường hợp khác
+        try {
+            const date = new Date(dateString);
+            if (!isNaN(date.getTime())) {
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            }
+        } catch (error) {
+            console.error("Error formatting date for backend:", error);
+        }
+
+        return dateString;
+    };
+
+    // Chuyển đổi định dạng ngày từ yyyy-MM-dd sang dd/MM/yyyy (định dạng hiển thị)
+    const formatDisplayDate = (dateString) => {
+        if (!dateString) return "";
+
+        // Nếu đã đúng định dạng dd/MM/yyyy thì giữ nguyên
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+            return dateString;
+        }
+
+        // Nếu định dạng là yyyy-MM-dd
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+            const [year, month, day] = dateString.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        // Xử lý các định dạng khác
+        try {
+            const date = new Date(dateString);
+            if (!isNaN(date.getTime())) {
+                return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+            }
+        } catch (error) {
+            console.error("Error formatting display date:", error);
+        }
+
+        return dateString;
+    };
 
     const handleEdit = (index) => {
         setEditingIndex(index);
@@ -25,27 +102,61 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
     };
 
     const handleSave = async () => {
-        const updatedData = [...priceGasoline];
-        updatedData[editingIndex] = { ...editedRow };
-        setPriceGasoline(updatedData);
-        setEditingIndex(null);
+        try {
+            // Kiểm tra dữ liệu đầu vào
+            if (!editedRow.date) {
+                showNotification("error", "Vui lòng chọn ngày hiệu lực");
+                return;
+            }
 
-        const data = {
-            id: editedRow.id || null,
-            name: name,
-            date: editedRow.date,
-            price: editedRow.price,
-        };
+            if (!editedRow.price || isNaN(editedRow.price) || editedRow.price <= 0) {
+                showNotification("error", "Vui lòng nhập giá trị phụ phí hợp lệ");
+                return;
+            }
 
-        if (isCreating) {
-            console.log("Creating new data:", data);
-            await PostPriceGasoline(data);
-        } else {
-            console.log("Updating existing data:", data);
-            await PutPriceGasoline(data);
+            const updatedData = [...priceGasoline];
+            updatedData[editingIndex] = { ...editedRow };
+
+            const data = {
+                id: editedRow.id || null,
+                name: name,
+                date: formatDateForBackend(editedRow.date), // Chuyển đổi sang định dạng yyyy-MM-dd
+                price: editedRow.price,
+            };
+
+            let response;
+            if (isCreating) {
+                console.log("Creating new data:", data);
+                response = await PostPriceGasoline(data);
+                if (response) {
+                    showNotification("success", "Thêm dữ liệu thành công");
+                    // Cập nhật ID từ response nếu có
+                    if (response.id) {
+                        updatedData[editingIndex].id = response.id;
+                    }
+                } else {
+                    showNotification("error", "Thêm dữ liệu thất bại");
+                    return;
+                }
+            } else {
+                console.log("Updating existing data:", data);
+                response = await PutPriceGasoline(data);
+                if (response) {
+                    showNotification("success", "Cập nhật dữ liệu thành công");
+                } else {
+                    showNotification("error", "Cập nhật dữ liệu thất bại");
+                    return;
+                }
+            }
+
+            // Cập nhật state chỉ khi API thành công
+            setPriceGasoline(updatedData);
+            setEditingIndex(null);
+            setIsCreating(false);
+        } catch (error) {
+            console.error("Error saving data:", error);
+            showNotification("error", `Lỗi: ${error.message || "Không thể lưu dữ liệu"}`);
         }
-
-        setIsCreating(false);
     };
 
     const handleInputChange = (field, value) => {
@@ -65,34 +176,50 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
         setIsCreating(true);
     };
 
-    // Thay đổi hàm handleDelete để mở modal xác nhận
     const handleDeleteClick = (index) => {
         setRowToDeleteIndex(index);
         setDeleteConfirmOpen(true);
     };
 
-    // Hàm xử lý khi người dùng xác nhận xóa
     const confirmDelete = async () => {
         if (rowToDeleteIndex === null) return;
 
-        await DeletePriceGasonline(priceGasoline[rowToDeleteIndex].id);
-        const updatedData = priceGasoline.filter((_, rowIndex) => rowIndex !== rowToDeleteIndex);
-        console.log(priceGasoline[rowToDeleteIndex]);
-        setPriceGasoline(updatedData);
+        try {
+            const response = await DeletePriceGasonline(priceGasoline[rowToDeleteIndex].id);
+            if (response) {
+                const updatedData = priceGasoline.filter((_, rowIndex) => rowIndex !== rowToDeleteIndex);
+                setPriceGasoline(updatedData);
+                showNotification("success", "Xóa dữ liệu thành công");
+            } else {
+                showNotification("error", "Xóa dữ liệu thất bại");
+            }
+        } catch (error) {
+            console.error("Error deleting data:", error);
+            showNotification("error", `Lỗi: ${error.message || "Không thể xóa dữ liệu"}`);
+        }
 
-        // Đóng modal xác nhận
         setDeleteConfirmOpen(false);
         setRowToDeleteIndex(null);
     };
 
-    // Hàm hủy xóa
     const cancelDelete = () => {
         setDeleteConfirmOpen(false);
         setRowToDeleteIndex(null);
     };
 
     return (
-        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md relative">
+            {/* Hiển thị thông báo */}
+            {notification.show && (
+                <div className="fixed top-30 right-5 z-50">
+                    <Notification
+                        variant={notification.type}
+                        title={notification.type === "success" ? "Thành công!" : "Lỗi!"}
+                        description={notification.message}
+                    />
+                </div>
+            )}
+
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                     Bảng Giá Xăng Dầu
@@ -106,12 +233,12 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
             </div>
             {
                 priceGasoline?.length === 0 ? (
-                    <div className="flex items-center justify-center h-64">
+                    <div className="flex items-center justify-center h-64 top-5">
                         <p className="text-gray-500">Không có dữ liệu nào để hiển thị.</p>
                     </div>)
                     :
                     (
-                        <Table className="w-full border border-gray-200 rounded-lg shadow-md">
+                        <Table className="w-full border border-gray-200 rounded-lg shadow-md mt-[100px]">
                             <TableHeader className="bg-gray-100 dark:bg-gray-700">
                                 <TableRow>
                                     <TableCell
@@ -145,27 +272,40 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
                                             className="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600"
                                         >
                                             {editingIndex === rowIndex ? (
-                                                <DatePicker
-                                                    selected={
-                                                        editedRow.date
-                                                            ? new Date(
-                                                                editedRow.date.split("/").reverse().join("-")
-                                                            )
-                                                            : null
-                                                    }
-                                                    onChange={(date) => {
-                                                        const formattedDate = date
-                                                            ? `${String(date.getDate()).padStart(2, "0")}/${String(
-                                                                date.getMonth() + 1
-                                                            ).padStart(2, "0")}/${date.getFullYear()}`
-                                                            : "";
-                                                        handleInputChange("date", formattedDate);
-                                                    }}
-                                                    dateFormat="dd/MM/yyyy"
-                                                    className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                />
+                                                <div className="relative">
+                                                    <DatePicker
+                                                        selected={
+                                                            editedRow.date
+                                                                ? new Date(formatDateForBackend(editedRow.date).replace(/-/g, '/'))
+                                                                : null
+                                                        }
+                                                        onChange={(date) => {
+                                                            const formattedDate = date
+                                                                ? `${String(date.getDate()).padStart(2, "0")}/${String(
+                                                                    date.getMonth() + 1
+                                                                ).padStart(2, "0")}/${date.getFullYear()}`
+                                                                : "";
+                                                            handleInputChange("date", formattedDate);
+                                                        }}
+                                                        dateFormat="dd/MM/yyyy"
+                                                        className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                        placeholderText="Chọn ngày"
+                                                        customInput={
+                                                            <input
+                                                                className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                            />
+                                                        }
+                                                    />
+                                                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 dark:text-gray-400">
+                                                        <CalenderIcon className="size-5" />
+                                                    </span>
+                                                </div>
                                             ) : (
-                                                row.date
+                                                <div className="flex items-center justify-center">
+                                                    <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md font-medium dark:bg-blue-900/30 dark:text-blue-300">
+                                                        {formatDisplayDate(row.date)}
+                                                    </span>
+                                                </div>
                                             )}
                                         </TableCell>
                                         <TableCell
@@ -176,10 +316,12 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
                                                     type="number"
                                                     value={editedRow.price || ""}
                                                     onChange={(e) => handleInputChange("price", e.target.value)}
-                                                    className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 />
                                             ) : (
-                                                row.price.toLocaleString("en-US")
+                                                <span className="font-medium">
+                                                    {row.price.toLocaleString("en-US")}
+                                                </span>
                                             )}
                                         </TableCell>
                                         <TableCell
@@ -187,27 +329,29 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
                                         >
                                             {editingIndex === rowIndex ? (
                                                 <button
-                                                    onClick={async () => await handleSave()}
-                                                    className={`px-3 py-1 text-sm text-white ${isCreating ? "bg-blue-500 hover:bg-blue-600" : "bg-green-500 hover:bg-green-600"
-                                                        } rounded focus:outline-none focus:ring-2 ${isCreating ? "focus:ring-blue-400" : "focus:ring-green-400"
+                                                    onClick={handleSave}
+                                                    className={`px-3 py-1.5 text-sm text-white ${isCreating ? "bg-blue-500 hover:bg-blue-600" : "bg-green-500 hover:bg-green-600"
+                                                        } rounded-md focus:outline-none focus:ring-2 ${isCreating ? "focus:ring-blue-400" : "focus:ring-green-400"
                                                         }`}
                                                 >
                                                     {isCreating ? "Tạo mới" : "Lưu"}
                                                 </button>
                                             ) : (
-                                                <button
-                                                    onClick={() => handleEdit(rowIndex)}
-                                                    className="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                                >
-                                                    Chỉnh sửa
-                                                </button>
+                                                <div className="flex items-center justify-center space-x-2">
+                                                    <button
+                                                        onClick={() => handleEdit(rowIndex)}
+                                                        className="px-3 py-1.5 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                                    >
+                                                        Chỉnh sửa
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteClick(rowIndex)}
+                                                        className="px-3 py-1.5 text-sm text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                                    >
+                                                        Xóa
+                                                    </button>
+                                                </div>
                                             )}
-                                            <button
-                                                onClick={() => handleDeleteClick(rowIndex)}
-                                                className="ml-2 px-3 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
-                                            >
-                                                Xóa
-                                            </button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -225,31 +369,30 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
                 <div className="w-full">
                     <div className="p-6">
                         <div className="flex flex-col items-center justify-center text-center">
-                            <div className="w-16 h-16 mb-4 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600 dark:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            <div className="w-16 h-16 mb-4 rounded-full bg-red-100 flex items-center justify-center dark:bg-red-900/30">
+                                <svg className="w-8 h-8 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                             </div>
                             <h3 className="mb-2 text-xl font-medium text-gray-900 dark:text-white">Xác nhận xóa</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Bạn có chắc chắn muốn xóa mục này không? Hành động này không thể hoàn tác.
+                            <p className="text-gray-500 dark:text-gray-400">
+                                Bạn có chắc chắn muốn xóa dữ liệu này không? Hành động này không thể hoàn tác.
                             </p>
+                            <div className="flex mt-6 space-x-3">
+                                <button
+                                    onClick={cancelDelete}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                >
+                                    Xóa
+                                </button>
+                            </div>
                         </div>
-                    </div>
-
-                    <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-center space-x-3">
-                        <button
-                            onClick={cancelDelete}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
-                        >
-                            Hủy
-                        </button>
-                        <button
-                            onClick={confirmDelete}
-                            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:bg-red-700 dark:hover:bg-red-800"
-                        >
-                            Xóa
-                        </button>
                     </div>
                 </div>
             </Modal>
