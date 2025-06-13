@@ -195,7 +195,7 @@ const GetAllBaseUser = async (nameRole) => {
   return await axios.get(API);
 };
 const PutBaseUser = async (data) => {
-  const API = `/update`;
+  const API = `base_user/update`;
   return await axios.put(API, data);
 };
 

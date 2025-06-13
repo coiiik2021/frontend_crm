@@ -459,7 +459,13 @@ export default function ContentTable(props) {
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {item.email}
+                    <NavLink
+                      to="/quan-ly/profile"
+                      state={{ user: item }}
+                      className="block font-medium text-gray-800 text-theme-sm dark:text-white/90"
+                    >
+                      {item.email}
+                    </NavLink>
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
                     {item.phone}

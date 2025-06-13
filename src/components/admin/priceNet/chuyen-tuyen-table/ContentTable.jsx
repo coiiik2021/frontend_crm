@@ -48,13 +48,8 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                 setPriceGasoline(dataGasOline);
 
                 const dataServiceCompany = await GetNameService(nameHang);
-
-
-
                 if (dataServiceCompany && Array.isArray(dataServiceCompany.nameService) && dataServiceCompany.nameService.length > 0) {
                     setServiceCompany(dataServiceCompany.nameService);
-                    console.log(dataServiceCompany);
-
 
                     const firstService = dataServiceCompany.nameService[0];
                     setTableType(firstService);
@@ -247,28 +242,28 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl shadow-lg">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                 {/* Tabs and controls - responsive layout */}
-                <div className="flex flex-col space-y-4">
+                <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:justify-between lg:items-center">
                     {/* Tabs section */}
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 sm:gap-4">
                         <button
                             onClick={() => setCurrentPage(1)}
                             className={`px-3 py-2 sm:px-4 rounded-lg font-medium transition-all ${currentPage === 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"}`}
                         >
-                            Bảng giá
+                            Giá Net
                         </button>
 
                         <button
                             onClick={() => setCurrentPage(2)}
                             className={`px-3 py-2 sm:px-4 rounded-lg font-medium transition-all ${currentPage === 2 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"}`}
                         >
-                            Phụ phí nhiên liệu
+                            Giá xăng dầu
                         </button>
 
                         <button
                             onClick={() => setCurrentPage(3)}
                             className={`px-3 py-2 sm:px-4 rounded-lg font-medium transition-all ${currentPage === 3 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"}`}
                         >
-                            Phụ phí khác
+                            Phụ phí quá khổ
                         </button>
 
                         <button
@@ -277,9 +272,40 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                         >
                             Phụ phí mùa cao điểm
                         </button>
+
+                        {currentPage === 1 && (
+                            <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
+                                <select
+                                    value={selectedDate || ""}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                    className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+                                >
+                                    <option value="" disabled>
+                                        Chọn ngày
+                                    </option>
+                                    {Object.keys(dataByDate).map((date) => (
+                                        <option key={date} value={date}>
+                                            {date}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <select
+                                    value={tableType}
+                                    onChange={(e) => handleTableTypeChange(e.target.value)}
+                                    className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+                                >
+                                    {serviceCompany?.map((name) => (
+                                        <option key={name} value={name}>
+                                            {name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Action buttons */}
+                    {/* Action buttons - responsive layout */}
                     {currentPage === 1 && (
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                             <Button
@@ -338,32 +364,43 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                                             <span className="hidden sm:inline">Xóa</span>
                                         </span>
                                     </Button>
+
+                                    <label
+                                        htmlFor="file-upload"
+                                        className="px-3 py-2 text-white bg-green-500 rounded-lg shadow cursor-pointer hover:bg-green-600 transition-all flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                                            <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+                                        </svg>
+                                        <span className="hidden sm:inline">Import Excel</span>
+                                        <span className="sm:hidden">Import</span>
+                                    </label>
+                                    <input
+                                        id="file-upload"
+                                        type="file"
+                                        accept=".xlsx, .xls"
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                    />
                                 </>
+                            )}
+
+                            {isImported && (
+                                <button
+                                    onClick={handleSaveData}
+                                    className="px-3 py-2 text-white bg-indigo-500 rounded-lg shadow hover:bg-indigo-600 transition-all flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z" />
+                                    </svg>
+                                    <span className="hidden sm:inline">Lưu thông tin</span>
+                                    <span className="sm:hidden">Lưu</span>
+                                </button>
                             )}
                         </div>
                     )}
                 </div>
-
-                {/* Date selector - completely separate */}
-                {currentPage === 1 && (
-                    <div className="flex justify-end mt-4 mb-2">
-                        <select
-                            value={selectedDate || ""}
-                            onChange={(e) => setSelectedDate(e.target.value)}
-                            className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-                        >
-                            <option value="" disabled>
-                                Chọn ngày
-                            </option>
-                            {Object.keys(dataByDate).map((date) => (
-                                <option key={date} value={date}>
-                                    {date}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-
             </div>
 
             {/* Table content */}

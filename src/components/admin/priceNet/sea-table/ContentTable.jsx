@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
-import PriceNetTable from "../../TableDataPrice/PriceNetTable.jsx";
-import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable.jsx";
-import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, GetShipperServiceCompany, PostNameService, PostPriceNet, PutService } from "../../../../service/api.admin.service.jsx";
-import Button from "../../../../elements/Button/index.jsx";
-import { useModal } from "../../../../hooks/useModal.js";
-import { Modal } from "../../ui/modal/index.js";
-import Label from "../../form/Label.js";
-import Input from "../../form/input/InputField.js";
+import PriceNetTable from "../../TableDataPrice/PriceNetTable";
+import PriceGasolineTable from "../../TableDataPrice/PriceGasolineTable";
+import { DeleteServiceCompany, GetConstNet, GetNameService, GetPriceAllGasoline, GetPriceNet, GetShipperServiceCompany, PostNameService, PostPriceNet, PutService } from "../../../../service/api.admin.service";
+import Button from "../../../../elements/Button";
+import { useModal } from "../../../../hooks/useModal";
+import { Modal } from "../../ui/modal";
+import Label from "../../form/Label";
+import Input from "../../form/input/InputField";
 import OverSizeTable from "../../TableDataPrice/OverSizeTable.jsx";
-import PeakSeason from "../../TableDataPrice/PeakSeason.jsx";
+import PeakSeason from "../../TableDataPrice/PeakSeason";
 
 
 export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }) {
@@ -24,6 +24,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
     const [isImported, setIsImported] = useState(false);
     const [newShipper, setNewShipper] = useState({});
     const [newNameService, setNewNameService] = useState("");
+    const [newCurrency, setNewCurrency] = useState("VND");
     const [serviceCompany, setServiceCompany] = useState([]);
     const [zone, setZone] = useState([]);
     const [constNet, setConstNet] = useState({});
@@ -79,6 +80,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
         const dataRequest = {
             name: nameHang,
             nameService: newNameService,
+            currency: newCurrency,
             shipperCompany: {
                 companyName: newShipper.companyName,
                 address: newShipper.address,
@@ -102,10 +104,11 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
         setTableType(newNameService);
 
         setConstNet({
-            dim: 6000,
+            dim: 5000,
             ppxd: 100,
             vat: 8,
-            overSize: 100
+            overSize: 100,
+            peakSeason: 100
         });
         setDataByDate({});
 
@@ -421,8 +424,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                     <OverSizeTable />
                 ) : (
                     <PeakSeason
-
-
+                        nameHang={nameHang}
                     />
                 )}
             </div>
@@ -442,8 +444,8 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                     </div>
                     <form className="flex flex-col">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            {/* Thông tin cơ bản */}
-                            <div className="sm:col-span-2">
+                            {/* Thông tin cơ bản - đặt trên cùng một hàng */}
+                            <div>
                                 <Label>Tên dịch vụ <span className="text-red-500">*</span></Label>
                                 <Input
                                     type="text"
@@ -451,6 +453,18 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                                     onChange={(e) => setNewNameService(e.target.value)}
                                     placeholder="Nhập tên dịch vụ"
                                 />
+                            </div>
+
+                            <div>
+                                <Label>Loại tiền<span className="text-red-500">*</span></Label>
+                                <select
+                                    value={newCurrency}
+                                    onChange={(e) => setNewCurrency(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                                >
+                                    <option>VND</option>
+                                    <option>USD</option>
+                                </select>
                             </div>
 
                             {/* Thông tin công ty */}
@@ -570,6 +584,10 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                                     placeholder="Nhập tên dịch vụ"
                                 />
                             </div>
+
+
+
+
 
                             {/* Thông tin công ty */}
                             <div>
