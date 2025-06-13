@@ -40,6 +40,9 @@ export default function ContentTable(props) {
   const [priceOrders, setPriceOrders] = useState([]);
   const [billEdit, setBillEdit] = useState({});
 
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
   const formatCurrency = (amount) => {
     const num = parseFloat(String(amount).replace(/[^0-9.]/g, ""));
     if (isNaN(num)) return "0";
@@ -197,6 +200,7 @@ export default function ContentTable(props) {
   const [paymentDetails, setPaymentDetails] = useState({
     cash: 0,
     banking: 0,
+    businessBanking: 0,
   });
 
   // Hàm để lấy thông tin thanh toán từ backend
@@ -209,6 +213,7 @@ export default function ContentTable(props) {
       setPaymentDetails({
         cash: response.priceCash || 0,
         banking: response.priceCard || 0,
+        businessBanking: response.priceBusinessCard || 0,
       });
     } catch (error) {
       console.error("Error fetching payment details:", error);
@@ -216,6 +221,7 @@ export default function ContentTable(props) {
       setPaymentDetails({
         cash: 0,
         banking: 0,
+        businessBanking: 0,
       });
     }
   };
@@ -887,29 +893,30 @@ export default function ContentTable(props) {
   };
 
   // Tính toán các giá trị tổng quan
-  const totalMastertracking = currentData.filter(
+  const filteredMastertracking = currentData.filter(
     (item) => item.awb && item.awb !== ""
-  ).length;
-  const totalDebit = currentData.reduce(
+  );
+  const totalMastertracking = filteredMastertracking.length;
+  const totalDebit = filteredMastertracking.reduce(
     (sum, item) => sum + (item?.grand_total?.grand_total || 0),
     0
   );
-  const totalPayment = currentData.reduce(
+  const totalPayment = filteredMastertracking.reduce(
     (sum, item) =>
       sum +
       (item?.pricePayment?.payment_card || 0) +
       (item?.pricePayment?.payment_cash || 0),
     0
   );
-  const totalRemaining = currentData.reduce(
+  const totalRemaining = filteredMastertracking.reduce(
     (sum, item) => sum + (item?.pricePayment?.payments_remaining || 0),
     0
   );
 
   return (
     <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
-      {/* Thêm 4 ô tổng quan ở đây */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
+      {/* Thêm 6 ô tổng quan ở đây */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4 p-4">
         <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex flex-col items-center">
           <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">
             Doanh số (Mastertracking)
@@ -927,11 +934,39 @@ export default function ContentTable(props) {
           </span>
         </div>
         <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4 flex flex-col items-center">
-          <span className="text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">
+          <span className="w-full max-w-md text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">
             Tổng Thanh toán
           </span>
           <span className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">
             {formatCurrency(totalPayment)} VNĐ
+          </span>
+        </div>
+        <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 flex flex-col items-center">
+          <span className="text-xs text-green-700 dark:text-green-300 font-semibold mb-1">
+            Tiền mặt:
+          </span>
+          <span className="text-2xl font-bold text-green-700 dark:text-green-300">
+            {formatCurrency(
+              filteredMastertracking.reduce(
+                (sum, item) => sum + (item?.pricePayment?.payment_cash || 0),
+                0
+              )
+            )}{" "}
+            VNĐ
+          </span>
+        </div>
+        <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex flex-col items-center">
+          <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">
+            Chuyển khoản:
+          </span>
+          <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+            {formatCurrency(
+              filteredMastertracking.reduce(
+                (sum, item) => sum + (item?.pricePayment?.payment_card || 0),
+                0
+              )
+            )}{" "}
+            VNĐ
           </span>
         </div>
         <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 flex flex-col items-center">
@@ -1977,11 +2012,47 @@ export default function ContentTable(props) {
                       {formatCurrency(item?.total_ar.total)} VNĐ
                     </TableCell>
                   )}
+
                   {visibleColumns.order_grand_total && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.grand_total.order_grand_total || "..."}
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="relative flex flex-col items-start space-y-2">
+                        {(authorities.includes("ADMIN") ||
+                          authorities.includes("CS") ||
+                          authorities.includes("TRANSPORTER")) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              openModal();
+                              setBillEdit(item);
+                            }}
+                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            <PencilIcon className="w-5 h-5" />
+                          </button>
+                        )}
+
+                        {/* Giá trị tiền order */}
+                        <div className="flex flex-col space-y-1 pt-6">
+                          {/* Giá trị xanh */}
+                          <div className="flex items-center space-x-2">
+                            <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                              {formatCurrency(item.priceOrder.total_complete)}{" "}
+                              VNĐ
+                            </span>
+                          </div>
+
+                          {/* Giá trị đỏ */}
+                          <div className="flex items-center space-x-2">
+                            <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                              {formatCurrency(item.priceOrder.total_process)}{" "}
+                              VNĐ
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </TableCell>
                   )}
+
                   {visibleColumns.other_charges_total && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.grand_total.other_charges_total || "..."}
@@ -2604,4 +2675,14 @@ export default function ContentTable(props) {
       </Modal>
     </div>
   );
+}
+
+function parseCustomDate(dateString) {
+  // dateString dạng "10:44:19 07:06:2025"
+  if (!dateString) return null;
+  const parts = dateString.split(" ");
+  if (parts.length !== 2) return null;
+  const [time, date] = parts;
+  const [day, month, year] = date.split(":").map(Number);
+  return new Date(year, month - 1, day);
 }
