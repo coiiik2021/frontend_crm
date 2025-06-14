@@ -27,6 +27,7 @@ import {
 import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import ExcelJS from "exceljs";
+import { DatePicker } from 'antd';
 // import { set } from "date-fns";
 // import { s } from "@fullcalendar/core/internal-common";
 
@@ -42,8 +43,23 @@ export default function ContentTable(props) {
   const [priceOrders, setPriceOrders] = useState([]);
   const [billEdit, setBillEdit] = useState({});
 
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  // State bộ lọc
+  const { RangePicker } = DatePicker;
+  const [filterType, setFilterType] = useState(""); // "day" | "month" | "year" | "range" | ""
+  const [filterDay, setFilterDay] = useState(null);
+  const [filterMonth, setFilterMonth] = useState(null);
+  const [filterYear, setFilterYear] = useState(null);
+  const [filterRange, setFilterRange] = useState({ from: null, to: null });
+
+  // reset bộ lọc
+  const resetAllFilters = () => {
+    setFilterType("");
+    setFilterDay(null);
+    setFilterMonth(null);
+    setFilterYear(null);
+    setFilterRange({ from: null, to: null });
+  };
+
   const [editType, setEditType] = useState("");
   const formatCurrency = (amount) => {
     const num = parseFloat(String(amount).replace(/[^0-9.-]/g, "")); // Cho phép dấu "-"
@@ -157,28 +173,82 @@ export default function ContentTable(props) {
   }
 
   const filteredAndSortedData = useMemo(() => {
-    return dataBill
-      .filter((item) =>
-        item.bill_house.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .sort((a, b) => {
-        if (sortKey === "bill_house") {
-          return sortOrder === "asc"
-            ? a.fullName.localeCompare(b.fullName)
-            : b.fullName.localeCompare(a.fullName);
-        }
+    let filtered = dataBill;
 
-        if (sortKey === "total_price") {
-          const salaryA = Number.parseInt(a[sortKey]);
-          const salaryB = Number.parseInt(b[sortKey]);
-          return sortOrder === "asc" ? salaryA - salaryB : salaryB - salaryA;
-        }
+    // Lọc theo house bill (search)
+    filtered = filtered.filter((item) =>
+      item.bill_house.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-        return sortOrder === "asc"
-          ? String(a[sortKey]).localeCompare(String(b[sortKey]))
-          : String(b[sortKey]).localeCompare(String(a[sortKey]));
+    // Lọc theo ngày/tháng/năm/khoảng ngày
+    if (filterType === "day" && filterDay) {
+      filtered = filtered.filter((item) => {
+        const date = parseCustomDate(item.date_create);
+        return (
+          date &&
+          date.getDate() === filterDay.date() &&
+          date.getMonth() === filterDay.month() &&
+          date.getFullYear() === filterDay.year()
+        );
       });
-  }, [dataBill, sortKey, sortOrder, searchTerm]);
+    } else if (filterType === "month" && filterMonth) {
+      filtered = filtered.filter((item) => {
+        const date = parseCustomDate(item.date_create);
+        return (
+          date &&
+          date.getMonth() === filterMonth.month() &&
+          date.getFullYear() === filterMonth.year()
+        );
+      });
+    } else if (filterType === "year" && filterYear) {
+      filtered = filtered.filter((item) => {
+        const date = parseCustomDate(item.date_create);
+        return date && date.getFullYear() === filterYear.year();
+      });
+    } else if (
+      filterType === "range" &&
+      filterRange.from &&
+      filterRange.to
+    ) {
+      filtered = filtered.filter((item) => {
+        const date = parseCustomDate(item.date_create);
+        return (
+          date &&
+          date >= filterRange.from.startOf("day") &&
+          date <= filterRange.to.endOf("day")
+        );
+      });
+    }
+
+    // Sắp xếp
+    return filtered.sort((a, b) => {
+      if (sortKey === "bill_house") {
+        return sortOrder === "asc"
+          ? a.fullName.localeCompare(b.fullName)
+          : b.fullName.localeCompare(a.fullName);
+      }
+
+      if (sortKey === "total_price") {
+        const salaryA = Number.parseInt(a[sortKey]);
+        const salaryB = Number.parseInt(b[sortKey]);
+        return sortOrder === "asc" ? salaryA - salaryB : salaryB - salaryA;
+      }
+
+      return sortOrder === "asc"
+        ? String(a[sortKey]).localeCompare(String(b[sortKey]))
+        : String(b[sortKey]).localeCompare(String(a[sortKey]));
+    });
+  }, [
+    dataBill,
+    sortKey,
+    sortOrder,
+    searchTerm,
+    filterType,
+    filterDay,
+    filterMonth,
+    filterYear,
+    filterRange,
+  ]);
 
   const totalItems = filteredAndSortedData.length;
 
@@ -1125,7 +1195,152 @@ export default function ContentTable(props) {
   );
 
   return (
-    <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
+    <div className="bg-white dark:bg-white/[0.03] rounded-xl">
+
+      {/* Bộ lọc */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+              Bộ lọc
+            </h3>
+            <button
+              className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors duration-200 flex items-center gap-1"
+              onClick={() => {
+                setFilterType("");
+                resetAllFilters();
+              }}
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Xóa bộ lọc
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+            {/* Lọc theo khoảng ngày */}
+            <div className="space-y-2 md:col-span-2 lg:col-span-1">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                📅 Khoảng ngày
+              </label>
+              <div className="space-y-2">
+                <RangePicker
+                  format={"DD/MM/YYYY"}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  value={filterType === "range" && filterRange.from && filterRange.to ? [filterRange.from, filterRange.to] : []}
+                  onChange={(dates) => {
+                    if (dates && dates.length === 2) {
+                      setFilterType("range");
+                      setFilterRange({ from: dates[0], to: dates[1] });
+                      setFilterDay(null);
+                      setFilterMonth(null);
+                      setFilterYear(null);
+                    } else {
+                      resetAllFilters();
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Lọc theo ngày đơn */}
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                📅 Theo ngày
+              </label>
+              <DatePicker
+                format={"DD/MM/YYYY"}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                value={filterType === "day" && filterDay ? filterDay : null}
+                onChange={(date) => {
+                  if (date) {
+                    setFilterType("day");
+                    setFilterDay(date);
+                    setFilterMonth(null);
+                    setFilterYear(null);
+                    setFilterRange({ from: null, to: null });
+                  } else {
+                    resetAllFilters();
+                  }
+                }}
+              />
+            </div>
+
+            {/* Lọc theo tháng */}
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                📊 Theo tháng
+              </label>
+              <DatePicker
+                picker="month"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                value={filterType === "month" && filterMonth ? filterMonth : null}
+                onChange={(date) => {
+                  if (date) {
+                    setFilterType("month");
+                    setFilterMonth(date);
+                    setFilterDay(null);
+                    setFilterYear(null);
+                    setFilterRange({ from: null, to: null });
+                  } else {
+                    resetAllFilters();
+                  }
+                }}
+              />
+            </div>
+
+            {/* Lọc theo năm */}
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                🗓️ Theo năm
+              </label>
+              <DatePicker
+                picker="year"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                value={filterType === "year" && filterYear ? filterYear : null}
+                onChange={(date) => {
+                  if (date) {
+                    setFilterType("year");
+                    setFilterYear(date);
+                    setFilterDay(null);
+                    setFilterMonth(null);
+                    setFilterRange({ from: null, to: null });
+                  } else {
+                    resetAllFilters();
+                  }
+                }}
+              />
+            </div>
+
+          </div>
+
+          {/* Thông tin trạng thái filter */}
+          {filterType && (
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+              <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-medium">
+                  Đang lọc:
+                  {filterType === "day" && filterDay && ` Ngày ${filterDay.format("DD/MM/YYYY")}`}
+                  {filterType === "month" && filterMonth && ` Tháng ${filterMonth.format("MM/YYYY")}`}
+                  {filterType === "year" && filterYear && ` Năm ${filterYear.format("YYYY")}`}
+                  {filterType === "range" && filterRange.from && filterRange.to &&
+                    ` Từ ${filterRange.from.format("DD/MM/YYYY")} đến ${filterRange.to.format("DD/MM/YYYY")}`}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Thêm 6 ô tổng quan ở đây */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
         <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex flex-col items-center">
@@ -1762,6 +1977,7 @@ export default function ContentTable(props) {
                         onClick={() => {
                           const newVisibleColumns = { ...visibleColumns };
                           [
+
                             "payments_cash",
                             "payments_banking",
                             "payments_business",
@@ -2260,17 +2476,17 @@ export default function ContentTable(props) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              openModal();
-                              setBillEdit(item);
-                            }}
-                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                openModal();
+                                setBillEdit(item);
+                              }}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
@@ -2339,11 +2555,10 @@ export default function ContentTable(props) {
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${
-                                item.pricePayment.cashPayment.active
-                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                              }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cashPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.cashPayment.price
@@ -2380,11 +2595,10 @@ export default function ContentTable(props) {
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${
-                                item.pricePayment.cardPayment.active
-                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                              }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cardPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.cardPayment.price
@@ -2420,11 +2634,10 @@ export default function ContentTable(props) {
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${
-                                item.pricePayment.businessCardPayment.active
-                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                              }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.businessCardPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.businessCardPayment.price
@@ -2540,8 +2753,8 @@ export default function ContentTable(props) {
                         <StatusBadge status={item.status_payment} />
 
                         {authorities.includes("ADMIN") ||
-                        authorities.includes("CS") ||
-                        authorities.includes("TRANSPORTER") ? (
+                          authorities.includes("CS") ||
+                          authorities.includes("TRANSPORTER") ? (
                           <select
                             value={item.status_payment || "pending"}
                             onChange={(e) =>
@@ -2628,9 +2841,8 @@ export default function ContentTable(props) {
                     type="button"
                     onClick={() => {
                       const currentDate = new Date();
-                      const formattedDate = `${currentDate.getDate()}/${
-                        currentDate.getMonth() + 1
-                      }/${currentDate.getFullYear()}`;
+                      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
+                        }/${currentDate.getFullYear()}`;
                       const newPriceOrder = {
                         id: "",
                         name: "",
