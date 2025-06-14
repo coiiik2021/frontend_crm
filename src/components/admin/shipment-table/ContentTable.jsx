@@ -18,6 +18,7 @@ import {
   GetAllBaseUser,
   GetAllPriceOrder,
   GetPaymentDetails,
+  GetShipment,
   PostBaseUser,
   PostPriceOrder,
   PutPriceOrder,
@@ -27,12 +28,11 @@ import {
 import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import ExcelJS from "exceljs";
-import { DatePicker } from 'antd';
-// import { set } from "date-fns";
+import { DatePicker } from "antd";
 // import { s } from "@fullcalendar/core/internal-common";
 
-export default function ContentTable(props) {
-  const { dataBill } = props;
+export default function ContentTable({ data }) {
+  const [dataBill, setDataBill] = useState(data || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState("name");
@@ -50,7 +50,20 @@ export default function ContentTable(props) {
   const [filterMonth, setFilterMonth] = useState(null);
   const [filterYear, setFilterYear] = useState(null);
   const [filterRange, setFilterRange] = useState({ from: null, to: null });
-
+  console.log("Dữ liệu đơn hàng:", dataBill);
+  const fetchBillData = async () => {
+    try {
+      const data = await GetShipment();
+      setDataBill(data);
+      console.log("Dữ liệu đơn hàng:", dataBill);
+      // setState hoặc xử lý tiếp tại đây nếu cần
+    } catch (error) {
+      console.error("Lỗi khi gọi GetShipment:", error);
+    }
+  };
+  useEffect(() => {
+    setDataBill(data || []);
+  }, [data]);
   // reset bộ lọc
   const resetAllFilters = () => {
     setFilterType("");
@@ -205,11 +218,7 @@ export default function ContentTable(props) {
         const date = parseCustomDate(item.date_create);
         return date && date.getFullYear() === filterYear.year();
       });
-    } else if (
-      filterType === "range" &&
-      filterRange.from &&
-      filterRange.to
-    ) {
+    } else if (filterType === "range" && filterRange.from && filterRange.to) {
       filtered = filtered.filter((item) => {
         const date = parseCustomDate(item.date_create);
         return (
@@ -401,7 +410,7 @@ export default function ContentTable(props) {
 
       // Thông báo thành công
       alert("Cập nhật thanh toán thành công!");
-      window.location.reload();
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
     } catch (error) {
       console.error("Error updating payment:", error);
       alert("Lỗi khi cập nhật thanh toán!");
@@ -444,7 +453,7 @@ export default function ContentTable(props) {
 
       // Thông báo thành công
       alert("Xác nhận thanh toán thành công!");
-      window.location.reload();
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
     } catch (error) {
       console.error("Error confirming payment:", error);
       alert("Lỗi khi xac nhận thanh toán!");
@@ -487,7 +496,7 @@ export default function ContentTable(props) {
 
       // Thông báo thành công
       alert("Hủy thanh toán thành công!");
-      window.location.reload();
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
     } catch (error) {
       console.error("Error cancelling payment:", error);
       alert("Lỗi khi hủy thanh toán!");
@@ -648,7 +657,7 @@ export default function ContentTable(props) {
 
       // Thông báo thành công
       alert("Cập nhật trạng thái thành công!");
-      window.location.reload();
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Lỗi khi cập nhật trạng thái!");
@@ -1196,7 +1205,6 @@ export default function ContentTable(props) {
 
   return (
     <div className="bg-white dark:bg-white/[0.03] rounded-xl">
-
       {/* Bộ lọc */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
         {/* Header */}
@@ -1212,8 +1220,18 @@ export default function ContentTable(props) {
                 resetAllFilters();
               }}
             >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
               Xóa bộ lọc
             </button>
@@ -1223,7 +1241,6 @@ export default function ContentTable(props) {
         {/* Content */}
         <div className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-
             {/* Lọc theo khoảng ngày */}
             <div className="space-y-2 md:col-span-2 lg:col-span-1">
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -1233,7 +1250,11 @@ export default function ContentTable(props) {
                 <RangePicker
                   format={"DD/MM/YYYY"}
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  value={filterType === "range" && filterRange.from && filterRange.to ? [filterRange.from, filterRange.to] : []}
+                  value={
+                    filterType === "range" && filterRange.from && filterRange.to
+                      ? [filterRange.from, filterRange.to]
+                      : []
+                  }
                   onChange={(dates) => {
                     if (dates && dates.length === 2) {
                       setFilterType("range");
@@ -1280,7 +1301,9 @@ export default function ContentTable(props) {
               <DatePicker
                 picker="month"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                value={filterType === "month" && filterMonth ? filterMonth : null}
+                value={
+                  filterType === "month" && filterMonth ? filterMonth : null
+                }
                 onChange={(date) => {
                   if (date) {
                     setFilterType("month");
@@ -1317,23 +1340,42 @@ export default function ContentTable(props) {
                 }}
               />
             </div>
-
           </div>
 
           {/* Thông tin trạng thái filter */}
           {filterType && (
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
               <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <span className="font-medium">
                   Đang lọc:
-                  {filterType === "day" && filterDay && ` Ngày ${filterDay.format("DD/MM/YYYY")}`}
-                  {filterType === "month" && filterMonth && ` Tháng ${filterMonth.format("MM/YYYY")}`}
-                  {filterType === "year" && filterYear && ` Năm ${filterYear.format("YYYY")}`}
-                  {filterType === "range" && filterRange.from && filterRange.to &&
-                    ` Từ ${filterRange.from.format("DD/MM/YYYY")} đến ${filterRange.to.format("DD/MM/YYYY")}`}
+                  {filterType === "day" &&
+                    filterDay &&
+                    ` Ngày ${filterDay.format("DD/MM/YYYY")}`}
+                  {filterType === "month" &&
+                    filterMonth &&
+                    ` Tháng ${filterMonth.format("MM/YYYY")}`}
+                  {filterType === "year" &&
+                    filterYear &&
+                    ` Năm ${filterYear.format("YYYY")}`}
+                  {filterType === "range" &&
+                    filterRange.from &&
+                    filterRange.to &&
+                    ` Từ ${filterRange.from.format(
+                      "DD/MM/YYYY"
+                    )} đến ${filterRange.to.format("DD/MM/YYYY")}`}
                 </span>
               </div>
             </div>
@@ -1977,7 +2019,6 @@ export default function ContentTable(props) {
                         onClick={() => {
                           const newVisibleColumns = { ...visibleColumns };
                           [
-
                             "payments_cash",
                             "payments_banking",
                             "payments_business",
@@ -2476,17 +2517,17 @@ export default function ContentTable(props) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                openModal();
-                                setBillEdit(item);
-                              }}
-                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                            >
-                              <PencilIcon className="w-5 h-5" />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              openModal();
+                              setBillEdit(item);
+                            }}
+                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            <PencilIcon className="w-5 h-5" />
+                          </button>
+                        )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
@@ -2555,10 +2596,11 @@ export default function ContentTable(props) {
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cashPayment.active
-                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                                }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${
+                                item.pricePayment.cashPayment.active
+                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                              }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.cashPayment.price
@@ -2595,10 +2637,11 @@ export default function ContentTable(props) {
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cardPayment.active
-                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                                }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${
+                                item.pricePayment.cardPayment.active
+                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                              }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.cardPayment.price
@@ -2634,10 +2677,11 @@ export default function ContentTable(props) {
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.businessCardPayment.active
-                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                                }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${
+                                item.pricePayment.businessCardPayment.active
+                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                              }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.businessCardPayment.price
@@ -2753,8 +2797,8 @@ export default function ContentTable(props) {
                         <StatusBadge status={item.status_payment} />
 
                         {authorities.includes("ADMIN") ||
-                          authorities.includes("CS") ||
-                          authorities.includes("TRANSPORTER") ? (
+                        authorities.includes("CS") ||
+                        authorities.includes("TRANSPORTER") ? (
                           <select
                             value={item.status_payment || "pending"}
                             onChange={(e) =>
@@ -2803,7 +2847,7 @@ export default function ContentTable(props) {
         onClose={() => {
           closeModal();
           if (isDataChanged) {
-            window.location.reload(); // Chỉ reload nếu dữ liệu đã thay đổi
+            fetchBillData(); // Chỉ reload nếu dữ liệu đã thay đổi
           }
         }}
         className="max-w-[800px] m-4"
@@ -2818,7 +2862,7 @@ export default function ContentTable(props) {
               onClick={() => {
                 closeModal();
                 if (isDataChanged) {
-                  window.location.reload(); // Chỉ reload nếu dữ liệu đã thay đổi
+                  fetchBillData(); // Chỉ reload nếu dữ liệu đã thay đổi
                 }
               }}
               className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
@@ -2841,8 +2885,9 @@ export default function ContentTable(props) {
                     type="button"
                     onClick={() => {
                       const currentDate = new Date();
-                      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
-                        }/${currentDate.getFullYear()}`;
+                      const formattedDate = `${currentDate.getDate()}/${
+                        currentDate.getMonth() + 1
+                      }/${currentDate.getFullYear()}`;
                       const newPriceOrder = {
                         id: "",
                         name: "",
@@ -3006,7 +3051,7 @@ export default function ContentTable(props) {
                 onClick={() => {
                   closeModal();
                   if (isDataChanged) {
-                    window.location.reload();
+                    fetchBillData();
                   }
                 }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
@@ -3023,7 +3068,7 @@ export default function ContentTable(props) {
         onClose={() => {
           setIsOpenFormPayment(false);
           if (isDataChanged) {
-            window.location.reload();
+            fetchBillData();
           }
         }}
         className="max-w-[800px] m-4"
@@ -3041,7 +3086,7 @@ export default function ContentTable(props) {
                   onClick={() => {
                     setIsOpenFormPayment(false);
                     if (isDataChanged) {
-                      window.location.reload();
+                      fetchBillData();
                     }
                   }}
                   className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
@@ -3073,7 +3118,7 @@ export default function ContentTable(props) {
                           Tiền mặt (VNĐ)
                         </label>
                         <input
-                          type="text"
+                          type="number"
                           value={
                             cashPayment.price === 0 &&
                             document.activeElement ===
@@ -3091,6 +3136,7 @@ export default function ContentTable(props) {
                             if (e.target.value === "")
                               handlePaymentInputChange("cash", "0");
                           }}
+                          readOnly={cashPayment.dateUpdate !== null}
                           id="cash-input"
                           className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                         />
@@ -3116,7 +3162,7 @@ export default function ContentTable(props) {
                         type="button"
                         onClick={() => {
                           setIsOpenFormPayment(false);
-                          if (isDataChanged) window.location.reload();
+                          if (isDataChanged) fetchBillData();
                         }}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
                       >
@@ -3162,7 +3208,7 @@ export default function ContentTable(props) {
                           Tiền chuyển khoản (VNĐ)
                         </label>
                         <input
-                          type="text"
+                          type="number"
                           value={
                             bankingPayment.price === 0 &&
                             document.activeElement ===
@@ -3180,6 +3226,7 @@ export default function ContentTable(props) {
                             if (e.target.value === "")
                               handlePaymentInputChange("banking", "0");
                           }}
+                          readOnly={bankingPayment.dateUpdate !== null}
                           id="banking-input"
                           className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                         />
@@ -3207,7 +3254,7 @@ export default function ContentTable(props) {
                         type="button"
                         onClick={() => {
                           setIsOpenFormPayment(false);
-                          if (isDataChanged) window.location.reload();
+                          if (isDataChanged) fetchBillData();
                         }}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
                       >
@@ -3253,7 +3300,7 @@ export default function ContentTable(props) {
                           Tiền chuyển khoản doanh nghiệp (VNĐ)
                         </label>
                         <input
-                          type="text"
+                          type="number"
                           value={
                             businessBankingPayment.price === 0 &&
                             document.activeElement ===
@@ -3275,6 +3322,7 @@ export default function ContentTable(props) {
                             if (e.target.value === "")
                               handlePaymentInputChange("businessBanking", "0");
                           }}
+                          readOnly={businessBankingPayment.dateUpdate !== null}
                           id="business-input"
                           className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                         />
@@ -3302,7 +3350,7 @@ export default function ContentTable(props) {
                         type="button"
                         onClick={() => {
                           setIsOpenFormPayment(false);
-                          if (isDataChanged) window.location.reload();
+                          if (isDataChanged) fetchBillData();
                         }}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
                       >
