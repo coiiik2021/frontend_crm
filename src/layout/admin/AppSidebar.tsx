@@ -19,7 +19,12 @@ import {
   // TaskIcon,
   UserCircleIcon,
 } from "../../icons";
-import { useSidebar } from "../../context/SidebarContext.tsx";
+import { useSidebar } from "../../context/SidebarContext";
+import { jwtDecode } from "jwt-decode";
+
+type ExtendedJwtPayload = {
+  authorities: string[];
+};
 // import SidebarWidget from "./SidebarWidget";
 
 type NavItem = {
@@ -29,104 +34,7 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    subItems: [
-      { name: "Ecommerce", path: "/quan-ly", pro: false },
-      { name: "Analytics", path: "/quan-ly/analytics", pro: true },
-      { name: "Marketing", path: "/quan-ly/marketing", pro: true },
-      { name: "CRM", path: "/quan-ly/crm", pro: true },
-      { name: "Stocks", path: "/quan-ly/stocks", new: true, pro: true },
-      { name: "SaaS", path: "/quan-ly/saas", new: true, pro: true },
-    ],
-  },
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Calendar",
-  //   path: "/calendar",
-  // },
-  {
-    icon: <UserCircleIcon />,
-    name: "User",
-    subItems: [
-      {
-        name: "User", path: "/quan-ly/user-table", pro: false,
 
-      },
-      { name: "Manager", path: "/quan-ly/manager-table", pro: true },
-      { name: "Sales", path: "/quan-ly/sale-table", pro: true },
-    ],
-  },
-
-
-  // {
-  //   name: "Task",
-  //   icon: <TaskIcon />,
-  //   subItems: [
-  //     { name: "List", path: "/task-list", pro: true },
-  //     { name: "Kanban", path: "/task-kanban", pro: true },
-  //   ],
-  // },
-  {
-    name: "Đơn hàng",
-    icon: <ListIcon />,
-    path: "/quan-ly/shipment",
-  },
-
-  {
-    name: "Hoá đơn của tôi",
-    icon: <ListIcon />,
-    path: "/quan-ly/my-debits",
-  },
-  {
-    name: "Price Net",
-    icon: <ListIcon />,
-    subItems: [
-      { name: "Ups", path: "/quan-ly/ups-table", pro: true },
-      { name: "DHL", path: "/quan-ly/dhl-table", pro: true },
-      { name: "FEDEX", path: "/quan-ly/fedex-table", pro: true },
-      { name: "SF", path: "/quan-ly/sf-table", pro: true },
-      { name: "zone country", path: "/quan-ly/zone-country", pro: true },
-
-    ],
-  },
-
-
-  // {
-  //   name: "Forms",
-  //   icon: <ListIcon />,
-  //   subItems: [
-  //     { name: "Form Elements", path: "/form-elements", pro: false },
-  //     { name: "Form Layout", path: "/form-layout", pro: true },
-  //   ],
-  // },
-  // {
-  //   name: "Tables",
-  //   icon: <TableIcon />,
-  //   subItems: [
-  //     { name: "Basic Tables", path: "/basic-tables", pro: false },
-  //     { name: "Data Tables", path: "/data-tables", pro: true },
-  //   ],
-  // },
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "File Manager", path: "/file-manager", pro: true },
-  //     { name: "Pricing Tables", path: "/pricing-tables", pro: true },
-  //     { name: "Faqs", path: "/faq", pro: true },
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //     { name: "500 Error", path: "/error-500", pro: true },
-  //     { name: "503 Error", path: "/error-503", pro: true },
-  //     { name: "Coming Soon", path: "/coming-soon", pro: true },
-  //     { name: "Maintenance", path: "/maintenance", pro: true },
-  //     { name: "Success", path: "/success", pro: true },
-  //   ],
-  // },
-];
 
 const othersItems: NavItem[] = [
   {
@@ -138,34 +46,6 @@ const othersItems: NavItem[] = [
       { name: "Pie Chart", path: "/pie-chart", pro: true },
     ],
   },
-  // {
-  //   icon: <BoxCubeIcon />,
-  //   name: "UI Elements",
-  //   subItems: [
-  //     { name: "Alerts", path: "/alerts", pro: false },
-  //     { name: "Avatar", path: "/avatars", pro: false },
-  //     { name: "Badge", path: "/badge", pro: false },
-  //     { name: "Breadcrumb", path: "/breadcrumb", pro: true },
-  //     { name: "Buttons", path: "/buttons", pro: false },
-  //     { name: "Buttons Group", path: "/buttons-group", pro: true },
-  //     { name: "Cards", path: "/cards", pro: true },
-  //     { name: "Carousel", path: "/carousel", pro: true },
-  //     { name: "Dropdowns", path: "/dropdowns", pro: true },
-  //     { name: "Images", path: "/images", pro: false },
-  //     { name: "Links", path: "/links", pro: true },
-  //     { name: "List", path: "/list", pro: true },
-  //     { name: "Modals", path: "/modals", pro: true },
-  //     { name: "Notification", path: "/notifications", pro: true },
-  //     { name: "Pagination", path: "/pagination", pro: true },
-  //     { name: "Popovers", path: "/popovers", pro: true },
-  //     { name: "Progressbar", path: "/progress-bar", pro: true },
-  //     { name: "Ribbons", path: "/ribbons", pro: true },
-  //     { name: "Spinners", path: "/spinners", pro: true },
-  //     { name: "Tabs", path: "/tabs", pro: true },
-  //     { name: "Tooltips", path: "/tooltips", pro: true },
-  //     { name: "Videos", path: "/videos", pro: false },
-  //   ],
-  // },
   {
     icon: <PlugInIcon />,
     name: "Authentication",
@@ -182,30 +62,169 @@ const othersItems: NavItem[] = [
   },
 ];
 
-// const supportItems: NavItem[] = [
-//   {
-//     icon: <ChatIcon />,
-//     name: "Chat",
-//     path: "/chat",
-//   },
-//   {
-//     icon: <MailIcon />,
-//     name: "Email",
-//     subItems: [
-//       { name: "Inbox", path: "/inbox" },
-//       { name: "Details", path: "/inbox-details" },
-//     ],
-//   },
-//   {
-//     icon: <DocsIcon />,
-//     name: "Invoice",
-//     path: "/invoice",
-//   },
-// ];
+
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+
+  const [authorities, setAuthorities] = useState<string[]>([])
+
+  const [navItems, setNavItems] = useState<NavItem[]>([])
+
+  useEffect(
+    () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const decoded = jwtDecode<ExtendedJwtPayload>(token);
+        setAuthorities(decoded.authorities || []);
+        if (decoded.authorities.includes('ADMIN')) {
+          setNavItems(
+            [{
+              icon: <GridIcon />,
+              name: "Dashboard",
+              subItems: [
+                { name: "Ecommerce", path: "/quan-ly", pro: false },
+                { name: "Analytics", path: "/quan-ly/analytics", pro: true },
+                { name: "Marketing", path: "/quan-ly/marketing", pro: true },
+                { name: "CRM", path: "/quan-ly/crm", pro: true },
+                { name: "Stocks", path: "/quan-ly/stocks", new: true, pro: true },
+                { name: "SaaS", path: "/quan-ly/saas", new: true, pro: true },
+              ],
+            },
+            {
+              icon: <UserCircleIcon />,
+              name: "User",
+              subItems: [
+                { name: "Manager", path: "/quan-ly/manager-table" },
+              ],
+            },
+
+            {
+              name: "Đơn hàng",
+              icon: <ListIcon />,
+              path: "/quan-ly/shipment",
+            },
+
+            {
+              name: "Hoá đơn",
+              icon: <ListIcon />,
+              path: "/quan-ly/my-debits",
+            },
+            {
+              name: "Price Net",
+              icon: <ListIcon />,
+              subItems: [
+                { name: "Ups", path: "/quan-ly/ups-table", pro: true },
+                { name: "DHL", path: "/quan-ly/dhl-table", pro: true },
+
+                { name: "FEDEX", path: "/quan-ly/fedex-table", pro: true },
+                { name: "SF", path: "/quan-ly/sf-table", pro: true },
+                { name: "Chuyên tuyến", path: "/quan-ly/chuyen-tuyen-table", pro: true },
+                { name: "Sea", path: "/quan-ly/sea-table", pro: true },
+                { name: "zone country", path: "/quan-ly/zone-country", pro: true },
+
+              ],
+            },
+
+            ]
+          )
+        } else if (decoded.authorities.includes('MANAGER')) {
+          setNavItems([
+            {
+              icon: <UserCircleIcon />,
+              name: "User",
+              subItems: [
+                {
+                  name: "User", path: "/quan-ly/user-table",
+                },
+                {
+                  name: "Cs", path: "/quan-ly/cs-table",
+                },
+                {
+                  name: "Accountant", path: "/quan-ly/accountant-table",
+                },
+                {
+                  name: "Transporter", path: "/quan-ly/transporter-table",
+                },
+              ],
+            },
+            {
+              name: "Đơn hàng",
+              icon: <ListIcon />,
+              path: "/quan-ly/shipment",
+            },
+
+            {
+              name: "Hoá đơn của tôi",
+              icon: <ListIcon />,
+              path: "/quan-ly/my-debits",
+            },
+
+            {
+              name: "Thông tin tài khoản",
+              icon: <ListIcon />,
+              path: "/quan-ly/my-profile",
+            },
+          ])
+        } else {
+          setNavItems(
+            [
+              {
+                name: "Đơn hàng",
+                icon: <ListIcon />,
+                path: "/quan-ly/shipment",
+              },
+
+              {
+                name: "Hoá đơn của tôi",
+                icon: <ListIcon />,
+                path: "/quan-ly/my-debits",
+              },
+            ]
+          )
+        }
+
+      }
+    }, []);
+
+  // const navItems: NavItem[] = [
+
+  //   {
+  //     icon: <UserCircleIcon />,
+  //     name: "User",
+  //     subItems: [
+  //       {
+  //         name: "User", path: "/quan-ly/user-table",
+
+  //       },
+  //       { name: "Manager", path: "/quan-ly/manager-table" },
+  //     ],
+  //   },
+  //   {
+  //     name: "Đơn hàng",
+  //     icon: <ListIcon />,
+  //     path: "/quan-ly/shipment",
+  //   },
+
+  //   {
+  //     name: "Hoá đơn của tôi",
+  //     icon: <ListIcon />,
+  //     path: "/quan-ly/my-debits",
+  //   },
+  //   {
+  //     name: "Price Net",
+  //     icon: <ListIcon />,
+  //     subItems: [
+  //       { name: "Ups", path: "/quan-ly/ups-table", pro: true },
+  //       { name: "DHL", path: "/quan-ly/dhl-table", pro: true },
+  //       { name: "FEDEX", path: "/quan-ly/fedex-table", pro: true },
+  //       { name: "SF", path: "/quan-ly/sf-table", pro: true },
+  //       { name: "zone country", path: "/quan-ly/zone-country", pro: true },
+
+  //     ],
+  //   },
+  // ];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "support" | "others";
@@ -419,14 +438,14 @@ const AppSidebar: React.FC = () => {
             <>
               <img
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
+                src="/images/logo/logo.png"
                 alt="Logo"
                 width={150}
                 height={40}
               />
               <img
                 className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                src="/images/logo/logo.png"
                 alt="Logo"
                 width={150}
                 height={40}

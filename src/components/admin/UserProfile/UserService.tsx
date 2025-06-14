@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { GetConstUser } from "../../../service/api.admin.servicets";
+import Select from "../form/Select";
 type UserMetaCardProps = {
   user: any;
 };
@@ -39,6 +40,11 @@ export default function UserService({ user }: UserMetaCardProps) {
             <h4 className="w-full text-2xl font-semibold text-gray-800 dark:text-white/90 lg:mb-8">
               Service Information
             </h4>
+            <Button
+              onClick={openModal}
+            >
+              Thêm dịch vụ
+            </Button>
 
             <div className="w-full overflow-x-auto custom-scrollbar">
               <div className="w-full max-w-full mx-auto border border-gray-300 rounded-lg shadow-lg bg-white dark:bg-dark-900">
@@ -156,22 +162,27 @@ export default function UserService({ user }: UserMetaCardProps) {
         <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Edit Address
+              Add Service
             </h4>
-            <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Update your details to keep your profile up-to-date.
-            </p>
+
           </div>
           <form className="flex flex-col">
             <div className="px-2 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
-                  <Label>Country</Label>
-                  <Input type="text" value="United States" />
+                  <Label>Service</Label>
+                  <Select
+                    options={[
+                      { value: "1", label: "Service 1" },
+                      { value: "2", label: "Service 2" },
+                      { value: "3", label: "Service 3" },
+                    ]}
+                    onChange={(selectedOption) => console.log(selectedOption)}
+                  />
                 </div>
 
                 <div>
-                  <Label>City/State</Label>
+                  <Label>DIM</Label>
                   <Input type="text" value="Arizona, United States." />
                 </div>
 

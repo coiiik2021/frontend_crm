@@ -2,8 +2,8 @@ import { useLocation } from "react-router-dom";
 import PageBreadcrumb from "../../components/admin/common/PageBreadCrumb";
 import UserMetaCard from "../../components/admin/UserProfile/UserMetaCard";
 import UserInfoCard from "../../components/admin/UserProfile/UserInfoCard";
-import UserService from "../../components/admin/UserProfile/UserService";
 import PageMeta from "../../components/admin/common/PageMeta";
+import UserService from "../../components/admin/UserProfile/UserService";
 
 export default function UserProfiles() {
   const location = useLocation();

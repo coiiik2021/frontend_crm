@@ -1,15 +1,18 @@
+import { useState } from "react";
 import ComponentCard from "../../common/ComponentCard";
 import PageBreadcrumb from "../../common/PageBreadCrumb";
 import ContentTable from "./ContentTable.jsx"; // Đã sửa từ .tsx thành .jsx
 
 export default function FedexTable() {
+    const [isPriceNetPackage, setIsPriceNetPackage] = useState(true);
+
 
     return (
         <>
-            <PageBreadcrumb pageTitle="Price NET Fedex" />
+            <PageBreadcrumb pageTitle="FEDEX " />
             <div className="space-y-5 sm:space-y-6">
-                <ComponentCard title="Fedex Table">
-                    <ContentTable />
+                <ComponentCard title="Price Net Table" >
+                    <ContentTable isPriceNetPackage={isPriceNetPackage} setIsPriceNetPackage={setIsPriceNetPackage} />
                 </ComponentCard>
             </div>
         </>

@@ -9,7 +9,7 @@ export default function ManagerTable() {
 
   useEffect(() => {
     const fetchManagers = async () => {
-      const dataBaseManager = await GetAllBaseUser("Manager");
+      const dataBaseManager = await GetAllBaseUser("manager");
       setManagers(dataBaseManager);
     };
     fetchManagers();

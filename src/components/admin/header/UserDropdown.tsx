@@ -1,10 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { Link } from "react-router";
+import { jwtDecode } from "jwt-decode";
+
+interface MyJwtPayload {
+  sub: string;
+  authorities: string[];
+  exp: number;
+  iat: number;
+  [key: string]: any;
+}
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [decoded, setDecoded] = useState<MyJwtPayload | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decodedToken = jwtDecode<MyJwtPayload>(token);
+        setDecoded(decodedToken);
+      } catch (error) {
+        console.error("Token decode error:", error);
+        setDecoded(null);
+      }
+    } else {
+      setDecoded(null);
+    }
+  }, []);
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -12,6 +37,11 @@ export default function UserDropdown() {
 
   function closeDropdown() {
     setIsOpen(false);
+  }
+
+  function handleSignOut() {
+    localStorage.removeItem("token");
+    window.location.href = "/signin";
   }
   return (
     <div className="relative">
@@ -23,11 +53,10 @@ export default function UserDropdown() {
           <img src="/images/user/owner.jpg" alt="User" />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">Musharof</span>
+        <span className="block mr-1 font-medium text-theme-sm">{decoded?.sub}</span>
         <svg
-          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            }`}
           width="18"
           height="20"
           viewBox="0 0 18 20"
@@ -51,10 +80,10 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            Musharof Chowdhury
+            {decoded?.authorities.includes("ADMIN") ? "Admin" : decoded?.authorities.includes("MANAGER") ? "Manager" : decoded?.authorities.includes("CS") ? "CS" : decoded?.authorities.includes("TRANSPORTER") ? "Transporter" : decoded?.authorities.includes("ACCOUNTANT") ? "Accountant" : "User"}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            randomuser@pimjo.com
+            {decoded?.sub || "No email found"}
           </span>
         </div>
 
@@ -137,6 +166,7 @@ export default function UserDropdown() {
         </ul>
         <Link
           to="/signin"
+          onClick={handleSignOut}
           className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           <svg

@@ -138,7 +138,6 @@ export default function ContentTable() {
     const [sortKey, setSortKey] = useState<SortKey>("name");
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
     const [searchTerm, setSearchTerm] = useState("");
-
     const filteredAndSortedData = useMemo(() => {
         return tableRowData
             .filter((item) =>

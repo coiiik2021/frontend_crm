@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const Header = ({ currentStep, setCurrentStep }) => {
@@ -13,6 +13,11 @@ const Header = ({ currentStep, setCurrentStep }) => {
         // Cho phép quay lại các bước trước
         if (stepId < currentStep) {
             setCurrentStep(stepId);
+            // Cuộn trang lên đầu khi chuyển bước
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
         }
         // Không cho phép nhảy tới các bước sau
         // Chỉ cho phép đi tiếp khi đã hoàn thành bước hiện tại
