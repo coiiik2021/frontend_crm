@@ -28,8 +28,7 @@ import {
 import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import ExcelJS from "exceljs";
-import { DatePicker } from "antd";
-// import { s } from "@fullcalendar/core/internal-common";
+import { DatePicker } from "antd"; // import { s } from "@fullcalendar/core/internal-common";
 
 export default function ContentTable({ data }) {
   const [dataBill, setDataBill] = useState(data || []);
@@ -72,7 +71,29 @@ export default function ContentTable({ data }) {
     setFilterYear(null);
     setFilterRange({ from: null, to: null });
   };
+  function formatDateTime(isoString, format = "DD/MM/YYYY HH:mm") {
+    if (!isoString) return "";
 
+    // Cắt phần microseconds nếu có
+    const date = new Date(isoString.split(".")[0]);
+
+    const pad = (n) => String(n).padStart(2, "0");
+
+    const replacements = {
+      DD: pad(date.getDate()),
+      MM: pad(date.getMonth() + 1),
+      YYYY: date.getFullYear(),
+      HH: pad(date.getHours()),
+      mm: pad(date.getMinutes()),
+      ss: pad(date.getSeconds()),
+    };
+
+    // Thay thế định dạng
+    return format.replace(
+      /DD|MM|YYYY|HH|mm|ss/g,
+      (match) => replacements[match]
+    );
+  }
   const [editType, setEditType] = useState("");
   const formatCurrency = (amount) => {
     const num = parseFloat(String(amount).replace(/[^0-9.-]/g, "")); // Cho phép dấu "-"
@@ -3148,7 +3169,11 @@ export default function ContentTable({ data }) {
                         </label>
                         <input
                           type="text"
-                          value={cashPayment.dateUpdate || "Chưa có ngày tạo"}
+                          value={
+                            cashPayment.dateUpdate
+                              ? formatDateTime(cashPayment.dateUpdate)
+                              : "Chưa có ngày tạo"
+                          }
                           readOnly
                           className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                         />
@@ -3239,7 +3264,9 @@ export default function ContentTable({ data }) {
                         <input
                           type="text"
                           value={
-                            bankingPayment.dateUpdate || "Chưa có ngày tạo"
+                            bankingPayment.dateUpdate
+                              ? formatDateTime(bankingPayment.dateUpdate)
+                              : "Chưa có ngày tạo"
                           }
                           readOnly
                           className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
@@ -3335,8 +3362,11 @@ export default function ContentTable({ data }) {
                         <input
                           type="text"
                           value={
-                            businessBankingPayment.dateUpdate ||
-                            "Chưa có ngày tạo"
+                            businessBankingPayment.dateUpdate
+                              ? formatDateTime(
+                                  businessBankingPayment.dateUpdate
+                                )
+                              : "Chưa có ngày tạo"
                           }
                           readOnly
                           className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
