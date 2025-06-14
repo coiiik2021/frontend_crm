@@ -1536,245 +1536,163 @@ export default function ContentTable({ data }) {
           <span className="text-gray-500 dark:text-gray-400"> entries </span>
 
           {/* Thêm nút tùy chỉnh cột */}
-          <button
-            ref={columnButtonRef}
-            onClick={() => setShowColumnSelector(!showColumnSelector)}
-            className="ml-4 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 flex items-center"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div className="relative">
+            <button
+              ref={columnButtonRef}
+              onClick={() => setShowColumnSelector(!showColumnSelector)}
+              className="ml-4 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 flex items-center"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            Tùy chỉnh cột
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              Tùy chỉnh cột
+            </button>
 
-          <button
-            ref={columnButtonRef}
-            onClick={() => exportToExcel()}
-            className="ml-4 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 flex items-center transition-all duration-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-1"
-              fill="currentColor"
-              viewBox="0 0 16 16"
-            >
-              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V4a1 1 0 0 1 1-1z" />
-            </svg>
-            Xuất Excel
-          </button>
+            {/* Dropdown tùy chỉnh cột */}
+            {showColumnSelector && (
+              <div
+                ref={columnSelectorRef}
+                className="absolute left-0 top-full mt-2 z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-3 w-72 dark:bg-gray-800 dark:border-gray-700"
+              >
+                <h3 className="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+                  Hiển thị cột
+                </h3>
 
-          {/* Dropdown tùy chỉnh cột */}
-          {showColumnSelector && (
-            <div
-              ref={columnSelectorRef}
-              className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-3 top-16 w-72 dark:bg-gray-800 dark:border-gray-700"
-            >
-              <h3 className="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                Hiển thị cột
-              </h3>
-
-              {/* Thêm nút Chọn tất cả/Bỏ chọn tất cả */}
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => {
-                    const newVisibleColumns = { ...visibleColumns };
-                    Object.keys(newVisibleColumns).forEach((column) => {
-                      if (column !== "house_bill") {
-                        // Giữ nguyên house_bill
-                        newVisibleColumns[column] = true;
-                      }
-                    });
-                    setVisibleColumns(newVisibleColumns);
-                  }}
-                  className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                >
-                  Chọn tất cả
-                </button>
-                <button
-                  onClick={() => {
-                    const newVisibleColumns = { ...visibleColumns };
-                    Object.keys(newVisibleColumns).forEach((column) => {
-                      if (column !== "house_bill") {
-                        // Giữ nguyên house_bill
-                        newVisibleColumns[column] = false;
-                      }
-                    });
-                    setVisibleColumns(newVisibleColumns);
-                  }}
-                  className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                >
-                  Bỏ chọn tất cả
-                </button>
-              </div>
-
-              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                {/* Cột luôn hiển thị */}
-                <div className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
-                    id="col-house_bill"
-                    checked={true}
-                    disabled={true}
-                    className="w-4 h-4 bg-blue-600 text-blue-600 cursor-not-allowed opacity-70 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  />
-                  <label
-                    htmlFor="col-house_bill"
-                    className="ml-2 text-sm font-medium text-gray-800 dark:text-gray-200"
+                {/* Thêm nút Chọn tất cả/Bỏ chọn tất cả */}
+                <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => {
+                      const newVisibleColumns = { ...visibleColumns };
+                      Object.keys(newVisibleColumns).forEach((column) => {
+                        if (column !== "house_bill") {
+                          // Giữ nguyên house_bill
+                          newVisibleColumns[column] = true;
+                        }
+                      });
+                      setVisibleColumns(newVisibleColumns);
+                    }}
+                    className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
                   >
-                    HOUSE BILL
-                  </label>
+                    Chọn tất cả
+                  </button>
+                  <button
+                    onClick={() => {
+                      const newVisibleColumns = { ...visibleColumns };
+                      Object.keys(newVisibleColumns).forEach((column) => {
+                        if (column !== "house_bill") {
+                          // Giữ nguyên house_bill
+                          newVisibleColumns[column] = false;
+                        }
+                      });
+                      setVisibleColumns(newVisibleColumns);
+                    }}
+                    className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  >
+                    Bỏ chọn tất cả
+                  </button>
                 </div>
 
-                {/* Nhóm THÔNG TIN CƠ BẢN */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      THÔNG TIN CƠ BẢN
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "house_bill",
-                            "Date",
-                            "customer",
-                            "country_name",
-                            "master_tracking",
-
-                            "gw",
-                            "cw",
-                            "company_service",
-                            "inwh_date",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "Date",
-                            "customer",
-                            "country_name",
-                            "master_tracking",
-                            "gw",
-                            "cw",
-                            "company_service",
-                            "inwh_date",
-                          ].forEach((column) => {
-                            if (column !== "house_bill") {
-                              // Giữ nguyên house_bill
-                              newVisibleColumns[column] = false;
-                            }
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
-                    </div>
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  {/* Cột luôn hiển thị */}
+                  <div className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      id="col-house_bill"
+                      checked={true}
+                      disabled={true}
+                      className="w-4 h-4 bg-blue-600 text-blue-600 cursor-not-allowed opacity-70 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label
+                      htmlFor="col-house_bill"
+                      className="ml-2 text-sm font-medium text-gray-800 dark:text-gray-200"
+                    >
+                      HOUSE BILL
+                    </label>
                   </div>
-                  {[
-                    "Date",
-                    "customer",
-                    "country_name",
-                    "master_tracking",
-                    "gw",
-                    "cw",
-                    "company_service",
-                    "inwh_date",
-                  ].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column] || column}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm PRICE */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      PRICE
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "price_price",
-                            "fsc_price",
-                            "surge_fee_price",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "price_price",
-                            "fsc_price",
-                            "surge_fee_price",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm THÔNG TIN CƠ BẢN */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        THÔNG TIN CƠ BẢN
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "house_bill",
+                              "Date",
+                              "customer",
+                              "country_name",
+                              "master_tracking",
+
+                              "gw",
+                              "cw",
+                              "company_service",
+                              "inwh_date",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "Date",
+                              "customer",
+                              "country_name",
+                              "master_tracking",
+                              "gw",
+                              "cw",
+                              "company_service",
+                              "inwh_date",
+                            ].forEach((column) => {
+                              if (column !== "house_bill") {
+                                // Giữ nguyên house_bill
+                                newVisibleColumns[column] = false;
+                              }
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  {["price_price", "fsc_price", "surge_fee_price"].map(
-                    (column) => (
+                    {[
+                      "Date",
+                      "customer",
+                      "country_name",
+                      "master_tracking",
+                      "gw",
+                      "cw",
+                      "company_service",
+                      "inwh_date",
+                    ].map((column) => (
                       <div key={column} className="flex items-center ml-2 mt-1">
                         <input
                           type="checkbox"
@@ -1792,529 +1710,614 @@ export default function ContentTable({ data }) {
                           htmlFor={`col-${column}`}
                           className="ml-2 text-xs text-gray-600 dark:text-gray-400"
                         >
-                          {columnLabels[column].replace(" (PRICE)", "")}
+                          {columnLabels[column] || column}
                         </label>
                       </div>
-                    )
-                  )}
-                </div>
-
-                {/* Nhóm DEBIT */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      DEBIT
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "afr_debit",
-                            "oversize_debit",
-                            "surge_fee_debit",
-                            "other_charges_debit",
-                            "fsc_debit",
-                            "gw_debit",
-                            "cw_debit",
-                            "bill",
-                            "reconcile",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "afr_debit",
-                            "oversize_debit",
-                            "surge_fee_debit",
-                            "other_charges_debit",
-                            "fsc_debit",
-                            "gw_debit",
-                            "cw_debit",
-                            "bill",
-                            "reconcile",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
-                    </div>
+                    ))}
                   </div>
-                  {[
-                    "afr_debit",
-                    "oversize_debit",
-                    "surge_fee_debit",
-                    "other_charges_debit",
-                    "fsc_debit",
-                    "gw_debit",
-                    "cw_debit",
-                    "bill",
-                    "reconcile",
-                  ].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (DEBIT)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm TOTAL AR */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      TOTAL AR
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          ["total_ar", "vat", "total"].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          ["total_ar", "vat", "total"].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm PRICE */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        PRICE
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "price_price",
+                              "fsc_price",
+                              "surge_fee_price",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "price_price",
+                              "fsc_price",
+                              "surge_fee_price",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
+                    {["price_price", "fsc_price", "surge_fee_price"].map(
+                      (column) => (
+                        <div key={column} className="flex items-center ml-2 mt-1">
+                          <input
+                            type="checkbox"
+                            id={`col-${column}`}
+                            checked={visibleColumns[column]}
+                            onChange={() => {
+                              setVisibleColumns({
+                                ...visibleColumns,
+                                [column]: !visibleColumns[column],
+                              });
+                            }}
+                            className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                          />
+                          <label
+                            htmlFor={`col-${column}`}
+                            className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                          >
+                            {columnLabels[column].replace(" (PRICE)", "")}
+                          </label>
+                        </div>
+                      )
+                    )}
                   </div>
-                  {["total_ar", "vat", "total"].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (TOTAL AR)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm GRAND TOTAL */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      GRAND TOTAL
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "order_grand_total",
-                            "other_charges_total",
-                            "grand_total",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "order_grand_total",
-                            "other_charges_total",
-                            "grand_total",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm DEBIT */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        DEBIT
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "afr_debit",
+                              "oversize_debit",
+                              "surge_fee_debit",
+                              "other_charges_debit",
+                              "fsc_debit",
+                              "gw_debit",
+                              "cw_debit",
+                              "bill",
+                              "reconcile",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "afr_debit",
+                              "oversize_debit",
+                              "surge_fee_debit",
+                              "other_charges_debit",
+                              "fsc_debit",
+                              "gw_debit",
+                              "cw_debit",
+                              "bill",
+                              "reconcile",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
+                    {[
+                      "afr_debit",
+                      "oversize_debit",
+                      "surge_fee_debit",
+                      "other_charges_debit",
+                      "fsc_debit",
+                      "gw_debit",
+                      "cw_debit",
+                      "bill",
+                      "reconcile",
+                    ].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (DEBIT)", "")}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                  {[
-                    "order_grand_total",
-                    "other_charges_total",
-                    "grand_total",
-                  ].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (GRAND TOTAL)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm PAYMENT */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      PAYMENT
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "payments_cash",
-                            "payments_banking",
-                            "payments_business",
-                            "payments_remaining",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "payments_cash",
-                            "payments_banking",
-                            "payments_business",
-                            "payments_remaining",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm TOTAL AR */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        TOTAL AR
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            ["total_ar", "vat", "total"].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            ["total_ar", "vat", "total"].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
+                    {["total_ar", "vat", "total"].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (TOTAL AR)", "")}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                  {[
-                    "payments_cash",
-                    "payments_banking",
-                    "payments_business",
-                    "payments_remaining",
-                  ].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (PAYMENT)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm PROFIT */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      PROFIT
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "price_diff",
-                            "packing",
-                            "pickup",
-                            "other_costs",
-                            "profit",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "price_diff",
-                            "packing",
-                            "pickup",
-                            "other_costs",
-                            "profit",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm GRAND TOTAL */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        GRAND TOTAL
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "order_grand_total",
+                              "other_charges_total",
+                              "grand_total",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "order_grand_total",
+                              "other_charges_total",
+                              "grand_total",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
+                    {[
+                      "order_grand_total",
+                      "other_charges_total",
+                      "grand_total",
+                    ].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (GRAND TOTAL)", "")}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                  {[
-                    "price_diff",
-                    "packing",
-                    "pickup",
-                    "other_costs",
-                    "profit",
-                  ].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (PROFIT)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm HH */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      HH
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          ["hh1", "hh2", "hh3", "hh4"].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          ["hh1", "hh2", "hh3", "hh4"].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm PAYMENT */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        PAYMENT
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "payments_cash",
+                              "payments_banking",
+                              "payments_business",
+                              "payments_remaining",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "payments_cash",
+                              "payments_banking",
+                              "payments_business",
+                              "payments_remaining",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
+                    {[
+                      "payments_cash",
+                      "payments_banking",
+                      "payments_business",
+                      "payments_remaining",
+                    ].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (PAYMENT)", "")}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                  {["hh1", "hh2", "hh3", "hh4"].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (HH)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm LƯƠNG THƯỞNG */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      LƯƠNG THƯỞNG
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "base_salary",
-                            "kpi_bonus",
-                            "bonus_1_2_3",
-                            "allowance",
-                            "other_bonus",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "base_salary",
-                            "kpi_bonus",
-                            "bonus_1_2_3",
-                            "allowance",
-                            "other_bonus",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm PROFIT */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        PROFIT
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "price_diff",
+                              "packing",
+                              "pickup",
+                              "other_costs",
+                              "profit",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "price_diff",
+                              "packing",
+                              "pickup",
+                              "other_costs",
+                              "profit",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
+                    {[
+                      "price_diff",
+                      "packing",
+                      "pickup",
+                      "other_costs",
+                      "profit",
+                    ].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (PROFIT)", "")}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                  {[
-                    "base_salary",
-                    "kpi_bonus",
-                    "bonus_1_2_3",
-                    "allowance",
-                    "other_bonus",
-                  ].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (LƯƠNG THƯỞNG)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Trạng thái */}
-                <div className="flex items-center mt-2">
-                  <input
-                    type="checkbox"
-                    id="col-status"
-                    checked={visibleColumns["status"]}
-                    onChange={() => {
-                      setVisibleColumns({
-                        ...visibleColumns,
-                        status: !visibleColumns["status"],
-                      });
-                    }}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  />
-                  <label
-                    htmlFor="col-status"
-                    className="ml-2 text-sm text-gray-600 dark:text-gray-400"
-                  >
-                    TRẠNG THÁI
-                  </label>
+                  {/* Nhóm HH */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        HH
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            ["hh1", "hh2", "hh3", "hh4"].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            ["hh1", "hh2", "hh3", "hh4"].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
+                    </div>
+                    {["hh1", "hh2", "hh3", "hh4"].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (HH)", "")}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Nhóm LƯƠNG THƯỞNG */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        LƯƠNG THƯỞNG
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "base_salary",
+                              "kpi_bonus",
+                              "bonus_1_2_3",
+                              "allowance",
+                              "other_bonus",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "base_salary",
+                              "kpi_bonus",
+                              "bonus_1_2_3",
+                              "allowance",
+                              "other_bonus",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
+                    </div>
+                    {[
+                      "base_salary",
+                      "kpi_bonus",
+                      "bonus_1_2_3",
+                      "allowance",
+                      "other_bonus",
+                    ].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (LƯƠNG THƯỞNG)", "")}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Trạng thái */}
+                  <div className="flex items-center mt-2">
+                    <input
+                      type="checkbox"
+                      id="col-status"
+                      checked={visibleColumns["status"]}
+                      onChange={() => {
+                        setVisibleColumns({
+                          ...visibleColumns,
+                          status: !visibleColumns["status"],
+                        });
+                      }}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label
+                      htmlFor="col-status"
+                      className="ml-2 text-sm text-gray-600 dark:text-gray-400"
+                    >
+                      TRẠNG THÁI
+                    </label>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+
+          </div>
+
+          <button
+            ref={columnButtonRef}
+            onClick={() => exportToExcel()}
+            className="ml-4 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 flex items-center transition-all duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-1"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V4a1 1 0 0 1 1-1z" />
+            </svg>
+            Xuất Excel
+          </button>
         </div>
 
         <div className="relative">
@@ -2538,17 +2541,17 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              openModal();
-                              setBillEdit(item);
-                            }}
-                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                openModal();
+                                setBillEdit(item);
+                              }}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
@@ -2600,28 +2603,27 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("CASH"); // Thêm dòng này
-                              handleViewPaymentDetails(item);
-                            }}
-                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CASH"); // Thêm dòng này
+                                handleViewPaymentDetails(item);
+                              }}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${
-                                item.pricePayment.cashPayment.active
-                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                              }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cashPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.cashPayment.price
@@ -2641,28 +2643,27 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("CARD"); // Thêm dòng này
-                              handleViewPaymentDetails(item);
-                            }}
-                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CARD"); // Thêm dòng này
+                                handleViewPaymentDetails(item);
+                              }}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${
-                                item.pricePayment.cardPayment.active
-                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                              }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cardPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.cardPayment.price
@@ -2681,28 +2682,27 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("BUSINESS_CARD"); // Thêm dòng này
-                              handleViewPaymentDetails(item);
-                            }}
-                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("BUSINESS_CARD"); // Thêm dòng này
+                                handleViewPaymentDetails(item);
+                              }}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${
-                                item.pricePayment.businessCardPayment.active
-                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                              }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.businessCardPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.businessCardPayment.price
@@ -2818,8 +2818,8 @@ export default function ContentTable({ data }) {
                         <StatusBadge status={item.status_payment} />
 
                         {authorities.includes("ADMIN") ||
-                        authorities.includes("CS") ||
-                        authorities.includes("TRANSPORTER") ? (
+                          authorities.includes("CS") ||
+                          authorities.includes("TRANSPORTER") ? (
                           <select
                             value={item.status_payment || "pending"}
                             onChange={(e) =>
@@ -2906,9 +2906,8 @@ export default function ContentTable({ data }) {
                     type="button"
                     onClick={() => {
                       const currentDate = new Date();
-                      const formattedDate = `${currentDate.getDate()}/${
-                        currentDate.getMonth() + 1
-                      }/${currentDate.getFullYear()}`;
+                      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
+                        }/${currentDate.getFullYear()}`;
                       const newPriceOrder = {
                         id: "",
                         name: "",
@@ -3142,7 +3141,7 @@ export default function ContentTable({ data }) {
                           type="number"
                           value={
                             cashPayment.price === 0 &&
-                            document.activeElement ===
+                              document.activeElement ===
                               document.getElementById("cash-input")
                               ? ""
                               : cashPayment.price
@@ -3236,7 +3235,7 @@ export default function ContentTable({ data }) {
                           type="number"
                           value={
                             bankingPayment.price === 0 &&
-                            document.activeElement ===
+                              document.activeElement ===
                               document.getElementById("banking-input")
                               ? ""
                               : bankingPayment.price
@@ -3330,7 +3329,7 @@ export default function ContentTable({ data }) {
                           type="number"
                           value={
                             businessBankingPayment.price === 0 &&
-                            document.activeElement ===
+                              document.activeElement ===
                               document.getElementById("business-input")
                               ? ""
                               : businessBankingPayment.price
@@ -3364,8 +3363,8 @@ export default function ContentTable({ data }) {
                           value={
                             businessBankingPayment.dateUpdate
                               ? formatDateTime(
-                                  businessBankingPayment.dateUpdate
-                                )
+                                businessBankingPayment.dateUpdate
+                              )
                               : "Chưa có ngày tạo"
                           }
                           readOnly
