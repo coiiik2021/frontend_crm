@@ -23,7 +23,7 @@ const tableData: Product[] = [
     id: 1,
     name: "TailGrids",
     category: "UI Kits",
-    country: "/images/country/country-01.svg",
+    country: "https://cdn-icons-png.flaticon.com/512/9746/9746676.png",
     cr: "Dashboard",
     value: "12,499", // Replace with actual image URL
   },
