@@ -9,7 +9,8 @@ const Products = ({
     productsTotal,
     setProductsTotal,
     productsErrors,
-    setProductsErrors
+    setProductsErrors,
+    priceShipment
 }) => {
     // Thêm useEffect để cuộn trang lên đầu khi component được render
     useEffect(() => {
@@ -582,7 +583,7 @@ const Products = ({
                             </svg>
                             <span className="text-xs font-medium text-gray-600">Phí vận chuyển</span>
                             <p className="text-sm font-semibold text-purple-600 mt-1">
-                                {formatCurrency(productsTotal.price)} VND
+                                {formatCurrency(priceShipment)} VND
                             </p>
                         </div>
                     </div>

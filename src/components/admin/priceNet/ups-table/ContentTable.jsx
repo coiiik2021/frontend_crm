@@ -11,9 +11,10 @@ import { Modal } from "../../ui/modal";
 import Label from "../../form/Label";
 import Input from "../../form/input/InputField";
 import OverSizeTable from "../../TableDataPrice/OverSizeTable.jsx";
+import PeakSeason from "../../TableDataPrice/PeakSeason";
 
 
-export default function ContentTable() {
+export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }) {
     // Existing states
     const [dataByDate, setDataByDate] = useState({});
     const [selectedDate, setSelectedDate] = useState(null);
@@ -23,6 +24,7 @@ export default function ContentTable() {
     const [isImported, setIsImported] = useState(false);
     const [newShipper, setNewShipper] = useState({});
     const [newNameService, setNewNameService] = useState("");
+    const [newCurrency, setNewCurrency] = useState("VND");
     const [serviceCompany, setServiceCompany] = useState([]);
     const [zone, setZone] = useState([]);
     const [constNet, setConstNet] = useState({});
@@ -38,10 +40,10 @@ export default function ContentTable() {
     const { isOpen: isAddModalOpen, openModal: openAddModal, closeModal: closeAddModal } = useModal();
     const { isOpen: isEditModalOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
 
-
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log("Đang lấy dữ liệu với isPriceNetPackage:", isPriceNetPackage);
                 const dataGasOline = await GetPriceAllGasoline(nameHang);
                 setPriceGasoline(dataGasOline);
 
@@ -51,9 +53,9 @@ export default function ContentTable() {
 
                     const firstService = dataServiceCompany.nameService[0];
                     setTableType(firstService);
-
-                    const dataNet = await GetPriceNet(nameHang, firstService);
-                    if (dataNet && Object.keys(dataNet).length > 0) {
+                    // Đảm bảo truyền isPriceNetPackage vào đây
+                    const dataNet = await GetPriceNet(nameHang, firstService, isPriceNetPackage);
+                    if (dataNet) {
                         setDataByDate(dataNet);
 
                         const firstDate = Object.keys(dataNet)[0];
@@ -63,21 +65,22 @@ export default function ContentTable() {
                     const dataConstNet = await GetConstNet(nameHang + firstService);
                     setConstNet(dataConstNet);
                 } else {
-                    console.warn("No services found in GetNameService");
+                    console.warn("Không tìm thấy dịch vụ nào trong GetNameService");
                     setServiceCompany([]);
                 }
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
         fetchData();
-    }, []);
+    }, [isPriceNetPackage]); // Đảm bảo isPriceNetPackage nằm trong mảng dependencies
 
     const handleCreateService = async () => {
         const dataRequest = {
             name: nameHang,
             nameService: newNameService,
+            currency: newCurrency,
             shipperCompany: {
                 companyName: newShipper.companyName,
                 address: newShipper.address,
@@ -104,7 +107,8 @@ export default function ContentTable() {
             dim: 5000,
             ppxd: 100,
             vat: 8,
-            overSize: 100
+            overSize: 100,
+            peakSeason: 100
         });
         setDataByDate({});
 
@@ -173,8 +177,9 @@ export default function ContentTable() {
     const handleTableTypeChange = async (type) => {
         setTableType(type);
 
-        const data = await GetPriceNet(nameHang, type);
-        console.log("Data from API:", data);
+        // Thêm isPriceNetPackage vào cuộc gọi API
+        const data = await GetPriceNet(nameHang, type, isPriceNetPackage);
+        console.log("Dữ liệu từ API:", data);
         setDataByDate(data);
         const firstDate = Object.keys(data)[0];
         setSelectedDate(firstDate);
@@ -228,7 +233,7 @@ export default function ContentTable() {
     };
 
     const handleSaveData = async () => {
-        await PostPriceNet(nameHang, tableType, dataByDate);
+        await PostPriceNet(nameHang, tableType, dataByDate, isPriceNetPackage);
         alert("Thông tin đã được lưu thành công!");
         setIsImported(false);
     };
@@ -259,6 +264,13 @@ export default function ContentTable() {
                             className={`px-3 py-2 sm:px-4 rounded-lg font-medium transition-all ${currentPage === 3 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"}`}
                         >
                             Phụ phí quá khổ
+                        </button>
+
+                        <button
+                            onClick={() => setCurrentPage(4)}
+                            className={`px-3 py-2 sm:px-4 rounded-lg font-medium transition-all ${currentPage === 4 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"}`}
+                        >
+                            Phụ phí mùa cao điểm
                         </button>
 
                         {currentPage === 1 && (
@@ -399,6 +411,8 @@ export default function ContentTable() {
                         selectedDate={selectedDate}
                         constNet={constNet}
                         setConstNet={setConstNet}
+                        isPriceNetPackage={isPriceNetPackage}
+                        setIsPriceNetPackage={setIsPriceNetPackage}
                     />
                 ) : currentPage === 2 ? (
                     <PriceGasolineTable
@@ -406,7 +420,13 @@ export default function ContentTable() {
                         setPriceGasoline={setPriceGasoline}
                         name={nameHang}
                     />
-                ) : <OverSizeTable />}
+                ) : currentPage === 3 ? (
+                    <OverSizeTable />
+                ) : (
+                    <PeakSeason
+                        nameHang={nameHang}
+                    />
+                )}
             </div>
 
             {/* Add Service Modal */}
@@ -424,8 +444,8 @@ export default function ContentTable() {
                     </div>
                     <form className="flex flex-col">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            {/* Thông tin cơ bản */}
-                            <div className="sm:col-span-2">
+                            {/* Thông tin cơ bản - đặt trên cùng một hàng */}
+                            <div>
                                 <Label>Tên dịch vụ <span className="text-red-500">*</span></Label>
                                 <Input
                                     type="text"
@@ -433,6 +453,18 @@ export default function ContentTable() {
                                     onChange={(e) => setNewNameService(e.target.value)}
                                     placeholder="Nhập tên dịch vụ"
                                 />
+                            </div>
+
+                            <div>
+                                <Label>Loại tiền<span className="text-red-500">*</span></Label>
+                                <select
+                                    value={newCurrency}
+                                    onChange={(e) => setNewCurrency(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                                >
+                                    <option>VND</option>
+                                    <option>USD</option>
+                                </select>
                             </div>
 
                             {/* Thông tin công ty */}
@@ -552,6 +584,10 @@ export default function ContentTable() {
                                     placeholder="Nhập tên dịch vụ"
                                 />
                             </div>
+
+
+
+
 
                             {/* Thông tin công ty */}
                             <div>

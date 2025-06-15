@@ -117,8 +117,11 @@ const AppSidebar: React.FC = () => {
               subItems: [
                 { name: "Ups", path: "/quan-ly/ups-table", pro: true },
                 { name: "DHL", path: "/quan-ly/dhl-table", pro: true },
+
                 { name: "FEDEX", path: "/quan-ly/fedex-table", pro: true },
                 { name: "SF", path: "/quan-ly/sf-table", pro: true },
+                { name: "Chuyên tuyến", path: "/quan-ly/chuyen-tuyen-table", pro: true },
+                { name: "Sea", path: "/quan-ly/sea-table", pro: true },
                 { name: "zone country", path: "/quan-ly/zone-country", pro: true },
 
               ],
@@ -435,14 +438,14 @@ const AppSidebar: React.FC = () => {
             <>
               <img
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
+                src="/images/logo/logo.png"
                 alt="Logo"
                 width={150}
                 height={40}
               />
               <img
                 className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                src="/images/logo/logo.png"
                 alt="Logo"
                 width={150}
                 height={40}

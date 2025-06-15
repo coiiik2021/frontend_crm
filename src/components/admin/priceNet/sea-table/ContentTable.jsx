@@ -34,7 +34,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
     const [editShipper, setEditShipper] = useState({});
     const [editNameService, setEditNameService] = useState("");
 
-    const nameHang = "dhl";
+    const nameHang = "sea";
 
     // Add modals for add and edit
     const { isOpen: isAddModalOpen, openModal: openAddModal, closeModal: closeAddModal } = useModal();

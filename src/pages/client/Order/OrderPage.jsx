@@ -9,9 +9,7 @@ import { GetBaseUserForSender } from "../../../service/api.admin.service";
 export default function OrderPage() {
     const [currentStep, setCurrentStep] = useState(2);
 
-    // Thêm useEffect để theo dõi thay đổi của currentStep và cuộn trang lên đầu
     useEffect(() => {
-        // Cuộn trang lên đầu khi currentStep thay đổi
         window.scrollTo({
             top: 0,
             behavior: "smooth"
@@ -121,8 +119,6 @@ export default function OrderPage() {
 
 
 
-
-
     let content = null;
     if (currentStep === 2) {
         content = (
@@ -152,6 +148,7 @@ export default function OrderPage() {
                 setProductsTotal={setProductsTotal}
                 productsErrors={productsErrors}
                 setProductsErrors={setProductsErrors}
+                priceShipment={selectedService.totalPrice}
             />
         );
     }

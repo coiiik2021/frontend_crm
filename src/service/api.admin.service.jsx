@@ -3,16 +3,18 @@ import axios from "./axios.admin.customize";
 const token = localStorage.getItem("token");
 
 // price net
-const GetPriceNet = async (nameCompany, nameService) => {
-  const API = `/prices?nameCompany=${nameCompany}&nameService=${nameService}`;
+const GetPriceNet = async (nameCompany, nameService, isPriceNetPackage) => {
+  const API = `/prices?nameCompany=${nameCompany}&nameService=${nameService}&isPriceNetPackage=${isPriceNetPackage}`;
+  console.log("API", API);
   return await axios.get(API);
 };
 
-const PostPriceNet = async (nameHang, nameService, data) => {
-  const API = `/prices?nameCompany=${nameHang}&nameService=${nameService}`;
+const PostPriceNet = async (nameHang, nameService, data, isPriceNetPackage) => {
+  const API = `/prices?nameCompany=${nameHang}&nameService=${nameService}&isPriceNetPackage=${isPriceNetPackage}`;
   data = {
     data: data,
   };
+
   return await axios.post(API, data);
 };
 
@@ -27,7 +29,6 @@ const PostZoneCountry = async (data) => {
   data = {
     data: data,
   };
-  console.log("data", data);
   return await axios.post(API, data);
 };
 
@@ -36,8 +37,8 @@ const GetAZoneCountry = async (name) => {
   return await axios.get(API);
 };
 
-const GetAllByServiceCompany = async (id) => {
-  const API = `zone-country/${id}`;
+const GetAllByServiceCompany = async (name) => {
+  const API = `zone-country/name?name=${name}`;
   return await axios.get(API);
 };
 
@@ -194,7 +195,7 @@ const GetAllBaseUser = async (nameRole) => {
   return await axios.get(API);
 };
 const PutBaseUser = async (data) => {
-  const API = `/update`;
+  const API = `base_user/update`;
   return await axios.put(API, data);
 };
 
@@ -223,6 +224,13 @@ export {
 };
 
 //const_user
+
+//shipment
+const GetShipment = async () => {
+  const API = `shipment`;
+  return await axios.get(API);
+};
+export { GetShipment };
 
 // bill
 const GetAllBill = async () => {
@@ -329,12 +337,12 @@ const PostConsigneeFavorite = async (data) => {
 };
 
 const DeleteConsigneeFavorite = async (id) => {
-  const API = `favorite/consignee${id}`;
+  const API = `favorite/consignee/${id}`;
   return await axios.delete(API);
 };
 
-const GetAllDeliveryFavorite = async (isTo) => {
-  const API = `favorite/delivery?isTo=${isTo}`;
+const GetAllDeliveryFavorite = async () => {
+  const API = `favorite/delivery`;
   return await axios.get(API);
 };
 const PostDeliveryFavorite = async (data) => {
@@ -343,12 +351,12 @@ const PostDeliveryFavorite = async (data) => {
 };
 
 const DeleteDeliveryFavorite = async (id) => {
-  const API = `favorite/delivery${id}`;
+  const API = `favorite/delivery/${id}`;
   return await axios.delete(API);
 };
 
-const GetAllProductFavorite = async (isTo) => {
-  const API = `favorite/product?isTo=${isTo}`;
+const GetAllProductFavorite = async () => {
+  const API = `favorite/product}`;
   return await axios.get(API);
 };
 const PostProductFavorite = async (data) => {
@@ -453,3 +461,28 @@ export {
   GetPaymentDetails,
   UpdatePaymentDetails,
 };
+
+// Thêm hàm DeletePeakSeason
+const DeletePeakSeason = async (data) => {
+  const API = `peak-season/delete`;
+  return await axios.post(API, data);
+};
+
+const PostPeakSeason = async (data) => {
+  const API = `peak-season`;
+  console.log("data", data);
+  return await axios.post(API, data);
+};
+
+const GetAllPeakSeason = async (nameCompany) => {
+  const API = `peak-season?nameCompany=${nameCompany}`;
+  return await axios.get(API);
+};
+
+const PutPeakSeason = async (data) => {
+  const API = `peak-season`;
+  return await axios.put(API, data);
+};
+
+// Đảm bảo hàm được export
+export { DeletePeakSeason, PostPeakSeason, GetAllPeakSeason, PutPeakSeason };

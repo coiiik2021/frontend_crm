@@ -8,12 +8,15 @@ import FormPackage from "./FormPackage.jsx";
 import DatePicker from "../../admin/form/date-picker.tsx";
 import { useState, useEffect, useRef } from "react";
 import { GetCodeByCompany } from "../../../service/api.service.jsx";
-import { DeleteConsigneeFavorite, GetAllConsigneeFavorite, GetZoneCountry, PostConsigneeFavorite } from "../../../service/api.admin.service.jsx";
+import { DeleteConsigneeFavorite, GetAllConsigneeFavorite, GetAllDeliveryFavorite, GetZoneCountry, PostConsigneeFavorite } from "../../../service/api.admin.service.jsx";
+import Document from "./Document.jsx";
+import { FileTextIcon, PackageIcon } from "lucide-react";
 
 export default function InformationOrder(props) {
     const { addressBackup, setAddressBackup,
         packages, setPackages, currentStep, setCurrentStep, setSelectedService } = props;
 
+    const [isPackage, setIsPackage] = useState(true);
 
     const recipientInfo = props.consigneeTo;
     const setRecipientInfo = props.setConsigneeTo;
@@ -83,7 +86,6 @@ export default function InformationOrder(props) {
     const recipientPopoverRef = useRef(null);
     const deliveryPopoverRef = useRef(null);
 
-    // Xử lý click outside cho các popover
     useEffect(() => {
         function handleClickOutside(event) {
             if (showSenderPopover &&
@@ -91,13 +93,11 @@ export default function InformationOrder(props) {
                 !senderPopoverRef.current.contains(event.target)) {
                 setShowSenderPopover(false);
             }
-
             if (showRecipientPopover &&
                 recipientPopoverRef.current &&
                 !recipientPopoverRef.current.contains(event.target)) {
                 setShowRecipientPopover(false);
             }
-
             if (showDeliveryPopover &&
                 deliveryPopoverRef.current &&
                 !deliveryPopoverRef.current.contains(event.target)) {
@@ -110,10 +110,6 @@ export default function InformationOrder(props) {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [showSenderPopover, showRecipientPopover, showDeliveryPopover]);
-
-    // Thêm dữ liệu mẫu cho sender
-
-
 
 
     // Thêm dữ liệu mẫu cho delivery
@@ -233,9 +229,12 @@ export default function InformationOrder(props) {
     // Thêm state cho lỗi form nhận hàng
     const [deliveryErrors, setDeliveryErrors] = useState({
         receiverName: false,
+        receiverPhone: false,
+
         deliveryDate: false,
         deliveryTime: false,
-        deliveryAddress: false
+        deliveryAddress: false,
+
     });
 
     // Thêm state để kiểm soát hiển thị form nhận hàng
@@ -371,6 +370,7 @@ export default function InformationOrder(props) {
             const updatedAddressBackup = {
                 id: deliveryForm.id || "",
                 name: deliveryForm.name || "",
+                phone: deliveryForm.phone || "",
                 date: deliveryForm.date || "",
                 time: deliveryForm.time || "",
                 address: deliveryForm.address || "",
@@ -380,12 +380,9 @@ export default function InformationOrder(props) {
             console.log("Updating addressBackup before moving to next step:", updatedAddressBackup);
             setAddressBackup(updatedAddressBackup);
 
-            // Ensure the parent component has the latest addressBackup value
-            // by using a small timeout before changing tabs
             setTimeout(() => {
                 console.log("Final addressBackup before changing step:", updatedAddressBackup);
                 setCurrentStep(3);
-                // Cuộn trang lên đầu khi chuyển sang bước tiếp theo
                 window.scrollTo({
                     top: 0,
                     behavior: "smooth"
@@ -709,11 +706,11 @@ export default function InformationOrder(props) {
     const handleSetupDeliverySave = async () => {
         try {
             // Trong thực tế, bạn sẽ gọi API để lấy dữ liệu
-            // const dataResponse = await GetAllDeliveryFavorite();
-            // setListDeliverySave(dataResponse);
+            const dataResponse = await GetAllDeliveryFavorite();
+            setListDeliverySave(dataResponse);
 
             // Sử dụng dữ liệu mẫu cho demo
-            setListDeliverySave(deliverySampleData);
+            // setListDeliverySave(deliverySampleData);
             setShowDeliveryPopover(prev => !prev);
         } catch (error) {
             console.error("Error fetching delivery data:", error);
@@ -1205,7 +1202,7 @@ export default function InformationOrder(props) {
                                             }}
                                             onDelete={async (idx, id) => {
                                                 const newList = listDeliverySave.filter((_, i) => i !== idx);
-                                                // await DeleteConsigneeFavorite(id);
+                                                await DeleteConsigneeFavorite(id);
                                                 setListDeliverySave(newList);
                                             }}
                                         />
@@ -1224,6 +1221,21 @@ export default function InformationOrder(props) {
                                             className={`bg-white dark:bg-gray-800 ${deliveryErrors.receiverName ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
                                         />
                                     </div>
+
+
+                                    <div>
+                                        <Label htmlFor="phone" className="text-gray-700 dark:text-gray-300">Số điện thoại</Label>
+                                        <Input
+                                            type="text"
+                                            id="phone"
+                                            name="phone"
+                                            value={deliveryForm.phone || ''}
+                                            onChange={handleDeliveryChange}
+                                            className={`bg-white dark:bg-gray-800 ${deliveryErrors.receiverPhone ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
+                                        />
+                                    </div>
+
+
                                     <div>
                                         <DatePicker
                                             id="date"
@@ -1331,18 +1343,63 @@ export default function InformationOrder(props) {
                 </div>
             )}
 
-            <FormPackage
-                packages={packages}
-                setPackages={setPackages}
-                nameCountry={recipientForm.country}
-                handleService={handleService}
-                setSelectedService={setSelectedService}
-                initialNameCountry={initialNameCountry}
-                isChangeCountry={isChangeCountry}
-                setIsChangeCountry={setIsChangeCountry}
-                zone={zone}
+            <div className="inline-flex rounded-md shadow-sm" role="group">
+                <button
+                    onClick={() => setIsPackage(true)}
+                    className={`px-4 py-2 text-sm font-medium rounded-l-lg border focus:z-10 focus:ring-2 focus:ring-purple-300 transition-colors ${isPackage
+                        ? "bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        }`}
+                >
+                    <div className="flex items-center">
+                        <PackageIcon className="w-4 h-4 mr-2" />
+                        Packages
+                    </div>
+                </button>
 
-            />
+                <button
+                    onClick={() => setIsPackage(false)}
+                    className={`px-4 py-2 text-sm font-medium rounded-r-lg border focus:z-10 focus:ring-2 focus:ring-purple-300 transition-colors ${!isPackage
+                        ? "bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        }`}
+                >
+                    <div className="flex items-center">
+                        <FileTextIcon className="w-4 h-4 mr-2" />
+                        Document
+                    </div>
+                </button>
+            </div>
+
+
+            {
+                isPackage ? (
+                    <FormPackage
+                        packages={packages}
+                        setPackages={setPackages}
+                        nameCountry={recipientForm.country}
+                        handleService={handleService}
+                        setSelectedService={setSelectedService}
+                        initialNameCountry={initialNameCountry}
+                        isChangeCountry={isChangeCountry}
+                        setIsChangeCountry={setIsChangeCountry}
+                        zone={zone}
+
+                    />
+                ) : (
+                    <Document
+                        packages={packages}
+                        setPackages={setPackages}
+                        nameCountry={recipientForm.country}
+                        handleService={handleService}
+                        setSelectedService={setSelectedService}
+                        initialNameCountry={initialNameCountry}
+                        isChangeCountry={isChangeCountry}
+                        setIsChangeCountry={setIsChangeCountry}
+                        zone={zone}
+                    />
+                )
+            }
         </div>
     );
 }

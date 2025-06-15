@@ -22,8 +22,8 @@ const PdfViewer = ({ bill_id }) => {
       }
     };
 
-    loadPdf(); // tự động gọi khi component mount
-  }, []);
+    loadPdf();
+  }, [id]); // chỉ load lại khi bill_id đổi
 
   return (
     <div>
@@ -31,7 +31,7 @@ const PdfViewer = ({ bill_id }) => {
 
       {!loading && pdfUrl && (
         <iframe
-          src={pdfUrl}
+          src={pdfUrl ? `${pdfUrl}#zoom=100` : ""}
           title="PDF Viewer"
           width="100%"
           height="800px"

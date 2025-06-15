@@ -3,13 +3,13 @@ import ComponentCard from "../../common/ComponentCard";
 import PageBreadcrumb from "../../common/PageBreadCrumb";
 import ContentTable from "./ContentTable.jsx"; // Đã sửa từ .tsx thành .jsx
 
-export default function ZoneCountryTable() {
+export default function ChuyenTuyenTable() {
     const [isPriceNetPackage, setIsPriceNetPackage] = useState(true);
 
 
     return (
         <>
-            <PageBreadcrumb pageTitle="Ups " />
+            <PageBreadcrumb pageTitle="Chuyen Tuyen  " />
             <div className="space-y-5 sm:space-y-6">
                 <ComponentCard title="Price Net Table" >
                     <ContentTable isPriceNetPackage={isPriceNetPackage} setIsPriceNetPackage={setIsPriceNetPackage} />

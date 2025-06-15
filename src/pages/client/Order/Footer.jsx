@@ -70,7 +70,6 @@ export default function Footer({ currentStep, setCurrentStep, products, setProdu
                 const response = await CreateBill(dataRequest);
                 console.log(response);
 
-                // Cập nhật toast khi có kết quả
                 if (response === "created successfully") {
                     toast.update(loadingToast, {
                         render: "Đơn hàng đã được tạo thành công!",
