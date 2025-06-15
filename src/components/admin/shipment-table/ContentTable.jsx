@@ -18,6 +18,7 @@ import {
   GetAllBaseUser,
   GetAllPriceOrder,
   GetPaymentDetails,
+  GetShipment,
   PostBaseUser,
   PostPriceOrder,
   PutPriceOrder,
@@ -27,9 +28,10 @@ import {
 import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import ExcelJS from "exceljs";
+import { DatePicker } from "antd"; // import { s } from "@fullcalendar/core/internal-common";
 
-export default function ContentTable(props) {
-  const { dataBill } = props;
+export default function ContentTable({ data }) {
+  const [dataBill, setDataBill] = useState(data || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState("name");
@@ -40,14 +42,72 @@ export default function ContentTable(props) {
   const [priceOrders, setPriceOrders] = useState([]);
   const [billEdit, setBillEdit] = useState({});
 
+  // State bộ lọc
+  const { RangePicker } = DatePicker;
+  const [filterType, setFilterType] = useState(""); // "day" | "month" | "year" | "range" | ""
+  const [filterDay, setFilterDay] = useState(null);
+  const [filterMonth, setFilterMonth] = useState(null);
+  const [filterYear, setFilterYear] = useState(null);
+  const [filterRange, setFilterRange] = useState({ from: null, to: null });
+  console.log("Dữ liệu đơn hàng:", dataBill);
+  const fetchBillData = async () => {
+    try {
+      const data = await GetShipment();
+      setDataBill(data);
+      console.log("Dữ liệu đơn hàng:", dataBill);
+      // setState hoặc xử lý tiếp tại đây nếu cần
+    } catch (error) {
+      console.error("Lỗi khi gọi GetShipment:", error);
+    }
+  };
+  useEffect(() => {
+    setDataBill(data || []);
+  }, [data]);
+  // reset bộ lọc
+  const resetAllFilters = () => {
+    setFilterType("");
+    setFilterDay(null);
+    setFilterMonth(null);
+    setFilterYear(null);
+    setFilterRange({ from: null, to: null });
+  };
+  function formatDateTime(isoString, format = "DD/MM/YYYY HH:mm") {
+    if (!isoString) return "";
+
+    // Cắt phần microseconds nếu có
+    const date = new Date(isoString.split(".")[0]);
+
+    const pad = (n) => String(n).padStart(2, "0");
+
+    const replacements = {
+      DD: pad(date.getDate()),
+      MM: pad(date.getMonth() + 1),
+      YYYY: date.getFullYear(),
+      HH: pad(date.getHours()),
+      mm: pad(date.getMinutes()),
+      ss: pad(date.getSeconds()),
+    };
+
+    // Thay thế định dạng
+    return format.replace(
+      /DD|MM|YYYY|HH|mm|ss/g,
+      (match) => replacements[match]
+    );
+  }
+  const [editType, setEditType] = useState("");
   const formatCurrency = (amount) => {
-    const num = parseFloat(String(amount).replace(/[^0-9.]/g, ""));
+    const num = parseFloat(String(amount).replace(/[^0-9.-]/g, "")); // Cho phép dấu "-"
     if (isNaN(num)) return "0";
-    return new Intl.NumberFormat("vi-VN", {
+
+    const formatted = new Intl.NumberFormat("vi-VN", {
       style: "decimal",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(num);
+    }).format(Math.abs(num)); // Dùng Math.abs để bỏ dấu âm khi hiển thị
+
+    if (num < 0) return `Dư ${formatted}`;
+
+    return formatted;
   };
 
   function StatusBadge({ status }) {
@@ -147,28 +207,78 @@ export default function ContentTable(props) {
   }
 
   const filteredAndSortedData = useMemo(() => {
-    return dataBill
-      .filter((item) =>
-        item.bill_house.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .sort((a, b) => {
-        if (sortKey === "bill_house") {
-          return sortOrder === "asc"
-            ? a.fullName.localeCompare(b.fullName)
-            : b.fullName.localeCompare(a.fullName);
-        }
+    let filtered = dataBill;
 
-        if (sortKey === "total_price") {
-          const salaryA = Number.parseInt(a[sortKey]);
-          const salaryB = Number.parseInt(b[sortKey]);
-          return sortOrder === "asc" ? salaryA - salaryB : salaryB - salaryA;
-        }
+    // Lọc theo house bill (search)
+    filtered = filtered.filter((item) =>
+      item.bill_house.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-        return sortOrder === "asc"
-          ? String(a[sortKey]).localeCompare(String(b[sortKey]))
-          : String(b[sortKey]).localeCompare(String(a[sortKey]));
+    // Lọc theo ngày/tháng/năm/khoảng ngày
+    if (filterType === "day" && filterDay) {
+      filtered = filtered.filter((item) => {
+        const date = parseCustomDate(item.date_create);
+        return (
+          date &&
+          date.getDate() === filterDay.date() &&
+          date.getMonth() === filterDay.month() &&
+          date.getFullYear() === filterDay.year()
+        );
       });
-  }, [dataBill, sortKey, sortOrder, searchTerm]);
+    } else if (filterType === "month" && filterMonth) {
+      filtered = filtered.filter((item) => {
+        const date = parseCustomDate(item.date_create);
+        return (
+          date &&
+          date.getMonth() === filterMonth.month() &&
+          date.getFullYear() === filterMonth.year()
+        );
+      });
+    } else if (filterType === "year" && filterYear) {
+      filtered = filtered.filter((item) => {
+        const date = parseCustomDate(item.date_create);
+        return date && date.getFullYear() === filterYear.year();
+      });
+    } else if (filterType === "range" && filterRange.from && filterRange.to) {
+      filtered = filtered.filter((item) => {
+        const date = parseCustomDate(item.date_create);
+        return (
+          date &&
+          date >= filterRange.from.startOf("day") &&
+          date <= filterRange.to.endOf("day")
+        );
+      });
+    }
+
+    // Sắp xếp
+    return filtered.sort((a, b) => {
+      if (sortKey === "bill_house") {
+        return sortOrder === "asc"
+          ? a.fullName.localeCompare(b.fullName)
+          : b.fullName.localeCompare(a.fullName);
+      }
+
+      if (sortKey === "total_price") {
+        const salaryA = Number.parseInt(a[sortKey]);
+        const salaryB = Number.parseInt(b[sortKey]);
+        return sortOrder === "asc" ? salaryA - salaryB : salaryB - salaryA;
+      }
+
+      return sortOrder === "asc"
+        ? String(a[sortKey]).localeCompare(String(b[sortKey]))
+        : String(b[sortKey]).localeCompare(String(a[sortKey]));
+    });
+  }, [
+    dataBill,
+    sortKey,
+    sortOrder,
+    searchTerm,
+    filterType,
+    filterDay,
+    filterMonth,
+    filterYear,
+    filterRange,
+  ]);
 
   const totalItems = filteredAndSortedData.length;
 
@@ -197,25 +307,83 @@ export default function ContentTable(props) {
   const [paymentDetails, setPaymentDetails] = useState({
     cash: 0,
     banking: 0,
+    businessBanking: 0,
   });
 
-  // Hàm để lấy thông tin thanh toán từ backend
+  const [cashPayment, setCashPayment] = useState({
+    price: 0,
+    dateUpdate: null,
+    active: false,
+  });
+
+  const [bankingPayment, setBankingPayment] = useState({
+    price: 0,
+    dateUpdate: null,
+    active: false,
+  });
+  const [businessBankingPayment, setBusinessBankingPayment] = useState({
+    price: 0,
+    dateUpdate: null,
+    active: false,
+  });
+
   const fetchPaymentDetails = async (billId) => {
     try {
       const response = await GetPaymentDetails(billId);
       console.log("Payment details:", response);
 
-      // Cập nhật state với dữ liệu từ API
+      let cash = 0;
+      let banking = 0;
+      let businessBanking = 0;
+
+      if (response && Array.isArray(response)) {
+        response.forEach((payment) => {
+          switch (payment.methodPayment) {
+            case "CASH":
+              cash += payment.price;
+              setCashPayment({
+                price: payment.price,
+                dateUpdate: payment.updatedAt,
+                active: payment.active,
+              });
+              console.log("Cash payment:", cashPayment);
+              break;
+            case "CARD":
+              banking += payment.price;
+              setBankingPayment({
+                price: payment.price,
+                dateUpdate: payment.updatedAt,
+                active: payment.active,
+              });
+              console.log("Banking payment:", bankingPayment);
+              break;
+            case "BUSINESS_CARD":
+              businessBanking += payment.price;
+              setBusinessBankingPayment({
+                price: payment.price,
+                dateUpdate: payment.updatedAt,
+                active: payment.active,
+              });
+              console.log("Business banking payment:", businessBankingPayment);
+              break;
+            default:
+              break;
+          }
+        });
+      }
+
       setPaymentDetails({
-        cash: response.priceCash || 0,
-        banking: response.priceCard || 0,
+        cash,
+        banking,
+        businessBanking,
       });
+      console.log("Payment details set:", paymentDetails);
     } catch (error) {
       console.error("Error fetching payment details:", error);
-      // Nếu có lỗi, đặt giá trị mặc định
       setPaymentDetails({
         cash: 0,
         banking: 0,
+        businessBanking: 0,
       });
     }
   };
@@ -229,13 +397,29 @@ export default function ContentTable(props) {
 
   // Hàm xử lý khi người dùng bấm Save
   const handleUpdatePayment = async () => {
+    let price = 0;
+    switch (editType) {
+      case "CASH":
+        price = cashPayment.price;
+        break;
+      case "CARD":
+        price = bankingPayment.price;
+        break;
+      case "BUSINESS_CARD":
+        price = businessBankingPayment.price;
+        break;
+      default:
+        break;
+    }
     try {
       const dataRequest = {
         bill_id: billEdit.bill_house,
-        priceCash: paymentDetails.cash,
-        priceCard: paymentDetails.banking,
+        active: false,
+        price: price,
+        methodPayment: editType,
       };
 
+      console.log("Updating payment with data:", dataRequest);
       const dataResponse = await UpdatePaymentDetails(dataRequest);
 
       console.log("Payment updated:", dataResponse);
@@ -247,13 +431,98 @@ export default function ContentTable(props) {
 
       // Thông báo thành công
       alert("Cập nhật thanh toán thành công!");
-      window.location.reload();
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
     } catch (error) {
       console.error("Error updating payment:", error);
       alert("Lỗi khi cập nhật thanh toán!");
     }
   };
 
+  // Hàm xử lý khi người dùng bấm Save
+  const handleConfirmPayment = async () => {
+    let price = 0;
+    switch (editType) {
+      case "CASH":
+        price = cashPayment.price;
+        break;
+      case "CARD":
+        price = bankingPayment.price;
+        break;
+      case "BUSINESS_CARD":
+        price = businessBankingPayment.price;
+        break;
+      default:
+        break;
+    }
+    try {
+      const dataRequest = {
+        bill_id: billEdit.bill_house,
+        active: true,
+        price: price,
+        methodPayment: editType,
+      };
+
+      console.log("Confirming payment with data:", dataRequest);
+      const dataResponse = await UpdatePaymentDetails(dataRequest);
+
+      console.log("Payment confirmed:", dataResponse);
+
+      // Đánh dấu dữ liệu đã thay đổi
+
+      // Đóng modal
+      setIsOpenFormPayment(false);
+
+      // Thông báo thành công
+      alert("Xác nhận thanh toán thành công!");
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      alert("Lỗi khi xac nhận thanh toán!");
+    }
+  };
+
+  // Hàm xử lý khi người dùng bấm Save
+  const handleCancelPayment = async () => {
+    let price = 0;
+    switch (editType) {
+      case "CASH":
+        price = cashPayment.price;
+        break;
+      case "CARD":
+        price = bankingPayment.price;
+        break;
+      case "BUSINESS_CARD":
+        price = businessBankingPayment.price;
+        break;
+      default:
+        break;
+    }
+    try {
+      const dataRequest = {
+        bill_id: billEdit.bill_house,
+        active: false,
+        price: price,
+        methodPayment: editType,
+      };
+
+      console.log("Cancelling payment with data:", dataRequest);
+      const dataResponse = await UpdatePaymentDetails(dataRequest);
+
+      console.log("Payment cancelled:", dataResponse);
+
+      // Đánh dấu dữ liệu đã thay đổi
+
+      // Đóng modal
+      setIsOpenFormPayment(false);
+
+      // Thông báo thành công
+      alert("Hủy thanh toán thành công!");
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
+    } catch (error) {
+      console.error("Error cancelling payment:", error);
+      alert("Lỗi khi hủy thanh toán!");
+    }
+  };
   // Hàm gọi API lấy dữ liệu priceOrders
   const fetchPriceOrders = async (billHouse) => {
     try {
@@ -355,12 +624,39 @@ export default function ContentTable(props) {
     if (value === "") {
       numericValue = 0;
     }
+    console.log("value:", value);
+    switch (field) {
+      case "cash":
+        setCashPayment((prev) => ({
+          price: value,
+          dateUpdate: prev.dateUpdate,
+          active: prev.active,
+        }));
+        break;
+      case "banking":
+        setBankingPayment((prev) => ({
+          price: value,
+          dateUpdate: prev.dateUpdate,
+          active: prev.active,
+        }));
+        break;
+      case "businessBanking":
+        setBusinessBankingPayment((prev) => ({
+          price: value,
+          dateUpdate: prev.dateUpdate,
+          active: prev.active,
+        }));
+        break;
+      default:
+        break;
+    }
+    console.log("Payment details set cash:", cashPayment);
 
     // Cập nhật state
-    setPaymentDetails((prev) => ({
-      ...prev,
-      [field]: numericValue,
-    }));
+    // setPaymentDetails((prev) => ({
+    //   ...prev,
+    //   [field]: numericValue,
+    // }));
   };
 
   const handleUpdateStatus = async (billId, newStatus) => {
@@ -382,7 +678,7 @@ export default function ContentTable(props) {
 
       // Thông báo thành công
       alert("Cập nhật trạng thái thành công!");
-      window.location.reload();
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Lỗi khi cập nhật trạng thái!");
@@ -442,101 +738,35 @@ export default function ContentTable(props) {
     workbook.creator = "Shipment Management System";
     workbook.created = new Date();
 
-    // Cập nhật mapping cột với các cột mới và nhóm chủ đề
     const columnMapping = {
-      house_bill: { header: "HOUSE BILL", width: 15, group: "THÔNG TIN CƠ BẢN" },
-      Date: { header: "NGÀY TẠO", width: 20, group: "THÔNG TIN CƠ BẢN" },
-      customer: { header: "CUSTOMER", width: 30, group: "THÔNG TIN CƠ BẢN" },
-      country_name: { header: "COUNTRY", width: 30, group: "THÔNG TIN CƠ BẢN" },
-      master_tracking: { header: "MASTERTRACKING", width: 22, group: "THÔNG TIN CƠ BẢN" },
-      gw: { header: "GW", width:20, group: "THÔNG TIN CƠ BẢN" },
-      cw: { header: "CW", width: 20, group: "THÔNG TIN CƠ BẢN" },
-      company_service: { header: "DỊCH VỤ", width: 15, group: "THÔNG TIN CƠ BẢN" },
-      inwh_date: { header: "In-WH DATE", width: 20, group: "THÔNG TIN CƠ BẢN" },
-
-      // PRICE
-      price_price: { header: "PRICE", width: 15, group: "PRICE" },
-      fsc_price: { header: "FSC", width: 10, group: "PRICE" },
-      surge_fee_price: { header: "SURGE FEE", width: 12, group: "PRICE" },
-
-      // DEBIT
-      afr_debit: { header: "AFR", width: 10, group: "DEBIT" },
-      oversize_debit: { header: "OVERSIZE", width: 12, group: "DEBIT" },
-      surge_fee_debit: { header: "SURGE FEE", width: 12, group: "DEBIT" },
-      other_charges_debit: { header: "OTHER CHARGES", width: 20, group: "DEBIT" },
-      fsc_debit: { header: "FSC", width: 10, group: "DEBIT" },
-      gw_debit: { header: "GW", width: 10, group: "DEBIT" },
-      cw_debit: { header: "CW", width: 10, group: "DEBIT" },
-      bill: { header: "THÀNH TIỀN", width: 15, group: "DEBIT" },
-      reconcile: { header: "ĐỐI SOÁT", width: 12, group: "DEBIT" },
-
-      // TOTAL AR
-      total_ar: { header: "TOTAL AR", width: 15, group: "TOTAL AR" },
-      vat: { header: "VAT", width: 10, group: "TOTAL AR" },
-      total: { header: "TOTAL", width: 15, group: "TOTAL AR" },
-
-      // GRAND TOTAL
-      order_grand_total: { header: "ORDER", width: 15, group: "GRAND TOTAL" },
-      other_charges_total: { header: "OTHER CHARGES", width: 20, group: "GRAND TOTAL" },
-      grand_total: { header: "GRAND TOTAL", width: 18, group: "GRAND TOTAL" },
-
-      // PAYMENT
-      payments_cash: { header: "TIỀN MẶT", width: 15, group: "PAYMENT" },
-      payments_banking: { header: "CHUYỂN KHOẢN", width: 20, group: "PAYMENT" },
-      payments_remaining: { header: "CÒN LẠI", width: 15, group: "PAYMENT" },
-
-      // PROFIT
-      price_diff: { header: "CHÊNH LỆCH GIÁ", width: 20, group: "PROFIT" },
-      packing: { header: "ĐÓNG GÓI", width: 12, group: "PROFIT" },
-      pickup: { header: "PICK UP", width: 12, group: "PROFIT" },
-      other_costs: { header: "CHI PHÍ KHÁC", width: 15, group: "PROFIT" },
-      profit: { header: "LỢI NHUẬN", width: 15, group: "PROFIT" },
-
-      // HH
-      hh1: { header: "HH 1", width: 10, group: "HH" },
-      hh2: { header: "HH 2", width: 10, group: "HH" },
-      hh3: { header: "HH 3", width: 10, group: "HH" },
-      hh4: { header: "HH 4", width: 10, group: "HH" },
-
-      // LƯƠNG THƯỞNG
-      base_salary: { header: "LƯƠNG CĂN BẢN", width: 22, group: "LƯƠNG THƯỞNG" },
-      kpi_bonus: { header: "THƯỞNG KPI", width: 18, group: "LƯƠNG THƯỞNG" },
-      bonus_1_2_3: { header: "THƯỞNG 1/2/3", width: 18, group: "LƯƠNG THƯỞNG" },
-      allowance: { header: "PHỤ CẤP", width: 12, group: "LƯƠNG THƯỞNG" },
-      other_bonus: { header: "THƯỞNG KHÁC", width: 18, group: "LƯƠNG THƯỞNG" },
-
-      // STATUS
-      status: { header: "TRẠNG THÁI", width: 15, group: "TRẠNG THÁI" },
+      house_bill: { header: "HOUSE BILL", width: 5 },
+      Date: { header: "NGÀY TẠO", width: 15 },
+      bill_employee: { header: "BILL PHỤ", width: 15 },
+      awb: { header: "AWB", width: 15 },
+      company_service: { header: "DỊCH VỤ", width: 15 },
+      payment_bill_real: { header: "THÀNH TIỀN (TẠM TÍNH)", width: 24 },
+      price_order: { header: "TIỀN ORDER", width: 38 },
+      payment_bill_fake: { header: "THÀNH TIỀN (CHỐT)", width: 25 },
+      payments_cash: { header: "THANH TOÁN TIỀN MẶT", width: 25 },
+      payments_banking: { header: "THANH TOÁN BANKING", width: 25 },
+      payments_business: { header: "THANH TOÁN DOANH NGHIỆP", width: 25 },
+      status: { header: "TRẠNG THÁI", width: 15 },
     };
 
-    // Lấy danh sách cột xuất ra
     const columnsToExport = Object.keys(columnMapping).filter(
       (key) => key === "house_bill" || visibleColumns[key]
     );
 
-    // Tạo mảng nhóm chủ đề (group headers)
-    const groupHeaders = [];
-    let lastGroup = null;
-    columnsToExport.forEach((key) => {
-      const group = columnMapping[key].group || "";
-      if (groupHeaders.length === 0 || group !== lastGroup) {
-        groupHeaders.push({ group, start: groupHeaders.length, count: 1 });
-        lastGroup = group;
-      } else {
-        groupHeaders[groupHeaders.length - 1].count += 1;
-      }
-    });
-
-    // Định nghĩa cột cho worksheet
     worksheet.columns = columnsToExport.map((key) => ({
       key: key,
       width: columnMapping[key].width,
     }));
 
-    // Thêm tiêu đề chính
+    // Thêm tiêu đề
     const titleRow = worksheet.insertRow(1, ["BÁO CÁO SHIPMENT"]);
     worksheet.mergeCells(1, 1, 1, columnsToExport.length);
     titleRow.height = 60;
+
     const titleCell = worksheet.getCell(1, 1);
     titleCell.font = {
       size: 30,
@@ -546,42 +776,20 @@ export default function ContentTable(props) {
     };
     titleCell.alignment = { horizontal: "center", vertical: "middle" };
 
-    // Thêm ngày xuất
+    // Thêm thông tin ngày xuất
     const dateRow = worksheet.insertRow(2, [
       `Ngày xuất: ${new Date().toLocaleString("vi-VN")}`,
     ]);
     worksheet.mergeCells(2, 1, 2, columnsToExport.length);
     dateRow.height = 20;
+
     const dateCell = worksheet.getCell(2, 1);
     dateCell.font = { size: 14, italic: true };
     dateCell.alignment = { horizontal: "center", vertical: "middle" };
 
-    // Thêm dòng tiêu đề nhóm chủ đề (group header row)
-    const groupHeaderRow = worksheet.insertRow(3, []);
-    let colIndex = 1;
-    groupHeaders.forEach((group) => {
-      worksheet.mergeCells(3, colIndex, 3, colIndex + group.count - 1);
-      const cell = worksheet.getCell(3, colIndex);
-      cell.value = group.group || "";
-      cell.font = { bold: true, size: 13, color: { argb: "FF1E293B" } };
-      cell.alignment = { horizontal: "center", vertical: "middle" };
-      cell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFE0E7EF" },
-      };
-      cell.border = {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" },
-      };
-      colIndex += group.count;
-    });
-    groupHeaderRow.height = 30;
+    const headerRow = worksheet.getRow(4);
+    headerRow.height = 45;
 
-    // Thêm dòng tiêu đề cột
-    const headerRow = worksheet.insertRow(4, []);
     columnsToExport.forEach((key, index) => {
       const cell = headerRow.getCell(index + 1);
       cell.value = columnMapping[key].header;
@@ -599,22 +807,6 @@ export default function ContentTable(props) {
         right: { style: "thin" },
       };
     });
-    headerRow.height = 45;
-
-    // Hàm xử lý giá trị nhiều dòng
-    function processMultiLineValue(value) {
-      if (typeof value !== "string") return value;
-      // Tách các dòng và xử lý từng dòng
-      const lines = value.split("\n");
-      return lines.map(line => {
-        // Tìm số trong dòng
-        const matches = line.match(/-?\d+(\.\d+)?/g);
-        if (!matches) return line;
-        // Tính tổng các số trong dòng
-        const sum = matches.reduce((acc, num) => acc + parseFloat(num), 0);
-        return sum;
-      }).join("\n");
-    }
 
     // Thêm dữ liệu
     dataToExport.forEach((item, rowIndex) => {
@@ -628,126 +820,55 @@ export default function ContentTable(props) {
           case "Date":
             rowData[key] = item.date_create;
             break;
-          case "customer":
-            rowData[key] = `Người gửi: ${item.information_human.from}\nNgười nhận: ${item.information_human.to}`;
+          case "bill_employee":
+            rowData[key] = item?.bill_employee || "";
             break;
-          case "country_name":
-            rowData[key] = item?.country_name || "";
-            break;
-          case "master_tracking":
+          case "awb":
             rowData[key] = item?.awb || "";
-            break;
-          case "gw":
-            rowData[key] = `SL: ${item?.packageInfo_begin?.quantity}\nCân nặng: ${item?.packageInfo_begin?.total_weight} KG`;
-            break;
-          case "cw":
-            rowData[key] = `SL: ${item?.packageInfo_end?.quantity}\nCân nặng: ${item?.packageInfo_end?.total_weight} KG`;
             break;
           case "company_service":
             rowData[key] = item.company_service;
             break;
-          case "inwh_date":
-            rowData[key] = item?.date_create || "";
+          case "payment_bill_real":
+            rowData[key] = `${formatCurrency(item.total_real)} VNĐ`;
             break;
-          case "price_price":
-            rowData[key] = formatCurrency(item?.price.priceNet);
+          case "price_order":
+            // Xuất cả 2 giá trị: complete và process
+            rowData[key] = `Hoàn thành: ${formatCurrency(
+              item.priceOrder.total_complete
+            )} VNĐ | Đang xử lý: ${formatCurrency(
+              item.priceOrder.total_process
+            )} VNĐ`;
             break;
-          case "fsc_price":
-            rowData[key] = item?.price.fsc_price;
-            break;
-          case "surge_fee_price":
-            rowData[key] = item?.price.surge_fee_price;
-            break;
-          case "afr_debit":
-            rowData[key] = formatCurrency(item?.debit.afr_debit);
-            break;
-          case "oversize_debit":
-            rowData[key] = formatCurrency(item?.debit.oversize_debit);
-            break;
-          case "surge_fee_debit":
-            rowData[key] = item?.debit.surge_fee_debit || "";
-            break;
-          case "other_charges_debit":
-            rowData[key] = item?.debit.other_charges_debit || "";
-            break;
-          case "fsc_debit":
-            rowData[key] = formatCurrency(item?.debit.fsc_debit);
-            break;
-          case "gw_debit":
-            rowData[key] = item?.gw_debit || "";
-            break;
-          case "cw_debit":
-            rowData[key] = item?.cw_debit || "";
-            break;
-          case "bill":
-            rowData[key] = item?.bill || "";
-            break;
-          case "reconcile":
-            rowData[key] = item?.reconcile || "";
-            break;
-          case "total_ar":
-            rowData[key] = formatCurrency(item?.total_ar.total_ar);
-            break;
-          case "vat":
-            rowData[key] = formatCurrency(item?.total_ar.vat);
-            break;
-          case "total":
-            rowData[key] = formatCurrency(item?.total_ar.total);
-            break;
-          case "order_grand_total":
-            rowData[key] = item?.grand_total.order_grand_total || "";
-            break;
-          case "other_charges_total":
-            rowData[key] = item?.grand_total.other_charges_total || "";
-            break;
-          case "grand_total":
-            rowData[key] = formatCurrency(item?.grand_total.grand_total);
+          case "payment_bill_fake":
+            rowData[key] = `${formatCurrency(item.total_fake)} VNĐ`;
             break;
           case "payments_cash":
-            rowData[key] = formatCurrency(item.pricePayment.payment_cash);
+            rowData[key] = `${formatCurrency(
+              item.pricePayment.cashPayment.price
+            )} VNĐ`;
             break;
           case "payments_banking":
-            rowData[key] = formatCurrency(item.pricePayment.payment_card);
+            rowData[key] = `${formatCurrency(
+              item.pricePayment.cardPayment.price
+            )} VNĐ`;
             break;
-          case "payments_remaining":
-            rowData[key] = formatCurrency(item?.pricePayment.payments_remaining);
+          case "payments_business":
+            rowData[key] = `${formatCurrency(
+              item.pricePayment.businessCardPayment.price
+            )} VNĐ`;
             break;
-          case "price_diff":
-            rowData[key] = item?.price_diff || "";
-            break;
-          case "packing":
-            rowData[key] = item?.packing || "";
-            break;
-          case "pickup":
-            rowData[key] = item?.pickup || "";
-            break;
-          case "other_costs":
-            rowData[key] = item?.other_costs || "";
-            break;
-          case "profit":
-            rowData[key] = item?.profit || "";
-            break;
-          case "hh1":
-          case "hh2":
-          case "hh3":
-          case "hh4":
-            rowData[key] = processMultiLineValue(item?.[key] || "");
-            break;
-          case "base_salary":
-          case "kpi_bonus":
-          case "bonus_1_2_3":
-          case "allowance":
-          case "other_bonus":
-            rowData[key] = processMultiLineValue(item?.[key] || "");
-            break;
+
           case "status":
+            // Chuyển đổi status thành text dễ hiểu
             const statusText = {
               pending: "Chờ xử lý",
               processing: "Đang xử lý",
               completed: "Hoàn thành",
               cancelled: "Đã hủy",
             };
-            rowData[key] = statusText[item.status_payment] || item.status_payment;
+            rowData[key] =
+              statusText[item.status_payment] || item.status_payment;
             break;
           default:
             rowData[key] = item[key] || "";
@@ -755,7 +876,7 @@ export default function ContentTable(props) {
       });
 
       const dataRow = worksheet.addRow(rowData);
-      dataRow.height = 42;
+      dataRow.height = 35;
 
       // Định dạng cho từng cell trong dòng dữ liệu
       dataRow.eachCell((cell, colNumber) => {
@@ -775,167 +896,149 @@ export default function ContentTable(props) {
         }
 
         // Căn giữa cho một số cột
-        const colKey = columnsToExport[colNumber - 1];
         if (
-          ["Date", "status", "company_service"].includes(colKey)
+          columnsToExport[colNumber - 1] === "Date" ||
+          columnsToExport[colNumber - 1] === "status" ||
+          columnsToExport[colNumber - 1] === "company_service"
         ) {
           cell.alignment = { horizontal: "center", vertical: "middle" };
         } else if (
-          colKey.includes("payment") ||
-          colKey.includes("price") ||
-          colKey.includes("total") ||
-          colKey.includes("profit")
+          columnsToExport[colNumber - 1].includes("payment") ||
+          columnsToExport[colNumber - 1].includes("price")
         ) {
+          // Căn phải cho các cột tiền
           cell.alignment = { horizontal: "right", vertical: "middle" };
           cell.font = { bold: true };
         } else {
           cell.alignment = { vertical: "middle" };
         }
-
-        if (typeof cell.value === "string" && cell.value.includes("\n")) {
-          cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-        } else {
-          cell.alignment = { horizontal: "center", vertical: "middle" };
-        }
-          });
+      });
     });
 
     // Thêm tổng kết ở cuối (nếu có dữ liệu số)
     if (dataToExport.length > 0) {
+      // Thêm dòng trống
       worksheet.addRow([]);
-      worksheet.addRow([]);
 
-      // Danh sách các cột cần tính tổng
-      const sumColumns = [
-        "gw", "cw", "bill", "total_ar", "vat", "total",
-        "order_grand_total", "other_charges_total", "grand_total",
-        "payments_cash", "payments_banking", "payments_remaining",
-        "price_diff", "packing", "pickup", "other_costs", "profit",
-        "hh1", "hh2", "hh3", "hh4",
-        "base_salary", "kpi_bonus", "bonus_1_2_3", "allowance", "other_bonus"
-      ];
+      // Tính tổng các giá trị tiền
+      let totalReal = 0;
+      let totalFake = 0;
+      let totalCash = 0;
+      let totalBanking = 0;
+      let totalBusiness = 0;
+      let totalComplete = 0;
+      let totalProcess = 0;
 
-      // Khởi tạo object tổng
-      const sumResult = {};
-      sumColumns.forEach((key) => (sumResult[key] = 0));
-
-      // Hàm cộng tổng cho từng giá trị trong ô có nhiều dòng
-      function sumMultiLineCell(cellValue) {
-        if (typeof cellValue !== "string") return 0;
-        // Tách các dòng và xử lý từng dòng
-        const lines = cellValue.split("\n");
-        return lines.reduce((sum, line) => {
-          // Tìm tất cả số trong dòng
-          const matches = line.match(/-?\d+(\.\d+)?/g);
-          if (!matches) return sum;
-          // Cộng tổng các số trong dòng
-          return sum + matches.reduce((lineSum, num) => lineSum + parseFloat(num), 0);
-        }, 0);
-      }
-
-      // Duyệt từng dòng dữ liệu để cộng tổng
       dataToExport.forEach((item) => {
-        // GW
-        if (item?.packageInfo_begin?.total_weight)
-          sumResult.gw += Number(item.packageInfo_begin.total_weight) || 0;
-        // CW
-        if (item?.packageInfo_end?.total_weight)
-          sumResult.cw += Number(item.packageInfo_end.total_weight) || 0;
-        // THÀNH TIỀN (bill)
-        if (item?.bill) sumResult.bill += Number(item.bill) || 0;
-        // TOTAL AR
-        if (item?.total_ar?.total_ar) sumResult.total_ar += Number(item.total_ar.total_ar) || 0;
-        // VAT
-        if (item?.total_ar?.vat) sumResult.vat += Number(item.total_ar.vat) || 0;
-        // TOTAL
-        if (item?.total_ar?.total) sumResult.total += Number(item.total_ar.total) || 0;
-        // ORDER
-        if (item?.grand_total?.order_grand_total) sumResult.order_grand_total += Number(item.grand_total.order_grand_total) || 0;
-        // OTHER CHARGES
-        if (item?.grand_total?.other_charges_total) sumResult.other_charges_total += Number(item.grand_total.other_charges_total) || 0;
-        // GRAND TOTAL
-        if (item?.grand_total?.grand_total) sumResult.grand_total += Number(item.grand_total.grand_total) || 0;
-        // TIỀN MẶT
-        if (item?.pricePayment?.payment_cash) sumResult.payments_cash += Number(item.pricePayment.payment_cash) || 0;
-        // CHUYỂN KHOẢN
-        if (item?.pricePayment?.payment_card) sumResult.payments_banking += Number(item.pricePayment.payment_card) || 0;
-        // CÒN LẠI
-        if (item?.pricePayment?.payments_remaining) sumResult.payments_remaining += Number(item.pricePayment.payments_remaining) || 0;
-        // CHÊNH LỆCH GIÁ
-        if (item?.price_diff) sumResult.price_diff += Number(item.price_diff) || 0;
-        // ĐÓNG GÓI
-        if (item?.packing) sumResult.packing += Number(item.packing) || 0;
-        // PICK UP
-        if (item?.pickup) sumResult.pickup += Number(item.pickup) || 0;
-        // CHI PHÍ KHÁC
-        if (item?.other_costs) sumResult.other_costs += Number(item.other_costs) || 0;
-        // LỢI NHUẬN
-        if (item?.profit) sumResult.profit += Number(item.profit) || 0;
-        // HH 1-4
-        if (item?.hh1) sumResult.hh1 += sumMultiLineCell(item.hh1);
-        if (item?.hh2) sumResult.hh2 += sumMultiLineCell(item.hh2);
-        if (item?.hh3) sumResult.hh3 += sumMultiLineCell(item.hh3);
-        if (item?.hh4) sumResult.hh4 += sumMultiLineCell(item.hh4);
-        // LƯƠNG CĂN BẢN
-        if (item?.base_salary) sumResult.base_salary += sumMultiLineCell(item.base_salary);
-        // THƯỞNG KPI
-        if (item?.kpi_bonus) sumResult.kpi_bonus += sumMultiLineCell(item.kpi_bonus);
-        // THƯỞNG 1/2/3
-        if (item?.bonus_1_2_3) sumResult.bonus_1_2_3 += sumMultiLineCell(item.bonus_1_2_3);
-        // PHỤ CẤP
-        if (item?.allowance) sumResult.allowance += sumMultiLineCell(item.allowance);
-        // THƯỞNG KHÁC
-        if (item?.other_bonus) sumResult.other_bonus += sumMultiLineCell(item.other_bonus);
+        totalReal += item.total_real || 0;
+        totalFake += item.total_fake || 0;
+        totalCash += item.pricePayment?.cashPayment.price || 0;
+        totalBanking += item.pricePayment?.cardPayment.price || 0;
+        totalBusiness += item.pricePayment?.businessPayment.price || 0;
+        totalComplete += item.priceOrder?.total_complete || 0;
+        totalProcess += item.priceOrder?.total_process || 0;
       });
 
-      // Dòng tiêu đề khu vực tổng cộng
-      const summaryTitleRow = worksheet.addRow(["TỔNG CỘNG"]);
-      worksheet.mergeCells(
-        summaryTitleRow.number,
-        1,
-        summaryTitleRow.number,
-        columnsToExport.length
-      );
-      summaryTitleRow.height = 30;
-      const summaryTitleCell = worksheet.getCell(summaryTitleRow.number, 1);
-      summaryTitleCell.font = { bold: true, size: 14 };
-      summaryTitleCell.alignment = { horizontal: "center", vertical: "middle" };
-      summaryTitleCell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFE0E7EF" },
-      };
-
-      // Dòng tổng cộng
-      const summaryRow = worksheet.addRow([]);
-      summaryRow.height = 30;
-
-      // Thêm giá trị tổng cộng vào các cột tương ứng
+      // Thêm dòng tổng kết
+      const summaryData = {};
       columnsToExport.forEach((key, index) => {
-        const cell = summaryRow.getCell(index + 1);
-        if (sumColumns.includes(key)) {
-          cell.value = formatCurrency(sumResult[key]);
-          cell.font = { bold: true };
-          cell.alignment = { horizontal: "right", vertical: "middle" };
+        if (index === 0) {
+          summaryData[key] = "TỔNG CỘNG";
+        } else if (key === "payment_bill_real" && visibleColumns[key]) {
+          summaryData[key] = `${formatCurrency(totalReal)} VNĐ`;
+        } else if (key === "payment_bill_fake" && visibleColumns[key]) {
+          summaryData[key] = `${formatCurrency(totalFake)} VNĐ`;
+        } else if (key === "payments_cash" && visibleColumns[key]) {
+          summaryData[key] = `${formatCurrency(totalCash)} VNĐ`;
+        } else if (key === "payments_banking" && visibleColumns[key]) {
+          summaryData[key] = `${formatCurrency(totalBanking)} VNĐ`;
+        } else if (key === "payments_business" && visibleColumns[key]) {
+          summaryData[key] = `${formatCurrency(totalBanking)} VNĐ`;
+        } else if (key === "price_order" && visibleColumns[key]) {
+          summaryData[key] = `HT: ${formatCurrency(
+            totalComplete
+          )} | XL: ${formatCurrency(totalProcess)} VNĐ`;
+        } else {
+          summaryData[key] = "";
         }
+      });
+
+      const summaryRow = worksheet.addRow(summaryData);
+      summaryRow.height = 35;
+
+      summaryRow.eachCell((cell, colNumber) => {
+        cell.font = { bold: true, size: 13 };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFDBEAFE" },
+        };
         cell.border = {
-          top: { style: "thin" },
+          top: { style: "medium" },
           left: { style: "thin" },
-          bottom: { style: "thin" },
+          bottom: { style: "medium" },
           right: { style: "thin" },
         };
+
+        if (colNumber === 1) {
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+        } else {
+          cell.alignment = { horizontal: "right", vertical: "middle" };
+        }
       });
+
+      let mergeEndColumn = 1;
+      for (let i = 1; i <= columnsToExport.length; i++) {
+        // const key = columnsToExport[i - 1];
+        const value = summaryRow.getCell(i).value;
+        if (
+          typeof value === "string" &&
+          value.trim() !== "TỔNG CỘNG" &&
+          value.trim() !== ""
+        ) {
+          mergeEndColumn = i - 1;
+          break;
+        }
+      }
+      if (mergeEndColumn < 2) {
+        mergeEndColumn = columnsToExport.length;
+        worksheet.spliceRows(summaryRow.number, 1);
+      }
+
+      worksheet.mergeCells(
+        summaryRow.number,
+        1,
+        summaryRow.number,
+        mergeEndColumn
+      );
     }
 
-    // Save file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `shipment_report_${new Date().toISOString().split("T")[0]}.xlsx`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    // Xuất file
+    try {
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+
+      // Tạo tên file với timestamp
+      const timestamp = new Date().toISOString().slice(0, 10);
+      a.download = `shipment_report_${timestamp}.xlsx`;
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      // Thông báo thành công
+      console.log("Xuất Excel thành công!");
+    } catch (error) {
+      console.error("Lỗi khi xuất Excel:", error);
+      alert("Có lỗi xảy ra khi xuất file Excel!");
+    }
   };
 
   const columnLabels = {
@@ -969,6 +1072,7 @@ export default function ContentTable(props) {
     // Thanh toan
     payments_cash: "TIỀN MẶT (PAYMENT)",
     payments_banking: "CHUYỂN KHOẢN (PAYMENT)",
+    payments_business: "DOANH NGHIỆP (PAYMENT)",
     payments_remaining: "CÒN LẠI (PAYMENT)",
     // payment_bill_real: "THÀNH TIỀN (TẠM TÍNH)",
     // payment_bill_fake: "THÀNH TIỀN (CHỐT)",
@@ -1017,6 +1121,7 @@ export default function ContentTable(props) {
       "grand_total", // GRAND TOTAL(GRAND TOTAL)
       "payments_cash", // TIỀN MẶT(PAYMENT)
       "payments_banking", // CHUYỂN KHOẢN(PAYMENT)
+      "payments_business", // DOANH NGHIỆP(PAYMENT)
       "payments_remaining", // CÒN LẠI(PAYMENT)
     ];
 
@@ -1091,29 +1196,216 @@ export default function ContentTable(props) {
   };
 
   // Tính toán các giá trị tổng quan
-  const totalMastertracking = currentData.filter(
+  const filteredMastertracking = currentData.filter(
     (item) => item.awb && item.awb !== ""
-  ).length;
-  const totalDebit = currentData.reduce(
+  );
+  const totalMastertracking = filteredMastertracking.length;
+  const totalDebit = filteredMastertracking.reduce(
     (sum, item) => sum + (item?.grand_total?.grand_total || 0),
     0
   );
-  const totalPayment = currentData.reduce(
+  const totalPayment = filteredMastertracking.reduce(
     (sum, item) =>
       sum +
-      (item?.pricePayment?.payment_card || 0) +
-      (item?.pricePayment?.payment_cash || 0),
+      (item?.pricePayment?.cashPayment?.active
+        ? item?.pricePayment?.cashPayment?.price || 0
+        : 0) +
+      (item?.pricePayment?.cardPayment?.active
+        ? item?.pricePayment?.cardPayment?.price || 0
+        : 0) +
+      (item?.pricePayment?.businessCardPayment?.active
+        ? item?.pricePayment?.businessCardPayment?.price || 0
+        : 0),
     0
   );
-  const totalRemaining = currentData.reduce(
-    (sum, item) => sum + (item?.pricePayment?.payments_remaining || 0),
+  const totalRemaining = filteredMastertracking.reduce(
+    (sum, item) =>
+      sum + Math.max(0, item?.pricePayment?.payments_remaining || 0),
     0
   );
 
   return (
-    <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
-      {/* Thêm 4 ô tổng quan ở đây */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
+    <div className="bg-white dark:bg-white/[0.03] rounded-xl">
+      {/* Bộ lọc */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+              Bộ lọc
+            </h3>
+            <button
+              className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors duration-200 flex items-center gap-1"
+              onClick={() => {
+                setFilterType("");
+                resetAllFilters();
+              }}
+            >
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+              Xóa bộ lọc
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Lọc theo khoảng ngày */}
+            <div className="space-y-2 md:col-span-2 lg:col-span-1">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                📅 Khoảng ngày
+              </label>
+              <div className="space-y-2">
+                <RangePicker
+                  format={"DD/MM/YYYY"}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  value={
+                    filterType === "range" && filterRange.from && filterRange.to
+                      ? [filterRange.from, filterRange.to]
+                      : []
+                  }
+                  onChange={(dates) => {
+                    if (dates && dates.length === 2) {
+                      setFilterType("range");
+                      setFilterRange({ from: dates[0], to: dates[1] });
+                      setFilterDay(null);
+                      setFilterMonth(null);
+                      setFilterYear(null);
+                    } else {
+                      resetAllFilters();
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Lọc theo ngày đơn */}
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                📅 Theo ngày
+              </label>
+              <DatePicker
+                format={"DD/MM/YYYY"}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                value={filterType === "day" && filterDay ? filterDay : null}
+                onChange={(date) => {
+                  if (date) {
+                    setFilterType("day");
+                    setFilterDay(date);
+                    setFilterMonth(null);
+                    setFilterYear(null);
+                    setFilterRange({ from: null, to: null });
+                  } else {
+                    resetAllFilters();
+                  }
+                }}
+              />
+            </div>
+
+            {/* Lọc theo tháng */}
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                📊 Theo tháng
+              </label>
+              <DatePicker
+                picker="month"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                value={
+                  filterType === "month" && filterMonth ? filterMonth : null
+                }
+                onChange={(date) => {
+                  if (date) {
+                    setFilterType("month");
+                    setFilterMonth(date);
+                    setFilterDay(null);
+                    setFilterYear(null);
+                    setFilterRange({ from: null, to: null });
+                  } else {
+                    resetAllFilters();
+                  }
+                }}
+              />
+            </div>
+
+            {/* Lọc theo năm */}
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                🗓️ Theo năm
+              </label>
+              <DatePicker
+                picker="year"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                value={filterType === "year" && filterYear ? filterYear : null}
+                onChange={(date) => {
+                  if (date) {
+                    setFilterType("year");
+                    setFilterYear(date);
+                    setFilterDay(null);
+                    setFilterMonth(null);
+                    setFilterRange({ from: null, to: null });
+                  } else {
+                    resetAllFilters();
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Thông tin trạng thái filter */}
+          {filterType && (
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+              <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="font-medium">
+                  Đang lọc:
+                  {filterType === "day" &&
+                    filterDay &&
+                    ` Ngày ${filterDay.format("DD/MM/YYYY")}`}
+                  {filterType === "month" &&
+                    filterMonth &&
+                    ` Tháng ${filterMonth.format("MM/YYYY")}`}
+                  {filterType === "year" &&
+                    filterYear &&
+                    ` Năm ${filterYear.format("YYYY")}`}
+                  {filterType === "range" &&
+                    filterRange.from &&
+                    filterRange.to &&
+                    ` Từ ${filterRange.from.format(
+                      "DD/MM/YYYY"
+                    )} đến ${filterRange.to.format("DD/MM/YYYY")}`}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Thêm 6 ô tổng quan ở đây */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
         <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex flex-col items-center">
           <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">
             Doanh số (Mastertracking)
@@ -1122,22 +1414,77 @@ export default function ContentTable(props) {
             {totalMastertracking}
           </span>
         </div>
-        <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 flex flex-col items-center">
-          <span className="text-xs text-green-700 dark:text-green-300 font-semibold mb-1">
+        <div className="bg-orange-100 dark:bg-orange-900/60 rounded-lg p-4 flex flex-col items-center">
+          <span className="text-xs text-orange-700 dark:text-orange-300 font-semibold mb-1">
             Tổng Debit
           </span>
-          <span className="text-2xl font-bold text-green-700 dark:text-green-300">
+          <span className="text-2xl font-bold text-orange-700 dark:text-orange-300">
             {formatCurrency(totalDebit)} VNĐ
           </span>
         </div>
         <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4 flex flex-col items-center">
-          <span className="text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">
+          <span className="w-full max-w-md text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">
             Tổng Thanh toán
           </span>
           <span className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">
             {formatCurrency(totalPayment)} VNĐ
           </span>
         </div>
+        <div className="bg-green-100 dark:bg-green-900/60 rounded-lg p-4 flex flex-col items-center">
+          <span className="text-xs text-green-800 dark:text-green-200 font-semibold mb-1">
+            Tiền mặt:
+          </span>
+          <span className="text-2xl font-bold text-green-800 dark:text-green-200">
+            {formatCurrency(
+              filteredMastertracking.reduce(
+                (sum, item) =>
+                  sum +
+                  (item?.pricePayment?.cashPayment?.active
+                    ? item?.pricePayment?.cashPayment?.price || 0
+                    : 0),
+                0
+              )
+            )}{" "}
+            VNĐ
+          </span>
+        </div>
+        <div className="bg-blue-100 dark:bg-blue-900/60 rounded-lg p-4 flex flex-col items-center">
+          <span className="text-xs text-blue-800 dark:text-blue-200 font-semibold mb-1">
+            Chuyển khoản:
+          </span>
+          <span className="text-2xl font-bold text-blue-800 dark:text-blue-200">
+            {formatCurrency(
+              filteredMastertracking.reduce(
+                (sum, item) =>
+                  sum +
+                  (item?.pricePayment?.cardPayment?.active
+                    ? item?.pricePayment?.cardPayment?.price || 0
+                    : 0),
+                0
+              )
+            )}{" "}
+            VNĐ
+          </span>
+        </div>
+        <div className="bg-purple-100 dark:bg-purple-900/60 rounded-lg p-4 flex flex-col items-center">
+          <span className="text-xs text-purple-800 dark:text-purple-200 font-semibold mb-1">
+            Doanh nghiệp:
+          </span>
+          <span className="text-2xl font-bold text-purple-800 dark:text-purple-200">
+            {formatCurrency(
+              filteredMastertracking.reduce(
+                (sum, item) =>
+                  sum +
+                  (item?.pricePayment?.businessCardPayment?.active
+                    ? item?.pricePayment?.businessCardPayment?.price || 0
+                    : 0),
+                0
+              )
+            )}{" "}
+            VNĐ
+          </span>
+        </div>
+
         <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 flex flex-col items-center">
           <span className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">
             Tổng Còn lại
@@ -1189,245 +1536,163 @@ export default function ContentTable(props) {
           <span className="text-gray-500 dark:text-gray-400"> entries </span>
 
           {/* Thêm nút tùy chỉnh cột */}
-          <button
-            ref={columnButtonRef}
-            onClick={() => setShowColumnSelector(!showColumnSelector)}
-            className="ml-4 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 flex items-center"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div className="relative">
+            <button
+              ref={columnButtonRef}
+              onClick={() => setShowColumnSelector(!showColumnSelector)}
+              className="ml-4 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 flex items-center"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            Tùy chỉnh cột
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              Tùy chỉnh cột
+            </button>
 
-          <button
-            ref={columnButtonRef}
-            onClick={() => exportToExcel()}
-            className="ml-4 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 flex items-center transition-all duration-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-1"
-              fill="currentColor"
-              viewBox="0 0 16 16"
-            >
-              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .146-.354l3-3z" />
-            </svg>
-            Xuất Excel
-          </button>
+            {/* Dropdown tùy chỉnh cột */}
+            {showColumnSelector && (
+              <div
+                ref={columnSelectorRef}
+                className="absolute left-0 top-full mt-2 z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-3 w-72 dark:bg-gray-800 dark:border-gray-700"
+              >
+                <h3 className="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+                  Hiển thị cột
+                </h3>
 
-          {/* Dropdown tùy chỉnh cột */}
-          {showColumnSelector && (
-            <div
-              ref={columnSelectorRef}
-              className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-3 top-16 w-72 dark:bg-gray-800 dark:border-gray-700"
-            >
-              <h3 className="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                Hiển thị cột
-              </h3>
-
-              {/* Thêm nút Chọn tất cả/Bỏ chọn tất cả */}
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => {
-                    const newVisibleColumns = { ...visibleColumns };
-                    Object.keys(newVisibleColumns).forEach((column) => {
-                      if (column !== "house_bill") {
-                        // Giữ nguyên house_bill
-                        newVisibleColumns[column] = true;
-                      }
-                    });
-                    setVisibleColumns(newVisibleColumns);
-                  }}
-                  className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                >
-                  Chọn tất cả
-                </button>
-                <button
-                  onClick={() => {
-                    const newVisibleColumns = { ...visibleColumns };
-                    Object.keys(newVisibleColumns).forEach((column) => {
-                      if (column !== "house_bill") {
-                        // Giữ nguyên house_bill
-                        newVisibleColumns[column] = false;
-                      }
-                    });
-                    setVisibleColumns(newVisibleColumns);
-                  }}
-                  className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                >
-                  Bỏ chọn tất cả
-                </button>
-              </div>
-
-              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                {/* Cột luôn hiển thị */}
-                <div className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
-                    id="col-house_bill"
-                    checked={true}
-                    disabled={true}
-                    className="w-4 h-4 bg-blue-600 text-blue-600 cursor-not-allowed opacity-70 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  />
-                  <label
-                    htmlFor="col-house_bill"
-                    className="ml-2 text-sm font-medium text-gray-800 dark:text-gray-200"
+                {/* Thêm nút Chọn tất cả/Bỏ chọn tất cả */}
+                <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => {
+                      const newVisibleColumns = { ...visibleColumns };
+                      Object.keys(newVisibleColumns).forEach((column) => {
+                        if (column !== "house_bill") {
+                          // Giữ nguyên house_bill
+                          newVisibleColumns[column] = true;
+                        }
+                      });
+                      setVisibleColumns(newVisibleColumns);
+                    }}
+                    className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
                   >
-                    HOUSE BILL
-                  </label>
+                    Chọn tất cả
+                  </button>
+                  <button
+                    onClick={() => {
+                      const newVisibleColumns = { ...visibleColumns };
+                      Object.keys(newVisibleColumns).forEach((column) => {
+                        if (column !== "house_bill") {
+                          // Giữ nguyên house_bill
+                          newVisibleColumns[column] = false;
+                        }
+                      });
+                      setVisibleColumns(newVisibleColumns);
+                    }}
+                    className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  >
+                    Bỏ chọn tất cả
+                  </button>
                 </div>
 
-                {/* Nhóm THÔNG TIN CƠ BẢN */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      THÔNG TIN CƠ BẢN
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "house_bill",
-                            "Date",
-                            "customer",
-                            "country_name",
-                            "master_tracking",
-
-                            "gw",
-                            "cw",
-                            "company_service",
-                            "inwh_date",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "Date",
-                            "customer",
-                            "country_name",
-                            "master_tracking",
-                            "gw",
-                            "cw",
-                            "company_service",
-                            "inwh_date",
-                          ].forEach((column) => {
-                            if (column !== "house_bill") {
-                              // Giữ nguyên house_bill
-                              newVisibleColumns[column] = false;
-                            }
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
-                    </div>
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  {/* Cột luôn hiển thị */}
+                  <div className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      id="col-house_bill"
+                      checked={true}
+                      disabled={true}
+                      className="w-4 h-4 bg-blue-600 text-blue-600 cursor-not-allowed opacity-70 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label
+                      htmlFor="col-house_bill"
+                      className="ml-2 text-sm font-medium text-gray-800 dark:text-gray-200"
+                    >
+                      HOUSE BILL
+                    </label>
                   </div>
-                  {[
-                    "Date",
-                    "customer",
-                    "country_name",
-                    "master_tracking",
-                    "gw",
-                    "cw",
-                    "company_service",
-                    "inwh_date",
-                  ].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column] || column}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm PRICE */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      PRICE
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "price_price",
-                            "fsc_price",
-                            "surge_fee_price",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "price_price",
-                            "fsc_price",
-                            "surge_fee_price",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm THÔNG TIN CƠ BẢN */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        THÔNG TIN CƠ BẢN
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "house_bill",
+                              "Date",
+                              "customer",
+                              "country_name",
+                              "master_tracking",
+
+                              "gw",
+                              "cw",
+                              "company_service",
+                              "inwh_date",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "Date",
+                              "customer",
+                              "country_name",
+                              "master_tracking",
+                              "gw",
+                              "cw",
+                              "company_service",
+                              "inwh_date",
+                            ].forEach((column) => {
+                              if (column !== "house_bill") {
+                                // Giữ nguyên house_bill
+                                newVisibleColumns[column] = false;
+                              }
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  {["price_price", "fsc_price", "surge_fee_price"].map(
-                    (column) => (
+                    {[
+                      "Date",
+                      "customer",
+                      "country_name",
+                      "master_tracking",
+                      "gw",
+                      "cw",
+                      "company_service",
+                      "inwh_date",
+                    ].map((column) => (
                       <div key={column} className="flex items-center ml-2 mt-1">
                         <input
                           type="checkbox"
@@ -1445,200 +1710,269 @@ export default function ContentTable(props) {
                           htmlFor={`col-${column}`}
                           className="ml-2 text-xs text-gray-600 dark:text-gray-400"
                         >
-                          {columnLabels[column].replace(" (PRICE)", "")}
+                          {columnLabels[column] || column}
                         </label>
                       </div>
-                    )
-                  )}
-                </div>
-
-                {/* Nhóm DEBIT */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      DEBIT
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "afr_debit",
-                            "oversize_debit",
-                            "surge_fee_debit",
-                            "other_charges_debit",
-                            "fsc_debit",
-                            "gw_debit",
-                            "cw_debit",
-                            "bill",
-                            "reconcile",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "afr_debit",
-                            "oversize_debit",
-                            "surge_fee_debit",
-                            "other_charges_debit",
-                            "fsc_debit",
-                            "gw_debit",
-                            "cw_debit",
-                            "bill",
-                            "reconcile",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
-                    </div>
+                    ))}
                   </div>
-                  {[
-                    "afr_debit",
-                    "oversize_debit",
-                    "surge_fee_debit",
-                    "other_charges_debit",
-                    "fsc_debit",
-                    "gw_debit",
-                    "cw_debit",
-                    "bill",
-                    "reconcile",
-                  ].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (DEBIT)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm TOTAL AR */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      TOTAL AR
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          ["total_ar", "vat", "total"].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          ["total_ar", "vat", "total"].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm PRICE */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        PRICE
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "price_price",
+                              "fsc_price",
+                              "surge_fee_price",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "price_price",
+                              "fsc_price",
+                              "surge_fee_price",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
+                    {["price_price", "fsc_price", "surge_fee_price"].map(
+                      (column) => (
+                        <div key={column} className="flex items-center ml-2 mt-1">
+                          <input
+                            type="checkbox"
+                            id={`col-${column}`}
+                            checked={visibleColumns[column]}
+                            onChange={() => {
+                              setVisibleColumns({
+                                ...visibleColumns,
+                                [column]: !visibleColumns[column],
+                              });
+                            }}
+                            className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                          />
+                          <label
+                            htmlFor={`col-${column}`}
+                            className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                          >
+                            {columnLabels[column].replace(" (PRICE)", "")}
+                          </label>
+                        </div>
+                      )
+                    )}
                   </div>
-                  {["total_ar", "vat", "total"].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (TOTAL AR)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm GRAND TOTAL */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      GRAND TOTAL
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "order_grand_total",
-                            "other_charges_total",
-                            "grand_total",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "order_grand_total",
-                            "other_charges_total",
-                            "grand_total",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm DEBIT */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        DEBIT
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "afr_debit",
+                              "oversize_debit",
+                              "surge_fee_debit",
+                              "other_charges_debit",
+                              "fsc_debit",
+                              "gw_debit",
+                              "cw_debit",
+                              "bill",
+                              "reconcile",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "afr_debit",
+                              "oversize_debit",
+                              "surge_fee_debit",
+                              "other_charges_debit",
+                              "fsc_debit",
+                              "gw_debit",
+                              "cw_debit",
+                              "bill",
+                              "reconcile",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
+                    {[
+                      "afr_debit",
+                      "oversize_debit",
+                      "surge_fee_debit",
+                      "other_charges_debit",
+                      "fsc_debit",
+                      "gw_debit",
+                      "cw_debit",
+                      "bill",
+                      "reconcile",
+                    ].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (DEBIT)", "")}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                  {["order_grand_total", "other_charges_total", "grand_total"].map(
-                    (column) => (
+
+                  {/* Nhóm TOTAL AR */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        TOTAL AR
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            ["total_ar", "vat", "total"].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            ["total_ar", "vat", "total"].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
+                    </div>
+                    {["total_ar", "vat", "total"].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (TOTAL AR)", "")}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Nhóm GRAND TOTAL */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        GRAND TOTAL
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "order_grand_total",
+                              "other_charges_total",
+                              "grand_total",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "order_grand_total",
+                              "other_charges_total",
+                              "grand_total",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
+                    </div>
+                    {[
+                      "order_grand_total",
+                      "other_charges_total",
+                      "grand_total",
+                    ].map((column) => (
                       <div key={column} className="flex items-center ml-2 mt-1">
                         <input
                           type="checkbox"
@@ -1659,241 +1993,331 @@ export default function ContentTable(props) {
                           {columnLabels[column].replace(" (GRAND TOTAL)", "")}
                         </label>
                       </div>
-                    )
-                  )}
-                </div>
-
-                {/* Nhóm PROFIT */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      PROFIT
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "price_diff",
-                            "packing",
-                            "pickup",
-                            "other_costs",
-                            "profit",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "price_diff",
-                            "packing",
-                            "pickup",
-                            "other_costs",
-                            "profit",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
-                    </div>
+                    ))}
                   </div>
-                  {[
-                    "price_diff",
-                    "packing",
-                    "pickup",
-                    "other_costs",
-                    "profit",
-                  ].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (PROFIT)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm HH */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      HH
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          ["hh1", "hh2", "hh3", "hh4"].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          ["hh1", "hh2", "hh3", "hh4"].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm PAYMENT */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        PAYMENT
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "payments_cash",
+                              "payments_banking",
+                              "payments_business",
+                              "payments_remaining",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "payments_cash",
+                              "payments_banking",
+                              "payments_business",
+                              "payments_remaining",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
+                    {[
+                      "payments_cash",
+                      "payments_banking",
+                      "payments_business",
+                      "payments_remaining",
+                    ].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (PAYMENT)", "")}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                  {["hh1", "hh2", "hh3", "hh4"].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (HH)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Nhóm LƯƠNG THƯỞNG */}
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      LƯƠNG THƯỞNG
-                    </span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "base_salary",
-                            "kpi_bonus",
-                            "bonus_1_2_3",
-                            "allowance",
-                            "other_bonus",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = true;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                      >
-                        Chọn
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newVisibleColumns = { ...visibleColumns };
-                          [
-                            "base_salary",
-                            "kpi_bonus",
-                            "bonus_1_2_3",
-                            "allowance",
-                            "other_bonus",
-                          ].forEach((column) => {
-                            newVisibleColumns[column] = false;
-                          });
-                          setVisibleColumns(newVisibleColumns);
-                        }}
-                        className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                      >
-                        Bỏ chọn
-                      </button>
+                  {/* Nhóm PROFIT */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        PROFIT
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "price_diff",
+                              "packing",
+                              "pickup",
+                              "other_costs",
+                              "profit",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "price_diff",
+                              "packing",
+                              "pickup",
+                              "other_costs",
+                              "profit",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
+                    {[
+                      "price_diff",
+                      "packing",
+                      "pickup",
+                      "other_costs",
+                      "profit",
+                    ].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (PROFIT)", "")}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                  {[
-                    "base_salary",
-                    "kpi_bonus",
-                    "bonus_1_2_3",
-                    "allowance",
-                    "other_bonus",
-                  ].map((column) => (
-                    <div key={column} className="flex items-center ml-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id={`col-${column}`}
-                        checked={visibleColumns[column]}
-                        onChange={() => {
-                          setVisibleColumns({
-                            ...visibleColumns,
-                            [column]: !visibleColumns[column],
-                          });
-                        }}
-                        className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label
-                        htmlFor={`col-${column}`}
-                        className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        {columnLabels[column].replace(" (LƯƠNG THƯỞNG)", "")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Trạng thái */}
-                <div className="flex items-center mt-2">
-                  <input
-                    type="checkbox"
-                    id="col-status"
-                    checked={visibleColumns["status"]}
-                    onChange={() => {
-                      setVisibleColumns({
-                        ...visibleColumns,
-                        status: !visibleColumns["status"],
-                      });
-                    }}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  />
-                  <label
-                    htmlFor="col-status"
-                    className="ml-2 text-sm text-gray-600 dark:text-gray-400"
-                  >
-                    TRẠNG THÁI
-                  </label>
+                  {/* Nhóm HH */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        HH
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            ["hh1", "hh2", "hh3", "hh4"].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            ["hh1", "hh2", "hh3", "hh4"].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
+                    </div>
+                    {["hh1", "hh2", "hh3", "hh4"].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (HH)", "")}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Nhóm LƯƠNG THƯỞNG */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        LƯƠNG THƯỞNG
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "base_salary",
+                              "kpi_bonus",
+                              "bonus_1_2_3",
+                              "allowance",
+                              "other_bonus",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = true;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                          Chọn
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newVisibleColumns = { ...visibleColumns };
+                            [
+                              "base_salary",
+                              "kpi_bonus",
+                              "bonus_1_2_3",
+                              "allowance",
+                              "other_bonus",
+                            ].forEach((column) => {
+                              newVisibleColumns[column] = false;
+                            });
+                            setVisibleColumns(newVisibleColumns);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
+                    </div>
+                    {[
+                      "base_salary",
+                      "kpi_bonus",
+                      "bonus_1_2_3",
+                      "allowance",
+                      "other_bonus",
+                    ].map((column) => (
+                      <div key={column} className="flex items-center ml-2 mt-1">
+                        <input
+                          type="checkbox"
+                          id={`col-${column}`}
+                          checked={visibleColumns[column]}
+                          onChange={() => {
+                            setVisibleColumns({
+                              ...visibleColumns,
+                              [column]: !visibleColumns[column],
+                            });
+                          }}
+                          className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label
+                          htmlFor={`col-${column}`}
+                          className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                        >
+                          {columnLabels[column].replace(" (LƯƠNG THƯỞNG)", "")}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Trạng thái */}
+                  <div className="flex items-center mt-2">
+                    <input
+                      type="checkbox"
+                      id="col-status"
+                      checked={visibleColumns["status"]}
+                      onChange={() => {
+                        setVisibleColumns({
+                          ...visibleColumns,
+                          status: !visibleColumns["status"],
+                        });
+                      }}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label
+                      htmlFor="col-status"
+                      className="ml-2 text-sm text-gray-600 dark:text-gray-400"
+                    >
+                      TRẠNG THÁI
+                    </label>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+
+          </div>
+
+          <button
+            ref={columnButtonRef}
+            onClick={() => exportToExcel()}
+            className="ml-4 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 flex items-center transition-all duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-1"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V4a1 1 0 0 1 1-1z" />
+            </svg>
+            Xuất Excel
+          </button>
         </div>
 
         <div className="relative">
@@ -2110,11 +2534,47 @@ export default function ContentTable(props) {
                       {formatCurrency(item?.total_ar.total)} VNĐ
                     </TableCell>
                   )}
+
                   {visibleColumns.order_grand_total && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.grand_total.order_grand_total || "..."}
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="relative flex flex-col items-start space-y-2">
+                        {(authorities.includes("ADMIN") ||
+                          authorities.includes("CS") ||
+                          authorities.includes("TRANSPORTER")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                openModal();
+                                setBillEdit(item);
+                              }}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
+
+                        {/* Giá trị tiền order */}
+                        <div className="flex flex-col space-y-1 pt-6">
+                          {/* Giá trị xanh */}
+                          <div className="flex items-center space-x-2">
+                            <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                              {formatCurrency(item.priceOrder.total_complete)}{" "}
+                              VNĐ
+                            </span>
+                          </div>
+
+                          {/* Giá trị đỏ */}
+                          <div className="flex items-center space-x-2">
+                            <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                              {formatCurrency(item.priceOrder.total_process)}{" "}
+                              VNĐ
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </TableCell>
                   )}
+
                   {visibleColumns.other_charges_total && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.grand_total.other_charges_total || "..."}
@@ -2143,21 +2603,31 @@ export default function ContentTable(props) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                          <button
-                            type="button"
-                            onClick={() => handleViewPaymentDetails(item)}
-                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CASH"); // Thêm dòng này
+                                handleViewPaymentDetails(item);
+                              }}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
-                            <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
-                              {formatCurrency(item.pricePayment.payment_cash)}{" "}
+                            <span
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cashPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
+                            >
+                              {formatCurrency(
+                                item.pricePayment.cashPayment.price
+                              )}{" "}
                               VNĐ
                             </span>
                           </div>
@@ -2173,21 +2643,70 @@ export default function ContentTable(props) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                          <button
-                            type="button"
-                            onClick={() => handleViewPaymentDetails(item)}
-                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CARD"); // Thêm dòng này
+                                handleViewPaymentDetails(item);
+                              }}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
-                            <span className="px-2 py-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-md dark:bg-blue-900/50 dark:text-blue-300">
-                              {formatCurrency(item.pricePayment.payment_card)}{" "}
+                            <span
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cardPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
+                            >
+                              {formatCurrency(
+                                item.pricePayment.cardPayment.price
+                              )}{" "}
+                              VNĐ
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                  )}
+                  {visibleColumns.payments_business && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="relative flex flex-col items-start space-y-2">
+                        {/* Nút để mở modal thanh toán */}
+                        {(authorities.includes("ADMIN") ||
+                          authorities.includes("CS") ||
+                          authorities.includes("TRANSPORTER")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("BUSINESS_CARD"); // Thêm dòng này
+                                handleViewPaymentDetails(item);
+                              }}
+                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
+
+                        {/* Giá trị tiền order */}
+                        <div className="flex flex-col space-y-1 pt-6">
+                          {/* Giá trị xanh */}
+                          <div className="flex items-center space-x-2">
+                            <span
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.businessCardPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
+                            >
+                              {formatCurrency(
+                                item.pricePayment.businessCardPayment.price
+                              )}{" "}
                               VNĐ
                             </span>
                           </div>
@@ -2299,8 +2818,8 @@ export default function ContentTable(props) {
                         <StatusBadge status={item.status_payment} />
 
                         {authorities.includes("ADMIN") ||
-                        authorities.includes("CS") ||
-                        authorities.includes("TRANSPORTER") ? (
+                          authorities.includes("CS") ||
+                          authorities.includes("TRANSPORTER") ? (
                           <select
                             value={item.status_payment || "pending"}
                             onChange={(e) =>
@@ -2349,7 +2868,7 @@ export default function ContentTable(props) {
         onClose={() => {
           closeModal();
           if (isDataChanged) {
-            window.location.reload(); // Chỉ reload nếu dữ liệu đã thay đổi
+            fetchBillData(); // Chỉ reload nếu dữ liệu đã thay đổi
           }
         }}
         className="max-w-[800px] m-4"
@@ -2364,7 +2883,7 @@ export default function ContentTable(props) {
               onClick={() => {
                 closeModal();
                 if (isDataChanged) {
-                  window.location.reload(); // Chỉ reload nếu dữ liệu đã thay đổi
+                  fetchBillData(); // Chỉ reload nếu dữ liệu đã thay đổi
                 }
               }}
               className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
@@ -2387,9 +2906,8 @@ export default function ContentTable(props) {
                     type="button"
                     onClick={() => {
                       const currentDate = new Date();
-                      const formattedDate = `${currentDate.getDate()}/${
-                        currentDate.getMonth() + 1
-                      }/${currentDate.getFullYear()}`;
+                      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
+                        }/${currentDate.getFullYear()}`;
                       const newPriceOrder = {
                         id: "",
                         name: "",
@@ -2553,7 +3071,7 @@ export default function ContentTable(props) {
                 onClick={() => {
                   closeModal();
                   if (isDataChanged) {
-                    window.location.reload();
+                    fetchBillData();
                   }
                 }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
@@ -2570,7 +3088,7 @@ export default function ContentTable(props) {
         onClose={() => {
           setIsOpenFormPayment(false);
           if (isDataChanged) {
-            window.location.reload();
+            fetchBillData();
           }
         }}
         className="max-w-[800px] m-4"
@@ -2588,7 +3106,7 @@ export default function ContentTable(props) {
                   onClick={() => {
                     setIsOpenFormPayment(false);
                     if (isDataChanged) {
-                      window.location.reload();
+                      fetchBillData();
                     }
                   }}
                   className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
@@ -2611,131 +3129,307 @@ export default function ContentTable(props) {
 
               {/* Payment Form */}
               <div className="space-y-4">
-                {/* Tiền mặt */}
-                <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                  <div className="w-1/12 text-center">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      1
-                    </p>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Tiền mặt (VNĐ)
-                    </label>
-                    <input
-                      type="text"
-                      value={
-                        paymentDetails.cash === 0 &&
-                        document.activeElement ===
-                          document.getElementById("cash-input")
-                          ? ""
-                          : paymentDetails.cash
-                      }
-                      onChange={(e) =>
-                        handlePaymentInputChange("cash", e.target.value)
-                      }
-                      onFocus={(e) => {
-                        if (paymentDetails.cash === 0) {
-                          e.target.value = "";
-                        }
-                      }}
-                      onBlur={(e) => {
-                        if (e.target.value === "") {
-                          handlePaymentInputChange("cash", "0");
-                        }
-                      }}
-                      id="cash-input"
-                      className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                    />
-                  </div>
-                </div>
+                {editType === "CASH" && (
+                  <div className="space-y-4">
+                    {/* Form nội dung */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                      <div className="flex-1">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Tiền mặt (VNĐ)
+                        </label>
+                        <input
+                          type="number"
+                          value={
+                            cashPayment.price === 0 &&
+                              document.activeElement ===
+                              document.getElementById("cash-input")
+                              ? ""
+                              : cashPayment.price
+                          }
+                          onChange={(e) =>
+                            handlePaymentInputChange("cash", e.target.value)
+                          }
+                          onFocus={(e) => {
+                            if (cashPayment.price === 0) e.target.value = "";
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value === "")
+                              handlePaymentInputChange("cash", "0");
+                          }}
+                          readOnly={cashPayment.dateUpdate !== null}
+                          id="cash-input"
+                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
 
-                {/* Tiền chuyển khoản */}
-                <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                  <div className="w-1/12 text-center">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      2
-                    </p>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Tiền chuyển khoản (VNĐ)
-                    </label>
-                    <input
-                      type="text"
-                      value={
-                        paymentDetails.banking === 0 &&
-                        document.activeElement ===
-                          document.getElementById("banking-input")
-                          ? ""
-                          : paymentDetails.banking
-                      }
-                      onChange={(e) =>
-                        handlePaymentInputChange("banking", e.target.value)
-                      }
-                      onFocus={(e) => {
-                        if (paymentDetails.banking === 0) {
-                          e.target.value = "";
-                        }
-                      }}
-                      onBlur={(e) => {
-                        if (e.target.value === "") {
-                          handlePaymentInputChange("banking", "0");
-                        }
-                      }}
-                      id="banking-input"
-                      className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                    />
-                  </div>
-                </div>
+                      <div className="w-full sm:w-1/4">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Ngày tạo
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            cashPayment.dateUpdate
+                              ? formatDateTime(cashPayment.dateUpdate)
+                              : "Chưa có ngày tạo"
+                          }
+                          readOnly
+                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
+                    </div>
 
-                {/* Tổng tiền */}
-                <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
-                  <div className="w-1/12 text-center">
-                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                      Σ
-                    </p>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-medium text-blue-700 dark:text-blue-300">
-                      Tổng tiền thanh toán (VNĐ)
-                    </label>
-                    <div className="w-full px-3 py-2 text-sm font-bold border rounded-md bg-white dark:bg-gray-800 dark:text-blue-300 dark:border-blue-800">
-                      {formatCurrency(
-                        paymentDetails.cash + paymentDetails.banking
-                      )}
+                    {/* ✅ Nút hành động bên dưới */}
+
+                    <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpenFormPayment(false);
+                          if (isDataChanged) fetchBillData();
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Đóng
+                      </button>
+                      {!cashPayment.active &&
+                        (cashPayment.dateUpdate === null ? (
+                          <button
+                            type="button"
+                            onClick={handleUpdatePayment}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            Lưu thay đổi
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleConfirmPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                              Xác nhận
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                            >
+                              Huỷ
+                            </button>
+                          </>
+                        ))}
                     </div>
                   </div>
-                </div>
+                )}
+
+                {editType === "CARD" && (
+                  <div className="space-y-4">
+                    {/* Form nội dung */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                      <div className="flex-1">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Tiền chuyển khoản (VNĐ)
+                        </label>
+                        <input
+                          type="number"
+                          value={
+                            bankingPayment.price === 0 &&
+                              document.activeElement ===
+                              document.getElementById("banking-input")
+                              ? ""
+                              : bankingPayment.price
+                          }
+                          onChange={(e) =>
+                            handlePaymentInputChange("banking", e.target.value)
+                          }
+                          onFocus={(e) => {
+                            if (bankingPayment.price === 0) e.target.value = "";
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value === "")
+                              handlePaymentInputChange("banking", "0");
+                          }}
+                          readOnly={bankingPayment.dateUpdate !== null}
+                          id="banking-input"
+                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
+
+                      <div className="w-full sm:w-1/4">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Ngày tạo
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            bankingPayment.dateUpdate
+                              ? formatDateTime(bankingPayment.dateUpdate)
+                              : "Chưa có ngày tạo"
+                          }
+                          readOnly
+                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
+                    </div>
+
+                    {/* ✅ Nút hành động bên dưới */}
+
+                    <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpenFormPayment(false);
+                          if (isDataChanged) fetchBillData();
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Đóng
+                      </button>
+                      {!bankingPayment.active &&
+                        (bankingPayment.dateUpdate === null ? (
+                          <button
+                            type="button"
+                            onClick={handleUpdatePayment}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            Lưu thay đổi
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleConfirmPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                              Xác nhận
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                            >
+                              Huỷ
+                            </button>
+                          </>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {editType === "BUSINESS_CARD" && (
+                  <div className="space-y-4">
+                    {/* Form nội dung */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                      <div className="flex-1">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Tiền chuyển khoản doanh nghiệp (VNĐ)
+                        </label>
+                        <input
+                          type="number"
+                          value={
+                            businessBankingPayment.price === 0 &&
+                              document.activeElement ===
+                              document.getElementById("business-input")
+                              ? ""
+                              : businessBankingPayment.price
+                          }
+                          onChange={(e) =>
+                            handlePaymentInputChange(
+                              "businessBanking",
+                              e.target.value
+                            )
+                          }
+                          onFocus={(e) => {
+                            if (businessBankingPayment.price === 0)
+                              e.target.value = "";
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value === "")
+                              handlePaymentInputChange("businessBanking", "0");
+                          }}
+                          readOnly={businessBankingPayment.dateUpdate !== null}
+                          id="business-input"
+                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
+
+                      <div className="w-full sm:w-1/4">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Ngày tạo
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            businessBankingPayment.dateUpdate
+                              ? formatDateTime(
+                                businessBankingPayment.dateUpdate
+                              )
+                              : "Chưa có ngày tạo"
+                          }
+                          readOnly
+                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
+                    </div>
+
+                    {/* ✅ Nút hành động nằm dưới toàn bộ form */}
+                    <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpenFormPayment(false);
+                          if (isDataChanged) fetchBillData();
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Đóng
+                      </button>
+                      {!businessBankingPayment.active &&
+                        (businessBankingPayment.dateUpdate === null ? (
+                          <button
+                            type="button"
+                            onClick={handleUpdatePayment}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            Lưu thay đổi
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleConfirmPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                              Xác nhận
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                            >
+                              Huỷ
+                            </button>
+                          </>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpenFormPayment(false);
-                  if (isDataChanged) {
-                    window.location.reload();
-                  }
-                }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-              >
-                Đóng
-              </button>
-
-              <button
-                type="button"
-                onClick={handleUpdatePayment}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Lưu thay đổi
-              </button>
             </div>
           </form>
         </div>
       </Modal>
     </div>
   );
+}
+
+function parseCustomDate(dateString) {
+  // dateString dạng "10:44:19 07:06:2025"
+  if (!dateString) return null;
+  const parts = dateString.split(" ");
+  if (parts.length !== 2) return null;
+  const [time, date] = parts;
+  const [day, month, year] = date.split(":").map(Number);
+  return new Date(year, month - 1, day);
 }
