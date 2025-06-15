@@ -9,7 +9,7 @@ export default function CsTable() {
 
   useEffect(() => {
     const loadData = async () => {
-      const dataBaseUser = await GetAllBaseUser("cs");
+      const dataBaseUser = await GetAllBaseUser("CS");
       console.log(dataBaseUser);
       setUsers(dataBaseUser);
     };
