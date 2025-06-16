@@ -8,10 +8,20 @@ import Button from "../../../elements/Button/index";
 import { Modal } from "../ui/modal/index.js";
 import { useModal } from "../../../hooks/useModal";
 import { DeleteOverSize, GetOverSizeByName, PostOverSize } from "../../../service/api.admin.service.jsx";
+import { useLoading } from "../../../hooks/useLoading";
+import { Spin } from "antd";
 
 const OverSizeTable = () => {
     const [sortKey, setSortKey] = useState("name");
     const [sortOrder, setSortOrder] = useState("asc");
+    const [isEditing, setIsEditing] = useState(false);
+    const [editValues, setEditValues] = useState({
+        length: 0,
+        width: 0,
+        height: 0,
+        price: 0
+    });
+    const { loading, withLoading } = useLoading();
 
     const handleSort = (key) => {
         if (sortKey === key) {
@@ -66,11 +76,60 @@ const OverSizeTable = () => {
 
     };
 
-    // Mock dữ liệu hiển thị trên bảng
-
-
     const { isOpen, openModal, closeModal } = useModal();
 
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditValues((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleSave = async () => {
+        await withLoading(
+            async () => {
+                // Kiểm tra dữ liệu đầu vào
+                if (!editValues.length || !editValues.width || !editValues.height || !editValues.price) {
+                    throw new Error("Vui lòng nhập đầy đủ thông tin");
+                }
+
+                // TODO: Gọi API để lưu dữ liệu
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Giả lập API call
+                setIsEditing(false);
+            },
+            "Cập nhật dữ liệu thành công",
+            "Cập nhật dữ liệu thất bại"
+        );
+    };
+
+    const handleCancel = () => {
+        setEditValues({
+            length: 0,
+            width: 0,
+            height: 0,
+            price: 0
+        });
+        setIsEditing(false);
+    };
+
+    const handleEdit = () => {
+        setEditValues({
+            length: 0,
+            width: 0,
+            height: 0,
+            price: 0
+        });
+        setIsEditing(true);
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[200px]">
+                <Spin size="large" />
+            </div>
+        );
+    }
 
     return (
         <div>
@@ -153,8 +212,8 @@ const OverSizeTable = () => {
                                     <button className="flex flex-col gap-0.5">
                                         <svg
                                             className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "asc"
-                                                    ? "text-brand-500"
-                                                    : ""
+                                                ? "text-brand-500"
+                                                : ""
                                                 }`}
                                             width="8"
                                             height="5"
@@ -169,8 +228,8 @@ const OverSizeTable = () => {
                                         </svg>
                                         <svg
                                             className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "desc"
-                                                    ? "text-brand-500"
-                                                    : ""
+                                                ? "text-brand-500"
+                                                : ""
                                                 }`}
                                             width="8"
                                             height="5"
