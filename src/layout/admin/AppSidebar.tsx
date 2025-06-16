@@ -171,6 +171,14 @@ const AppSidebar: React.FC = () => {
           setNavItems(
             [
               {
+                icon: <GridIcon />,
+                name: "Dashboard",
+                subItems: [
+                  { name: "Ecommerce", path: "/quan-ly/thong-ke" },
+                  { name: "Analytics", path: "/quan-ly/analytics"},
+                ],
+              },
+              {
                 name: "Đơn hàng",
                 icon: <ListIcon />,
                 path: "/quan-ly/shipment",

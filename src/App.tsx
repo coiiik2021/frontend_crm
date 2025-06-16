@@ -82,6 +82,8 @@ import TransporterTable from "./components/admin/transporter-table/TransporterTa
 import AccountantTable from "./components/admin/accountant-table/AccountantTable";
 import ChuyenTuyenTable from "./components/admin/priceNet/chuyen-tuyen-table/ChuyenTuyenTable";
 import SeaTable from "./components/admin/priceNet/sea-table/SeaTable";
+import EcommerceClient from "./pages/client/Dashboard/Ecommerce";
+import AnalyticsClient from "./pages/client/Dashboard/Analytics";
 
 export default function App() {
   return (
@@ -205,7 +207,8 @@ export default function App() {
               path="/quan-ly/shipment-detail"
               element={<ShipmentDetail />}
             />
-
+            <Route index path="/quan-ly/analytics" element={<AnalyticsClient />} />
+            <Route index path="/quan-ly/thong-ke" element={<EcommerceClient />} />
             <Route path="/quan-ly/my-debits" element={<ShipmentTable />} />
           </Route>
 
