@@ -5,6 +5,8 @@ type UploadedFile = {
   name: string;
   url: string;
   created_at: string;
+  bill_id: string; // Optional property for file identification
+  id: string; // Optional property for file identification
 };
 
 export default function ShippingDocumentContent({ bill_id }: { bill_id: string }) {
@@ -51,26 +53,22 @@ export default function ShippingDocumentContent({ bill_id }: { bill_id: string }
 
       const fileUrl = res.data.secure_url;
       console.log("File uploaded to:", fileUrl);
-
+      const publicId = res.data.public_id;
       const dataRequest = {
         bill_id,
         url: fileUrl,
+        public_id: publicId,
         type: "excel",
         name: "invoice " + bill_id.substring(0, 5),
       };
 
-      await axios.post("http://localhost:8080/api/files", dataRequest);
+      const saveRes = await axios.post("http://localhost:8080/api/files", dataRequest);
 
-      const newFile: UploadedFile = {
-        name: file.name,
-        url: fileUrl,
-        created_at: new Date().toLocaleDateString(),
-      };
+      const newFile: UploadedFile = saveRes.data.data;
+
       setUploadedFiles((prev) => [...prev, newFile]);
-
       setFile(null);
       setFileName(null);
-
       alert("Upload thành công!");
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -78,10 +76,34 @@ export default function ShippingDocumentContent({ bill_id }: { bill_id: string }
     }
   };
 
-  const handleRemoveFile = (fileUrl: string) => {
-    setUploadedFiles((prev) => prev.filter((file) => file.url !== fileUrl));
-    alert("File đã được xóa!");
+  const handleRemoveFile = async (file: UploadedFile) => {
+    // Hiển thị hộp thoại xác nhận
+    const isConfirmed = window.confirm(`Bạn có chắc chắn muốn xóa file "${file.name}" không?`);
+
+    if (!isConfirmed) {
+      // Nếu người dùng không xác nhận, hủy hành động xóa
+      return;
+    }
+
+    try {
+      // Gửi yêu cầu xóa file lên server
+      const response = await axios.delete(`http://localhost:8080/api/files/${file.id}`);
+      console.log("Response from delete API:", response.data);
+
+      if (response.status === 200) {
+        // Xóa file khỏi danh sách hiển thị
+        setUploadedFiles((prev) => prev.filter((f) => f.id !== file.id));
+        alert("Xóa file thành công!");
+      } else {
+        console.error("Error deleting file:", response.data);
+        alert("Xóa file thất bại!");
+      }
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      alert("Xóa file thất bại!");
+    }
   };
+
 
   const handleOpenFile = (fileUrl: string) => {
     window.open(fileUrl, "_blank");
@@ -177,7 +199,7 @@ export default function ShippingDocumentContent({ bill_id }: { bill_id: string }
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleRemoveFile(file.url);
+                  handleRemoveFile(file);
                 }}
                 className="text-red-500 hover:underline text-xs"
               >
