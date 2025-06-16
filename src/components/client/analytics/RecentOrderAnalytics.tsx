@@ -139,10 +139,11 @@ export default function RecentOrderAnalytics() {
                       {item.totalBill}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-theme-sm sm:px-6 text-start text-success-600">
-                      ${item.totalDebit.toLocaleString()}
+                      {item.totalDebit.toLocaleString()} VND
                     </TableCell>
                     <TableCell className="px-4 py-3 text-theme-sm sm:px-6 text-start text-success-600">
-                      {item.percentage}%
+                      {/* {item.percentage}% */}
+                      {Math.round(item.percentage).toLocaleString()}%
                     </TableCell>
                   </TableRow>
                 ))
