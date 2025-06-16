@@ -1,13 +1,13 @@
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table/index.js";
 import { NavLink } from "react-router";
 import { PencilIcon, TrashBinIcon } from "../../../icons/index.js";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import Label from "../form/Label.js";
 import Input from "../form/input/InputField.js";
 import Button from "../../../elements/Button/index";
-import {Modal} from "../ui/modal/index.js";
-import {useModal} from "../../../hooks/useModal";
-import {DeleteOverSize, GetOverSizeByName, PostOverSize} from "../../../service/api.admin.service.jsx";
+import { Modal } from "../ui/modal/index.js";
+import { useModal } from "../../../hooks/useModal";
+import { DeleteOverSize, GetOverSizeByName, PostOverSize } from "../../../service/api.admin.service.jsx";
 
 const OverSizeTable = () => {
     const [sortKey, setSortKey] = useState("name");
@@ -34,7 +34,7 @@ const OverSizeTable = () => {
         nameCompany: nameCompany,
     });
 
-    useEffect( () => {
+    useEffect(() => {
         async function fetchData() {
             const dataOverSize = await GetOverSizeByName(nameCompany);
 
@@ -43,14 +43,14 @@ const OverSizeTable = () => {
             setOverSize(dataOverSize);
 
         }
-         fetchData();
+        fetchData();
 
     }, [])
 
     const handleAddNew = async () => {
 
         const data = await PostOverSize(newOverSize);
-        if(data){
+        if (data) {
             setOverSize(
                 [...overSize, data]
             )
@@ -96,17 +96,17 @@ const OverSizeTable = () => {
                                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                                     <div>
                                         <Label>name</Label>
-                                        <Input type="text" value={newOverSize.name} onChange={(e) => setNewOverSize({...newOverSize, name: e.target.value}) }/>
+                                        <Input type="text" value={newOverSize.name} onChange={(e) => setNewOverSize({ ...newOverSize, name: e.target.value })} />
                                     </div>
 
                                     <div>
                                         <Label>price</Label>
-                                        <Input type="number" value={overSize.price} onChange={(e) => setNewOverSize({...newOverSize, price: e.target.value})} />
+                                        <Input type="number" value={overSize.price} onChange={(e) => setNewOverSize({ ...newOverSize, price: e.target.value })} />
                                     </div>
 
                                     <div>
                                         <Label>Description</Label>
-                                        <Input type="text" value={overSize.description} onChange={(e) => setNewOverSize({...newOverSize, description: e.target.value})} />
+                                        <Input type="text" value={overSize.description} onChange={(e) => setNewOverSize({ ...newOverSize, description: e.target.value })} />
 
                                     </div>
 
@@ -117,7 +117,7 @@ const OverSizeTable = () => {
                                     Close
                                 </Button>
                                 <Button size="sm" onClick={
-                                     async () => {
+                                    async () => {
                                         await handleAddNew();
                                         closeModal();
                                     }
@@ -134,7 +134,7 @@ const OverSizeTable = () => {
                 <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
                     <TableRow>
                         {[
-                            { key: "name", label: "User" },
+                            { key: "name", label: "name" },
                             { key: "price", label: "Price" },
                             { key: "description", label: "Description" },
                         ].map(({ key, label }) => (
@@ -152,11 +152,10 @@ const OverSizeTable = () => {
                                     </p>
                                     <button className="flex flex-col gap-0.5">
                                         <svg
-                                            className={`text-gray-300 dark:text-gray-700  ${
-                                                sortKey === key && sortOrder === "asc"
+                                            className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "asc"
                                                     ? "text-brand-500"
                                                     : ""
-                                            }`}
+                                                }`}
                                             width="8"
                                             height="5"
                                             viewBox="0 0 8 5"
@@ -169,11 +168,10 @@ const OverSizeTable = () => {
                                             />
                                         </svg>
                                         <svg
-                                            className={`text-gray-300 dark:text-gray-700  ${
-                                                sortKey === key && sortOrder === "desc"
+                                            className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "desc"
                                                     ? "text-brand-500"
                                                     : ""
-                                            }`}
+                                                }`}
                                             width="8"
                                             height="5"
                                             viewBox="0 0 8 5"

@@ -745,7 +745,7 @@ export default function ContentTable({ data }) {
       customer: { header: "CUSTOMER", width: 30, group: "THÔNG TIN CƠ BẢN" },
       country_name: { header: "COUNTRY", width: 30, group: "THÔNG TIN CƠ BẢN" },
       master_tracking: { header: "MASTERTRACKING", width: 22, group: "THÔNG TIN CƠ BẢN" },
-      gw: { header: "GW", width:20, group: "THÔNG TIN CƠ BẢN" },
+      gw: { header: "GW", width: 20, group: "THÔNG TIN CƠ BẢN" },
       cw: { header: "CW", width: 20, group: "THÔNG TIN CƠ BẢN" },
       company_service: { header: "DỊCH VỤ", width: 15, group: "THÔNG TIN CƠ BẢN" },
       inwh_date: { header: "In-WH DATE", width: 20, group: "THÔNG TIN CƠ BẢN" },
@@ -777,7 +777,7 @@ export default function ContentTable({ data }) {
       grand_total: { header: "GRAND TOTAL", width: 18, group: "GRAND TOTAL" },
 
       // PAYMENT
-      payments_cash: { header: "Tiền mặt", width: 15 , group: "PAYMENT"},
+      payments_cash: { header: "Tiền mặt", width: 15, group: "PAYMENT" },
       payments_banking: { header: "Chuyển khoản", width: 15, group: "PAYMENT" },
       payments_business: { header: "Doanh nghiệp", width: 15, group: "PAYMENT" },
       payments_remaining: { header: "Số tiền còn lại", width: 18, group: "PAYMENT" },
@@ -2731,9 +2731,9 @@ export default function ContentTable({ data }) {
                   {visibleColumns.order_grand_total && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                       <div className="relative flex flex-col items-start space-y-2">
-                        {(authorities.includes("ADMIN") ||
-                          authorities.includes("CS") ||
-                          authorities.includes("TRANSPORTER")) && (
+                        {
+                          ["ACCOUNTANT", "ADMIN"].some(role => authorities.includes(role))
+                          && (
                             <button
                               type="button"
                               onClick={() => {
