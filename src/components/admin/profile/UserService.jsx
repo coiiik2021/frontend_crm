@@ -101,6 +101,7 @@ export default function UserService({ user }) {
   const [zoneOfService, setZoneOfService] = useState([]);
 
   const handleSetupPriceNetUser = async (service) => {
+    console.log(service);
     setIsOpenPrice(true);
 
 
@@ -255,9 +256,10 @@ export default function UserService({ user }) {
         zone: row?.zone,
         price: row?.price
       };
+      console.log("Response from API:", serviceNamePriceEdit);
+
 
       const dataResponse = await PostPriceNetUserByWeightAndZone(dataRequest);
-      console.log("Response from API:", dataResponse);
 
       if (dataResponse) {
         // Cập nhật state với dữ liệu từ API và ID mới
