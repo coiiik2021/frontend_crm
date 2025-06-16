@@ -28,8 +28,6 @@ const Products = ({
 
   const [isOpenFormPackage, setIsOpenFormPackage] = useState(true);
   const [favorites, setFavorites] = useState([]);
-  const [convertedFavoriteList, setConvertedFavoriteList] = useState([]);
-  const [convertedFavorite, setConvertedFavorite] = useState(null);
   const [showSavedPopup, setShowSavedPopup] = useState(false);
   const [saveErrors, setSaveErrors] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -126,18 +124,26 @@ const Products = ({
     setProductsTotal((prev) => ({ ...prev, quantity: prev.quantity + 1 }));
   };
 
-  const removePackage = (id) => {
+  const removePackage = (index) => {
+    console.log("Removing package at index:", index);
     if (products.length <= 1) return;
 
     setProducts((prevProducts) => {
-      const productToRemove = prevProducts.find((pkg) => pkg.id === id);
+      if (index < 0 || index >= prevProducts.length) return prevProducts;
+
+      const productToRemove = prevProducts[index];
       if (!productToRemove) return prevProducts;
+
+      // Cập nhật tổng số lượng và tổng giá
       setProductsTotal((prev) => ({
-        quantity: prev.quantity - 1 / 2,
+        quantity: prev.quantity - 0.5,
         priceProduct: prev.priceProduct - (productToRemove.totalPrice / 2 || 0),
       }));
 
-      return prevProducts.filter((pkg) => pkg.id !== id);
+      // Trả về mảng mới không chứa phần tử ở vị trí index
+      const newProducts = [...prevProducts];
+      newProducts.splice(index, 1);
+      return newProducts;
     });
   };
 
@@ -268,8 +274,6 @@ const Products = ({
       ...product,
     };
 
-    const updatedFavorites = [...favorites, newFavorite];
-    setFavorites(updatedFavorites);
     const converted = {
       id: "",
       name: "",
@@ -282,13 +286,12 @@ const Products = ({
       description: product["Mô tả sản phẩm"] || "",
     };
 
-    // Optional: nếu bạn vẫn muốn lưu lại vào state
-    setConvertedFavorite(converted);
-
     // Gọi API ngay với biến `converted`
     PostProductFavorite(converted)
       .then((response) => {
-        console.log("Gửi thành công:", response.data);
+        console.log("Gửi thành công:", response);
+        const updatedFavorites = [...favorites, revertProduct(response)];
+        setFavorites(updatedFavorites);
       })
       .catch((error) => {
         console.log("Lỗi:", error);
@@ -303,8 +306,8 @@ const Products = ({
   };
 
   const loadFromFavorites = (favoriteProduct) => {
-    const newId =
-      products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
+    // const newId =
+    //   products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
 
     const newProduct = {
       id: favoriteProduct.id,
@@ -406,7 +409,7 @@ const Products = ({
                 <div className="relative">
                   <input
                     type="text"
-                    value={searchQuery}
+                    value={searchQuery || ""}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Tìm kiếm theo mô tả sản phẩm..."
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -536,7 +539,7 @@ const Products = ({
               </motion.button>
               {products.map((pkg, index) => (
                 <motion.div
-                  key={pkg.id}
+                  key={index}
                   className="mb-6 border-t pt-4"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -672,7 +675,7 @@ const Products = ({
                     <div className="flex items-center mt-3 sm:mb-2 sm:border-t sm:pt-4">
                       <motion.button
                         type="button"
-                        onClick={() => removePackage(pkg.id)}
+                        onClick={() => removePackage(index)}
                         className="text-red-500 hover:text-red-700"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
