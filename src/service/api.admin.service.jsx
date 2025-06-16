@@ -371,7 +371,7 @@ const PostProductFavorite = async (data) => {
 };
 
 const DeleteProductFavorite = async (id) => {
-  const API = `favorite/product${id}`;
+  const API = `favorite/product/${id}`;
   return await axios.delete(API);
 };
 
