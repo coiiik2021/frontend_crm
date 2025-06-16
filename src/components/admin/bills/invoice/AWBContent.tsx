@@ -9,7 +9,13 @@ type UploadedFile = {
   created_at: string;
 };
 
-export default function AWBContent({ bill_id }: { bill_id: string }) {
+export default function AWBContent({
+  bill_id,
+  fetchBillData,
+}: {
+  bill_id: string | undefined;
+  fetchBillData?: () => void;
+}) {
   if (!bill_id) {
     console.warn("bill_id is not provided");
   }
@@ -19,24 +25,29 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(""); // State để lưu từ khóa tìm kiếm
 
-  const [dataInformation, setDataInformation] = useState<any>(null);
+  type DataInformation = {
+    awb: string;
+    bill_employee: string;
+  };
 
+  const [dataInformation, setDataInformation] = useState<DataInformation>({
+    awb: "",
+    bill_employee: "",
+  });
 
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
-
-        const response = await axios.get(`http://localhost:8080/api/bill/information-awb/${bill_id}`);
-
+        const response = await axios.get(
+          `http://localhost:8080/api/bill/information-awb/${bill_id}`
+        );
 
         setUploadedFiles(response.data.data.files);
 
         setDataInformation({
-
           awb: response.data.data.awb,
-          bill_employee: response.data.data.billEmployee
-
-        })
+          bill_employee: response.data.data.billEmployee,
+        });
       } catch (error) {
         console.error("Error fetching uploaded files:", error);
       }
@@ -105,7 +116,6 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-
   const [showForm, setShowForm] = useState(false);
 
   const handleSubmit = async () => {
@@ -119,17 +129,21 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
         render: "Cập nhật thành công!",
         type: "success",
         isLoading: false,
-        autoClose: 3000
+        autoClose: 3000,
       });
-
     } catch (error) {
       toast.update(toastId, {
-        render: `Lỗi: ${error.message}`,
+        render: `Lỗi: ${
+          error instanceof Error
+            ? error.message
+            : "Đã xảy ra lỗi không xác định"
+        }`,
         type: "error",
         isLoading: false,
-        autoClose: 5000
+        autoClose: 5000,
       });
     }
+    fetchBillData?.();
   };
 
   return (
@@ -144,14 +158,20 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
           onClick={() => setShowForm(!showForm)}
           className="mb-4 w-full flex justify-between items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
         >
-          <span>{showForm ? 'Ẩn form' : 'Hiện form'}</span>
+          <span>{showForm ? "Ẩn form" : "Hiện form"}</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className={`h-5 w-5 transform transition-transform duration-200 ${showForm ? 'rotate-180' : ''}`}
+            className={`h-5 w-5 transform transition-transform duration-200 ${
+              showForm ? "rotate-180" : ""
+            }`}
             viewBox="0 0 20 20"
             fill="currentColor"
           >
-            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            <path
+              fillRule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
           </svg>
         </button>
 
@@ -170,7 +190,12 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
                 type="text"
                 id="awb"
                 value={dataInformation.awb}
-                onChange={(e) => setDataInformation({ ...dataInformation, awb: e.target.value })}
+                onChange={(e) =>
+                  setDataInformation({
+                    ...dataInformation,
+                    awb: e.target.value,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
                 placeholder="Enter AWB number"
               />
@@ -188,7 +213,12 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
                 type="text"
                 id="bill_employee"
                 value={dataInformation.bill_employee}
-                onChange={(e) => setDataInformation({ ...dataInformation, bill_employee: e.target.value })}
+                onChange={(e) =>
+                  setDataInformation({
+                    ...dataInformation,
+                    bill_employee: e.target.value,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
                 placeholder="Enter employee name"
               />
