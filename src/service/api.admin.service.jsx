@@ -495,9 +495,9 @@ export { DeletePeakSeason, PostPeakSeason, GetAllPeakSeason, PutPeakSeason };
 
 
 // dashboard user
-const GetDashboardUser = async () => {
+const GetAnalyticsCountry = async () => {
   const API = '/dashboard/analytics/country';
   return await axios.get(API);
 };
 
-export { GetDashboardUser };
+export { GetAnalyticsCountry };

@@ -1,4 +1,4 @@
-import { GetDashboardUser } from "../../../service/api.admin.service";
+import { GetAnalyticsCountry } from "../../../service/api.admin.service";
 import Button from "../../admin/ui/button/Button";
 import {
   Table,
@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from "react";
 
 // Định nghĩa interface cho dữ liệu bảng
-interface DashboardUserData {
+interface CountryData {
   nameCountry: string;
   totalDebit: number;
   totalBill: number;
@@ -18,12 +18,12 @@ interface DashboardUserData {
 }
 
 export default function RecentOrderAnalytics() {
-  const [tableData, setTableData] = useState<DashboardUserData[]>([]);
+  const [tableData, setTableData] = useState<CountryData[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    GetDashboardUser()
+    GetAnalyticsCountry()
       .then((res: any) => {
         setTableData(res || []);
       })
