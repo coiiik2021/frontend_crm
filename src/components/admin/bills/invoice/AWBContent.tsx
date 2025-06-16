@@ -1,5 +1,7 @@
+import { PutInformationAwb } from "../../../../service/api.admin.service";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 
 type UploadedFile = {
   name: string;
@@ -17,18 +19,24 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(""); // State để lưu từ khóa tìm kiếm
 
+  const [dataInformation, setDataInformation] = useState<any>(null);
+
+
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
-        const dataRequest = {
-          bill_id,
-          type: "pdf",
-        };
-        const response = await axios.post(
-          "http://localhost:8080/api/files/get",
-          dataRequest
-        );
-        setUploadedFiles(response.data.data);
+
+        const response = await axios.get(`http://localhost:8080/api/bill/information-awb/${bill_id}`);
+
+
+        setUploadedFiles(response.data.data.files);
+
+        setDataInformation({
+
+          awb: response.data.data.awb,
+          bill_employee: response.data.data.billEmployee
+
+        })
       } catch (error) {
         console.error("Error fetching uploaded files:", error);
       }
@@ -61,6 +69,7 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
         url: fileUrl,
         type: "pdf",
         name: file.name,
+        category: "awb",
       };
 
       await axios.post("http://localhost:8080/api/files", dataRequest);
@@ -96,11 +105,105 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+
+  const [showForm, setShowForm] = useState(false);
+
+  const handleSubmit = async () => {
+    const toastId = toast.loading("Đang cập nhật dữ liệu...");
+
+    try {
+      const dataRequest = { id: bill_id, ...dataInformation };
+      await PutInformationAwb(dataRequest);
+
+      toast.update(toastId, {
+        render: "Cập nhật thành công!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000
+      });
+
+    } catch (error) {
+      toast.update(toastId, {
+        render: `Lỗi: ${error.message}`,
+        type: "error",
+        isLoading: false,
+        autoClose: 5000
+      });
+    }
+  };
+
   return (
     <>
+      <ToastContainer
+        toastClassName="bg-white dark:bg-gray-800 text-gray-800 dark:text-white shadow-lg top-12"
+        progressClassName="bg-blue-500"
+      />
+      <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+        {/* Nút toggle ẩn/hiện form */}
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="mb-4 w-full flex justify-between items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+        >
+          <span>{showForm ? 'Ẩn form' : 'Hiện form'}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`h-5 w-5 transform transition-transform duration-200 ${showForm ? 'rotate-180' : ''}`}
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
 
+        {/* Form sẽ ẩn/hiện */}
+        {showForm && (
+          <div className="space-y-4">
+            {/* AWB Field */}
+            <div className="space-y-1">
+              <label
+                htmlFor="awb"
+                className="block text-sm font-medium text-gray-700"
+              >
+                AWB
+              </label>
+              <input
+                type="text"
+                id="awb"
+                value={dataInformation.awb}
+                onChange={(e) => setDataInformation({ ...dataInformation, awb: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                placeholder="Enter AWB number"
+              />
+            </div>
 
+            {/* Bill Employee Field */}
+            <div className="space-y-1">
+              <label
+                htmlFor="bill_employee"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Bill Employee
+              </label>
+              <input
+                type="text"
+                id="bill_employee"
+                value={dataInformation.bill_employee}
+                onChange={(e) => setDataInformation({ ...dataInformation, bill_employee: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                placeholder="Enter employee name"
+              />
+            </div>
 
+            {/* Submit Button */}
+            <button
+              onClick={handleSubmit}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+            >
+              Submit
+            </button>
+          </div>
+        )}
+      </div>
       <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
         <div className="relative w-full mb-5">
           <form>

@@ -261,12 +261,18 @@ const UpdateBillTRANSPORTER = async (data) => {
   return await axios.put(API, data);
 };
 
+const PutInformationAwb = async (dataRequest) => {
+  const API = `bill/information-awb`;
+  return await axios.put(API, dataRequest);
+}
+
 export {
   GetAllBill,
   CreateBill,
   UpdateBillTRANSPORTER,
   UpdateBillCS,
   UpdateBillAccountant,
+  PutInformationAwb
 };
 
 // const user

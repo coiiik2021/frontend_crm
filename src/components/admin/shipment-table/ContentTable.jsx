@@ -738,35 +738,102 @@ export default function ContentTable({ data }) {
     workbook.creator = "Shipment Management System";
     workbook.created = new Date();
 
+    // Cập nhật mapping cột với các cột mới và nhóm chủ đề
     const columnMapping = {
-      house_bill: { header: "HOUSE BILL", width: 5 },
-      Date: { header: "NGÀY TẠO", width: 15 },
-      bill_employee: { header: "BILL PHỤ", width: 15 },
-      awb: { header: "AWB", width: 15 },
-      company_service: { header: "DỊCH VỤ", width: 15 },
-      payment_bill_real: { header: "THÀNH TIỀN (TẠM TÍNH)", width: 24 },
-      price_order: { header: "TIỀN ORDER", width: 38 },
-      payment_bill_fake: { header: "THÀNH TIỀN (CHỐT)", width: 25 },
-      payments_cash: { header: "THANH TOÁN TIỀN MẶT", width: 25 },
-      payments_banking: { header: "THANH TOÁN BANKING", width: 25 },
-      payments_business: { header: "THANH TOÁN DOANH NGHIỆP", width: 25 },
-      status: { header: "TRẠNG THÁI", width: 15 },
+      house_bill: { header: "HOUSE BILL", width: 15, group: "THÔNG TIN CƠ BẢN" },
+      Date: { header: "NGÀY TẠO", width: 20, group: "THÔNG TIN CƠ BẢN" },
+      customer: { header: "CUSTOMER", width: 30, group: "THÔNG TIN CƠ BẢN" },
+      country_name: { header: "COUNTRY", width: 30, group: "THÔNG TIN CƠ BẢN" },
+      master_tracking: { header: "MASTERTRACKING", width: 22, group: "THÔNG TIN CƠ BẢN" },
+      gw: { header: "GW", width:20, group: "THÔNG TIN CƠ BẢN" },
+      cw: { header: "CW", width: 20, group: "THÔNG TIN CƠ BẢN" },
+      company_service: { header: "DỊCH VỤ", width: 15, group: "THÔNG TIN CƠ BẢN" },
+      inwh_date: { header: "In-WH DATE", width: 20, group: "THÔNG TIN CƠ BẢN" },
+
+      // PRICE
+      price_price: { header: "PRICE", width: 15, group: "PRICE" },
+      fsc_price: { header: "FSC", width: 10, group: "PRICE" },
+      surge_fee_price: { header: "SURGE FEE", width: 12, group: "PRICE" },
+
+      // DEBIT
+      afr_debit: { header: "AFR", width: 10, group: "DEBIT" },
+      oversize_debit: { header: "OVERSIZE", width: 12, group: "DEBIT" },
+      surge_fee_debit: { header: "SURGE FEE", width: 12, group: "DEBIT" },
+      other_charges_debit: { header: "OTHER CHARGES", width: 20, group: "DEBIT" },
+      fsc_debit: { header: "FSC", width: 10, group: "DEBIT" },
+      gw_debit: { header: "GW", width: 10, group: "DEBIT" },
+      cw_debit: { header: "CW", width: 10, group: "DEBIT" },
+      bill: { header: "THÀNH TIỀN", width: 15, group: "DEBIT" },
+      reconcile: { header: "ĐỐI SOÁT", width: 12, group: "DEBIT" },
+
+      // TOTAL AR
+      total_ar: { header: "TOTAL AR", width: 15, group: "TOTAL AR" },
+      vat: { header: "VAT", width: 10, group: "TOTAL AR" },
+      total: { header: "TOTAL", width: 15, group: "TOTAL AR" },
+
+      // GRAND TOTAL
+      order_grand_total: { header: "ORDER", width: 15, group: "GRAND TOTAL" },
+      other_charges_total: { header: "OTHER CHARGES", width: 20, group: "GRAND TOTAL" },
+      grand_total: { header: "GRAND TOTAL", width: 18, group: "GRAND TOTAL" },
+
+      // PAYMENT
+      payments_cash: { header: "Tiền mặt", width: 15 , group: "PAYMENT"},
+      payments_banking: { header: "Chuyển khoản", width: 15, group: "PAYMENT" },
+      payments_business: { header: "Doanh nghiệp", width: 15, group: "PAYMENT" },
+      payments_remaining: { header: "Số tiền còn lại", width: 18, group: "PAYMENT" },
+
+      // PROFIT
+      price_diff: { header: "CHÊNH LỆCH GIÁ", width: 20, group: "PROFIT" },
+      packing: { header: "ĐÓNG GÓI", width: 12, group: "PROFIT" },
+      pickup: { header: "PICK UP", width: 12, group: "PROFIT" },
+      other_costs: { header: "CHI PHÍ KHÁC", width: 15, group: "PROFIT" },
+      profit: { header: "LỢI NHUẬN", width: 15, group: "PROFIT" },
+
+      // HH
+      hh1: { header: "HH 1", width: 10, group: "HH" },
+      hh2: { header: "HH 2", width: 10, group: "HH" },
+      hh3: { header: "HH 3", width: 10, group: "HH" },
+      hh4: { header: "HH 4", width: 10, group: "HH" },
+
+      // LƯƠNG THƯỞNG
+      base_salary: { header: "LƯƠNG CĂN BẢN", width: 22, group: "LƯƠNG THƯỞNG" },
+      kpi_bonus: { header: "THƯỞNG KPI", width: 18, group: "LƯƠNG THƯỞNG" },
+      bonus_1_2_3: { header: "THƯỞNG 1/2/3", width: 18, group: "LƯƠNG THƯỞNG" },
+      allowance: { header: "PHỤ CẤP", width: 12, group: "LƯƠNG THƯỞNG" },
+      other_bonus: { header: "THƯỞNG KHÁC", width: 18, group: "LƯƠNG THƯỞNG" },
+
+      // STATUS
+      status: { header: "TRẠNG THÁI", width: 15, group: "TRẠNG THÁI" },
     };
 
+    // Lấy danh sách cột xuất ra
     const columnsToExport = Object.keys(columnMapping).filter(
       (key) => key === "house_bill" || visibleColumns[key]
     );
 
+    // Tạo mảng nhóm chủ đề (group headers)
+    const groupHeaders = [];
+    let lastGroup = null;
+    columnsToExport.forEach((key) => {
+      const group = columnMapping[key].group || "";
+      if (groupHeaders.length === 0 || group !== lastGroup) {
+        groupHeaders.push({ group, start: groupHeaders.length, count: 1 });
+        lastGroup = group;
+      } else {
+        groupHeaders[groupHeaders.length - 1].count += 1;
+      }
+    });
+
+    // Định nghĩa cột cho worksheet
     worksheet.columns = columnsToExport.map((key) => ({
       key: key,
       width: columnMapping[key].width,
     }));
 
-    // Thêm tiêu đề
+    // Thêm tiêu đề chính
     const titleRow = worksheet.insertRow(1, ["BÁO CÁO SHIPMENT"]);
     worksheet.mergeCells(1, 1, 1, columnsToExport.length);
     titleRow.height = 60;
-
     const titleCell = worksheet.getCell(1, 1);
     titleCell.font = {
       size: 30,
@@ -776,20 +843,42 @@ export default function ContentTable({ data }) {
     };
     titleCell.alignment = { horizontal: "center", vertical: "middle" };
 
-    // Thêm thông tin ngày xuất
+    // Thêm ngày xuất
     const dateRow = worksheet.insertRow(2, [
       `Ngày xuất: ${new Date().toLocaleString("vi-VN")}`,
     ]);
     worksheet.mergeCells(2, 1, 2, columnsToExport.length);
     dateRow.height = 20;
-
     const dateCell = worksheet.getCell(2, 1);
     dateCell.font = { size: 14, italic: true };
     dateCell.alignment = { horizontal: "center", vertical: "middle" };
 
-    const headerRow = worksheet.getRow(4);
-    headerRow.height = 45;
+    // Thêm dòng tiêu đề nhóm chủ đề (group header row)
+    const groupHeaderRow = worksheet.insertRow(3, []);
+    let colIndex = 1;
+    groupHeaders.forEach((group) => {
+      worksheet.mergeCells(3, colIndex, 3, colIndex + group.count - 1);
+      const cell = worksheet.getCell(3, colIndex);
+      cell.value = group.group || "";
+      cell.font = { bold: true, size: 13, color: { argb: "FF1E293B" } };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFE0E7EF" },
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      colIndex += group.count;
+    });
+    groupHeaderRow.height = 30;
 
+    // Thêm dòng tiêu đề cột
+    const headerRow = worksheet.insertRow(4, []);
     columnsToExport.forEach((key, index) => {
       const cell = headerRow.getCell(index + 1);
       cell.value = columnMapping[key].header;
@@ -807,6 +896,22 @@ export default function ContentTable({ data }) {
         right: { style: "thin" },
       };
     });
+    headerRow.height = 45;
+
+    // Hàm xử lý giá trị nhiều dòng
+    function processMultiLineValue(value) {
+      if (typeof value !== "string") return value;
+      // Tách các dòng và xử lý từng dòng
+      const lines = value.split("\n");
+      return lines.map(line => {
+        // Tìm số trong dòng
+        const matches = line.match(/-?\d+(\.\d+)?/g);
+        if (!matches) return line;
+        // Tính tổng các số trong dòng
+        const sum = matches.reduce((acc, num) => acc + parseFloat(num), 0);
+        return sum;
+      }).join("\n");
+    }
 
     // Thêm dữ liệu
     dataToExport.forEach((item, rowIndex) => {
@@ -820,56 +925,118 @@ export default function ContentTable({ data }) {
           case "Date":
             rowData[key] = item.date_create;
             break;
-          case "bill_employee":
-            rowData[key] = item?.bill_employee || "";
+          case "customer":
+            rowData[key] = `Người gửi: ${item.information_human.from}\nNgười nhận: ${item.information_human.to}`;
             break;
-          case "awb":
+          case "country_name":
+            rowData[key] = item?.country_name || "";
+            break;
+          case "master_tracking":
             rowData[key] = item?.awb || "";
+            break;
+          case "gw":
+            rowData[key] = `SL: ${item?.packageInfo_begin?.quantity}\nCân nặng: ${item?.packageInfo_begin?.total_weight} KG`;
+            break;
+          case "cw":
+            rowData[key] = `SL: ${item?.packageInfo_end?.quantity}\nCân nặng: ${item?.packageInfo_end?.total_weight} KG`;
             break;
           case "company_service":
             rowData[key] = item.company_service;
             break;
-          case "payment_bill_real":
-            rowData[key] = `${formatCurrency(item.total_real)} VNĐ`;
+          case "inwh_date":
+            rowData[key] = item?.date_create || "";
             break;
-          case "price_order":
-            // Xuất cả 2 giá trị: complete và process
-            rowData[key] = `Hoàn thành: ${formatCurrency(
-              item.priceOrder.total_complete
-            )} VNĐ | Đang xử lý: ${formatCurrency(
-              item.priceOrder.total_process
-            )} VNĐ`;
+          case "price_price":
+            rowData[key] = formatCurrency(item?.price.priceNet);
             break;
-          case "payment_bill_fake":
-            rowData[key] = `${formatCurrency(item.total_fake)} VNĐ`;
+          case "fsc_price":
+            rowData[key] = item?.price.fsc_price;
+            break;
+          case "surge_fee_price":
+            rowData[key] = item?.price.surge_fee_price;
+            break;
+          case "afr_debit":
+            rowData[key] = formatCurrency(item?.debit.afr_debit);
+            break;
+          case "oversize_debit":
+            rowData[key] = formatCurrency(item?.debit.oversize_debit);
+            break;
+          case "surge_fee_debit":
+            rowData[key] = item?.debit.surge_fee_debit || "";
+            break;
+          case "other_charges_debit":
+            rowData[key] = item?.debit.other_charges_debit || "";
+            break;
+          case "fsc_debit":
+            rowData[key] = formatCurrency(item?.debit.fsc_debit);
+            break;
+          case "gw_debit":
+            rowData[key] = item?.gw_debit || "";
+            break;
+          case "cw_debit":
+            rowData[key] = item?.cw_debit || "";
+            break;
+          case "bill":
+            rowData[key] = item?.bill || "";
+            break;
+          case "reconcile":
+            rowData[key] = item?.reconcile || "";
+            break;
+          case "total_ar":
+            rowData[key] = formatCurrency(item?.total_ar.total_ar);
+            break;
+          case "vat":
+            rowData[key] = formatCurrency(item?.total_ar.vat);
+            break;
+          case "total":
+            rowData[key] = formatCurrency(item?.total_ar.total);
+            break;
+          case "order_grand_total":
+            rowData[key] = item?.grand_total.order_grand_total || "";
+            break;
+          case "other_charges_total":
+            rowData[key] = item?.grand_total.other_charges_total || "";
+            break;
+          case "grand_total":
+            rowData[key] = formatCurrency(item?.grand_total.grand_total);
             break;
           case "payments_cash":
-            rowData[key] = `${formatCurrency(
-              item.pricePayment.cashPayment.price
-            )} VNĐ`;
+            rowData[key] = formatCurrency(item.pricePayment?.cashPayment?.price || 0);
+            break;
+          case "payments_cash_status":
+            rowData[key] = item.pricePayment?.cashPayment?.active ? "Đã thanh toán" : "Chưa thanh toán";
+            break;
+          case "payments_cash_date":
+            rowData[key] = item.pricePayment?.cashPayment?.dateUpdate
+              ? formatDateTime(item.pricePayment.cashPayment.dateUpdate)
+              : "";
             break;
           case "payments_banking":
-            rowData[key] = `${formatCurrency(
-              item.pricePayment.cardPayment.price
-            )} VNĐ`;
+            rowData[key] = formatCurrency(item.pricePayment?.cardPayment?.price || 0);
+            break;
+          case "payments_banking_status":
+            rowData[key] = item.pricePayment?.cardPayment?.active ? "Đã thanh toán" : "Chưa thanh toán";
+            break;
+          case "payments_banking_date":
+            rowData[key] = item.pricePayment?.cardPayment?.dateUpdate
+              ? formatDateTime(item.pricePayment.cardPayment.dateUpdate)
+              : "";
             break;
           case "payments_business":
-            rowData[key] = `${formatCurrency(
-              item.pricePayment.businessCardPayment.price
-            )} VNĐ`;
+            rowData[key] = formatCurrency(item.pricePayment?.businessCardPayment?.price || 0);
             break;
-
-          case "status":
-            // Chuyển đổi status thành text dễ hiểu
-            const statusText = {
-              pending: "Chờ xử lý",
-              processing: "Đang xử lý",
-              completed: "Hoàn thành",
-              cancelled: "Đã hủy",
-            };
-            rowData[key] =
-              statusText[item.status_payment] || item.status_payment;
+          case "payments_business_status":
+            rowData[key] = item.pricePayment?.businessCardPayment?.active ? "Đã thanh toán" : "Chưa thanh toán";
             break;
+          case "payments_business_date":
+            rowData[key] = item.pricePayment?.businessCardPayment?.dateUpdate
+              ? formatDateTime(item.pricePayment.businessCardPayment.dateUpdate)
+              : "";
+            break;
+          case "payments_remaining":
+            rowData[key] = formatCurrency(item.pricePayment?.payments_remaining || 0);
+            break;
+          // ...other cases...
           default:
             rowData[key] = item[key] || "";
         }
@@ -896,149 +1063,169 @@ export default function ContentTable({ data }) {
         }
 
         // Căn giữa cho một số cột
+        const colKey = columnsToExport[colNumber - 1];
         if (
-          columnsToExport[colNumber - 1] === "Date" ||
-          columnsToExport[colNumber - 1] === "status" ||
-          columnsToExport[colNumber - 1] === "company_service"
+          ["Date", "status", "company_service"].includes(colKey)
         ) {
           cell.alignment = { horizontal: "center", vertical: "middle" };
         } else if (
-          columnsToExport[colNumber - 1].includes("payment") ||
-          columnsToExport[colNumber - 1].includes("price")
+          colKey.includes("payment") ||
+          colKey.includes("price") ||
+          colKey.includes("total") ||
+          colKey.includes("profit")
         ) {
-          // Căn phải cho các cột tiền
           cell.alignment = { horizontal: "right", vertical: "middle" };
           cell.font = { bold: true };
         } else {
           cell.alignment = { vertical: "middle" };
+        }
+
+        // Luôn wrap text nếu có \n
+        if (
+          typeof cell.value === "string" &&
+          cell.value.includes("\n")
+        ) {
+          cell.alignment = { ...(cell.alignment || {}), wrapText: true };
         }
       });
     });
 
     // Thêm tổng kết ở cuối (nếu có dữ liệu số)
     if (dataToExport.length > 0) {
-      // Thêm dòng trống
+      worksheet.addRow([]);
       worksheet.addRow([]);
 
-      // Tính tổng các giá trị tiền
-      let totalReal = 0;
-      let totalFake = 0;
-      let totalCash = 0;
-      let totalBanking = 0;
-      let totalBusiness = 0;
-      let totalComplete = 0;
-      let totalProcess = 0;
+      // Danh sách các cột cần tính tổng
+      const sumColumns = [
+        "gw", "cw", "bill", "total_ar", "vat", "total",
+        "order_grand_total", "other_charges_total", "grand_total",
+        "payments_cash", "payments_banking", "payments_remaining",
+        "price_diff", "packing", "pickup", "other_costs", "profit",
+        "hh1", "hh2", "hh3", "hh4",
+        "base_salary", "kpi_bonus", "bonus_1_2_3", "allowance", "other_bonus"
+      ];
 
+      // Khởi tạo object tổng
+      const sumResult = {};
+      sumColumns.forEach((key) => (sumResult[key] = 0));
+
+      // Hàm cộng tổng cho từng giá trị trong ô có nhiều dòng
+      function sumMultiLineCell(cellValue) {
+        if (typeof cellValue !== "string") return 0;
+        // Tách các dòng và xử lý từng dòng
+        const lines = cellValue.split("\n");
+        return lines.reduce((sum, line) => {
+          // Tìm tất cả số trong dòng
+          const matches = line.match(/-?\d+(\.\d+)?/g);
+          if (!matches) return sum;
+          // Cộng tổng các số trong dòng
+          return sum + matches.reduce((lineSum, num) => lineSum + parseFloat(num), 0);
+        }, 0);
+      }
+
+      // Duyệt từng dòng dữ liệu để cộng tổng
       dataToExport.forEach((item) => {
-        totalReal += item.total_real || 0;
-        totalFake += item.total_fake || 0;
-        totalCash += item.pricePayment?.cashPayment.price || 0;
-        totalBanking += item.pricePayment?.cardPayment.price || 0;
-        totalBusiness += item.pricePayment?.businessPayment.price || 0;
-        totalComplete += item.priceOrder?.total_complete || 0;
-        totalProcess += item.priceOrder?.total_process || 0;
+        // GW
+        if (item?.packageInfo_begin?.total_weight)
+          sumResult.gw += Number(item.packageInfo_begin.total_weight) || 0;
+        // CW
+        if (item?.packageInfo_end?.total_weight)
+          sumResult.cw += Number(item.packageInfo_end.total_weight) || 0;
+        // THÀNH TIỀN (bill)
+        if (item?.bill) sumResult.bill += Number(item.bill) || 0;
+        // TOTAL AR
+        if (item?.total_ar?.total_ar) sumResult.total_ar += Number(item.total_ar.total_ar) || 0;
+        // VAT
+        if (item?.total_ar?.vat) sumResult.vat += Number(item.total_ar.vat) || 0;
+        // TOTAL
+        if (item?.total_ar?.total) sumResult.total += Number(item.total_ar.total) || 0;
+        // ORDER
+        if (item?.grand_total?.order_grand_total) sumResult.order_grand_total += Number(item.grand_total.order_grand_total) || 0;
+        // OTHER CHARGES
+        if (item?.grand_total?.other_charges_total) sumResult.other_charges_total += Number(item.grand_total.other_charges_total) || 0;
+        // GRAND TOTAL
+        if (item?.grand_total?.grand_total) sumResult.grand_total += Number(item.grand_total.grand_total) || 0;
+        // TIỀN MẶT
+        if (item?.pricePayment?.payment_cash) sumResult.payments_cash += Number(item.pricePayment.payment_cash) || 0;
+        // CHUYỂN KHOẢN
+        if (item?.pricePayment?.payment_card) sumResult.payments_banking += Number(item.pricePayment.payment_card) || 0;
+        // CÒN LẠI
+        if (item?.pricePayment?.payments_remaining) sumResult.payments_remaining += Number(item.pricePayment.payments_remaining) || 0;
+        // CHÊNH LỆCH GIÁ
+        if (item?.price_diff) sumResult.price_diff += Number(item.price_diff) || 0;
+        // ĐÓNG GÓI
+        if (item?.packing) sumResult.packing += Number(item.packing) || 0;
+        // PICK UP
+        if (item?.pickup) sumResult.pickup += Number(item.pickup) || 0;
+        // CHI PHÍ KHÁC
+        if (item?.other_costs) sumResult.other_costs += Number(item.other_costs) || 0;
+        // LỢI NHUẬN
+        if (item?.profit) sumResult.profit += Number(item.profit) || 0;
+        // HH 1-4
+        if (item?.hh1) sumResult.hh1 += sumMultiLineCell(item.hh1);
+        if (item?.hh2) sumResult.hh2 += sumMultiLineCell(item.hh2);
+        if (item?.hh3) sumResult.hh3 += sumMultiLineCell(item.hh3);
+        if (item?.hh4) sumResult.hh4 += sumMultiLineCell(item.hh4);
+        // LƯƠNG CĂN BẢN
+        if (item?.base_salary) sumResult.base_salary += sumMultiLineCell(item.base_salary);
+        // THƯỞNG KPI
+        if (item?.kpi_bonus) sumResult.kpi_bonus += sumMultiLineCell(item.kpi_bonus);
+        // THƯỞNG 1/2/3
+        if (item?.bonus_1_2_3) sumResult.bonus_1_2_3 += sumMultiLineCell(item.bonus_1_2_3);
+        // PHỤ CẤP
+        if (item?.allowance) sumResult.allowance += sumMultiLineCell(item.allowance);
+        // THƯỞNG KHÁC
+        if (item?.other_bonus) sumResult.other_bonus += sumMultiLineCell(item.other_bonus);
       });
 
-      // Thêm dòng tổng kết
-      const summaryData = {};
+      // Dòng tiêu đề khu vực tổng cộng
+      const summaryTitleRow = worksheet.addRow(["TỔNG CỘNG"]);
+      worksheet.mergeCells(
+        summaryTitleRow.number,
+        1,
+        summaryTitleRow.number,
+        columnsToExport.length
+      );
+      summaryTitleRow.height = 30;
+      const summaryTitleCell = worksheet.getCell(summaryTitleRow.number, 1);
+      summaryTitleCell.font = { bold: true, size: 14 };
+      summaryTitleCell.alignment = { horizontal: "center", vertical: "middle" };
+      summaryTitleCell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFE0E7EF" },
+      };
+
+      // Dòng tổng cộng
+      const summaryRow = worksheet.addRow([]);
+      summaryRow.height = 30;
+
+      // Thêm giá trị tổng cộng vào các cột tương ứng
       columnsToExport.forEach((key, index) => {
-        if (index === 0) {
-          summaryData[key] = "TỔNG CỘNG";
-        } else if (key === "payment_bill_real" && visibleColumns[key]) {
-          summaryData[key] = `${formatCurrency(totalReal)} VNĐ`;
-        } else if (key === "payment_bill_fake" && visibleColumns[key]) {
-          summaryData[key] = `${formatCurrency(totalFake)} VNĐ`;
-        } else if (key === "payments_cash" && visibleColumns[key]) {
-          summaryData[key] = `${formatCurrency(totalCash)} VNĐ`;
-        } else if (key === "payments_banking" && visibleColumns[key]) {
-          summaryData[key] = `${formatCurrency(totalBanking)} VNĐ`;
-        } else if (key === "payments_business" && visibleColumns[key]) {
-          summaryData[key] = `${formatCurrency(totalBanking)} VNĐ`;
-        } else if (key === "price_order" && visibleColumns[key]) {
-          summaryData[key] = `HT: ${formatCurrency(
-            totalComplete
-          )} | XL: ${formatCurrency(totalProcess)} VNĐ`;
-        } else {
-          summaryData[key] = "";
-        }
-      });
-
-      const summaryRow = worksheet.addRow(summaryData);
-      summaryRow.height = 35;
-
-      summaryRow.eachCell((cell, colNumber) => {
-        cell.font = { bold: true, size: 13 };
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFDBEAFE" },
-        };
-        cell.border = {
-          top: { style: "medium" },
-          left: { style: "thin" },
-          bottom: { style: "medium" },
-          right: { style: "thin" },
-        };
-
-        if (colNumber === 1) {
-          cell.alignment = { horizontal: "center", vertical: "middle" };
-        } else {
+        const cell = summaryRow.getCell(index + 1);
+        if (sumColumns.includes(key)) {
+          cell.value = formatCurrency(sumResult[key]);
+          cell.font = { bold: true };
           cell.alignment = { horizontal: "right", vertical: "middle" };
         }
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
       });
-
-      let mergeEndColumn = 1;
-      for (let i = 1; i <= columnsToExport.length; i++) {
-        // const key = columnsToExport[i - 1];
-        const value = summaryRow.getCell(i).value;
-        if (
-          typeof value === "string" &&
-          value.trim() !== "TỔNG CỘNG" &&
-          value.trim() !== ""
-        ) {
-          mergeEndColumn = i - 1;
-          break;
-        }
-      }
-      if (mergeEndColumn < 2) {
-        mergeEndColumn = columnsToExport.length;
-        worksheet.spliceRows(summaryRow.number, 1);
-      }
-
-      worksheet.mergeCells(
-        summaryRow.number,
-        1,
-        summaryRow.number,
-        mergeEndColumn
-      );
     }
 
-    // Xuất file
-    try {
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-
-      // Tạo tên file với timestamp
-      const timestamp = new Date().toISOString().slice(0, 10);
-      a.download = `shipment_report_${timestamp}.xlsx`;
-
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      // Thông báo thành công
-      console.log("Xuất Excel thành công!");
-    } catch (error) {
-      console.error("Lỗi khi xuất Excel:", error);
-      alert("Có lỗi xảy ra khi xuất file Excel!");
-    }
+    // Save file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `shipment_report_${new Date().toISOString().split("T")[0]}.xlsx`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   const columnLabels = {
@@ -1071,11 +1258,15 @@ export default function ContentTable({ data }) {
     grand_total: "GRAND TOTAL (GRAND TOTAL)",
     // Thanh toan
     payments_cash: "TIỀN MẶT (PAYMENT)",
+    payments_cash_status: "TRẠNG THÁI TIỀN MẶT (PAYMENT)",
+    payments_cash_date: "NGÀY THANH TOÁN TIỀN MẶT (PAYMENT)",
     payments_banking: "CHUYỂN KHOẢN (PAYMENT)",
+    payments_banking_status: "TRẠNG THÁI CHUYỂN KHOẢN (PAYMENT)",
+    payments_banking_date: "NGÀY THANH TOÁN CHUYỂN KHOẢN (PAYMENT)",
     payments_business: "DOANH NGHIỆP (PAYMENT)",
+    payments_business_status: "TRẠNG THÁI DOANH NGHIỆP (PAYMENT)",
+    payments_business_date: "NGÀY THANH TOÁN DOANH NGHIỆP (PAYMENT)",
     payments_remaining: "CÒN LẠI (PAYMENT)",
-    // payment_bill_real: "THÀNH TIỀN (TẠM TÍNH)",
-    // payment_bill_fake: "THÀNH TIỀN (CHỐT)",
 
     // DEBIT
     gw_debit: "GW (DEBIT)",
@@ -1524,11 +1715,13 @@ export default function ContentTable({ data }) {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
-                  stroke=""
-                  strokeWidth="1.2"
+                  d="M3.8335 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
             </span>
@@ -1617,7 +1810,7 @@ export default function ContentTable({ data }) {
                       id="col-house_bill"
                       checked={true}
                       disabled={true}
-                      className="w-4 h-4 bg-blue-600 text-blue-600 cursor-not-allowed opacity-70 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="w-4 h-4 bg-blue-600 text-blue-600 cursor-not-allowed opacity-70 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600"
                     />
                     <label
                       htmlFor="col-house_bill"
