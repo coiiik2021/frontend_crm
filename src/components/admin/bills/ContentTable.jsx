@@ -20,6 +20,7 @@ import {
   PostBaseUser,
   UpdateBillCS,
   UpdateBillTRANSPORTER,
+  GetAllBill,
 } from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
 import { PlusIcon, TrashIcon, XIcon, InfoIcon, EyeIcon } from "lucide-react";
@@ -28,6 +29,7 @@ import InvoiceHomeBill from "./invoice/InvoiceHomeBill.jsx";
 import Invoice from "../invoice/Invoice";
 import BillContent from "./BillContent";
 import { set } from "date-fns";
+import * as ExcelJS from "exceljs";
 
 // Thêm component OrderDetailModal với tabs
 const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
@@ -176,7 +178,31 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
                 </div>
               </div>
 
-              {orderData.packages && orderData.packages.length > 0 && (
+              <div>
+                <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Package Kết thúc:
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Số lượng:
+                    </p>
+                    <p className="font-medium">
+                      {orderData.packageInfo_end?.quantity || 0}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Cân nặng:
+                    </p>
+                    <p className="font-medium">
+                      {orderData.packageInfo_end?.total_weight || 0} KG
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* {orderData.packages && orderData.packages.length > 0 && (
                 <div>
                   <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Chi tiết package:
@@ -197,7 +223,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           )}
 
@@ -340,8 +366,8 @@ const OrderInfoTooltip = ({ isVisible, orderData, position, onClose }) => {
   );
 };
 
-export default function ContentTable(props) {
-  const { dataBill } = props;
+export default function ContentTable({ data }) {
+  const [dataBill, setDataBill] = useState(data || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState("name");
@@ -374,6 +400,19 @@ export default function ContentTable(props) {
   const [sidebarWidth, setSidebarWidth] = useState(700);
   const [isResizing, setIsResizing] = useState(false);
 
+  const fetchBillData = async () => {
+    try {
+      const data = await GetAllBill();
+      setDataBill(data);
+      console.log("Dữ liệu hóa đơn:", dataBill);
+      // setState hoặc xử lý tiếp tại đây nếu cần
+    } catch (error) {
+      console.error("Lỗi khi gọi GetShipment:", error);
+    }
+  };
+  useEffect(() => {
+    setDataBill(data || []);
+  }, [data]);
   // Thêm state để quản lý các cột hiển thị
   const [visibleColumns, setVisibleColumns] = useState({
     house_bill: true,
@@ -384,6 +423,7 @@ export default function ContentTable(props) {
     country_name: true,
     packageInfo_begin: true,
     packageInfo_end: true,
+    packageInfo_finish: true,
     status: true,
     Action: true,
     File: true,
@@ -589,20 +629,21 @@ export default function ContentTable(props) {
 
   const { isOpen, openModal, closeModal } = useModal();
 
-  // Hàm mở modal chi tiết đơn hàng
+  const {
+    isOpen: isOpenPackages,
+    openModal: openModalPackages,
+    closeModal: closeModalPackages,
+  } = useModal();
+
   const handleViewOrderDetail = (order) => {
-    // Bỏ highlight đơn hàng cũ (nếu có)
     setHighlightedOrderId(null);
 
-    // Sau đó mới highlight đơn hàng mới
     setSelectedOrder(order);
     setShowOrderDetail(true);
     setHighlightedOrderId(order.bill_house);
   };
 
-  // Hàm hiển thị tooltip thông tin nhanh
   const handleShowTooltip = (order, event) => {
-    // Nếu đang xem modal chi tiết, không thay đổi highlight
     if (!showOrderDetail) {
       setHighlightedOrderId(order.bill_house);
     }
@@ -612,37 +653,28 @@ export default function ContentTable(props) {
     setShowTooltip(true);
   };
 
-  // Hàm đóng tooltip và bỏ highlight nếu không còn xem modal
   const handleCloseTooltip = () => {
     setShowTooltip(false);
 
-    // Chỉ bỏ highlight nếu không đang xem modal hoặc sidebar
     if (!showOrderDetail && !showFileSidebar) {
       setHighlightedOrderId(null);
     } else if (showOrderDetail) {
-      // Nếu đang xem modal, đảm bảo highlight đúng đơn hàng đang xem
       setHighlightedOrderId(selectedOrder?.bill_house || null);
     } else if (showFileSidebar) {
-      // Nếu đang xem sidebar, giữ nguyên highlight
     }
   };
 
-  // Hàm đóng modal và bỏ highlight
   const handleCloseModal = () => {
     setShowOrderDetail(false);
 
-    // Chỉ bỏ highlight nếu không đang xem sidebar
     if (!showFileSidebar) {
       setHighlightedOrderId(null);
     }
   };
 
-  // Hàm xử lý khi xem file
   const handleViewFile = (item) => {
-    // Bỏ highlight đơn hàng cũ (nếu có)
     setHighlightedOrderId(null);
 
-    // Sau đó mới highlight đơn hàng mới
     setSelectedFile({
       name: `File ${item.bill_house}`,
       awb: item.awb || "Không có thông tin AWB",
@@ -652,15 +684,12 @@ export default function ContentTable(props) {
     setHighlightedOrderId(item.bill_house);
   };
 
-  // Hàm đóng sidebar file và bỏ highlight nếu không còn xem modal
   const handleCloseSidebar = () => {
     setShowFileSidebar(false);
     setBillContent(null);
-    // Chỉ bỏ highlight nếu không đang xem modal
     if (!showOrderDetail) {
       setHighlightedOrderId(null);
     } else {
-      // Nếu đang xem modal, đảm bảo highlight đúng đơn hàng đang xem
       setHighlightedOrderId(selectedOrder?.bill_house || null);
     }
   };
@@ -684,6 +713,7 @@ export default function ContentTable(props) {
           height: pkg.height,
           width: pkg.width,
         })),
+        end: !isFinish,
       };
       const dataResponse = await UpdateBillTRANSPORTER(dataRequest);
       console.log(dataResponse);
@@ -713,45 +743,280 @@ export default function ContentTable(props) {
     closeModal();
   };
 
-  // Hàm mở modal sửa đơn hàng
-  const handleOpenEditModal = (item) => {
-    // Bỏ highlight đơn hàng cũ (nếu có)
-    setHighlightedOrderId(null);
+  const [isFinish, setIsFinish] = useState(false);
 
-    // Sau đó mới highlight đơn hàng mới
+  const [namePackages, setNamePackages] = useState("Chốt");
+
+  const setupEditPackages = (item) => {
+    setHighlightedOrderId(null);
     setBillEdit(item);
-    openModal();
+
+    openModalPackages();
     setIsEditModalOpen(true);
     setHighlightedOrderId(item.bill_house);
   };
 
-  // Hàm đóng modal sửa đơn hàng
-  const handleCloseEditModal = () => {
-    closeModal();
+  const handleOpenEditPackageModal = (item) => {
+    setIsFinish(item.isFinish);
+    setNamePackages(item.isFinish ? "Kết thúc" : "Chốt");
+    setupEditPackages(item);
+  };
+
+  const handleCloseEditModalPackages = () => {
+    closeModalPackages();
     setIsEditModalOpen(false);
 
-    // Chỉ bỏ highlight nếu không đang xem modal chi tiết hoặc sidebar
     if (!showOrderDetail && !showFileSidebar) {
       setHighlightedOrderId(null);
     } else if (showOrderDetail) {
-      // Nếu đang xem modal chi tiết, đảm bảo highlight đúng đơn hàng đang xem
       setHighlightedOrderId(selectedOrder?.bill_house || null);
     } else if (showFileSidebar) {
-      // Nếu đang xem sidebar, giữ nguyên highlight của đơn hàng đang xem
       setHighlightedOrderId(selectedFile?.name?.replace("File ", "") || null);
     }
   };
 
   // Hàm lưu thay đổi
   const handleSaveChanges = async () => {
-    await handleUpdateBill(billEdit);
+    // Tính toán số lượng và cân nặng tổng
+    const totalQuantity = billEdit.packages.length;
+    const totalWeight = billEdit.packages.reduce((sum, pkg) => {
+      return sum + (parseFloat(pkg.weight) || 0);
+    }, 0);
+
+    // Cập nhật thông tin package vào billEdit
+    const updatedBillEdit = {
+      ...billEdit,
+      packageInfo_end: {
+        quantity: totalQuantity,
+        total_weight: totalWeight,
+      },
+    };
+
+    console.log(billEdit);
+
+    if (isFinish) {
+      updatedBillEdit.packageInfo_finish = {
+        quantity: totalQuantity,
+        total_weight: totalWeight,
+      };
+    }
+
+    console.log(updatedBillEdit);
+
+    await handleUpdateBill(updatedBillEdit);
+
+    // Cập nhật dữ liệu trong table
+    currentData.forEach((item) => {
+      if (item.bill_house === updatedBillEdit.bill_house) {
+        if (isFinish) {
+          item.packageInfo_finish = updatedBillEdit.packageInfo_finish;
+        } else {
+          item.packageInfo_end = updatedBillEdit.packageInfo_end;
+        }
+      }
+    });
 
     // Đóng modal nhưng vẫn giữ highlight
-    closeModal();
+    closeModalPackages();
     setIsEditModalOpen(false);
 
     // Giữ nguyên highlight sau khi lưu thay đổi
     // Người dùng có thể thấy rõ đơn hàng vừa được cập nhật
+
+    fetchBillData(); // Cập nhật lại dữ liệu nếu cần
+  };
+
+  const exportToExcel = async () => {
+    // Chỉ xuất các cột đang hiển thị
+    const columnsToExport = [
+      { key: "house_bill", label: "HOUSE BILL", width: 25 },
+      { key: "information_human", label: "THÔNG TIN NGƯỜI", width: 30 },
+      { key: "bill_employee", label: "BILL PHỤ", width: 15 },
+      { key: "awb", label: "AWB", width: 15 },
+      { key: "company_service", label: "DỊCH VỤ", width: 15 },
+      { key: "country_name", label: "NƯỚC ĐẾN", width: 20 },
+      { key: "packageInfo_begin", label: "PACKAGE KHAI BÁO", width: 23 },
+      { key: "packageInfo_end", label: "PACKAGE CHỐT", width: 20 },
+      { key: "status", label: "TRẠNG THÁI", width: 15 },
+    ].filter((col) => col.key === "house_bill" || visibleColumns[col.key]);
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Danh sách đơn hàng");
+
+    // Tiêu đề chính
+    const titleRow = worksheet.addRow(["DANH SÁCH ĐƠN HÀNG"]);
+    worksheet.mergeCells(1, 1, 1, columnsToExport.length);
+    titleRow.height = 50;
+    titleRow.getCell(1).font = { size: 23, bold: true };
+    titleRow.getCell(1).alignment = {
+      horizontal: "center",
+      vertical: "middle",
+    };
+
+    // Ngày xuất
+    const dateRow = worksheet.addRow([
+      `Ngày xuất: ${new Date().toLocaleString("vi-VN")}`,
+    ]);
+    worksheet.mergeCells(2, 1, 2, columnsToExport.length);
+    dateRow.getCell(1).font = { italic: true, size: 14 };
+    dateRow.getCell(1).alignment = {
+      horizontal: "center",
+      vertical: "middle",
+    };
+
+    // Header
+    worksheet.addRow(columnsToExport.map((col) => col.label));
+    const headerRow = worksheet.getRow(3);
+    headerRow.font = { bold: true, color: { argb: "FF000000" }, size: 12 };
+    headerRow.alignment = {
+      horizontal: "center",
+      vertical: "middle",
+      wrapText: true,
+    };
+    headerRow.height = 45;
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFA6A6A7" },
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
+
+    // Định nghĩa width cho từng cột
+    worksheet.columns = columnsToExport.map((col) => ({
+      key: col.key,
+      width: col.width,
+    }));
+
+    // Dữ liệu
+    currentData.forEach((item) => {
+      const row = {};
+      columnsToExport.forEach((col) => {
+        switch (col.key) {
+          case "house_bill":
+            row[col.key] = `EB${item.bill_house.substring(0, 5)}`;
+            break;
+          case "information_human":
+            row[col.key] =
+              `Người gửi: ${item.information_human?.from || ""}\n` +
+              `Người nhận: ${item.information_human?.to || ""}`;
+            break;
+          case "bill_employee":
+            row[col.key] = item.bill_employee || "";
+            break;
+          case "awb":
+            row[col.key] = item.awb || "";
+            break;
+          case "company_service":
+            row[col.key] = item.company_service || "";
+            break;
+          case "country_name":
+            row[col.key] = item.country_name || "";
+            break;
+          case "packageInfo_begin":
+            row[col.key] =
+              `SL: ${item.packageInfo_begin?.quantity || 0}\n` +
+              `Cân nặng: ${item.packageInfo_begin?.total_weight || 0} KG`;
+            break;
+          case "packageInfo_end":
+            row[col.key] =
+              `SL: ${item.packageInfo_end?.quantity || 0}\n` +
+              `Cân nặng: ${item.packageInfo_end?.total_weight || 0} KG`;
+            break;
+          case "status":
+            row[col.key] = item.status || "";
+            break;
+          default:
+            row[col.key] = item[col.key] || "";
+        }
+      });
+      const dataRow = worksheet.addRow(row);
+      dataRow.height = 42;
+      dataRow.eachCell((cell, colNumber) => {
+        cell.border = {
+          top: { style: "thin", color: { argb: "FFE5E7EB" } },
+          left: { style: "thin", color: { argb: "FFE5E7EB" } },
+          bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+          right: { style: "thin", color: { argb: "FFE5E7EB" } },
+        };
+        // Wrap text nếu có \n
+        if (typeof cell.value === "string" && cell.value.includes("\n")) {
+          cell.alignment = {
+            horizontal: "left",
+            vertical: "middle",
+            wrapText: true,
+          };
+        } else {
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+        }
+        // Căn giữa cho status
+        if (columnsToExport[colNumber - 1]?.key === "status") {
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+        }
+      });
+    });
+
+    // Tổng cộng (ví dụ: tổng số đơn hàng)
+    worksheet.addRow([]);
+    const summaryRow = worksheet.addRow([
+      "TỔNG SỐ ĐƠN HÀNG",
+      currentData.length,
+      ...Array(columnsToExport.length - 2).fill(""),
+    ]);
+    summaryRow.font = { bold: true, size: 13 };
+    summaryRow.height = 30;
+    summaryRow.getCell(1).fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFE0E7EF" },
+    };
+    summaryRow.getCell(1).border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+    summaryRow.getCell(2).fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFE0E7EF" },
+    };
+    summaryRow.getCell(2).border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+    summaryRow.getCell(1).alignment = {
+      horizontal: "center",
+      vertical: "middle",
+    };
+    summaryRow.getCell(2).alignment = {
+      horizontal: "center",
+      vertical: "middle",
+    };
+
+    // Xuất file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `danh_sach_don_hang_${new Date()
+      .toISOString()
+      .slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -825,6 +1090,23 @@ export default function ContentTable(props) {
             Tùy chỉnh cột
           </button>
 
+          <button
+            ref={columnButtonRef}
+            onClick={() => exportToExcel()}
+            className="ml-4 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 flex items-center transition-all duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-1"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .146-.354l3-3z" />
+            </svg>
+            Xuất Excel
+          </button>
+
           {/* Dropdown tùy chỉnh cột */}
           {showColumnSelector && (
             <div
@@ -881,10 +1163,10 @@ export default function ContentTable(props) {
                         ? "PACKAGE KHAI BÁO"
                         : column === "packageInfo_end"
                         ? "PACKAGE CHỐT"
+                        : column === "packageInfo_finish"
+                        ? "PACKAGE KẾT THÚC"
                         : column === "status"
                         ? "TRẠNG THÁI"
-                        : column === "Action"
-                        ? "CẬP NHẬT THÔNG TIN"
                         : column === "File"
                         ? "FILE"
                         : column === "Detail"
@@ -971,7 +1253,7 @@ export default function ContentTable(props) {
               </div>
 
               <div style={isResizing ? { pointerEvents: "none" } : {}}>
-                <BillContent id={billContent?.bill_house}></BillContent>
+                <BillContent id={billContent?.bill_house} fetchBillData={fetchBillData}></BillContent>
               </div>
             </div>
           </div>
@@ -992,16 +1274,9 @@ export default function ContentTable(props) {
                   { key: "country_name", label: "NƯỚC ĐẾN" },
                   { key: "packageInfo_begin", label: "PACKAGE KHAI BÁO" },
                   { key: "packageInfo_end", label: "PACKAGE CHỐT" },
+                  { key: "packageInfo_finish", label: "PACKAGE KẾT THÚC" },
                   { key: "status", label: "TRẠNG THÁI" },
-                  {
-                    key: "Action",
-                    label:
-                      authorities.includes("ADMIN") ||
-                      authorities.includes("CS") ||
-                      authorities.includes("TRANSPORTER")
-                        ? "Cập nhật thông tin"
-                        : "",
-                  },
+
                   { key: "File", label: "File" },
                   { key: "Detail", label: "Chi tiết" },
                 ]
@@ -1127,18 +1402,87 @@ export default function ContentTable(props) {
                     </TableCell>
                   )}
 
-                  {/* Package chốt */}
                   {visibleColumns.packageInfo_end && (
                     <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">SL:</span>{" "}
-                          {item?.packageInfo_end?.quantity}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">Cân nặng:</span>{" "}
-                          {item?.packageInfo_end?.total_weight} KG
-                        </p>
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">SL:</span>{" "}
+                            {item?.packageInfo_end?.quantity}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">Cân nặng:</span>{" "}
+                            {item?.packageInfo_end?.total_weight} KG
+                          </p>
+                        </div>
+                        <button
+                          className="ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                          title="Sửa"
+                          onClick={() => {
+                            setIsFinish(false);
+                            handleOpenEditPackageModal({
+                              ...item,
+                              isFinish: false,
+                            });
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-blue-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </TableCell>
+                  )}
+
+                  {visibleColumns.packageInfo_finish && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">SL:</span>{" "}
+                            {item.packageInfo_finish?.quantity || 0}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">Cân nặng:</span>{" "}
+                            {item.packageInfo_finish?.total_weight || 0} KG
+                          </p>
+                        </div>
+                        <button
+                          className="ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                          title="Sửa"
+                          onClick={() => {
+                            handleOpenEditPackageModal({
+                              ...item,
+                              isFinish: true,
+                            });
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-blue-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z"
+                            />
+                          </svg>
+                        </button>
                       </div>
                     </TableCell>
                   )}
@@ -1147,26 +1491,6 @@ export default function ContentTable(props) {
                   {visibleColumns.status && (
                     <TableCell className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={item.status} />
-                    </TableCell>
-                  )}
-
-                  {/* Cập nhật thông tin */}
-                  {visibleColumns.Action && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      {item.status !== "Hoàn thành" &&
-                      (authorities.includes("ADMIN") ||
-                        authorities.includes("CS") ||
-                        authorities.includes("TRANSPORTER")) ? (
-                        <Button
-                          variant="primary"
-                          className="w-full md:w-auto px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-                          onClick={() => handleOpenEditModal(item)}
-                        >
-                          Sửa
-                        </Button>
-                      ) : (
-                        <></>
-                      )}
                     </TableCell>
                   )}
 
@@ -1262,9 +1586,11 @@ export default function ContentTable(props) {
                   )}
                 </TableRow>
               ))}
+
+              {/* new */}
               <Modal
-                isOpen={isOpen}
-                onClose={closeModal}
+                isOpen={isOpenPackages}
+                onClose={closeModalPackages}
                 className="max-w-[800px] m-4"
               >
                 <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
@@ -1273,8 +1599,9 @@ export default function ContentTable(props) {
                     <h3 className="text-xl font-bold text-gray-800 dark:text-white">
                       Hóa đơn: HB{billEdit.bill_house?.substring(0, 5)}
                     </h3>
+                    <h3>{namePackages}</h3>
                     <button
-                      onClick={handleCloseEditModal}
+                      onClick={handleCloseEditModalPackages}
                       className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                     >
                       <XIcon className="w-5 h-5" />
@@ -1439,84 +1766,12 @@ export default function ContentTable(props) {
                         </div>
                       </div>
                     )}
-                    {(authorities.includes("CS") ||
-                      authorities.includes("ADMIN")) && (
-                      <>
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                          {/* Bill Phụ */}
-                          <div className="space-y-2" hidden>
-                            <Label className="text-sm font-medium">
-                              Bill Phụ
-                            </Label>
-                            <Input type="text" value={billEdit.id || ""} />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-sm font-medium">
-                              Bill Phụ
-                            </Label>
-                            <Input
-                              type="text"
-                              value={billEdit.bill_employee || ""}
-                              onChange={(e) =>
-                                setBillEdit({
-                                  ...billEdit,
-                                  bill_employee: e.target.value,
-                                })
-                              }
-                              placeholder="Nhập Bill Phụ"
-                              className="w-full"
-                            />
-                          </div>
-
-                          {/* AWB */}
-                          <div className="space-y-2">
-                            <Label className="text-sm font-medium">AWB</Label>
-                            <Input
-                              type="text"
-                              value={billEdit.awb || ""}
-                              onChange={(e) =>
-                                setBillEdit({
-                                  ...billEdit,
-                                  awb: e.target.value,
-                                })
-                              }
-                              placeholder="Nhập AWB"
-                              className="w-full"
-                            />
-                          </div>
-                        </div>
-                        {/* Status */}
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">
-                            Trạng thái
-                          </Label>
-                          <select
-                            value={billEdit.status || ""}
-                            onChange={(e) =>
-                              setBillEdit({
-                                ...billEdit,
-                                status: e.target.value,
-                              })
-                            }
-                            className="w-full px-3 py-2 text-sm border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="complete">Hoàn thành</option>
-                            <option value="waiting">Chờ xử lý</option>
-                            <option value="processing">
-                              Đã tiếp nhận hàng
-                            </option>
-                            <option value="shipping">Vận chuyển</option>
-                            <option value="cancelled">Đã hủy</option>
-                          </select>
-                        </div>
-                      </>
-                    )}
 
                     {/* Action Buttons */}
                     <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
                       <button
                         type="button"
-                        onClick={handleCloseEditModal}
+                        onClick={handleCloseEditModalPackages}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
                       >
                         Đóng

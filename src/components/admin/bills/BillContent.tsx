@@ -7,8 +7,9 @@ import AWBContent from "./invoice/AWBContent";
 
 type BillContentProps = {
   id?: string; // Có thể truyền hoặc không
+  fetchBillData?: (() => void) | undefined; // Thêm prop này để truyền xuống InvoiceHomeBill
 };
-const BillContent = ({ id: propId }: BillContentProps) => {
+const BillContent = ({ id: propId, fetchBillData }: BillContentProps) => {
   const [activeTab, setActiveTab] = useState("homebill");
   const { id: urlId } = useParams<{ id: string }>();
   const id = propId || urlId; // Ưu tiên props, fallback sang URL
@@ -18,7 +19,7 @@ const BillContent = ({ id: propId }: BillContentProps) => {
       case "homebill":
         return <InvoiceHomeBill bill_id={id || ""} />;
       case "awb":
-        return <AWBContent bill_id={id || ""} />; // Replace with actual bill_id as needed
+        return <AWBContent bill_id={id || ""} fetchBillData={fetchBillData} />; // Replace with actual bill_id as needed
       case "invoice":
         return <InvoiceContent bill_id={id || ""} />;
       case "invoiceOther":

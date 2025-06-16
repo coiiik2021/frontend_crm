@@ -22,7 +22,7 @@ const tableData: Product[] = [
   {
     id: 1,
     name: "TailGrids",
-    category: "UI Kits",
+    category: "UI Kitssss",
     country: "/images/country/country-01.svg",
     cr: "Dashboard",
     value: "12,499", // Replace with actual image URL
