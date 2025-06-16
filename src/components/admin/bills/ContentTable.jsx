@@ -20,6 +20,7 @@ import {
   PostBaseUser,
   UpdateBillCS,
   UpdateBillTRANSPORTER,
+  GetAllBill,
 } from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
 import { PlusIcon, TrashIcon, XIcon, InfoIcon, EyeIcon } from "lucide-react";
@@ -60,28 +61,31 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
         {/* Tabs */}
         <div className="flex border-b border-gray-200 dark:border-gray-700 mb-3">
           <button
-            className={`px-3 py-2 text-xs font-medium ${activeTab === "info"
-              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              }`}
+            className={`px-3 py-2 text-xs font-medium ${
+              activeTab === "info"
+                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            }`}
             onClick={() => setActiveTab("info")}
           >
             Thông tin người
           </button>
           <button
-            className={`px-3 py-2 text-xs font-medium ${activeTab === "package"
-              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              }`}
+            className={`px-3 py-2 text-xs font-medium ${
+              activeTab === "package"
+                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            }`}
             onClick={() => setActiveTab("package")}
           >
             Thông tin package
           </button>
           <button
-            className={`px-3 py-2 text-xs font-medium ${activeTab === "other"
-              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              }`}
+            className={`px-3 py-2 text-xs font-medium ${
+              activeTab === "other"
+                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            }`}
             onClick={() => setActiveTab("other")}
           >
             Thông tin khác
@@ -173,7 +177,6 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
                   </div>
                 </div>
               </div>
-
 
               <div>
                 <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -363,8 +366,8 @@ const OrderInfoTooltip = ({ isVisible, orderData, position, onClose }) => {
   );
 };
 
-export default function ContentTable(props) {
-  const { dataBill } = props;
+export default function ContentTable({ data }) {
+  const [dataBill, setDataBill] = useState(data || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState("name");
@@ -397,6 +400,19 @@ export default function ContentTable(props) {
   const [sidebarWidth, setSidebarWidth] = useState(700);
   const [isResizing, setIsResizing] = useState(false);
 
+  const fetchBillData = async () => {
+    try {
+      const data = await GetAllBill();
+      setDataBill(data);
+      console.log("Dữ liệu hóa đơn:", dataBill);
+      // setState hoặc xử lý tiếp tại đây nếu cần
+    } catch (error) {
+      console.error("Lỗi khi gọi GetShipment:", error);
+    }
+  };
+  useEffect(() => {
+    setDataBill(data || []);
+  }, [data]);
   // Thêm state để quản lý các cột hiển thị
   const [visibleColumns, setVisibleColumns] = useState({
     house_bill: true,
@@ -613,8 +629,11 @@ export default function ContentTable(props) {
 
   const { isOpen, openModal, closeModal } = useModal();
 
-  const { isOpen: isOpenPackages, openModal: openModalPackages, closeModal: closeModalPackages } = useModal();
-
+  const {
+    isOpen: isOpenPackages,
+    openModal: openModalPackages,
+    closeModal: closeModalPackages,
+  } = useModal();
 
   const handleViewOrderDetail = (order) => {
     setHighlightedOrderId(null);
@@ -652,7 +671,6 @@ export default function ContentTable(props) {
       setHighlightedOrderId(null);
     }
   };
-
 
   const handleViewFile = (item) => {
     setHighlightedOrderId(null);
@@ -725,13 +743,9 @@ export default function ContentTable(props) {
     closeModal();
   };
 
-
   const [isFinish, setIsFinish] = useState(false);
 
-
-
   const [namePackages, setNamePackages] = useState("Chốt");
-
 
   const setupEditPackages = (item) => {
     setHighlightedOrderId(null);
@@ -740,8 +754,7 @@ export default function ContentTable(props) {
     openModalPackages();
     setIsEditModalOpen(true);
     setHighlightedOrderId(item.bill_house);
-  }
-
+  };
 
   const handleOpenEditPackageModal = (item) => {
     setIsFinish(item.isFinish);
@@ -762,8 +775,6 @@ export default function ContentTable(props) {
     }
   };
 
-
-
   // Hàm lưu thay đổi
   const handleSaveChanges = async () => {
     // Tính toán số lượng và cân nặng tổng
@@ -777,8 +788,8 @@ export default function ContentTable(props) {
       ...billEdit,
       packageInfo_end: {
         quantity: totalQuantity,
-        total_weight: totalWeight
-      }
+        total_weight: totalWeight,
+      },
     };
 
     console.log(billEdit);
@@ -786,7 +797,7 @@ export default function ContentTable(props) {
     if (isFinish) {
       updatedBillEdit.packageInfo_finish = {
         quantity: totalQuantity,
-        total_weight: totalWeight
+        total_weight: totalWeight,
       };
     }
 
@@ -811,6 +822,8 @@ export default function ContentTable(props) {
 
     // Giữ nguyên highlight sau khi lưu thay đổi
     // Người dùng có thể thấy rõ đơn hàng vừa được cập nhật
+
+    fetchBillData(); // Cập nhật lại dữ liệu nếu cần
   };
 
   const exportToExcel = async () => {
@@ -934,7 +947,11 @@ export default function ContentTable(props) {
         };
         // Wrap text nếu có \n
         if (typeof cell.value === "string" && cell.value.includes("\n")) {
-          cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+          cell.alignment = {
+            horizontal: "left",
+            vertical: "middle",
+            wrapText: true,
+          };
         } else {
           cell.alignment = { horizontal: "center", vertical: "middle" };
         }
@@ -1116,46 +1133,45 @@ export default function ContentTable(props) {
                         });
                       }}
                       disabled={column === "house_bill"} // Disable checkbox nếu là house_bill
-                      className={`w-4 h-4 ${column === "house_bill"
-                        ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
-                        : "text-blue-600 bg-gray-100"
-                        } border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
+                      className={`w-4 h-4 ${
+                        column === "house_bill"
+                          ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
+                          : "text-blue-600 bg-gray-100"
+                      } border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
                     />
                     <label
                       htmlFor={`col-${column}`}
-                      className={`ml-2 text-sm ${column === "house_bill"
-                        ? "text-gray-800 font-medium dark:text-gray-200"
-                        : "text-gray-600 dark:text-gray-400"
-                        }`}
+                      className={`ml-2 text-sm ${
+                        column === "house_bill"
+                          ? "text-gray-800 font-medium dark:text-gray-200"
+                          : "text-gray-600 dark:text-gray-400"
+                      }`}
                     >
                       {column === "house_bill"
                         ? "HOUSE BILL"
                         : column === "information_human"
-                          ? "THÔNG TIN NGƯỜI"
-                          : column === "bill_employee"
-                            ? "BILL PHỤ"
-                            : column === "awb"
-                              ? "AWB"
-                              : column === "company_service"
-                                ? "DỊCH VỤ"
-                                : column === "country_name"
-                                  ? "NƯỚC ĐẾN"
-                                  : column === "packageInfo_begin"
-                                    ? "PACKAGE KHAI BÁO"
-                                    : column === "packageInfo_end"
-                                      ? "PACKAGE CHỐT"
-                                      :
-
-                                      column === "packageInfo_finish"
-                                        ? "PACKAGE KẾT THÚC"
-                                        : column === "status"
-                                          ? "TRẠNG THÁI"
-
-                                          : column === "File"
-                                            ? "FILE"
-                                            : column === "Detail"
-                                              ? "CHI TIẾT"
-                                              : column}
+                        ? "THÔNG TIN NGƯỜI"
+                        : column === "bill_employee"
+                        ? "BILL PHỤ"
+                        : column === "awb"
+                        ? "AWB"
+                        : column === "company_service"
+                        ? "DỊCH VỤ"
+                        : column === "country_name"
+                        ? "NƯỚC ĐẾN"
+                        : column === "packageInfo_begin"
+                        ? "PACKAGE KHAI BÁO"
+                        : column === "packageInfo_end"
+                        ? "PACKAGE CHỐT"
+                        : column === "packageInfo_finish"
+                        ? "PACKAGE KẾT THÚC"
+                        : column === "status"
+                        ? "TRẠNG THÁI"
+                        : column === "File"
+                        ? "FILE"
+                        : column === "Detail"
+                        ? "CHI TIẾT"
+                        : column}
                     </label>
                   </div>
                 ))}
@@ -1302,18 +1318,20 @@ export default function ContentTable(props) {
               {currentData.map((item, i) => (
                 <TableRow
                   key={i + 1}
-                  className={`transition-colors ${highlightedOrderId === item.bill_house
-                    ? "bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400"
-                    : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                    }`}
+                  className={`transition-colors ${
+                    highlightedOrderId === item.bill_house
+                      ? "bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400"
+                      : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  }`}
                 >
                   {/* House Bill - luôn hiển thị */}
                   <TableCell className="px-6 py-4 whitespace-nowrap">
                     <div
-                      className={`font-medium hover:underline cursor-pointer ${highlightedOrderId === item.bill_house
-                        ? "text-blue-700 font-bold dark:text-blue-300"
-                        : "text-brand-600 dark:text-brand-400"
-                        }`}
+                      className={`font-medium hover:underline cursor-pointer ${
+                        highlightedOrderId === item.bill_house
+                          ? "text-blue-700 font-bold dark:text-blue-300"
+                          : "text-brand-600 dark:text-brand-400"
+                      }`}
                       onMouseEnter={(e) => handleShowTooltip(item, e)}
                       onMouseLeave={handleCloseTooltip}
                       onClick={() => handleViewOrderDetail(item)}
@@ -1384,8 +1402,6 @@ export default function ContentTable(props) {
                     </TableCell>
                   )}
 
-
-
                   {visibleColumns.packageInfo_end && (
                     <TableCell className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-start justify-between">
@@ -1404,11 +1420,25 @@ export default function ContentTable(props) {
                           title="Sửa"
                           onClick={() => {
                             setIsFinish(false);
-                            handleOpenEditPackageModal({ ...item, isFinish: false });
+                            handleOpenEditPackageModal({
+                              ...item,
+                              isFinish: false,
+                            });
                           }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z" />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-blue-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -1432,12 +1462,25 @@ export default function ContentTable(props) {
                           className="ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                           title="Sửa"
                           onClick={() => {
-
-                            handleOpenEditPackageModal({ ...item, isFinish: true });
+                            handleOpenEditPackageModal({
+                              ...item,
+                              isFinish: true,
+                            });
                           }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z" />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-blue-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -1451,8 +1494,6 @@ export default function ContentTable(props) {
                     </TableCell>
                   )}
 
-
-
                   {/* File */}
                   {visibleColumns.File && (
                     <TableCell className="px-6 py-4 whitespace-nowrap">
@@ -1461,13 +1502,15 @@ export default function ContentTable(props) {
                           item.files.map((file, index) => (
                             <div
                               key={index}
-                              className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
-                                ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
-                                }`}
+                              className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${
+                                highlightedOrderId === item.bill_house
+                                  ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                  : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                              }`}
                               onClick={() => {
                                 console.log(
-                                  `Clicked file: ${file.name || `File ${index + 1}`
+                                  `Clicked file: ${
+                                    file.name || `File ${index + 1}`
                                   }`,
                                   file
                                 );
@@ -1501,10 +1544,11 @@ export default function ContentTable(props) {
                           ))
                         ) : (
                           <div
-                            className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
-                              ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                              : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
-                              }`}
+                            className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${
+                              highlightedOrderId === item.bill_house
+                                ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                            }`}
                             onClick={() => handleViewFile(item)}
                           >
                             <svg
@@ -1543,7 +1587,6 @@ export default function ContentTable(props) {
                 </TableRow>
               ))}
 
-
               {/* new */}
               <Modal
                 isOpen={isOpenPackages}
@@ -1570,159 +1613,159 @@ export default function ContentTable(props) {
                     {/* Package Section */}
                     {(authorities.includes("TRANSPORTER") ||
                       authorities.includes("ADMIN")) && (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                KG Chốt (SL:{" "}
-                                {billEdit.packageInfo_end?.quantity || 0} /{" "}
-                                {billEdit.packageInfo_end?.total_weight || 0} KG)
-                              </h4>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newPackage = {
-                                  weight: "",
-                                  length: "",
-                                  height: "",
-                                  width: "",
-                                };
-                                setBillEdit({
-                                  ...billEdit,
-                                  packages: [
-                                    ...(billEdit.packages || []),
-                                    newPackage,
-                                  ],
-                                });
-                              }}
-                              className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                            >
-                              <PlusIcon className="w-4 h-4 mr-1" />
-                              Thêm Package
-                            </button>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              KG Chốt (SL:{" "}
+                              {billEdit.packageInfo_end?.quantity || 0} /{" "}
+                              {billEdit.packageInfo_end?.total_weight || 0} KG)
+                            </h4>
                           </div>
-
-                          {/* Package List */}
-                          <div className="space-y-3">
-                            {billEdit.packages?.map((pkg, index) => (
-                              <div
-                                key={index}
-                                className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 md:grid-cols-4"
-                              >
-                                {/* Weight */}
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Cân nặng (KG)</Label>
-                                  <Input
-                                    type="number"
-                                    value={pkg.weight || ""}
-                                    onChange={(e) => {
-                                      const updatedPackages = [
-                                        ...billEdit.packages,
-                                      ];
-                                      updatedPackages[index].weight =
-                                        e.target.value;
-                                      setBillEdit({
-                                        ...billEdit,
-                                        packages: updatedPackages,
-                                      });
-                                    }}
-                                    placeholder="0.00"
-                                    className="w-full"
-                                  />
-                                </div>
-
-                                {/* Dimensions */}
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Dài (cm)</Label>
-                                  <Input
-                                    type="number"
-                                    value={pkg.length || ""}
-                                    onChange={(e) => {
-                                      const updatedPackages = [
-                                        ...billEdit.packages,
-                                      ];
-                                      updatedPackages[index].length =
-                                        e.target.value;
-                                      setBillEdit({
-                                        ...billEdit,
-                                        packages: updatedPackages,
-                                      });
-                                    }}
-                                    placeholder="0.00"
-                                    className="w-full"
-                                  />
-                                </div>
-
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Cao (cm)</Label>
-                                  <Input
-                                    type="number"
-                                    value={pkg.height || ""}
-                                    onChange={(e) => {
-                                      const updatedPackages = [
-                                        ...billEdit.packages,
-                                      ];
-                                      updatedPackages[index].height =
-                                        e.target.value;
-                                      setBillEdit({
-                                        ...billEdit,
-                                        packages: updatedPackages,
-                                      });
-                                    }}
-                                    placeholder="0.00"
-                                    className="w-full"
-                                  />
-                                </div>
-
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Rộng (cm)</Label>
-                                  <Input
-                                    type="number"
-                                    value={pkg.width || ""}
-                                    onChange={(e) => {
-                                      const updatedPackages = [
-                                        ...billEdit.packages,
-                                      ];
-                                      updatedPackages[index].width =
-                                        e.target.value;
-                                      setBillEdit({
-                                        ...billEdit,
-                                        packages: updatedPackages,
-                                      });
-                                    }}
-                                    placeholder="0.00"
-                                    className="w-full"
-                                  />
-                                </div>
-
-                                {/* Delete Button (only show if more than one package) */}
-                                {billEdit.packages.length > 1 && (
-                                  <div className="flex items-end md:col-span-4">
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const updatedPackages =
-                                          billEdit.packages.filter(
-                                            (_, i) => i !== index
-                                          );
-                                        setBillEdit({
-                                          ...billEdit,
-                                          packages: updatedPackages,
-                                        });
-                                      }}
-                                      className="flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:hover:text-red-400"
-                                    >
-                                      <TrashIcon className="w-4 h-4 mr-1" />
-                                      Xóa Package
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newPackage = {
+                                weight: "",
+                                length: "",
+                                height: "",
+                                width: "",
+                              };
+                              setBillEdit({
+                                ...billEdit,
+                                packages: [
+                                  ...(billEdit.packages || []),
+                                  newPackage,
+                                ],
+                              });
+                            }}
+                            className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                          >
+                            <PlusIcon className="w-4 h-4 mr-1" />
+                            Thêm Package
+                          </button>
                         </div>
-                      )}
+
+                        {/* Package List */}
+                        <div className="space-y-3">
+                          {billEdit.packages?.map((pkg, index) => (
+                            <div
+                              key={index}
+                              className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 md:grid-cols-4"
+                            >
+                              {/* Weight */}
+                              <div className="space-y-1">
+                                <Label className="text-xs">Cân nặng (KG)</Label>
+                                <Input
+                                  type="number"
+                                  value={pkg.weight || ""}
+                                  onChange={(e) => {
+                                    const updatedPackages = [
+                                      ...billEdit.packages,
+                                    ];
+                                    updatedPackages[index].weight =
+                                      e.target.value;
+                                    setBillEdit({
+                                      ...billEdit,
+                                      packages: updatedPackages,
+                                    });
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-full"
+                                />
+                              </div>
+
+                              {/* Dimensions */}
+                              <div className="space-y-1">
+                                <Label className="text-xs">Dài (cm)</Label>
+                                <Input
+                                  type="number"
+                                  value={pkg.length || ""}
+                                  onChange={(e) => {
+                                    const updatedPackages = [
+                                      ...billEdit.packages,
+                                    ];
+                                    updatedPackages[index].length =
+                                      e.target.value;
+                                    setBillEdit({
+                                      ...billEdit,
+                                      packages: updatedPackages,
+                                    });
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-full"
+                                />
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label className="text-xs">Cao (cm)</Label>
+                                <Input
+                                  type="number"
+                                  value={pkg.height || ""}
+                                  onChange={(e) => {
+                                    const updatedPackages = [
+                                      ...billEdit.packages,
+                                    ];
+                                    updatedPackages[index].height =
+                                      e.target.value;
+                                    setBillEdit({
+                                      ...billEdit,
+                                      packages: updatedPackages,
+                                    });
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-full"
+                                />
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label className="text-xs">Rộng (cm)</Label>
+                                <Input
+                                  type="number"
+                                  value={pkg.width || ""}
+                                  onChange={(e) => {
+                                    const updatedPackages = [
+                                      ...billEdit.packages,
+                                    ];
+                                    updatedPackages[index].width =
+                                      e.target.value;
+                                    setBillEdit({
+                                      ...billEdit,
+                                      packages: updatedPackages,
+                                    });
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-full"
+                                />
+                              </div>
+
+                              {/* Delete Button (only show if more than one package) */}
+                              {billEdit.packages.length > 1 && (
+                                <div className="flex items-end md:col-span-4">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updatedPackages =
+                                        billEdit.packages.filter(
+                                          (_, i) => i !== index
+                                        );
+                                      setBillEdit({
+                                        ...billEdit,
+                                        packages: updatedPackages,
+                                      });
+                                    }}
+                                    className="flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:hover:text-red-400"
+                                  >
+                                    <TrashIcon className="w-4 h-4 mr-1" />
+                                    Xóa Package
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Action Buttons */}
                     <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
@@ -1814,4 +1857,3 @@ export default function ContentTable(props) {
     animation: pulse 2s infinite;
   }
 `}</style>;
-

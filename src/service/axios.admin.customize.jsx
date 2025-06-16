@@ -20,12 +20,17 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   function (response) {
     if (response.config.responseType === "blob") {
-      return response.data; // Trả nguyên blob, không parse
+      return response.data;
     }
     return response.data?.data ?? response.data;
   },
   function (error) {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/signin";
+    }
     return Promise.reject(error);
   }
 );
+
 export default instance;
