@@ -169,12 +169,6 @@ export default function RecentOrderAnalytics() {
                 >
                   Value
                 </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-4 py-3 font-medium text-gray-500 sm:px-6 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Value Fake
-                </TableCell>
               </TableRow>
             </TableHeader>
 
@@ -200,9 +194,6 @@ export default function RecentOrderAnalytics() {
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 sm:px-6 text-start text-theme-sm dark:text-gray-400">
                     {product.cr}
-                  </TableCell>
-                  <TableCell className="px-4 text-theme-sm sm:px-6 text-start text-success-600">
-                    ${product.value}
                   </TableCell>
                   <TableCell className="px-4 text-theme-sm sm:px-6 text-start text-success-600">
                     ${product.value}

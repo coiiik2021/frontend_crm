@@ -41,11 +41,11 @@ export default function Analytics() {
           <SessionChart />
         </div> */}
 
-        <div className="col-span-12 xl:col-span-5">
+        {/* <div className="col-span-12 xl:col-span-5">
           <DemographicCard />
-        </div>
+        </div> */}
 
-        <div className="col-span-12 xl:col-span-7">
+        <div className="col-span-12 xl:col-span-12">
           <RecentOrderAnalytics />
         </div>
       </div>
