@@ -1,3 +1,4 @@
+import { GetAnalyticsCountry } from "../../../service/api.admin.service";
 import Button from "../../admin/ui/button/Button";
 import {
   Table,
@@ -6,80 +7,32 @@ import {
   TableHeader,
   TableRow,
 } from "../../admin/ui/table";
+import { useEffect, useState } from "react";
 
-// Define the TypeScript interface for the table rows
-interface Product {
-  id: number; // Unique identifier for each product
-  name: string; // Product name
-  category: string; // Category of the product
-  country: string; // Price of the product (as a string with currency symbol)
-  cr: string; // URL or path to the product image
-  value: string;
+// Định nghĩa interface cho dữ liệu bảng
+interface CountryData {
+  nameCountry: string;
+  totalDebit: number;
+  totalBill: number;
+  percentage: number;
 }
 
-// Define the table data using the interface
-const tableData: Product[] = [
-  {
-    id: 1,
-    name: "TailGrids",
-    category: "UI Kitssss",
-    country: "/images/country/country-01.svg",
-    cr: "Dashboard",
-    value: "12,499", // Replace with actual image URL
-  },
-  {
-    id: 2,
-    name: "GrayGrids",
-    category: "Templates",
-    country: "/images/country/country-02.svg",
-    cr: "Dashboard",
-    value: "5498", // Replace with actual image URL
-  },
-  {
-    id: 3,
-    name: "Uideck",
-    category: "Templates",
-    country: "/images/country/country-03.svg",
-    cr: "Dashboard",
-    value: "4621", // Replace with actual image URL
-  },
-  {
-    id: 4,
-    name: "FormBold",
-    category: "SaaS",
-    country: "/images/country/country-04.svg",
-    cr: "Dashboard",
-    value: "13843", // Replace with actual image URL
-  },
-  {
-    id: 5,
-    name: "NextAdmin",
-    category: "Templates",
-    country: "/images/country/country-05.svg",
-    cr: "Dashboard",
-    value: "7523", // Replace with actual image URL
-  },
-  {
-    id: 6,
-    name: "Form Builder",
-    category: "Templates",
-    country: "/images/country/country-06.svg",
-    cr: "Dashboard",
-    value: "1,377", // Replace with actual image URL
-  },
-  {
-    id: 7,
-    name: "AyroUI",
-    category: "Templates",
-    country: "/images/country/country-07.svg",
-    cr: "Dashboard",
-    value: "599,00", // Replace with actual image URL
-  },
-];
-
 export default function RecentOrderAnalytics() {
+  const [tableData, setTableData] = useState<CountryData[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    GetAnalyticsCountry()
+      .then((res: any) => {
+        setTableData(res || []);
+      })
+      .catch(() => setTableData([]))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white  dark:border-white/[0.05] dark:bg-white/[0.03] ">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] ">
       <div className="px-4 pt-4 sm:px-6">
         <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -87,7 +40,6 @@ export default function RecentOrderAnalytics() {
               Recent Orders
             </h3>
           </div>
-
           <div className="flex items-center gap-3">
             <Button size="sm" variant="outline">
               <svg
@@ -136,21 +88,8 @@ export default function RecentOrderAnalytics() {
       <div className="max-w-full ">
         <div className="overflow-x-auto">
           <Table>
-            {/* Table Header */}
             <TableHeader className="border-gray-100 border-y dark:border-white/[0.05]">
               <TableRow>
-                <TableCell
-                  isHeader
-                  className="px-4 py-3 font-medium text-gray-500 sm:px-6 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Products
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-4 py-3 font-medium text-gray-500 sm:px-6 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Category
-                </TableCell>
                 <TableCell
                   isHeader
                   className="px-4 py-3 font-medium text-gray-500 sm:px-6 text-start text-theme-xs dark:text-gray-400"
@@ -161,45 +100,53 @@ export default function RecentOrderAnalytics() {
                   isHeader
                   className="px-4 py-3 font-medium text-gray-500 sm:px-6 text-start text-theme-xs dark:text-gray-400"
                 >
-                  CR
+                  Tổng đơn
                 </TableCell>
                 <TableCell
                   isHeader
                   className="px-4 py-3 font-medium text-gray-500 sm:px-6 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Value
+                  Tổng Debit
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 font-medium text-gray-500 sm:px-6 text-start text-theme-xs dark:text-gray-400"
+                >
+                  Phần trăm
                 </TableCell>
               </TableRow>
             </TableHeader>
-
-            {/* Table Body */}
-
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-              {tableData.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="px-4 py-3 font-medium text-gray-800 sm:px-6 text-start text-theme-sm dark:text-white/90">
-                    {product.name}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-500 sm:px-6 text-start text-theme-sm dark:text-gray-400">
-                    {product.category}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-500 sm:px-6 text-start text-theme-sm dark:text-gray-400">
-                    <div className="w-5 h-5 overflow-hidden rounded-full">
-                      <img
-                        src={product.country}
-                        className="w-5 h-5 rounded-full"
-                        alt="country"
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-500 sm:px-6 text-start text-theme-sm dark:text-gray-400">
-                    {product.cr}
-                  </TableCell>
-                  <TableCell className="px-4 text-theme-sm sm:px-6 text-start text-success-600">
-                    ${product.value}
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-4">
+                    Đang tải dữ liệu...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : tableData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-4">
+                    Không có dữ liệu
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tableData.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="px-4 py-3 font-medium text-gray-800 sm:px-6 text-start text-theme-sm dark:text-white/90">
+                      {item.nameCountry}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 sm:px-6 text-start text-theme-sm dark:text-gray-400">
+                      {item.totalBill}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-theme-sm sm:px-6 text-start text-success-600">
+                      ${item.totalDebit.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-theme-sm sm:px-6 text-start text-success-600">
+                      {item.percentage}%
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
