@@ -21,12 +21,12 @@ export default function ComingSoon() {
             <Link to="/" className="inline-block mb-6">
               <img
                 className="dark:hidden"
-                src="./images/logo/logo.png"
+                src="./images/logo/logo_ebay_express.png"
                 alt="Logo"
               />
               <img
                 className="hidden dark:block"
-                src="./images/logo/logo-dark.png"
+                src="./images/logo/logo-ebay-white.png"
                 alt="Logo"
               />
             </Link>

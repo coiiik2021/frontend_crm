@@ -264,7 +264,7 @@ const UpdateBillTRANSPORTER = async (data) => {
 const PutInformationAwb = async (dataRequest) => {
   const API = `bill/information-awb`;
   return await axios.put(API, dataRequest);
-}
+};
 
 export {
   GetAllBill,
@@ -272,7 +272,7 @@ export {
   UpdateBillTRANSPORTER,
   UpdateBillCS,
   UpdateBillAccountant,
-  PutInformationAwb
+  PutInformationAwb,
 };
 
 // const user
@@ -362,7 +362,7 @@ const DeleteDeliveryFavorite = async (id) => {
 };
 
 const GetAllProductFavorite = async () => {
-  const API = `favorite/product}`;
+  const API = `favorite/product`;
   return await axios.get(API);
 };
 const PostProductFavorite = async (data) => {
@@ -371,7 +371,7 @@ const PostProductFavorite = async (data) => {
 };
 
 const DeleteProductFavorite = async (id) => {
-  const API = `favorite/product${id}`;
+  const API = `favorite/product/${id}`;
   return await axios.delete(API);
 };
 

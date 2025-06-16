@@ -1248,7 +1248,7 @@ export default function ContentTable({ data }) {
               </div>
 
               <div style={isResizing ? { pointerEvents: "none" } : {}}>
-                <BillContent id={billContent?.bill_house}></BillContent>
+                <BillContent id={billContent?.bill_house} fetchBillData={fetchBillData}></BillContent>
               </div>
             </div>
           </div>
