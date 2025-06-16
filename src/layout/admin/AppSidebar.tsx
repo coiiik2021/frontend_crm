@@ -96,7 +96,16 @@ const AppSidebar: React.FC = () => {
               icon: <UserCircleIcon />,
               name: "User",
               subItems: [
-                { name: "Manager", path: "/quan-ly/manager-table" },
+                { name: "Business Developer", path: "/quan-ly/bd-table" },
+                {
+                  name: "Cs", path: "/quan-ly/cs-table",
+                },
+                {
+                  name: "Accountant", path: "/quan-ly/accountant-table",
+                },
+                {
+                  name: "Transporter", path: "/quan-ly/transporter-table",
+                },
               ],
             },
 
@@ -167,7 +176,59 @@ const AppSidebar: React.FC = () => {
               path: "/quan-ly/my-profile",
             },
           ])
-        } else {
+        } else if (decoded.authorities.includes('BD')) {
+          setNavItems(
+            [{
+              icon: <GridIcon />,
+              name: "Dashboard",
+              subItems: [
+                { name: "Ecommerce", path: "/quan-ly", pro: false },
+                { name: "Analytics", path: "/quan-ly/analytics", pro: true },
+                { name: "Marketing", path: "/quan-ly/marketing", pro: true },
+                { name: "CRM", path: "/quan-ly/crm", pro: true },
+                { name: "Stocks", path: "/quan-ly/stocks", new: true, pro: true },
+                { name: "SaaS", path: "/quan-ly/saas", new: true, pro: true },
+              ],
+            },
+            {
+              icon: <UserCircleIcon />,
+              name: "User",
+              subItems: [
+                { name: "Manager", path: "/quan-ly/manager-table" }
+              ]
+            },
+
+            {
+              name: "Đơn hàng",
+              icon: <ListIcon />,
+              path: "/quan-ly/shipment",
+            },
+
+            {
+              name: "Hoá đơn",
+              icon: <ListIcon />,
+              path: "/quan-ly/my-debits",
+            },
+              // {
+              //   name: "Price Net",
+              //   icon: <ListIcon />,
+              //   subItems: [
+              //     { name: "Ups", path: "/quan-ly/ups-table", pro: true },
+              //     { name: "DHL", path: "/quan-ly/dhl-table", pro: true },
+
+              //     { name: "FEDEX", path: "/quan-ly/fedex-table", pro: true },
+              //     { name: "SF", path: "/quan-ly/sf-table", pro: true },
+              //     { name: "Chuyên tuyến", path: "/quan-ly/chuyen-tuyen-table", pro: true },
+              //     { name: "Sea", path: "/quan-ly/sea-table", pro: true },
+              //     { name: "zone country", path: "/quan-ly/zone-country", pro: true },
+
+              //   ],
+              // },
+
+            ]
+          )
+        }
+        else {
           setNavItems(
             [
               {

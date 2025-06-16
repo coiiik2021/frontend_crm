@@ -60,7 +60,7 @@ export default function UserService({ user }) {
         setAuthorities(authoritiesResponse);
 
         let dataNameServiceByUser = await GetNameServiceByUser(true);
-        if (authorities.includes("MANAGER")
+        if (authorities.includes("MANAGER") || authorities.includes("BD")
         ) {
           dataNameServiceByUser = await GetNameServiceByUser(false);
         }
@@ -458,7 +458,7 @@ export default function UserService({ user }) {
                                 </button>
 
 
-                                {authorities.includes("ADMIN") && (
+                                {authorities.includes("BD") && (
                                   <button
                                     onClick={async () => {
                                       setServiceSelect(row);

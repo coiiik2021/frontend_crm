@@ -82,6 +82,7 @@ import TransporterTable from "./components/admin/transporter-table/TransporterTa
 import AccountantTable from "./components/admin/accountant-table/AccountantTable";
 import ChuyenTuyenTable from "./components/admin/priceNet/chuyen-tuyen-table/ChuyenTuyenTable";
 import SeaTable from "./components/admin/priceNet/sea-table/SeaTable";
+import BDTable from "./components/admin/bd-table/BDTable";
 
 export default function App() {
   return (
@@ -90,7 +91,7 @@ export default function App() {
         <ScrollToTop />
         <Routes>
           <Route element={
-            <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "EMPLOYEE", "CS", "TRANSPORTER"]}>
+            <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "CS", "TRANSPORTER", "BD"]}>
               <AppLayoutAdmin />
             </ProtectedRoute>
           }>
@@ -107,6 +108,9 @@ export default function App() {
             <Route path="/quan-ly/user-table" element={<UserTable />} />
             <Route path="/quan-ly/manager-table" element={<ManagerTable />} />
             <Route path="/quan-ly/sale-table" element={<SaleTable />} />
+            <Route path="/quan-ly/bd-table" element={<BDTable />} />
+
+            BDTable
 
             <Route path="/quan-ly/ups-table" element={<UpsTable />} />
             <Route path="/quan-ly/dhl-table" element={<DhlTable />} />
@@ -209,8 +213,9 @@ export default function App() {
             <Route path="/quan-ly/my-debits" element={<ShipmentTable />} />
           </Route>
 
+
           <Route element={
-            <ProtectedRoute allowedRoles={["MANAGER"]}>
+            <ProtectedRoute allowedRoles={["MANAGER", "ADMIN"]}>
               <AppLayoutAdmin />
             </ProtectedRoute>
           }>
