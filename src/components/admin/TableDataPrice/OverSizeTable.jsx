@@ -11,7 +11,7 @@ import { DeleteOverSize, GetOverSizeByName, PostOverSize } from "../../../servic
 import { useLoading } from "../../../hooks/useLoading";
 import { Spin } from "antd";
 
-const OverSizeTable = () => {
+const OverSizeTable = ({ nameCompany }) => {
     const [sortKey, setSortKey] = useState("name");
     const [sortOrder, setSortOrder] = useState("asc");
     const [isEditing, setIsEditing] = useState(false);
@@ -34,9 +34,6 @@ const OverSizeTable = () => {
 
     const [overSize, setOverSize] = useState([]);
 
-
-    const nameCompany = "ups";
-
     const [newOverSize, setNewOverSize] = useState({
         name: "",
         price: "",
@@ -51,6 +48,8 @@ const OverSizeTable = () => {
             console.log("dataOverSize", dataOverSize);
 
             setOverSize(dataOverSize);
+
+            console.log(nameCompany);
 
         }
         fetchData();

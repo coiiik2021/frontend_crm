@@ -64,6 +64,14 @@ const Document = ({ packages, setPackages, nameCountry: initialNameCountry, zone
         const dataRequest = {
             nameCountry: initialNameCountry,
             weight: realVolume,
+            packages: [
+                {
+                    length: 0.5,
+                    height: 0.5,
+                    width: 0.5,
+                    weight: 0.5
+                }
+            ],
             isPackage: false
         };
         console.log("data request", dataRequest);
