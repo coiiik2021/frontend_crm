@@ -30,6 +30,7 @@ import Invoice from "../invoice/Invoice";
 import BillContent from "./BillContent";
 import { set } from "date-fns";
 import * as ExcelJS from "exceljs";
+import { useLoading } from "../../../hooks/useLoading";
 
 // Thêm component OrderDetailModal với tabs
 const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
@@ -396,11 +397,18 @@ export default function ContentTable({ data }) {
   // Thêm state để quản lý resize và hiển thị nút resize
   const [sidebarWidth, setSidebarWidth] = useState(700);
   const [isResizing, setIsResizing] = useState(false);
+  const { loading, withLoading } = useLoading();
 
   const fetchBillData = async () => {
     try {
-      const data = await GetAllBill();
-      setDataBill(data);
+      await withLoading(
+        async () => {
+          const data = await GetAllBill();
+          setDataBill(data);
+        },
+        "Tải dữ liệu thành công",
+        "Lỗi khi tải dữ liệu"
+      )
       console.log("Dữ liệu hóa đơn:", dataBill);
       // setState hoặc xử lý tiếp tại đây nếu cần
     } catch (error) {

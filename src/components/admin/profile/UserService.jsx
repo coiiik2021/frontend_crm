@@ -103,8 +103,12 @@ export default function UserService({ user }) {
   const handleSetupPriceNetUser = async (service) => {
     console.log(service);
     setIsOpenPrice(true);
+
+
+
     const nameService = service.nameService.split("-")[0].trim();
     console.log("Name Service:", nameService); // Kiểm tra giá trị nameService
+
     const dataZone = await GetAllByServiceCompany(nameService);
     const zoneOptions = dataZone.map(zone => ({
       label: zone,
@@ -246,7 +250,7 @@ export default function UserService({ user }) {
 
       const dataRequest = {
         account_id: user?.id,
-        service_id: serviceSelect?.service_id,
+        service_id: serviceNamePriceEdit?.service_id,
         kgMin: row?.kgMin,
         kgMax: row?.kgMax,
         zone: row?.zone,
@@ -456,7 +460,7 @@ export default function UserService({ user }) {
                                 </button>
 
 
-                                {(authorities.includes("BD") || authorities.includes("ADMIN")) && (
+                                {authorities.includes("BD") && (
                                   <button
                                     onClick={async () => {
                                       setServiceSelect(row);
