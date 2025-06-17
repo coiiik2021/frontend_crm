@@ -42,7 +42,11 @@ export default function ContentTable({ data }) {
   const [priceOrders, setPriceOrders] = useState([]);
   const [billEdit, setBillEdit] = useState({});
 
+  // State ẩn hiện bộ lọc
   const [showFilter, setShowFilter] = useState(false);
+
+  // State quản lý ẩn/hiện tổng quan
+  const [showOverview, setShowOverview] = useState(false);
 
   const scrollRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -1633,97 +1637,133 @@ export default function ContentTable({ data }) {
         </AnimatePresence>
       </div>
 
-
-      {/* Thêm 6 ô tổng quan ở đây */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
-        <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex flex-col items-center">
-          <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">
-            Doanh số (Mastertracking)
+      {/* Phần tổng quan */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-4">
+        {/* Header tổng quan */}
+        <div
+          className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg flex items-center cursor-pointer select-none"
+          onClick={() => setShowOverview((prev) => !prev)}
+        >
+          <span className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
+            <svg
+              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${showOverview ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+            Tổng quan
           </span>
-          <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-            {totalMastertracking}
-          </span>
-        </div>
-        <div className="bg-orange-100 dark:bg-orange-900/60 rounded-lg p-4 flex flex-col items-center">
-          <span className="text-xs text-orange-700 dark:text-orange-300 font-semibold mb-1">
-            Tổng Debit
-          </span>
-          <span className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-            {formatCurrency(totalDebit)} VNĐ
-          </span>
-        </div>
-        <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4 flex flex-col items-center">
-          <span className="w-full max-w-md text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">
-            Tổng Thanh toán
-          </span>
-          <span className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">
-            {formatCurrency(totalPayment)} VNĐ
-          </span>
-        </div>
-        <div className="bg-green-100 dark:bg-green-900/60 rounded-lg p-4 flex flex-col items-center">
-          <span className="text-xs text-green-800 dark:text-green-200 font-semibold mb-1">
-            Tiền mặt:
-          </span>
-          <span className="text-2xl font-bold text-green-800 dark:text-green-200">
-            {formatCurrency(
-              filteredMastertracking.reduce(
-                (sum, item) =>
-                  sum +
-                  (item?.pricePayment?.cashPayment?.active
-                    ? item?.pricePayment?.cashPayment?.price || 0
-                    : 0),
-                0
-              )
-            )}{" "}
-            VNĐ
-          </span>
-        </div>
-        <div className="bg-blue-100 dark:bg-blue-900/60 rounded-lg p-4 flex flex-col items-center">
-          <span className="text-xs text-blue-800 dark:text-blue-200 font-semibold mb-1">
-            Chuyển khoản:
-          </span>
-          <span className="text-2xl font-bold text-blue-800 dark:text-blue-200">
-            {formatCurrency(
-              filteredMastertracking.reduce(
-                (sum, item) =>
-                  sum +
-                  (item?.pricePayment?.cardPayment?.active
-                    ? item?.pricePayment?.cardPayment?.price || 0
-                    : 0),
-                0
-              )
-            )}{" "}
-            VNĐ
-          </span>
-        </div>
-        <div className="bg-purple-100 dark:bg-purple-900/60 rounded-lg p-4 flex flex-col items-center">
-          <span className="text-xs text-purple-800 dark:text-purple-200 font-semibold mb-1">
-            Doanh nghiệp:
-          </span>
-          <span className="text-2xl font-bold text-purple-800 dark:text-purple-200">
-            {formatCurrency(
-              filteredMastertracking.reduce(
-                (sum, item) =>
-                  sum +
-                  (item?.pricePayment?.businessCardPayment?.active
-                    ? item?.pricePayment?.businessCardPayment?.price || 0
-                    : 0),
-                0
-              )
-            )}{" "}
-            VNĐ
+          <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
+            {showOverview ? "Ẩn tổng quan" : "Hiện tổng quan"}
           </span>
         </div>
 
-        <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 flex flex-col items-center">
-          <span className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">
-            Tổng Còn lại
-          </span>
-          <span className="text-2xl font-bold text-red-700 dark:text-red-300">
-            {formatCurrency(totalRemaining)} VNĐ
-          </span>
-        </div>
+        <AnimatePresence>
+          {showOverview && (
+            <motion.div
+              initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+              animate={{ height: "auto", opacity: 1, overflow: "visible" }}
+              exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Thêm 6 ô tổng quan ở đây */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex flex-col items-center">
+                  <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">
+                    Doanh số (Mastertracking)
+                  </span>
+                  <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                    {totalMastertracking}
+                  </span>
+                </div>
+                <div className="bg-orange-100 dark:bg-orange-900/60 rounded-lg p-4 flex flex-col items-center">
+                  <span className="text-xs text-orange-700 dark:text-orange-300 font-semibold mb-1">
+                    Tổng Debit
+                  </span>
+                  <span className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                    {formatCurrency(totalDebit)} VNĐ
+                  </span>
+                </div>
+                <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4 flex flex-col items-center">
+                  <span className="w-full max-w-md text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">
+                    Tổng Thanh toán
+                  </span>
+                  <span className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">
+                    {formatCurrency(totalPayment)} VNĐ
+                  </span>
+                </div>
+                <div className="bg-green-100 dark:bg-green-900/60 rounded-lg p-4 flex flex-col items-center">
+                  <span className="text-xs text-green-800 dark:text-green-200 font-semibold mb-1">
+                    Tiền mặt:
+                  </span>
+                  <span className="text-2xl font-bold text-green-800 dark:text-green-200">
+                    {formatCurrency(
+                      filteredMastertracking.reduce(
+                        (sum, item) =>
+                          sum +
+                          (item?.pricePayment?.cashPayment?.active
+                            ? item?.pricePayment?.cashPayment?.price || 0
+                            : 0),
+                        0
+                      )
+                    )}{" "}
+                    VNĐ
+                  </span>
+                </div>
+                <div className="bg-blue-100 dark:bg-blue-900/60 rounded-lg p-4 flex flex-col items-center">
+                  <span className="text-xs text-blue-800 dark:text-blue-200 font-semibold mb-1">
+                    Chuyển khoản:
+                  </span>
+                  <span className="text-2xl font-bold text-blue-800 dark:text-blue-200">
+                    {formatCurrency(
+                      filteredMastertracking.reduce(
+                        (sum, item) =>
+                          sum +
+                          (item?.pricePayment?.cardPayment?.active
+                            ? item?.pricePayment?.cardPayment?.price || 0
+                            : 0),
+                        0
+                      )
+                    )}{" "}
+                    VNĐ
+                  </span>
+                </div>
+                <div className="bg-purple-100 dark:bg-purple-900/60 rounded-lg p-4 flex flex-col items-center">
+                  <span className="text-xs text-purple-800 dark:text-purple-200 font-semibold mb-1">
+                    Doanh nghiệp:
+                  </span>
+                  <span className="text-2xl font-bold text-purple-800 dark:text-purple-200">
+                    {formatCurrency(
+                      filteredMastertracking.reduce(
+                        (sum, item) =>
+                          sum +
+                          (item?.pricePayment?.businessCardPayment?.active
+                            ? item?.pricePayment?.businessCardPayment?.price || 0
+                            : 0),
+                        0
+                      )
+                    )}{" "}
+                    VNĐ
+                  </span>
+                </div>
+
+                <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 flex flex-col items-center">
+                  <span className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">
+                    Tổng Còn lại
+                  </span>
+                  <span className="text-2xl font-bold text-red-700 dark:text-red-300">
+                    {formatCurrency(totalRemaining)} VNĐ
+                  </span>
+                </div>
+              </div>
+
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+
 
       <div className="flex flex-col gap-2 px-4 py-4 border border-b-0 border-gray-100 dark:border-white/[0.05] rounded-t-xl sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
@@ -1754,13 +1794,11 @@ export default function ContentTable({ data }) {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M3.8335 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
+                  d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
+                  stroke=""
+                  strokeWidth="1.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
             </span>
@@ -2546,7 +2584,7 @@ export default function ContentTable({ data }) {
               viewBox="0 0 16 16"
             >
               <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V4a1 1 0 0 1 1-1z" />
+              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
             </svg>
             Xuất Excel
           </button>
@@ -2593,8 +2631,13 @@ export default function ContentTable({ data }) {
         onTouchEnd={handleTouchEnd}
       >
         <div>
-          <Table className="w-full rounded-lg overflow-hidden shadow-sm">
-            <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <Table className="w-full rounded-lg overflow-hidden shadow-sm select-none pointer-events-none">
+            <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
+              style={{
+                WebkitUserSelect: "none",
+                userSelect: "none",
+                msUserSelect: "none",
+              }}>
               <TableRow>
                 {Object.entries(columnLabels)
                   .filter(
@@ -2610,7 +2653,7 @@ export default function ContentTable({ data }) {
                         <span>{label}</span>
                         <button
                           onClick={() => handleSort(key)}
-                          className="ml-2 text-gray-400 hover:text-brand-500 transition-colors"
+                          className="pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
                         >
                           {sortKey === key ? (
                             sortOrder === "asc" ? (
@@ -2639,7 +2682,7 @@ export default function ContentTable({ data }) {
                     <div className="flex items-center">
                       <NavLink
                         to="/profile"
-                        className="font-medium text-brand-600 dark:text-brand-400 hover:underline"
+                        className="pointer-events-auto select-auto font-medium text-brand-600 dark:text-brand-400 hover:underline"
                       >
                         EB{item.bill_house.substring(0, 5)}
                       </NavLink>
@@ -2790,7 +2833,7 @@ export default function ContentTable({ data }) {
                                 openModal();
                                 setBillEdit(item);
                               }}
-                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                             >
                               <PencilIcon className="w-5 h-5" />
                             </button>
@@ -2852,7 +2895,7 @@ export default function ContentTable({ data }) {
                                 setEditType("CASH"); // Thêm dòng này
                                 handleViewPaymentDetails(item);
                               }}
-                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                             >
                               <PencilIcon className="w-5 h-5" />
                             </button>
@@ -2892,7 +2935,7 @@ export default function ContentTable({ data }) {
                                 setEditType("CARD"); // Thêm dòng này
                                 handleViewPaymentDetails(item);
                               }}
-                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                             >
                               <PencilIcon className="w-5 h-5" />
                             </button>
@@ -2931,7 +2974,7 @@ export default function ContentTable({ data }) {
                                 setEditType("BUSINESS_CARD"); // Thêm dòng này
                                 handleViewPaymentDetails(item);
                               }}
-                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                             >
                               <PencilIcon className="w-5 h-5" />
                             </button>
@@ -3071,7 +3114,7 @@ export default function ContentTable({ data }) {
                                 e.target.value
                               )
                             }
-                            className="ml-2 text-xs border border-gray-300 rounded p-1 bg-white dark:bg-gray-700 dark:border-gray-600"
+                            className="pointer-events-auto select-auto ml-2 text-xs border border-gray-300 rounded p-1 bg-white dark:bg-gray-700 dark:border-gray-600"
                           >
                             {availableStatuses.map((status) => (
                               <option key={status.value} value={status.value}>

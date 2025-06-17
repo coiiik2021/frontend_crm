@@ -283,6 +283,7 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
   );
 };
 
+
 // Thêm component cho tooltip thông tin nhanh
 const OrderInfoTooltip = ({ isVisible, orderData, position, onClose }) => {
   if (!isVisible || !orderData) return null;
@@ -396,6 +397,41 @@ export default function ContentTable({ data }) {
   // Thêm state để quản lý resize và hiển thị nút resize
   const [sidebarWidth, setSidebarWidth] = useState(700);
   const [isResizing, setIsResizing] = useState(false);
+
+  const scrollRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  // Mouse events
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = x - startX;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+  const handleMouseUp = () => setIsDragging(false);
+
+  // Touch events for mobile
+  const handleTouchStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
+    const walk = x - startX;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+  const handleTouchEnd = () => setIsDragging(false);
+
 
   const fetchBillData = async () => {
     try {
@@ -1158,7 +1194,7 @@ export default function ContentTable({ data }) {
               viewBox="0 0 16 16"
             >
               <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .146-.354l3-3z" />
+              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
             </svg>
             Xuất Excel
           </button>
@@ -1314,9 +1350,26 @@ export default function ContentTable({ data }) {
         </>
       )}
 
-      <div className="max-w-full overflow-x-auto custom-scrollbar">
+      {/* Table */}
+      <div
+        className="max-w-full overflow-x-auto custom-scrollbar scrollable-table"
+        ref={scrollRef}
+        style={{ cursor: isDragging ? "grabbing" : "default" }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div>
-          <Table className="w-full rounded-lg overflow-hidden shadow-sm">
+          <Table className="w-full rounded-lg overflow-hidden shadow-sm select-none pointer-events-none"
+            style={{
+              WebkitUserSelect: "none",
+              userSelect: "none",
+              msUserSelect: "none",
+            }}>
             <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               <TableRow>
                 {[
@@ -1349,7 +1402,7 @@ export default function ContentTable({ data }) {
                         {column.key !== "Detail" && (
                           <button
                             onClick={() => handleSort(column.key)}
-                            className="ml-2 text-gray-400 hover:text-brand-500 transition-colors"
+                            className="pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
                           >
                             {sortKey === column.key ? (
                               sortOrder === "asc" ? (
@@ -1380,7 +1433,7 @@ export default function ContentTable({ data }) {
                   {/* House Bill - luôn hiển thị */}
                   <TableCell className="px-6 py-4 whitespace-nowrap">
                     <div
-                      className={`font-medium hover:underline cursor-pointer ${highlightedOrderId === item.bill_house
+                      className={`pointer-events-auto select-auto font-medium hover:underline cursor-pointer ${highlightedOrderId === item.bill_house
                         ? "text-blue-700 font-bold dark:text-blue-300"
                         : "text-brand-600 dark:text-brand-400"
                         }`}
@@ -1471,7 +1524,7 @@ export default function ContentTable({ data }) {
                         {
                           ["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role)) &&
                           (<button
-                            className="ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                            className="pointer-events-auto select-auto ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                             title="Sửa"
                             onClick={() => {
                               setIsFinish(false);
@@ -1483,7 +1536,7 @@ export default function ContentTable({ data }) {
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5 text-blue-500"
+                              className="pointer-events-auto select-auto h-5 w-5 text-blue-500"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -1520,7 +1573,7 @@ export default function ContentTable({ data }) {
                           && authorities.includes("GET_ALL_ADMIN")
                           && (
                             <button
-                              className="ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                              className="pointer-events-auto select-auto ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                               title="Sửa"
                               onClick={() => {
                                 handleOpenEditPackageModal({
@@ -1531,7 +1584,7 @@ export default function ContentTable({ data }) {
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5 text-blue-500"
+                                className="pointer-events-auto select-auto h-5 w-5 text-blue-500"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -1566,7 +1619,7 @@ export default function ContentTable({ data }) {
                           item.files.map((file, index) => (
                             <div
                               key={index}
-                              className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
+                              className={`pointer-events-auto select-auto flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
                                 ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                                 : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
                                 }`}
@@ -1606,7 +1659,7 @@ export default function ContentTable({ data }) {
                           ))
                         ) : (
                           <div
-                            className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
+                            className={`pointer-events-auto select-auto flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
                               ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                               : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
                               }`}
@@ -1638,7 +1691,7 @@ export default function ContentTable({ data }) {
                     <TableCell className="px-6 py-4 whitespace-nowrap">
                       <button
                         onClick={() => handleViewOrderDetail(item)}
-                        className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                        className="pointer-events-auto select-auto flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
                       >
                         <InfoIcon className="w-4 h-4" />
                         <span>Chi tiết</span>
@@ -1647,223 +1700,223 @@ export default function ContentTable({ data }) {
                   )}
                 </TableRow>
               ))}
-
-              {/* new */}
-              <Modal
-                isOpen={isOpenPackages}
-                onClose={closeModalPackages}
-                className="max-w-[800px] m-4"
-              >
-                <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
-                  {/* Header */}
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-                      Hóa đơn: HB{billEdit.bill_house?.substring(0, 5)}
-                    </h3>
-                    <h3>{namePackages}</h3>
-                    <button
-                      onClick={handleCloseEditModalPackages}
-                      className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                    >
-                      <XIcon className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {/* Form */}
-                  <form className="space-y-6">
-                    {/* Package Section */}
-                    {["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role)) && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              KG Chốt (SL:{" "}
-                              {billEdit.packageInfo_end?.quantity || 0} /{" "}
-                              {billEdit.packageInfo_end?.total_weight || 0} KG)
-                            </h4>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newPackage = {
-                                weight: "",
-                                length: "",
-                                height: "",
-                                width: "",
-                              };
-                              setBillEdit({
-                                ...billEdit,
-                                packages: [
-                                  ...(billEdit.packages || []),
-                                  newPackage,
-                                ],
-                              });
-                            }}
-                            className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                          >
-                            <PlusIcon className="w-4 h-4 mr-1" />
-                            Thêm Package
-                          </button>
-                        </div>
-
-                        {/* Package List */}
-                        <div className="space-y-3">
-                          {billEdit.packages?.map((pkg, index) => (
-                            <div
-                              key={index}
-                              className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 md:grid-cols-4"
-                            >
-                              {/* Weight */}
-                              <div className="space-y-1">
-                                <Label className="text-xs">Cân nặng (KG)</Label>
-                                <Input
-                                  type="number"
-                                  value={pkg.weight || ""}
-                                  onChange={(e) => {
-                                    const updatedPackages = [...billEdit.packages];
-                                    updatedPackages[index].weight = e.target.value;
-                                    setBillEdit({
-                                      ...billEdit,
-                                      packages: updatedPackages,
-                                    });
-                                    // Validate ngay khi nhập
-                                    const errors = validateEditPackage(updatedPackages[index], index);
-                                    setEditErrors(prev => ({ ...prev, ...errors }));
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-full"
-                                />
-                                {editErrors[`${index}-weight`] && (
-                                  <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-weight`]}</div>
-                                )}
-                              </div>
-
-                              {/* Dimensions */}
-                              <div className="space-y-1">
-                                <Label className="text-xs">Dài (cm)</Label>
-                                <Input
-                                  type="number"
-                                  value={pkg.length || ""}
-                                  onChange={(e) => {
-                                    const updatedPackages = [...billEdit.packages];
-                                    updatedPackages[index].length = e.target.value;
-                                    setBillEdit({
-                                      ...billEdit,
-                                      packages: updatedPackages,
-                                    });
-                                    // Validate ngay khi nhập
-                                    const errors = validateEditPackage(updatedPackages[index], index);
-                                    setEditErrors(prev => ({ ...prev, ...errors }));
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-full"
-                                />
-                                {editErrors[`${index}-length`] && (
-                                  <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-length`]}</div>
-                                )}
-                              </div>
-
-                              <div className="space-y-1">
-                                <Label className="text-xs">Rộng (cm)</Label>
-                                <Input
-                                  type="number"
-                                  value={pkg.width || ""}
-                                  onChange={(e) => {
-                                    const updatedPackages = [...billEdit.packages];
-                                    updatedPackages[index].width = e.target.value;
-                                    setBillEdit({
-                                      ...billEdit,
-                                      packages: updatedPackages,
-                                    });
-                                    // Validate ngay khi nhập
-                                    const errors = validateEditPackage(updatedPackages[index], index);
-                                    setEditErrors(prev => ({ ...prev, ...errors }));
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-full"
-                                />
-                                {editErrors[`${index}-width`] && (
-                                  <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-width`]}</div>
-                                )}
-                              </div>
-
-                              <div className="space-y-1">
-                                <Label className="text-xs">Cao (cm)</Label>
-                                <Input
-                                  type="number"
-                                  value={pkg.height || ""}
-                                  onChange={(e) => {
-                                    const updatedPackages = [...billEdit.packages];
-                                    updatedPackages[index].height = e.target.value;
-                                    setBillEdit({
-                                      ...billEdit,
-                                      packages: updatedPackages,
-                                    });
-                                    // Validate ngay khi nhập
-                                    const errors = validateEditPackage(updatedPackages[index], index);
-                                    setEditErrors(prev => ({ ...prev, ...errors }));
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-full"
-                                />
-                                {editErrors[`${index}-height`] && (
-                                  <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-height`]}</div>
-                                )}
-                              </div>
-
-                              {/* Delete Button (only show if more than one package) */}
-                              {billEdit.packages.length > 1 && (
-                                <div className="flex items-end md:col-span-4">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const updatedPackages =
-                                        billEdit.packages.filter(
-                                          (_, i) => i !== index
-                                        );
-                                      setBillEdit({
-                                        ...billEdit,
-                                        packages: updatedPackages,
-                                      });
-                                    }}
-                                    className="flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:hover:text-red-400"
-                                  >
-                                    <TrashIcon className="w-4 h-4 mr-1" />
-                                    Xóa Package
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
-                      <button
-                        type="button"
-                        onClick={handleCloseEditModalPackages}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-                      >
-                        Đóng
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleSaveChanges}
-                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        Lưu thay đổi
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </Modal>
             </TableBody>
           </Table>
         </div>
       </div>
 
+      {/* new */}
+      <Modal
+        isOpen={isOpenPackages}
+        onClose={closeModalPackages}
+        className="max-w-[800px] m-4"
+      >
+        <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+              Hóa đơn: HB{billEdit.bill_house?.substring(0, 5)}
+            </h3>
+            <h3>{namePackages}</h3>
+            <button
+              onClick={handleCloseEditModalPackages}
+              className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+            >
+              <XIcon className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Form */}
+          <form className="space-y-6">
+            {/* Package Section */}
+            {["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role)) && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      KG Chốt (SL:{" "}
+                      {billEdit.packageInfo_end?.quantity || 0} /{" "}
+                      {billEdit.packageInfo_end?.total_weight || 0} KG)
+                    </h4>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newPackage = {
+                        weight: "",
+                        length: "",
+                        height: "",
+                        width: "",
+                      };
+                      setBillEdit({
+                        ...billEdit,
+                        packages: [
+                          ...(billEdit.packages || []),
+                          newPackage,
+                        ],
+                      });
+                    }}
+                    className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                  >
+                    <PlusIcon className="w-4 h-4 mr-1" />
+                    Thêm Package
+                  </button>
+                </div>
+
+                {/* Package List */}
+                <div className="space-y-3">
+                  {billEdit.packages?.map((pkg, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 md:grid-cols-4"
+                    >
+                      {/* Weight */}
+                      <div className="space-y-1">
+                        <Label className="text-xs">Cân nặng (KG)</Label>
+                        <Input
+                          type="number"
+                          value={pkg.weight || ""}
+                          onChange={(e) => {
+                            const updatedPackages = [...billEdit.packages];
+                            updatedPackages[index].weight = e.target.value;
+                            setBillEdit({
+                              ...billEdit,
+                              packages: updatedPackages,
+                            });
+                            // Validate ngay khi nhập
+                            const errors = validateEditPackage(updatedPackages[index], index);
+                            setEditErrors(prev => ({ ...prev, ...errors }));
+                          }}
+                          placeholder="0.00"
+                          className="w-full"
+                        />
+                        {editErrors[`${index}-weight`] && (
+                          <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-weight`]}</div>
+                        )}
+                      </div>
+
+                      {/* Dimensions */}
+                      <div className="space-y-1">
+                        <Label className="text-xs">Dài (cm)</Label>
+                        <Input
+                          type="number"
+                          value={pkg.length || ""}
+                          onChange={(e) => {
+                            const updatedPackages = [...billEdit.packages];
+                            updatedPackages[index].length = e.target.value;
+                            setBillEdit({
+                              ...billEdit,
+                              packages: updatedPackages,
+                            });
+                            // Validate ngay khi nhập
+                            const errors = validateEditPackage(updatedPackages[index], index);
+                            setEditErrors(prev => ({ ...prev, ...errors }));
+                          }}
+                          placeholder="0.00"
+                          className="w-full"
+                        />
+                        {editErrors[`${index}-length`] && (
+                          <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-length`]}</div>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-xs">Rộng (cm)</Label>
+                        <Input
+                          type="number"
+                          value={pkg.width || ""}
+                          onChange={(e) => {
+                            const updatedPackages = [...billEdit.packages];
+                            updatedPackages[index].width = e.target.value;
+                            setBillEdit({
+                              ...billEdit,
+                              packages: updatedPackages,
+                            });
+                            // Validate ngay khi nhập
+                            const errors = validateEditPackage(updatedPackages[index], index);
+                            setEditErrors(prev => ({ ...prev, ...errors }));
+                          }}
+                          placeholder="0.00"
+                          className="w-full"
+                        />
+                        {editErrors[`${index}-width`] && (
+                          <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-width`]}</div>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-xs">Cao (cm)</Label>
+                        <Input
+                          type="number"
+                          value={pkg.height || ""}
+                          onChange={(e) => {
+                            const updatedPackages = [...billEdit.packages];
+                            updatedPackages[index].height = e.target.value;
+                            setBillEdit({
+                              ...billEdit,
+                              packages: updatedPackages,
+                            });
+                            // Validate ngay khi nhập
+                            const errors = validateEditPackage(updatedPackages[index], index);
+                            setEditErrors(prev => ({ ...prev, ...errors }));
+                          }}
+                          placeholder="0.00"
+                          className="w-full"
+                        />
+                        {editErrors[`${index}-height`] && (
+                          <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-height`]}</div>
+                        )}
+                      </div>
+
+                      {/* Delete Button (only show if more than one package) */}
+                      {billEdit.packages.length > 1 && (
+                        <div className="flex items-end md:col-span-4">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updatedPackages =
+                                billEdit.packages.filter(
+                                  (_, i) => i !== index
+                                );
+                              setBillEdit({
+                                ...billEdit,
+                                packages: updatedPackages,
+                              });
+                            }}
+                            className="flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:hover:text-red-400"
+                          >
+                            <TrashIcon className="w-4 h-4 mr-1" />
+                            Xóa Package
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
+              <button
+                type="button"
+                onClick={handleCloseEditModalPackages}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveChanges}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Lưu thay đổi
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </Modal>
       {/* Tooltip thông tin nhanh */}
       <OrderInfoTooltip
         isVisible={showTooltip}
