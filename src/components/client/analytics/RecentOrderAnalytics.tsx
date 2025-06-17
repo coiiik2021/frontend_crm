@@ -37,7 +37,7 @@ export default function RecentOrderAnalytics() {
         <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-              Recent Orders
+              Thống kê khu vực nước đến
             </h3>
           </div>
           <div className="flex items-center gap-3">
@@ -94,7 +94,7 @@ export default function RecentOrderAnalytics() {
                   isHeader
                   className="px-4 py-3 font-medium text-gray-500 sm:px-6 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Country
+                  Nước
                 </TableCell>
                 <TableCell
                   isHeader
