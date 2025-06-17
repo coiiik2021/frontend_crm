@@ -71,7 +71,7 @@ const Products = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showSavedPopup]);
-
+  console.log("products", products);
   const formatCurrency = (amount) => {
     const num = parseFloat(String(amount).replace(/[^0-9.]/g, ""));
 
@@ -103,13 +103,13 @@ const Products = ({
     },
   };
 
-  const addPackage = () => {
-    const newId =
-      products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
+  const generateClientId = () =>
+    `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
+  const addPackage = () => {
     setProducts((prev) => [
       {
-        id: newId,
+        id: generateClientId(),
         description: "",
         quantity: 0,
         origin: "",
@@ -117,6 +117,7 @@ const Products = ({
         price: 0,
         totalPrice: 0,
         unitPrice: 0,
+        clientId: generateClientId(),
       },
       ...prev,
     ]);
@@ -124,14 +125,12 @@ const Products = ({
     setProductsTotal((prev) => ({ ...prev, quantity: prev.quantity + 1 }));
   };
 
-  const removePackage = (index) => {
-    console.log("Removing package at index:", index);
+  const removePackage = (clientId) => {
+    console.log("Removing package with id:", clientId);
     if (products.length <= 1) return;
 
     setProducts((prevProducts) => {
-      if (index < 0 || index >= prevProducts.length) return prevProducts;
-
-      const productToRemove = prevProducts[index];
+      const productToRemove = prevProducts.find((p) => p.clientId === clientId);
       if (!productToRemove) return prevProducts;
 
       // Cập nhật tổng số lượng và tổng giá
@@ -140,18 +139,18 @@ const Products = ({
         priceProduct: prev.priceProduct - (productToRemove.totalPrice / 2 || 0),
       }));
 
-      // Trả về mảng mới không chứa phần tử ở vị trí index
-      const newProducts = [...prevProducts];
-      newProducts.splice(index, 1);
-      return newProducts;
+      // Trả về mảng mới không chứa sản phẩm có id được truyền vào
+      return prevProducts.filter((p) => p.clientId !== clientId);
     });
   };
 
-  const handleChange = (id, field, value) => {
+  const handleChange = (id, clientId, field, value) => {
     setProducts((prevProducts) => {
       const updatedProducts = prevProducts.map((pkg) => {
-        if (pkg.id !== id) return pkg;
+        if (pkg.clientId !== clientId) return pkg;
         const updatedPkg = { ...pkg, [field]: value };
+        updatedPkg.id = generateClientId();
+        console.log("Updated product:", updatedPkg);
         if (field === "Số lượng" || field === "Giá trên 1 sản phẩm") {
           const quantity =
             field === "Số lượng" ? Number(value) : Number(pkg["Số lượng"]);
@@ -318,6 +317,7 @@ const Products = ({
       "Giá trên 1 sản phẩm": favoriteProduct["Giá trên 1 sản phẩm"],
       "Giá Trị": favoriteProduct["Giá Trị"],
       totalPrice: favoriteProduct.totalPrice,
+      clientId: generateClientId(),
     };
 
     setProducts((prev) => [newProduct, ...prev]);
@@ -539,7 +539,7 @@ const Products = ({
               </motion.button>
               {products.map((pkg, index) => (
                 <motion.div
-                  key={index}
+                  key={pkg.clientId}
                   className="mb-6 border-t pt-4"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -550,14 +550,14 @@ const Products = ({
                       Sản phẩm {index + 1}/{products.length}
                     </h3>
                     <div className="flex flex-col items-end">
-                      {saveErrors[pkg.id] && (
+                      {saveErrors[pkg.clientId] && (
                         <motion.p
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                           className="text-red-500 text-sm mb-2"
                         >
-                          {saveErrors[pkg.id]}
+                          {saveErrors[pkg.clientId]}
                         </motion.p>
                       )}
                       {isProductComplete(pkg) && (
@@ -596,7 +596,7 @@ const Products = ({
                       "Giá trên 1 sản phẩm",
                       "Giá Trị",
                     ].map((field) => {
-                      const errorKey = `${pkg.id}-${field}`;
+                      const errorKey = `${pkg.clientId}-${field}`;
                       let columnClass = "";
                       if (field === "Tên") {
                         columnClass = "md:col-span-3";
@@ -612,17 +612,22 @@ const Products = ({
                       return (
                         <div key={field} className={columnClass}>
                           <label
-                            htmlFor={`field-${pkg.id}-${field}`}
+                            htmlFor={`field-${pkg.clientId}-${field}`}
                             className="block text-sm font-medium mb-1"
                           >
                             {field.toUpperCase()}
                           </label>
                           {field === "Mô tả sản phẩm" ? (
                             <textarea
-                              id={`field-${pkg.id}-${field}`}
+                              id={`field-${pkg.clientId}-${field}`}
                               value={pkg[field]}
                               onChange={(e) =>
-                                handleChange(pkg.id, field, e.target.value)
+                                handleChange(
+                                  pkg.id,
+                                  pkg.clientId,
+                                  field,
+                                  e.target.value
+                                )
                               }
                               onFocus={(e) => (e.target.style.height = "250px")}
                               onBlur={(e) => (e.target.style.height = "80px")}
@@ -635,7 +640,7 @@ const Products = ({
                             />
                           ) : (
                             <input
-                              id={`field-${pkg.id}-${field}`}
+                              id={`field-${pkg.clientId}-${field}`}
                               type={
                                 field === "Số lượng" ||
                                 field === "Giá trên 1 sản phẩm"
@@ -646,7 +651,12 @@ const Products = ({
                               disabled={field === "Giá Trị"}
                               value={pkg[field]}
                               onChange={(e) =>
-                                handleChange(pkg.id, field, e.target.value)
+                                handleChange(
+                                  pkg.id,
+                                  pkg.clientId,
+                                  field,
+                                  e.target.value
+                                )
                               }
                               className={`w-full border rounded px-3 py-2 transition-colors duration-200 ${
                                 productsErrors[errorKey]
@@ -675,7 +685,7 @@ const Products = ({
                     <div className="flex items-center mt-3 sm:mb-2 sm:border-t sm:pt-4">
                       <motion.button
                         type="button"
-                        onClick={() => removePackage(index)}
+                        onClick={() => removePackage(pkg.clientId)}
                         className="text-red-500 hover:text-red-700"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
