@@ -857,7 +857,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                                     <>
                                                         <div className="flex justify-between items-center py-1">
                                                             <span className="text-sm text-gray-500">Phí quá khổ ({quote.overSize.name}):</span>
-                                                            <span className="text-sm font-medium text-red-500">{(quote.overSize.price)} đ</span>
+                                                            <span className="text-sm font-medium text-red-500">{formatCurrency((quote.overSize.price))} đ</span>
                                                         </div>
                                                         <div className="text-xs text-gray-400 italic mt-1">
                                                             {quote.overSize.description}

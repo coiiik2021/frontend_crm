@@ -343,15 +343,15 @@ const Document = ({ packages, setPackages, nameCountry: initialNameCountry, zone
                                                     </div>
                                                     <div className="flex justify-between text-sm">
                                                         <span className="text-gray-500">Phí cơ bản:</span>
-                                                        <span className="font-medium">{formatCurrency(quote.priceNet)} đ</span>
+                                                        <span className="font-medium">{formatCurrency(quote.priceNet.toFixed(2))} đ</span>
                                                     </div>
                                                     <div className="flex justify-between text-sm">
                                                         <span className="text-gray-500">Phí mùa cao điểm:</span>
-                                                        <span className="font-medium">{formatCurrency(quote.pricePeakSeason)} đ</span>
+                                                        <span className="font-medium">{formatCurrency(quote.pricePeakSeason.toFixed(2))} đ</span>
                                                     </div>
                                                     <div className="border-t border-gray-100 my-2"></div>
                                                     <div className="flex justify-between text-sm">
-                                                        <span className="text-gray-500">Phí xăng dầu ({quote.constPPXD}%):</span>
+                                                        <span className="text-gray-500">Phí xăng dầu ({quote.constPPXD.toFixed(2)}%):</span>
                                                         <span className="text-blue-600 font-medium">
                                                             {((quote.priceNet + quote.pricePeakSeason) * quote.constPPXD / 100)} đ
                                                         </span>
@@ -359,7 +359,7 @@ const Document = ({ packages, setPackages, nameCountry: initialNameCountry, zone
                                                     <div className="flex justify-between text-sm">
                                                         <span className="text-gray-500">VAT ({quote.constVAT}%):</span>
                                                         <span className="text-purple-600 font-medium">
-                                                            {formatCurrency(((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * quote.constVAT / 100)} đ
+                                                            {formatCurrency((((quote.priceNet + quote.pricePeakSeason) + (quote.overSize ? quote.overSize.price : 0)) * quote.constVAT / 100).toFixed(2))} đ
                                                         </span>
                                                     </div>
                                                 </div>
