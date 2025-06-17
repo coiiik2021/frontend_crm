@@ -375,6 +375,8 @@ const DeleteProductFavorite = async (id) => {
   return await axios.delete(API);
 };
 
+
+
 export {
   GetAllConsigneeFavorite,
   PostConsigneeFavorite,
@@ -492,3 +494,12 @@ const PutPeakSeason = async (data) => {
 
 // Đảm bảo hàm được export
 export { DeletePeakSeason, PostPeakSeason, GetAllPeakSeason, PutPeakSeason };
+
+
+// dashboard user
+const GetAnalyticsCountry = async () => {
+  const API = '/dashboard/analytics/country';
+  return await axios.get(API);
+};
+
+export { GetAnalyticsCountry };
