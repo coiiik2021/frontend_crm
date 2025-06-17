@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import * as XLSX from "xlsx"; // Import thư viện xlsx
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table";
 import { GetZoneCountry, PostZoneCountry } from "../../../../service/api.admin.service";
-import { set } from "date-fns";
+import { useLoading } from "../../../../hooks/useLoading";
+import { Spin } from "antd";
 
 export default function ContentTable() {
     const [zoneCountry, setZoneCountry] = useState([]);
@@ -12,12 +13,19 @@ export default function ContentTable() {
 
     const [isImported, setIsImported] = useState(false); // State để kiểm tra xem dữ liệu đã được import hay chưa
 
-    const [serviceName, setServiceName] = useState(); // State để lưu tên dịch vụ
+    const { loading, withLoading } = useLoading();
+
     useEffect(() => {
         const fetchData = async () => {
-            const data = await GetZoneCountry();
-            console.log("Dữ liệu từ API:", data);
-            setZoneCountry(data);
+            await withLoading(
+                async () => {
+                    const data = await GetZoneCountry();
+                    console.log("Dữ liệu từ API:", data);
+                    setZoneCountry(data);
+                },
+                "Lấy dữ liệu thành công",
+                "Không thể lấy dữ liệu"
+            );
         };
         fetchData();
     }, []);
@@ -64,11 +72,24 @@ export default function ContentTable() {
 
     // Hàm xử lý lưu trữ dữ liệu
     const handleSaveData = async () => {
-        console.log("Dữ liệu đã được lưu:", zoneCountry);
-        await PostZoneCountry(zoneCountry);
-        alert("Dữ liệu đã được lưu thành công!");
-        setIsImported(false);
+        await withLoading(
+            async () => {
+                console.log("Dữ liệu đã được lưu:", zoneCountry);
+                await PostZoneCountry(zoneCountry);
+                setIsImported(false);
+            },
+            "Lưu dữ liệu thành công",
+            "Không thể lưu dữ liệu"
+        );
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Spin size="large" />
+            </div>
+        );
+    }
 
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl">
@@ -103,7 +124,7 @@ export default function ContentTable() {
                     {/* Nút lưu trữ */}
                     {isImported && (
                         <button
-                            onClick={async () => handleSaveData()}
+                            onClick={handleSaveData}
                             className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600"
                         >
                             Lưu trữ

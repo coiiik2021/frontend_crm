@@ -35,7 +35,7 @@ export default function SignInForm() {
       } else if (authorities.includes("MANAGER")) {
         navigate("/quan-ly/user-table");
       }
-      else if (authorities.includes("USER") || authorities.includes("CS") || authorities.includes("TRANSPORTER") || authorities.includes("ACCOUNTANT") || authorities.includes("BD")) {
+      else if (["TRANSPORTER", "ACCOUNTANT", "BD", "USER", "CS"].some(role => authorities.includes(role))) {
         navigate("/quan-ly/shipment");
       }
       else {

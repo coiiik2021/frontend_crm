@@ -28,29 +28,18 @@ export default function ContentTable(props) {
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
-  const calculateAge = (dob) => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
 
-    // Nếu chưa đến ngày sinh nhật trong năm thì trừ đi 1
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-
-    return age;
-  };
   const filteredAndSortedData = useMemo(() => {
+    console.log(users);
     return users
       .filter((item) =>
-        item.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+        item.email.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => {
         if (sortKey === "name") {
           return sortOrder === "asc"
-            ? a.fullName.localeCompare(b.fullName)
-            : b.fullName.localeCompare(a.fullName);
+            ? a.email.localeCompare(b.email)
+            : b.email.localeCompare(a.email);
         }
 
         if (sortKey === "salary") {
@@ -89,10 +78,16 @@ export default function ContentTable(props) {
   const handleCreateUser = async () => {
     const data = { ...newDataUser, nameRole: "USER" };
 
+    console.log(data);
 
+    const dataResponse = await PostBaseUser(data);
 
-    await PostBaseUser(data);
-    setUsers([...users, newDataUser]);
+    const dataInsert = {
+      ...newDataUser,
+      id: dataResponse
+    }
+
+    setUsers([...users, dataInsert]);
 
     closeModal();
   };
@@ -111,7 +106,7 @@ export default function ContentTable(props) {
         <div className="relative w-full p-6 overflow-y-auto bg-white rounded-3xl dark:bg-gray-900 lg:p-8">
           <div className="flex items-center justify-between mb-6">
             <h4 className="text-2xl font-bold text-gray-800 dark:text-white/90">
-              Add New User
+              Add New USER
             </h4>
             <button
               onClick={closeModal}
@@ -299,8 +294,9 @@ export default function ContentTable(props) {
                 type="submit"
                 size="lg"
                 className="w-full md:w-auto px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700"
+
               >
-                Save User
+                Save USER
               </Button>
             </div>
           </form>
@@ -463,19 +459,25 @@ export default function ContentTable(props) {
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {item.email}
+                    <NavLink
+                      to="/quan-ly/profile"
+                      state={{ user: item }}
+                      className="block font-medium text-gray-800 text-theme-sm dark:text-white/90"
+                    >
+                      {item.email}
+                    </NavLink>
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
                     {item.phone}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {calculateAge(item.dateOfBirth)}
+                    {18}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {item.createdAt}
+                    {item.dateOfBirth}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {item.kpi}
+                    {1000}
                   </TableCell>
                 </TableRow>
               ))}
