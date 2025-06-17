@@ -11,7 +11,13 @@ type UploadedFile = {
   created_at: string;
 };
 
-export default function AWBContent({ bill_id }: { bill_id: string }) {
+export default function AWBContent({
+  bill_id,
+  fetchBillData,
+}: {
+  bill_id: string | undefined;
+  fetchBillData?: () => void;
+}) {
   if (!bill_id) {
     console.warn("bill_id is not provided");
   }
@@ -21,8 +27,16 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(""); // State để lưu từ khóa tìm kiếm
 
-  const [dataInformation, setDataInformation] = useState<any>(null);
+  type DataInformation = {
+    awb: string;
+    bill_employee: string;
+  };
   const [authorities, setAuthorities] = useState<any>([]);
+
+  const [dataInformation, setDataInformation] = useState<DataInformation>({
+    awb: "",
+    bill_employee: "",
+  });
 
   useEffect(() => {
     const fetchUploadedFiles = async () => {
@@ -43,11 +57,9 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
         setUploadedFiles(response.data.data.files);
 
         setDataInformation({
-
           awb: response.data.data.awb,
-          bill_employee: response.data.data.billEmployee
-
-        })
+          bill_employee: response.data.data.billEmployee,
+        });
       } catch (error) {
         console.error("Error fetching uploaded files:", error);
       }
@@ -116,7 +128,6 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-
   const [showForm, setShowForm] = useState(false);
 
   const handleSubmit = async () => {
@@ -130,17 +141,21 @@ export default function AWBContent({ bill_id }: { bill_id: string }) {
         render: "Cập nhật thành công!",
         type: "success",
         isLoading: false,
-        autoClose: 3000
+        autoClose: 3000,
       });
-
     } catch (error) {
       toast.update(toastId, {
-        render: `Lỗi: ${error.message}`,
+        render: `Lỗi: ${
+          error instanceof Error
+            ? error.message
+            : "Đã xảy ra lỗi không xác định"
+        }`,
         type: "error",
         isLoading: false,
-        autoClose: 5000
+        autoClose: 5000,
       });
     }
+    fetchBillData?.();
   };
 
   return (

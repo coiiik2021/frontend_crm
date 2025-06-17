@@ -740,14 +740,26 @@ export default function ContentTable({ data }) {
 
     // Cập nhật mapping cột với các cột mới và nhóm chủ đề
     const columnMapping = {
-      house_bill: { header: "HOUSE BILL", width: 15, group: "THÔNG TIN CƠ BẢN" },
+      house_bill: {
+        header: "HOUSE BILL",
+        width: 15,
+        group: "THÔNG TIN CƠ BẢN",
+      },
       Date: { header: "NGÀY TẠO", width: 20, group: "THÔNG TIN CƠ BẢN" },
       customer: { header: "CUSTOMER", width: 30, group: "THÔNG TIN CƠ BẢN" },
       country_name: { header: "COUNTRY", width: 30, group: "THÔNG TIN CƠ BẢN" },
-      master_tracking: { header: "MASTERTRACKING", width: 22, group: "THÔNG TIN CƠ BẢN" },
+      master_tracking: {
+        header: "MASTERTRACKING",
+        width: 22,
+        group: "THÔNG TIN CƠ BẢN",
+      },
       gw: { header: "GW", width: 20, group: "THÔNG TIN CƠ BẢN" },
       cw: { header: "CW", width: 20, group: "THÔNG TIN CƠ BẢN" },
-      company_service: { header: "DỊCH VỤ", width: 15, group: "THÔNG TIN CƠ BẢN" },
+      company_service: {
+        header: "DỊCH VỤ",
+        width: 15,
+        group: "THÔNG TIN CƠ BẢN",
+      },
       inwh_date: { header: "In-WH DATE", width: 20, group: "THÔNG TIN CƠ BẢN" },
 
       // PRICE
@@ -759,7 +771,11 @@ export default function ContentTable({ data }) {
       afr_debit: { header: "AFR", width: 10, group: "DEBIT" },
       oversize_debit: { header: "OVERSIZE", width: 12, group: "DEBIT" },
       surge_fee_debit: { header: "SURGE FEE", width: 12, group: "DEBIT" },
-      other_charges_debit: { header: "OTHER CHARGES", width: 20, group: "DEBIT" },
+      other_charges_debit: {
+        header: "OTHER CHARGES",
+        width: 20,
+        group: "DEBIT",
+      },
       fsc_debit: { header: "FSC", width: 10, group: "DEBIT" },
       gw_debit: { header: "GW", width: 10, group: "DEBIT" },
       cw_debit: { header: "CW", width: 10, group: "DEBIT" },
@@ -773,14 +789,26 @@ export default function ContentTable({ data }) {
 
       // GRAND TOTAL
       order_grand_total: { header: "ORDER", width: 15, group: "GRAND TOTAL" },
-      other_charges_total: { header: "OTHER CHARGES", width: 20, group: "GRAND TOTAL" },
+      other_charges_total: {
+        header: "OTHER CHARGES",
+        width: 20,
+        group: "GRAND TOTAL",
+      },
       grand_total: { header: "GRAND TOTAL", width: 18, group: "GRAND TOTAL" },
 
       // PAYMENT
       payments_cash: { header: "Tiền mặt", width: 15, group: "PAYMENT" },
       payments_banking: { header: "Chuyển khoản", width: 15, group: "PAYMENT" },
-      payments_business: { header: "Doanh nghiệp", width: 15, group: "PAYMENT" },
-      payments_remaining: { header: "Số tiền còn lại", width: 18, group: "PAYMENT" },
+      payments_business: {
+        header: "Doanh nghiệp",
+        width: 15,
+        group: "PAYMENT",
+      },
+      payments_remaining: {
+        header: "Số tiền còn lại",
+        width: 18,
+        group: "PAYMENT",
+      },
 
       // PROFIT
       price_diff: { header: "CHÊNH LỆCH GIÁ", width: 20, group: "PROFIT" },
@@ -796,7 +824,11 @@ export default function ContentTable({ data }) {
       hh4: { header: "HH 4", width: 10, group: "HH" },
 
       // LƯƠNG THƯỞNG
-      base_salary: { header: "LƯƠNG CĂN BẢN", width: 22, group: "LƯƠNG THƯỞNG" },
+      base_salary: {
+        header: "LƯƠNG CĂN BẢN",
+        width: 22,
+        group: "LƯƠNG THƯỞNG",
+      },
       kpi_bonus: { header: "THƯỞNG KPI", width: 18, group: "LƯƠNG THƯỞNG" },
       bonus_1_2_3: { header: "THƯỞNG 1/2/3", width: 18, group: "LƯƠNG THƯỞNG" },
       allowance: { header: "PHỤ CẤP", width: 12, group: "LƯƠNG THƯỞNG" },
@@ -903,14 +935,16 @@ export default function ContentTable({ data }) {
       if (typeof value !== "string") return value;
       // Tách các dòng và xử lý từng dòng
       const lines = value.split("\n");
-      return lines.map(line => {
-        // Tìm số trong dòng
-        const matches = line.match(/-?\d+(\.\d+)?/g);
-        if (!matches) return line;
-        // Tính tổng các số trong dòng
-        const sum = matches.reduce((acc, num) => acc + parseFloat(num), 0);
-        return sum;
-      }).join("\n");
+      return lines
+        .map((line) => {
+          // Tìm số trong dòng
+          const matches = line.match(/-?\d+(\.\d+)?/g);
+          if (!matches) return line;
+          // Tính tổng các số trong dòng
+          const sum = matches.reduce((acc, num) => acc + parseFloat(num), 0);
+          return sum;
+        })
+        .join("\n");
     }
 
     // Thêm dữ liệu
@@ -926,7 +960,9 @@ export default function ContentTable({ data }) {
             rowData[key] = item.date_create;
             break;
           case "customer":
-            rowData[key] = `Người gửi: ${item.information_human.from}\nNgười nhận: ${item.information_human.to}`;
+            rowData[
+              key
+            ] = `Người gửi: ${item.information_human.from}\nNgười nhận: ${item.information_human.to}`;
             break;
           case "country_name":
             rowData[key] = item?.country_name || "";
@@ -935,10 +971,14 @@ export default function ContentTable({ data }) {
             rowData[key] = item?.awb || "";
             break;
           case "gw":
-            rowData[key] = `SL: ${item?.packageInfo_begin?.quantity}\nCân nặng: ${item?.packageInfo_begin?.total_weight} KG`;
+            rowData[
+              key
+            ] = `SL: ${item?.packageInfo_begin?.quantity}\nCân nặng: ${item?.packageInfo_begin?.total_weight} KG`;
             break;
           case "cw":
-            rowData[key] = `SL: ${item?.packageInfo_end?.quantity}\nCân nặng: ${item?.packageInfo_end?.total_weight} KG`;
+            rowData[
+              key
+            ] = `SL: ${item?.packageInfo_end?.quantity}\nCân nặng: ${item?.packageInfo_end?.total_weight} KG`;
             break;
           case "company_service":
             rowData[key] = item.company_service;
@@ -1001,10 +1041,14 @@ export default function ContentTable({ data }) {
             rowData[key] = formatCurrency(item?.grand_total.grand_total);
             break;
           case "payments_cash":
-            rowData[key] = formatCurrency(item.pricePayment?.cashPayment?.price || 0);
+            rowData[key] = formatCurrency(
+              item.pricePayment?.cashPayment?.price || 0
+            );
             break;
           case "payments_cash_status":
-            rowData[key] = item.pricePayment?.cashPayment?.active ? "Đã thanh toán" : "Chưa thanh toán";
+            rowData[key] = item.pricePayment?.cashPayment?.active
+              ? "Đã thanh toán"
+              : "Chưa thanh toán";
             break;
           case "payments_cash_date":
             rowData[key] = item.pricePayment?.cashPayment?.dateUpdate
@@ -1012,10 +1056,14 @@ export default function ContentTable({ data }) {
               : "";
             break;
           case "payments_banking":
-            rowData[key] = formatCurrency(item.pricePayment?.cardPayment?.price || 0);
+            rowData[key] = formatCurrency(
+              item.pricePayment?.cardPayment?.price || 0
+            );
             break;
           case "payments_banking_status":
-            rowData[key] = item.pricePayment?.cardPayment?.active ? "Đã thanh toán" : "Chưa thanh toán";
+            rowData[key] = item.pricePayment?.cardPayment?.active
+              ? "Đã thanh toán"
+              : "Chưa thanh toán";
             break;
           case "payments_banking_date":
             rowData[key] = item.pricePayment?.cardPayment?.dateUpdate
@@ -1023,10 +1071,14 @@ export default function ContentTable({ data }) {
               : "";
             break;
           case "payments_business":
-            rowData[key] = formatCurrency(item.pricePayment?.businessCardPayment?.price || 0);
+            rowData[key] = formatCurrency(
+              item.pricePayment?.businessCardPayment?.price || 0
+            );
             break;
           case "payments_business_status":
-            rowData[key] = item.pricePayment?.businessCardPayment?.active ? "Đã thanh toán" : "Chưa thanh toán";
+            rowData[key] = item.pricePayment?.businessCardPayment?.active
+              ? "Đã thanh toán"
+              : "Chưa thanh toán";
             break;
           case "payments_business_date":
             rowData[key] = item.pricePayment?.businessCardPayment?.dateUpdate
@@ -1034,7 +1086,9 @@ export default function ContentTable({ data }) {
               : "";
             break;
           case "payments_remaining":
-            rowData[key] = formatCurrency(item.pricePayment?.payments_remaining || 0);
+            rowData[key] = formatCurrency(
+              item.pricePayment?.payments_remaining || 0
+            );
             break;
           // ...other cases...
           default:
@@ -1064,9 +1118,7 @@ export default function ContentTable({ data }) {
 
         // Căn giữa cho một số cột
         const colKey = columnsToExport[colNumber - 1];
-        if (
-          ["Date", "status", "company_service"].includes(colKey)
-        ) {
+        if (["Date", "status", "company_service"].includes(colKey)) {
           cell.alignment = { horizontal: "center", vertical: "middle" };
         } else if (
           colKey.includes("payment") ||
@@ -1081,10 +1133,7 @@ export default function ContentTable({ data }) {
         }
 
         // Luôn wrap text nếu có \n
-        if (
-          typeof cell.value === "string" &&
-          cell.value.includes("\n")
-        ) {
+        if (typeof cell.value === "string" && cell.value.includes("\n")) {
           cell.alignment = { ...(cell.alignment || {}), wrapText: true };
         }
       });
@@ -1097,12 +1146,32 @@ export default function ContentTable({ data }) {
 
       // Danh sách các cột cần tính tổng
       const sumColumns = [
-        "gw", "cw", "bill", "total_ar", "vat", "total",
-        "order_grand_total", "other_charges_total", "grand_total",
-        "payments_cash", "payments_banking", "payments_remaining",
-        "price_diff", "packing", "pickup", "other_costs", "profit",
-        "hh1", "hh2", "hh3", "hh4",
-        "base_salary", "kpi_bonus", "bonus_1_2_3", "allowance", "other_bonus"
+        "gw",
+        "cw",
+        "bill",
+        "total_ar",
+        "vat",
+        "total",
+        "order_grand_total",
+        "other_charges_total",
+        "grand_total",
+        "payments_cash",
+        "payments_banking",
+        "payments_remaining",
+        "price_diff",
+        "packing",
+        "pickup",
+        "other_costs",
+        "profit",
+        "hh1",
+        "hh2",
+        "hh3",
+        "hh4",
+        "base_salary",
+        "kpi_bonus",
+        "bonus_1_2_3",
+        "allowance",
+        "other_bonus",
       ];
 
       // Khởi tạo object tổng
@@ -1119,7 +1188,9 @@ export default function ContentTable({ data }) {
           const matches = line.match(/-?\d+(\.\d+)?/g);
           if (!matches) return sum;
           // Cộng tổng các số trong dòng
-          return sum + matches.reduce((lineSum, num) => lineSum + parseFloat(num), 0);
+          return (
+            sum + matches.reduce((lineSum, num) => lineSum + parseFloat(num), 0)
+          );
         }, 0);
       }
 
@@ -1134,31 +1205,47 @@ export default function ContentTable({ data }) {
         // THÀNH TIỀN (bill)
         if (item?.bill) sumResult.bill += Number(item.bill) || 0;
         // TOTAL AR
-        if (item?.total_ar?.total_ar) sumResult.total_ar += Number(item.total_ar.total_ar) || 0;
+        if (item?.total_ar?.total_ar)
+          sumResult.total_ar += Number(item.total_ar.total_ar) || 0;
         // VAT
-        if (item?.total_ar?.vat) sumResult.vat += Number(item.total_ar.vat) || 0;
+        if (item?.total_ar?.vat)
+          sumResult.vat += Number(item.total_ar.vat) || 0;
         // TOTAL
-        if (item?.total_ar?.total) sumResult.total += Number(item.total_ar.total) || 0;
+        if (item?.total_ar?.total)
+          sumResult.total += Number(item.total_ar.total) || 0;
         // ORDER
-        if (item?.grand_total?.order_grand_total) sumResult.order_grand_total += Number(item.grand_total.order_grand_total) || 0;
+        if (item?.grand_total?.order_grand_total)
+          sumResult.order_grand_total +=
+            Number(item.grand_total.order_grand_total) || 0;
         // OTHER CHARGES
-        if (item?.grand_total?.other_charges_total) sumResult.other_charges_total += Number(item.grand_total.other_charges_total) || 0;
+        if (item?.grand_total?.other_charges_total)
+          sumResult.other_charges_total +=
+            Number(item.grand_total.other_charges_total) || 0;
         // GRAND TOTAL
-        if (item?.grand_total?.grand_total) sumResult.grand_total += Number(item.grand_total.grand_total) || 0;
+        if (item?.grand_total?.grand_total)
+          sumResult.grand_total += Number(item.grand_total.grand_total) || 0;
         // TIỀN MẶT
-        if (item?.pricePayment?.payment_cash) sumResult.payments_cash += Number(item.pricePayment.payment_cash) || 0;
+        if (item?.pricePayment?.payment_cash)
+          sumResult.payments_cash +=
+            Number(item.pricePayment.payment_cash) || 0;
         // CHUYỂN KHOẢN
-        if (item?.pricePayment?.payment_card) sumResult.payments_banking += Number(item.pricePayment.payment_card) || 0;
+        if (item?.pricePayment?.payment_card)
+          sumResult.payments_banking +=
+            Number(item.pricePayment.payment_card) || 0;
         // CÒN LẠI
-        if (item?.pricePayment?.payments_remaining) sumResult.payments_remaining += Number(item.pricePayment.payments_remaining) || 0;
+        if (item?.pricePayment?.payments_remaining)
+          sumResult.payments_remaining +=
+            Number(item.pricePayment.payments_remaining) || 0;
         // CHÊNH LỆCH GIÁ
-        if (item?.price_diff) sumResult.price_diff += Number(item.price_diff) || 0;
+        if (item?.price_diff)
+          sumResult.price_diff += Number(item.price_diff) || 0;
         // ĐÓNG GÓI
         if (item?.packing) sumResult.packing += Number(item.packing) || 0;
         // PICK UP
         if (item?.pickup) sumResult.pickup += Number(item.pickup) || 0;
         // CHI PHÍ KHÁC
-        if (item?.other_costs) sumResult.other_costs += Number(item.other_costs) || 0;
+        if (item?.other_costs)
+          sumResult.other_costs += Number(item.other_costs) || 0;
         // LỢI NHUẬN
         if (item?.profit) sumResult.profit += Number(item.profit) || 0;
         // HH 1-4
@@ -1167,15 +1254,20 @@ export default function ContentTable({ data }) {
         if (item?.hh3) sumResult.hh3 += sumMultiLineCell(item.hh3);
         if (item?.hh4) sumResult.hh4 += sumMultiLineCell(item.hh4);
         // LƯƠNG CĂN BẢN
-        if (item?.base_salary) sumResult.base_salary += sumMultiLineCell(item.base_salary);
+        if (item?.base_salary)
+          sumResult.base_salary += sumMultiLineCell(item.base_salary);
         // THƯỞNG KPI
-        if (item?.kpi_bonus) sumResult.kpi_bonus += sumMultiLineCell(item.kpi_bonus);
+        if (item?.kpi_bonus)
+          sumResult.kpi_bonus += sumMultiLineCell(item.kpi_bonus);
         // THƯỞNG 1/2/3
-        if (item?.bonus_1_2_3) sumResult.bonus_1_2_3 += sumMultiLineCell(item.bonus_1_2_3);
+        if (item?.bonus_1_2_3)
+          sumResult.bonus_1_2_3 += sumMultiLineCell(item.bonus_1_2_3);
         // PHỤ CẤP
-        if (item?.allowance) sumResult.allowance += sumMultiLineCell(item.allowance);
+        if (item?.allowance)
+          sumResult.allowance += sumMultiLineCell(item.allowance);
         // THƯỞNG KHÁC
-        if (item?.other_bonus) sumResult.other_bonus += sumMultiLineCell(item.other_bonus);
+        if (item?.other_bonus)
+          sumResult.other_bonus += sumMultiLineCell(item.other_bonus);
       });
 
       // Dòng tiêu đề khu vực tổng cộng
@@ -1219,11 +1311,15 @@ export default function ContentTable({ data }) {
 
     // Save file
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `shipment_report_${new Date().toISOString().split("T")[0]}.xlsx`;
+    a.download = `shipment_report_${
+      new Date().toISOString().split("T")[0]
+    }.xlsx`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -1714,9 +1810,7 @@ export default function ContentTable({ data }) {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path
-                  d="M3.8335 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
+                <path d="M3.8335 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -1952,7 +2046,10 @@ export default function ContentTable({ data }) {
                     </div>
                     {["price_price", "fsc_price", "surge_fee_price"].map(
                       (column) => (
-                        <div key={column} className="flex items-center ml-2 mt-1">
+                        <div
+                          key={column}
+                          className="flex items-center ml-2 mt-1"
+                        >
                           <input
                             type="checkbox"
                             id={`col-${column}`}
@@ -2492,7 +2589,6 @@ export default function ContentTable({ data }) {
                 </div>
               </div>
             )}
-
           </div>
 
           <button
@@ -2734,17 +2830,17 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                openModal();
-                                setBillEdit(item);
-                              }}
-                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                            >
-                              <PencilIcon className="w-5 h-5" />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              openModal();
+                              setBillEdit(item);
+                            }}
+                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            <PencilIcon className="w-5 h-5" />
+                          </button>
+                        )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
@@ -2796,27 +2892,28 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setEditType("CASH"); // Thêm dòng này
-                                handleViewPaymentDetails(item);
-                              }}
-                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                            >
-                              <PencilIcon className="w-5 h-5" />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditType("CASH"); // Thêm dòng này
+                              handleViewPaymentDetails(item);
+                            }}
+                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            <PencilIcon className="w-5 h-5" />
+                          </button>
+                        )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cashPayment.active
-                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                                }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${
+                                item.pricePayment.cashPayment.active
+                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                              }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.cashPayment.price
@@ -2836,27 +2933,28 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setEditType("CARD"); // Thêm dòng này
-                                handleViewPaymentDetails(item);
-                              }}
-                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                            >
-                              <PencilIcon className="w-5 h-5" />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditType("CARD"); // Thêm dòng này
+                              handleViewPaymentDetails(item);
+                            }}
+                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            <PencilIcon className="w-5 h-5" />
+                          </button>
+                        )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cardPayment.active
-                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                                }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${
+                                item.pricePayment.cardPayment.active
+                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                              }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.cardPayment.price
@@ -2875,27 +2973,28 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("CS") ||
                           authorities.includes("TRANSPORTER")) && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setEditType("BUSINESS_CARD"); // Thêm dòng này
-                                handleViewPaymentDetails(item);
-                              }}
-                              className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                            >
-                              <PencilIcon className="w-5 h-5" />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditType("BUSINESS_CARD"); // Thêm dòng này
+                              handleViewPaymentDetails(item);
+                            }}
+                            className="absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            <PencilIcon className="w-5 h-5" />
+                          </button>
+                        )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
                           {/* Giá trị xanh */}
                           <div className="flex items-center space-x-2">
                             <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.businessCardPayment.active
-                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                                }`}
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${
+                                item.pricePayment.businessCardPayment.active
+                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                              }`}
                             >
                               {formatCurrency(
                                 item.pricePayment.businessCardPayment.price
@@ -3011,8 +3110,8 @@ export default function ContentTable({ data }) {
                         <StatusBadge status={item.status_payment} />
 
                         {authorities.includes("ADMIN") ||
-                          authorities.includes("CS") ||
-                          authorities.includes("TRANSPORTER") ? (
+                        authorities.includes("CS") ||
+                        authorities.includes("TRANSPORTER") ? (
                           <select
                             value={item.status_payment || "pending"}
                             onChange={(e) =>
@@ -3099,8 +3198,9 @@ export default function ContentTable({ data }) {
                     type="button"
                     onClick={() => {
                       const currentDate = new Date();
-                      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
-                        }/${currentDate.getFullYear()}`;
+                      const formattedDate = `${currentDate.getDate()}/${
+                        currentDate.getMonth() + 1
+                      }/${currentDate.getFullYear()}`;
                       const newPriceOrder = {
                         id: "",
                         name: "",
@@ -3334,7 +3434,7 @@ export default function ContentTable({ data }) {
                           type="number"
                           value={
                             cashPayment.price === 0 &&
-                              document.activeElement ===
+                            document.activeElement ===
                               document.getElementById("cash-input")
                               ? ""
                               : cashPayment.price
@@ -3428,7 +3528,7 @@ export default function ContentTable({ data }) {
                           type="number"
                           value={
                             bankingPayment.price === 0 &&
-                              document.activeElement ===
+                            document.activeElement ===
                               document.getElementById("banking-input")
                               ? ""
                               : bankingPayment.price
@@ -3522,7 +3622,7 @@ export default function ContentTable({ data }) {
                           type="number"
                           value={
                             businessBankingPayment.price === 0 &&
-                              document.activeElement ===
+                            document.activeElement ===
                               document.getElementById("business-input")
                               ? ""
                               : businessBankingPayment.price
@@ -3556,8 +3656,8 @@ export default function ContentTable({ data }) {
                           value={
                             businessBankingPayment.dateUpdate
                               ? formatDateTime(
-                                businessBankingPayment.dateUpdate
-                              )
+                                  businessBankingPayment.dateUpdate
+                                )
                               : "Chưa có ngày tạo"
                           }
                           readOnly
