@@ -12,7 +12,8 @@ import Label from "../../form/Label";
 import Input from "../../form/input/InputField";
 import OverSizeTable from "../../TableDataPrice/OverSizeTable.jsx";
 import PeakSeason from "../../TableDataPrice/PeakSeason";
-
+import { useLoading } from "../../../../hooks/useLoading";
+import { Spin } from "antd";
 
 export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }) {
     // Existing states
@@ -28,6 +29,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
     const [serviceCompany, setServiceCompany] = useState([]);
     const [zone, setZone] = useState([]);
     const [constNet, setConstNet] = useState({});
+    const { loading, withLoading } = useLoading();
 
     // New states for edit functionality
     const [isEditMode, setIsEditMode] = useState(false);
@@ -42,150 +44,160 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
 
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                console.log("Đang lấy dữ liệu với isPriceNetPackage:", isPriceNetPackage);
-                const dataGasOline = await GetPriceAllGasoline(nameHang);
-                setPriceGasoline(dataGasOline);
+            await withLoading(
+                async () => {
+                    console.log("Đang lấy dữ liệu với isPriceNetPackage:", isPriceNetPackage);
+                    const dataGasOline = await GetPriceAllGasoline(nameHang);
+                    setPriceGasoline(dataGasOline);
 
-                const dataServiceCompany = await GetNameService(nameHang);
-                if (dataServiceCompany && Array.isArray(dataServiceCompany.nameService) && dataServiceCompany.nameService.length > 0) {
-                    setServiceCompany(dataServiceCompany.nameService);
+                    const dataServiceCompany = await GetNameService(nameHang);
+                    if (dataServiceCompany && Array.isArray(dataServiceCompany.nameService) && dataServiceCompany.nameService.length > 0) {
+                        setServiceCompany(dataServiceCompany.nameService);
 
-                    const firstService = dataServiceCompany.nameService[0];
-                    setTableType(firstService);
-                    // Đảm bảo truyền isPriceNetPackage vào đây
-                    const dataNet = await GetPriceNet(nameHang, firstService, isPriceNetPackage);
-                    if (dataNet) {
-                        setDataByDate(dataNet);
+                        const firstService = dataServiceCompany.nameService[0];
+                        setTableType(firstService);
+                        // Đảm bảo truyền isPriceNetPackage vào đây
+                        const dataNet = await GetPriceNet(nameHang, firstService, isPriceNetPackage);
+                        if (dataNet) {
+                            setDataByDate(dataNet);
 
-                        const firstDate = Object.keys(dataNet)[0];
-                        setSelectedDate(firstDate);
+                            const firstDate = Object.keys(dataNet)[0];
+                            setSelectedDate(firstDate);
+                        }
+
+                        const dataConstNet = await GetConstNet(nameHang + firstService);
+                        setConstNet(dataConstNet);
+                    } else {
+                        console.warn("Không tìm thấy dịch vụ nào trong GetNameService");
+                        setServiceCompany([]);
                     }
-
-                    const dataConstNet = await GetConstNet(nameHang + firstService);
-                    setConstNet(dataConstNet);
-                } else {
-                    console.warn("Không tìm thấy dịch vụ nào trong GetNameService");
-                    setServiceCompany([]);
-                }
-            } catch (error) {
-                console.error("Lỗi khi lấy dữ liệu:", error);
-            }
+                },
+                "Tải dữ liệu thành công",
+                "Lỗi khi tải dữ liệu"
+            );
         };
 
         fetchData();
-    }, [isPriceNetPackage]); // Đảm bảo isPriceNetPackage nằm trong mảng dependencies
+    }, [isPriceNetPackage]);
 
     const handleCreateService = async () => {
-        const dataRequest = {
-            name: nameHang,
-            nameService: newNameService,
-            currency: newCurrency,
-            shipperCompany: {
-                companyName: newShipper.companyName,
-                address: newShipper.address,
-                areaCode: newShipper.areaCode,
-                country: newShipper.country,
-                contactName: newShipper.contactName,
-                phone: newShipper.phone,
-                tax: newShipper.tax
-            }
-        };
+        await withLoading(
+            async () => {
+                const dataRequest = {
+                    name: nameHang,
+                    nameService: newNameService,
+                    currency: newCurrency,
+                    shipperCompany: {
+                        companyName: newShipper.companyName,
+                        address: newShipper.address,
+                        areaCode: newShipper.areaCode,
+                        country: newShipper.country,
+                        contactName: newShipper.contactName,
+                        phone: newShipper.phone,
+                        tax: newShipper.tax
+                    }
+                };
 
-        const newService = await PostNameService(dataRequest);
+                const newService = await PostNameService(dataRequest);
 
-        setServiceCompany((prev) => {
-            if (!Array.isArray(prev)) {
-                console.error("serviceCompany is not an array:", prev);
-                return [newNameService];
-            }
-            return [newNameService, ...prev];
-        });
-        setTableType(newNameService);
+                setServiceCompany((prev) => {
+                    if (!Array.isArray(prev)) {
+                        console.error("serviceCompany is not an array:", prev);
+                        return [newNameService];
+                    }
+                    return [newNameService, ...prev];
+                });
+                setTableType(newNameService);
 
-        setConstNet({
-            dim: 5000,
-            ppxd: 100,
-            vat: 8,
-            overSize: 100,
-            peakSeason: 100
-        });
-        setDataByDate({});
+                setConstNet({
+                    dim: 5000,
+                    ppxd: 100,
+                    vat: 8,
+                    overSize: 100,
+                    peakSeason: 100
+                });
+                setDataByDate({});
 
-        // Reset form
-        setNewNameService("");
-        setNewShipper({});
-        closeAddModal();
+                // Reset form
+                setNewNameService("");
+                setNewShipper({});
+                closeAddModal();
+            },
+            "Thêm dịch vụ thành công",
+            "Lỗi khi thêm dịch vụ"
+        );
     };
 
     const handleEditService = async () => {
+        await withLoading(
+            async () => {
+                const dataRequest = {
+                    name: nameHang,
+                    nameService: tableType,
+                    newNameService: editNameService,
+                    shipperCompany: {
+                        companyName: editShipper.companyName,
+                        address: editShipper.address,
+                        areaCode: editShipper.areaCode,
+                        country: editShipper.country,
+                        contactName: editShipper.contactName,
+                        phone: editShipper.phone,
+                        tax: editShipper.tax
+                    }
+                };
 
-        const dataRequest = {
-            name: nameHang,
-            nameService: tableType,
-            newNameService: editNameService,
-            shipperCompany: {
-                companyName: editShipper.companyName,
-                address: editShipper.address,
-                areaCode: editShipper.areaCode,
-                country: editShipper.country,
-                contactName: editShipper.contactName,
-                phone: editShipper.phone,
-                tax: editShipper.tax
-            }
-        };
+                await PutService(dataRequest);
 
-        await PutService(dataRequest);
+                // Update service list
+                setServiceCompany((prev) => {
+                    return prev.map(service => service === tableType ? editNameService : service);
+                });
 
-        // Update service list
-        setServiceCompany((prev) => {
-            return prev.map(service => service === tableType ? editNameService : service);
-        });
-
-        setTableType(editNameService);
-        closeEditModal();
+                setTableType(editNameService);
+                closeEditModal();
+            },
+            "Cập nhật dịch vụ thành công",
+            "Lỗi khi cập nhật dịch vụ"
+        );
     };
 
     const handleEditButtonClick = async () => {
+        await withLoading(
+            async () => {
+                console.log(nameHang + " " + tableType);
+                setEditNameService(tableType);
 
-        console.log(nameHang + " " + tableType);
-        try {
-            setEditNameService(tableType);
+                const dataShipper = await GetShipperServiceCompany(nameHang, tableType);
+                setEditShipper(dataShipper);
+                openEditModal();
 
-            const dataShipper = await GetShipperServiceCompany(nameHang, tableType);
-
-            setEditShipper(dataShipper);
-
-            openEditModal();
-
-            // Sau đó lấy dữ liệu chi tiết (không chờ đợi)
-            GetNameService(nameHang, tableType)
-                .then(serviceDetails => {
-                    console.log("Service details:", serviceDetails);
-                    if (serviceDetails && serviceDetails.shipperCompany) {
-                        setEditShipper(serviceDetails.shipperCompany);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error fetching service details:", error);
-                });
-        } catch (error) {
-            console.error("Error in edit button click:", error);
-        }
+                // Sau đó lấy dữ liệu chi tiết
+                const serviceDetails = await GetNameService(nameHang, tableType);
+                if (serviceDetails && serviceDetails.shipperCompany) {
+                    setEditShipper(serviceDetails.shipperCompany);
+                }
+            },
+            "Tải thông tin dịch vụ thành công",
+            "Lỗi khi tải thông tin dịch vụ"
+        );
     };
 
     const handleTableTypeChange = async (type) => {
-        setTableType(type);
+        await withLoading(
+            async () => {
+                setTableType(type);
+                const data = await GetPriceNet(nameHang, type, isPriceNetPackage);
+                console.log("Dữ liệu từ API:", data);
+                setDataByDate(data);
+                const firstDate = Object.keys(data)[0];
+                setSelectedDate(firstDate);
 
-        // Thêm isPriceNetPackage vào cuộc gọi API
-        const data = await GetPriceNet(nameHang, type, isPriceNetPackage);
-        console.log("Dữ liệu từ API:", data);
-        setDataByDate(data);
-        const firstDate = Object.keys(data)[0];
-        setSelectedDate(firstDate);
-
-        const dataConstNet = await GetConstNet(nameHang + type);
-        setConstNet(dataConstNet);
+                const dataConstNet = await GetConstNet(nameHang + type);
+                setConstNet(dataConstNet);
+            },
+            "Chuyển đổi dịch vụ thành công",
+            "Lỗi khi chuyển đổi dịch vụ"
+        );
     };
 
     const handleFileUpload = (event) => {
@@ -233,10 +245,23 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
     };
 
     const handleSaveData = async () => {
-        await PostPriceNet(nameHang, tableType, dataByDate, isPriceNetPackage);
-        alert("Thông tin đã được lưu thành công!");
-        setIsImported(false);
+        await withLoading(
+            async () => {
+                await PostPriceNet(nameHang, tableType, dataByDate, isPriceNetPackage);
+                setIsImported(false);
+            },
+            "Lưu thông tin thành công",
+            "Lỗi khi lưu thông tin"
+        );
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Spin size="large" />
+            </div>
+        );
+    }
 
     return (
         <div className="overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl shadow-lg">
@@ -584,10 +609,6 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                                     placeholder="Nhập tên dịch vụ"
                                 />
                             </div>
-
-
-
-
 
                             {/* Thông tin công ty */}
                             <div>

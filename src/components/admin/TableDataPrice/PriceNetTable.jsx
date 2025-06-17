@@ -7,10 +7,13 @@ import {
   TableRow,
 } from "../ui/table";
 import { PutConstNet } from "../../../service/api.admin.service.jsx";
+import { useLoading } from "../../../hooks/useLoading";
+import { Spin } from "antd";
 
 const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet, isPriceNetPackage, setIsPriceNetPackage }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValues, setEditValues] = useState(constNet);
+  const { loading, withLoading } = useLoading();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -21,11 +24,15 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet, isPric
   };
 
   const handleSave = async () => {
-    setConstNet(editValues);
-    console.log("editValues", editValues);
-
-    await PutConstNet(editValues);
-    setIsEditing(false);
+    await withLoading(
+      async () => {
+        setConstNet(editValues);
+        await PutConstNet(editValues);
+        setIsEditing(false);
+      },
+      "Cập nhật dữ liệu thành công",
+      "Cập nhật dữ liệu thất bại"
+    );
   };
 
   const handleCancel = () => {
@@ -37,6 +44,14 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet, isPric
     setEditValues({ ...constNet });
     setIsEditing(true);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -74,7 +89,7 @@ const PriceNetTable = ({ selectedDate, dataByDate, constNet, setConstNet, isPric
                 Hủy
               </button>
               <button
-                onClick={async () => handleSave()}
+                onClick={handleSave}
                 className="px-3 py-1 text-sm bg-blue-500 text-white rounded"
               >
                 Lưu

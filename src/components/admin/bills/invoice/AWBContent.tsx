@@ -1,6 +1,8 @@
 import { PutInformationAwb } from "../../../../service/api.admin.service";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router";
 import { toast, ToastContainer } from "react-toastify";
 
 type UploadedFile = {
@@ -29,6 +31,7 @@ export default function AWBContent({
     awb: string;
     bill_employee: string;
   };
+  const [authorities, setAuthorities] = useState<any>([]);
 
   const [dataInformation, setDataInformation] = useState<DataInformation>({
     awb: "",
@@ -38,9 +41,18 @@ export default function AWBContent({
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/api/bill/information-awb/${bill_id}`
-        );
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          return <Navigate to="/signin" replace />;
+        }
+
+        const decoded: any = jwtDecode(token);
+        const userRoles: string[] = decoded.authorities || [];
+
+        setAuthorities(userRoles);
+        const response = await axios.get(`http://localhost:8080/api/bill/information-awb/${bill_id}`);
+
 
         setUploadedFiles(response.data.data.files);
 
@@ -152,88 +164,77 @@ export default function AWBContent({
         toastClassName="bg-white dark:bg-gray-800 text-gray-800 dark:text-white shadow-lg top-12"
         progressClassName="bg-blue-500"
       />
-      <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-        {/* Nút toggle ẩn/hiện form */}
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="mb-4 w-full flex justify-between items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
-        >
-          <span>{showForm ? "Ẩn form" : "Hiện form"}</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-5 w-5 transform transition-transform duration-200 ${
-              showForm ? "rotate-180" : ""
-            }`}
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-
-        {/* Form sẽ ẩn/hiện */}
-        {showForm && (
-          <div className="space-y-4">
-            {/* AWB Field */}
-            <div className="space-y-1">
-              <label
-                htmlFor="awb"
-                className="block text-sm font-medium text-gray-700"
-              >
-                AWB
-              </label>
-              <input
-                type="text"
-                id="awb"
-                value={dataInformation.awb}
-                onChange={(e) =>
-                  setDataInformation({
-                    ...dataInformation,
-                    awb: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
-                placeholder="Enter AWB number"
-              />
-            </div>
-
-            {/* Bill Employee Field */}
-            <div className="space-y-1">
-              <label
-                htmlFor="bill_employee"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Bill Employee
-              </label>
-              <input
-                type="text"
-                id="bill_employee"
-                value={dataInformation.bill_employee}
-                onChange={(e) =>
-                  setDataInformation({
-                    ...dataInformation,
-                    bill_employee: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
-                placeholder="Enter employee name"
-              />
-            </div>
-
-            {/* Submit Button */}
+      {
+        ["CS", "ADMIN"].some(role => authorities.includes(role)) &&
+        (
+          <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+            {/* Nút toggle ẩn/hiện form */}
             <button
-              onClick={handleSubmit}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+              onClick={() => setShowForm(!showForm)}
+              className="mb-4 w-full flex justify-between items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
             >
-              Submit
+              <span>{showForm ? 'Ẩn form' : 'Hiện form'}</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`h-5 w-5 transform transition-transform duration-200 ${showForm ? 'rotate-180' : ''}`}
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
             </button>
+
+            {/* Form sẽ ẩn/hiện */}
+            {showForm && (
+              <div className="space-y-4">
+                {/* AWB Field */}
+                <div className="space-y-1">
+                  <label
+                    htmlFor="awb"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    AWB
+                  </label>
+                  <input
+                    type="text"
+                    id="awb"
+                    value={dataInformation.awb}
+                    onChange={(e) => setDataInformation({ ...dataInformation, awb: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                    placeholder="awb"
+                  />
+                </div>
+
+                {/* Bill Employee Field */}
+                <div className="space-y-1">
+                  <label
+                    htmlFor="bill_employee"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Bill phụ
+                  </label>
+                  <input
+                    type="text"
+                    id="bill_employee"
+                    value={dataInformation.bill_employee}
+                    onChange={(e) => setDataInformation({ ...dataInformation, bill_employee: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                    placeholder="bill phụ"
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  onClick={handleSubmit}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+                >
+                  Submit
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        )
+      }
       <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
         <div className="relative w-full mb-5">
           <form>

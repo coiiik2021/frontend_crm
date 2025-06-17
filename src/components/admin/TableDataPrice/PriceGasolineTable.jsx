@@ -6,6 +6,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Modal } from "../ui/modal";
 import { CalenderIcon } from "../../../icons";
 import Notification from "../ui/notification/Notfication";
+import { useLoading } from "../../../hooks/useLoading";
+import { Spin } from "antd";
 
 const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
     const [editingIndex, setEditingIndex] = useState(null);
@@ -13,6 +15,7 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
     const [isCreating, setIsCreating] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [rowToDeleteIndex, setRowToDeleteIndex] = useState(null);
+    const { loading, withLoading } = useLoading();
 
     // Thêm state cho thông báo
     const [notification, setNotification] = useState({
@@ -102,61 +105,60 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
     };
 
     const handleSave = async () => {
-        try {
-            // Kiểm tra dữ liệu đầu vào
-            if (!editedRow.date) {
-                showNotification("error", "Vui lòng chọn ngày hiệu lực");
-                return;
-            }
+        await withLoading(
+            async () => {
+                // Kiểm tra dữ liệu đầu vào
+                if (!editedRow.date) {
+                    throw new Error("Vui lòng chọn ngày hiệu lực");
+                }
 
-            if (!editedRow.price || isNaN(editedRow.price) || editedRow.price <= 0) {
-                showNotification("error", "Vui lòng nhập giá trị phụ phí hợp lệ");
-                return;
-            }
+                if (!editedRow.price || isNaN(editedRow.price) || editedRow.price <= 0) {
+                    throw new Error("Vui lòng nhập giá trị phụ phí hợp lệ");
+                }
 
-            const updatedData = [...priceGasoline];
-            updatedData[editingIndex] = { ...editedRow };
+                const updatedData = [...priceGasoline];
+                updatedData[editingIndex] = { ...editedRow };
 
-            const data = {
-                id: editedRow.id || null,
-                name: name,
-                date: formatDateForBackend(editedRow.date), // Chuyển đổi sang định dạng yyyy-MM-dd
-                price: editedRow.price,
-            };
+                const data = {
+                    id: editedRow.id || null,
+                    name: name,
+                    date: formatDateForBackend(editedRow.date),
+                    price: editedRow.price,
+                };
 
-            let response;
-            if (isCreating) {
-                console.log("Creating new data:", data);
-                response = await PostPriceGasoline(data);
-                if (response) {
-                    showNotification("success", "Thêm dữ liệu thành công");
-                    // Cập nhật ID từ response nếu có
-                    if (response.id) {
-                        updatedData[editingIndex].id = response.id;
+                let response;
+                if (isCreating) {
+                    console.log("Creating new data:", data);
+                    response = await PostPriceGasoline(data);
+                    if (response) {
+                        showNotification("success", "Thêm dữ liệu thành công");
+                        // Cập nhật ID từ response nếu có
+                        if (response.id) {
+                            updatedData[editingIndex].id = response.id;
+                        }
+                    } else {
+                        showNotification("error", "Thêm dữ liệu thất bại");
+                        return;
                     }
                 } else {
-                    showNotification("error", "Thêm dữ liệu thất bại");
-                    return;
+                    console.log("Updating existing data:", data);
+                    response = await PutPriceGasoline(data);
+                    if (response) {
+                        showNotification("success", "Cập nhật dữ liệu thành công");
+                    } else {
+                        showNotification("error", "Cập nhật dữ liệu thất bại");
+                        return;
+                    }
                 }
-            } else {
-                console.log("Updating existing data:", data);
-                response = await PutPriceGasoline(data);
-                if (response) {
-                    showNotification("success", "Cập nhật dữ liệu thành công");
-                } else {
-                    showNotification("error", "Cập nhật dữ liệu thất bại");
-                    return;
-                }
-            }
 
-            // Cập nhật state chỉ khi API thành công
-            setPriceGasoline(updatedData);
-            setEditingIndex(null);
-            setIsCreating(false);
-        } catch (error) {
-            console.error("Error saving data:", error);
-            showNotification("error", `Lỗi: ${error.message || "Không thể lưu dữ liệu"}`);
-        }
+                // Cập nhật state chỉ khi API thành công
+                setPriceGasoline(updatedData);
+                setEditingIndex(null);
+                setIsCreating(false);
+            },
+            isCreating ? "Thêm dữ liệu thành công" : "Cập nhật dữ liệu thành công",
+            isCreating ? "Thêm dữ liệu thất bại" : "Cập nhật dữ liệu thất bại"
+        );
     };
 
     const handleInputChange = (field, value) => {
@@ -184,19 +186,20 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
     const confirmDelete = async () => {
         if (rowToDeleteIndex === null) return;
 
-        try {
-            const response = await DeletePriceGasonline(priceGasoline[rowToDeleteIndex].id);
-            if (response) {
-                const updatedData = priceGasoline.filter((_, rowIndex) => rowIndex !== rowToDeleteIndex);
-                setPriceGasoline(updatedData);
-                showNotification("success", "Xóa dữ liệu thành công");
-            } else {
-                showNotification("error", "Xóa dữ liệu thất bại");
-            }
-        } catch (error) {
-            console.error("Error deleting data:", error);
-            showNotification("error", `Lỗi: ${error.message || "Không thể xóa dữ liệu"}`);
-        }
+        await withLoading(
+            async () => {
+                const response = await DeletePriceGasonline(priceGasoline[rowToDeleteIndex].id);
+                if (response) {
+                    const updatedData = priceGasoline.filter((_, rowIndex) => rowIndex !== rowToDeleteIndex);
+                    setPriceGasoline(updatedData);
+                    showNotification("success", "Xóa dữ liệu thành công");
+                } else {
+                    showNotification("error", "Xóa dữ liệu thất bại");
+                }
+            },
+            "Xóa dữ liệu thành công",
+            "Xóa dữ liệu thất bại"
+        );
 
         setDeleteConfirmOpen(false);
         setRowToDeleteIndex(null);
@@ -206,6 +209,10 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
         setDeleteConfirmOpen(false);
         setRowToDeleteIndex(null);
     };
+
+    if (loading) {
+        return <Spin size="large" />;
+    }
 
     return (
         <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md relative">
@@ -328,25 +335,34 @@ const PriceGasolineTable = ({ priceGasoline, setPriceGasoline, name }) => {
                                             className="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600"
                                         >
                                             {editingIndex === rowIndex ? (
-                                                <button
-                                                    onClick={handleSave}
-                                                    className={`px-3 py-1.5 text-sm text-white ${isCreating ? "bg-blue-500 hover:bg-blue-600" : "bg-green-500 hover:bg-green-600"
-                                                        } rounded-md focus:outline-none focus:ring-2 ${isCreating ? "focus:ring-blue-400" : "focus:ring-green-400"
-                                                        }`}
-                                                >
-                                                    {isCreating ? "Tạo mới" : "Lưu"}
-                                                </button>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={handleSave}
+                                                        className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+                                                    >
+                                                        Lưu
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingIndex(null);
+                                                            setIsCreating(false);
+                                                        }}
+                                                        className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+                                                    >
+                                                        Hủy
+                                                    </button>
+                                                </div>
                                             ) : (
-                                                <div className="flex items-center justify-center space-x-2">
+                                                <div className="flex gap-2">
                                                     <button
                                                         onClick={() => handleEdit(rowIndex)}
-                                                        className="px-3 py-1.5 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                                        className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
                                                     >
-                                                        Chỉnh sửa
+                                                        Sửa
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteClick(rowIndex)}
-                                                        className="px-3 py-1.5 text-sm text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
                                                     >
                                                         Xóa
                                                     </button>

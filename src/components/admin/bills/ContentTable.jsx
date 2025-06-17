@@ -61,31 +61,28 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
         {/* Tabs */}
         <div className="flex border-b border-gray-200 dark:border-gray-700 mb-3">
           <button
-            className={`px-3 py-2 text-xs font-medium ${
-              activeTab === "info"
-                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-            }`}
+            className={`px-3 py-2 text-xs font-medium ${activeTab === "info"
+              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
             onClick={() => setActiveTab("info")}
           >
             Thông tin người
           </button>
           <button
-            className={`px-3 py-2 text-xs font-medium ${
-              activeTab === "package"
-                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-            }`}
+            className={`px-3 py-2 text-xs font-medium ${activeTab === "package"
+              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
             onClick={() => setActiveTab("package")}
           >
             Thông tin package
           </button>
           <button
-            className={`px-3 py-2 text-xs font-medium ${
-              activeTab === "other"
-                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-            }`}
+            className={`px-3 py-2 text-xs font-medium ${activeTab === "other"
+              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
             onClick={() => setActiveTab("other")}
           >
             Thông tin khác
@@ -704,7 +701,7 @@ export default function ContentTable({ data }) {
   };
 
   const handleUpdateBill = async (bill) => {
-    if (authorities.includes("TRANSPORTER") || authorities.includes("ADMIN")) {
+    if (["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role))) {
       const dataRequest = {
         id: bill.bill_house,
         package_end: bill.packages.map((pkg) => ({
@@ -1133,45 +1130,43 @@ export default function ContentTable({ data }) {
                         });
                       }}
                       disabled={column === "house_bill"} // Disable checkbox nếu là house_bill
-                      className={`w-4 h-4 ${
-                        column === "house_bill"
-                          ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
-                          : "text-blue-600 bg-gray-100"
-                      } border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
+                      className={`w-4 h-4 ${column === "house_bill"
+                        ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
+                        : "text-blue-600 bg-gray-100"
+                        } border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
                     />
                     <label
                       htmlFor={`col-${column}`}
-                      className={`ml-2 text-sm ${
-                        column === "house_bill"
-                          ? "text-gray-800 font-medium dark:text-gray-200"
-                          : "text-gray-600 dark:text-gray-400"
-                      }`}
+                      className={`ml-2 text-sm ${column === "house_bill"
+                        ? "text-gray-800 font-medium dark:text-gray-200"
+                        : "text-gray-600 dark:text-gray-400"
+                        }`}
                     >
                       {column === "house_bill"
                         ? "HOUSE BILL"
                         : column === "information_human"
-                        ? "THÔNG TIN NGƯỜI"
-                        : column === "bill_employee"
-                        ? "BILL PHỤ"
-                        : column === "awb"
-                        ? "AWB"
-                        : column === "company_service"
-                        ? "DỊCH VỤ"
-                        : column === "country_name"
-                        ? "NƯỚC ĐẾN"
-                        : column === "packageInfo_begin"
-                        ? "PACKAGE KHAI BÁO"
-                        : column === "packageInfo_end"
-                        ? "PACKAGE CHỐT"
-                        : column === "packageInfo_finish"
-                        ? "PACKAGE KẾT THÚC"
-                        : column === "status"
-                        ? "TRẠNG THÁI"
-                        : column === "File"
-                        ? "FILE"
-                        : column === "Detail"
-                        ? "CHI TIẾT"
-                        : column}
+                          ? "THÔNG TIN NGƯỜI"
+                          : column === "bill_employee"
+                            ? "BILL PHỤ"
+                            : column === "awb"
+                              ? "AWB"
+                              : column === "company_service"
+                                ? "DỊCH VỤ"
+                                : column === "country_name"
+                                  ? "NƯỚC ĐẾN"
+                                  : column === "packageInfo_begin"
+                                    ? "PACKAGE KHAI BÁO"
+                                    : column === "packageInfo_end"
+                                      ? "PACKAGE CHỐT"
+                                      : column === "packageInfo_finish"
+                                        ? "PACKAGE KẾT THÚC"
+                                        : column === "status"
+                                          ? "TRẠNG THÁI"
+                                          : column === "File"
+                                            ? "FILE"
+                                            : column === "Detail"
+                                              ? "CHI TIẾT"
+                                              : column}
                     </label>
                   </div>
                 ))}
@@ -1318,20 +1313,18 @@ export default function ContentTable({ data }) {
               {currentData.map((item, i) => (
                 <TableRow
                   key={i + 1}
-                  className={`transition-colors ${
-                    highlightedOrderId === item.bill_house
-                      ? "bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400"
-                      : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                  }`}
+                  className={`transition-colors ${highlightedOrderId === item.bill_house
+                    ? "bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    }`}
                 >
                   {/* House Bill - luôn hiển thị */}
                   <TableCell className="px-6 py-4 whitespace-nowrap">
                     <div
-                      className={`font-medium hover:underline cursor-pointer ${
-                        highlightedOrderId === item.bill_house
-                          ? "text-blue-700 font-bold dark:text-blue-300"
-                          : "text-brand-600 dark:text-brand-400"
-                      }`}
+                      className={`font-medium hover:underline cursor-pointer ${highlightedOrderId === item.bill_house
+                        ? "text-blue-700 font-bold dark:text-blue-300"
+                        : "text-brand-600 dark:text-brand-400"
+                        }`}
                       onMouseEnter={(e) => handleShowTooltip(item, e)}
                       onMouseLeave={handleCloseTooltip}
                       onClick={() => handleViewOrderDetail(item)}
@@ -1415,32 +1408,37 @@ export default function ContentTable({ data }) {
                             {item?.packageInfo_end?.total_weight} KG
                           </p>
                         </div>
-                        <button
-                          className="ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                          title="Sửa"
-                          onClick={() => {
-                            setIsFinish(false);
-                            handleOpenEditPackageModal({
-                              ...item,
-                              isFinish: false,
-                            });
-                          }}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 text-blue-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+
+                        {
+                          ["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role)) &&
+                          (<button
+                            className="ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                            title="Sửa"
+                            onClick={() => {
+                              setIsFinish(false);
+                              handleOpenEditPackageModal({
+                                ...item,
+                                isFinish: false,
+                              });
+                            }}
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z"
-                            />
-                          </svg>
-                        </button>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-blue-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z"
+                              />
+                            </svg>
+                          </button>)
+                        }
+
                       </div>
                     </TableCell>
                   )}
@@ -1458,31 +1456,38 @@ export default function ContentTable({ data }) {
                             {item.packageInfo_finish?.total_weight || 0} KG
                           </p>
                         </div>
-                        <button
-                          className="ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                          title="Sửa"
-                          onClick={() => {
-                            handleOpenEditPackageModal({
-                              ...item,
-                              isFinish: true,
-                            });
-                          }}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 text-blue-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z"
-                            />
-                          </svg>
-                        </button>
+                        {
+                          ["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role))
+                          && authorities.includes("GET_ALL_ADMIN")
+                          && (
+                            <button
+                              className="ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                              title="Sửa"
+                              onClick={() => {
+                                handleOpenEditPackageModal({
+                                  ...item,
+                                  isFinish: true,
+                                });
+                              }}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 text-blue-500"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z"
+                                />
+                              </svg>
+                            </button>
+                          )
+                        }
+
                       </div>
                     </TableCell>
                   )}
@@ -1502,15 +1507,13 @@ export default function ContentTable({ data }) {
                           item.files.map((file, index) => (
                             <div
                               key={index}
-                              className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${
-                                highlightedOrderId === item.bill_house
-                                  ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                  : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
-                              }`}
+                              className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
+                                ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                                }`}
                               onClick={() => {
                                 console.log(
-                                  `Clicked file: ${
-                                    file.name || `File ${index + 1}`
+                                  `Clicked file: ${file.name || `File ${index + 1}`
                                   }`,
                                   file
                                 );
@@ -1544,11 +1547,10 @@ export default function ContentTable({ data }) {
                           ))
                         ) : (
                           <div
-                            className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${
-                              highlightedOrderId === item.bill_house
-                                ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
-                            }`}
+                            className={`flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
+                              ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                              : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                              }`}
                             onClick={() => handleViewFile(item)}
                           >
                             <svg
@@ -1611,8 +1613,7 @@ export default function ContentTable({ data }) {
                   {/* Form */}
                   <form className="space-y-6">
                     {/* Package Section */}
-                    {(authorities.includes("TRANSPORTER") ||
-                      authorities.includes("ADMIN")) && (
+                    {["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role)) && (
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div>
