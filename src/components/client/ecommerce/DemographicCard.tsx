@@ -1,11 +1,52 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MoreDotIcon } from "../../../icons";
 import { Dropdown } from "../../admin/ui/dropdown/Dropdown";
 import { DropdownItem } from "../../admin/ui/dropdown/DropdownItem";
-import CountryMap from "../../admin/ecommerce/CountryMap";
+import CountryMap from "../../client/ecommerce/CountryMap";
+import countries from "world-countries";
+import { GetAnalyticsCountry } from "../../../service/api.admin.service";
+
+console.log("Countries Data API:", countries);
+function getLatLngByCountryName(name: string): [number, number] | null {
+  const lowerName = name.toLowerCase();
+
+  // Tìm country có tên chứa hoặc được chứa bởi tên truyền vào
+  const country = countries.find(
+    c =>
+      c.name.common.toLowerCase().includes(lowerName) ||
+      lowerName.includes(c.name.common.toLowerCase())
+  );
+  console.log("Tìm latLng cho:", name, "=>", country ? country.latlng : "Không tìm thấy");
+  return country ? (country.latlng as [number, number]) : null;
+}
+
+interface CountryData {
+  nameCountry: string;
+  totalDebit: number;
+  totalBill: number;
+  percentage: number;
+}
 
 export default function DemographicCard() {
   const [isOpen, setIsOpen] = useState(false);
+  const [countryData, setCountryData] = useState<any[]>([]);
+
+
+  useEffect(() => {
+    GetAnalyticsCountry()
+      .then((data) => {
+        const dataWithLatLng = data.map((item) => ({
+          ...item,
+          latLng: getLatLngByCountryName(item.nameCountry) || [0, 0],
+        }));
+        setCountryData(dataWithLatLng);
+      })
+      .catch(() => setCountryData([]));
+  }, []);
+
+
+
+  console.log("Country Data:", countryData);
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -56,7 +97,7 @@ export default function DemographicCard() {
           id="mapOne"
           className="mapOne map-btn -mx-4 -my-6 h-[212px] w-[252px] 2xsm:w-[307px] xsm:w-[358px] sm:-mx-6 md:w-[668px] lg:w-[634px] xl:w-[393px] 2xl:w-[554px]"
         >
-          <CountryMap />
+          <CountryMap countries={countryData} />
         </div>
       </div>
 
