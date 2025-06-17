@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 import { useSidebar } from "../../context/SidebarContext";
 import { ThemeToggleButton } from "../../components/admin/common/ThemeToggleButton";
 import NotificationDropdown from "../../components/admin/header/NotificationDropdown";
@@ -39,6 +39,19 @@ const AppHeader: React.FC = () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  const PlusIcon = (
+    <svg
+      className="w-5 h-5 mr-2 -ml-1"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+  );
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -156,6 +169,16 @@ const AppHeader: React.FC = () => {
             } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
+            {/* Nút tạo đơn hàng */}
+            <NavLink
+              to="/tao-don-hang"
+              className="flex items-center gap-2 ml-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-semibold shadow hover:from-blue-600 hover:to-purple-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              style={{ textDecoration: "none" }}
+            >
+              {PlusIcon}
+              <span>Tạo đơn</span>
+            </NavLink>
+
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
