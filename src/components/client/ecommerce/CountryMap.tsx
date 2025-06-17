@@ -98,7 +98,7 @@ interface CountryMapProps {
 
 export default function CountryMap({ countries }: CountryMapProps) {
   // Tạo marker động từ dữ liệu truyền vào
-  console.table(countries);
+  console.log("Dữ liệu countries truyền vào:", countries);
   const markers = countries
     .filter(country => country.latLng && country.latLng[0] !== 0)
     .map(country => ({
@@ -111,31 +111,6 @@ export default function CountryMap({ countries }: CountryMapProps) {
       },
     }));
 
-
-
-  // const markers = [
-  //   {
-  //     latLng: [50.83333333, 4],
-  //     name: "Test Marker",
-  //     style: {
-  //       fill: "#465FFF",
-  //       borderWidth: 1,
-  //       borderColor: "white",
-  //     },
-  //   },
-  // ];
-
-
-  markers.push({
-    latLng: [-10, -55],
-    name: "USA Marker Test",
-    style: {
-      fill: "red",
-      borderColor: "white",
-      borderWidth: 1,
-    },
-  });
-  console.table(markers);
 
   return (
     <VectorMap
@@ -186,5 +161,6 @@ export default function CountryMap({ countries }: CountryMapProps) {
       }}
     />
   );
+
 }
 

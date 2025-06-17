@@ -48,6 +48,8 @@ export default function Analytics() {
         <div className="col-span-12 xl:col-span-12">
           <RecentOrderAnalytics />
         </div>
+
+
       </div>
     </>
   );
