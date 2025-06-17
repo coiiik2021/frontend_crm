@@ -220,29 +220,45 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             return updatedPkg;
         });
 
-        // Tính toán tổng mới dựa trên updatedPackages
-        const newTotal = updatedPackages.reduce((acc, pkg) => ({
-            realVolume: acc.realVolume + (pkg.total?.realVolume || 0),
-            totalOverSize: acc.totalOverSize + (quaKhoMap.get(pkg.total?.OverSize)?.price || 0),
-            totalPackage: updatedPackages.length
-        }), {
-            totalOverSize: 0,
-            realVolume: 0,
-            totalPackage: 0
+        // Chỉ kiểm tra length, width, height
+        const pkg = updatedPackages.find(pkg => pkg.id === id);
+        const l = parseFloat(pkg.length) || 0;
+        const w = parseFloat(pkg.width) || 0;
+        const h = parseFloat(pkg.height) || 0;
+
+        const newErrors = { ...errors };
+
+        // Xóa lỗi cũ của 3 trường này và weight
+        ["length", "width", "height", "weight"].forEach(f => {
+            newErrors[`${id}-${f}`] = "";
         });
 
-        // Cập nhật cả packages và total
+        // Kiểm tra số dương cho length, width, height, weight
+        ["length", "width", "height", "weight"].forEach(f => {
+            const val = pkg[f];
+            if (val === "" || isNaN(val) || parseFloat(val) <= 0) {
+                newErrors[`${id}-${f}`] = "Vui lòng nhập số lớn hơn 0";
+            }
+        });
+
+        // Nếu weight hợp lệ thì xóa lỗi weight
+        if (pkg.weight !== "" && !isNaN(pkg.weight) && parseFloat(pkg.weight) > 0) {
+            newErrors[`${id}-weight`] = "";
+        }
+
+        // Kiểm tra điều kiện logic cho length, width, height
+        if (l < w || l < h) {
+            newErrors[`${id}-length`] = "Chiều dài phải lớn nhất (≥ rộng, cao)";
+        }
+        if (w > l) {
+            newErrors[`${id}-width`] = "Rộng không được lớn hơn chiều dài";
+        }
+        if (h > l) {
+            newErrors[`${id}-height`] = "Cao không được lớn hơn chiều dài";
+        }
+
         setPackages(updatedPackages);
-        setTotal(newTotal);
-
-        // Log để debug
-        console.log("Updated packages:", updatedPackages);
-        console.log("New total:", newTotal);
-
-        setErrors(prev => ({
-            ...prev,
-            [`${id}-${field}`]: "",
-        }));
+        setErrors(newErrors);
 
         setShowQuote(false);
         setIsOpenFormPackage(true);
