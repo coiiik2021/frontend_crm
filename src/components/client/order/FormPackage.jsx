@@ -220,29 +220,45 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
             return updatedPkg;
         });
 
-        // Tính toán tổng mới dựa trên updatedPackages
-        const newTotal = updatedPackages.reduce((acc, pkg) => ({
-            realVolume: acc.realVolume + (pkg.total?.realVolume || 0),
-            totalOverSize: acc.totalOverSize + (quaKhoMap.get(pkg.total?.OverSize)?.price || 0),
-            totalPackage: updatedPackages.length
-        }), {
-            totalOverSize: 0,
-            realVolume: 0,
-            totalPackage: 0
+        // Chỉ kiểm tra length, width, height
+        const pkg = updatedPackages.find(pkg => pkg.id === id);
+        const l = parseFloat(pkg.length) || 0;
+        const w = parseFloat(pkg.width) || 0;
+        const h = parseFloat(pkg.height) || 0;
+
+        const newErrors = { ...errors };
+
+        // Xóa lỗi cũ của 3 trường này và weight
+        ["length", "width", "height", "weight"].forEach(f => {
+            newErrors[`${id}-${f}`] = "";
         });
 
-        // Cập nhật cả packages và total
+        // Kiểm tra số dương cho length, width, height, weight
+        ["length", "width", "height", "weight"].forEach(f => {
+            const val = pkg[f];
+            if (val === "" || isNaN(val) || parseFloat(val) <= 0) {
+                newErrors[`${id}-${f}`] = "Vui lòng nhập số lớn hơn 0";
+            }
+        });
+
+        // Nếu weight hợp lệ thì xóa lỗi weight
+        if (pkg.weight !== "" && !isNaN(pkg.weight) && parseFloat(pkg.weight) > 0) {
+            newErrors[`${id}-weight`] = "";
+        }
+
+        // Kiểm tra điều kiện logic cho length, width, height
+        if (l < w || l < h) {
+            newErrors[`${id}-length`] = "Chiều dài phải lớn nhất (≥ rộng, cao)";
+        }
+        if (w > l) {
+            newErrors[`${id}-width`] = "Rộng không được lớn hơn chiều dài";
+        }
+        if (h > l) {
+            newErrors[`${id}-height`] = "Cao không được lớn hơn chiều dài";
+        }
+
         setPackages(updatedPackages);
-        setTotal(newTotal);
-
-        // Log để debug
-        console.log("Updated packages:", updatedPackages);
-        console.log("New total:", newTotal);
-
-        setErrors(prev => ({
-            ...prev,
-            [`${id}-${field}`]: "",
-        }));
+        setErrors(newErrors);
 
         setShowQuote(false);
         setIsOpenFormPackage(true);
@@ -526,6 +542,15 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         handleService();
     };
 
+    const hasInputErrors = () => {
+        return Object.keys(errors).some(key =>
+            key.endsWith('-length') ||
+            key.endsWith('-width') ||
+            key.endsWith('-height') ||
+            key.endsWith('-weight')
+        ) && Object.values(errors).some(val => val);
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             {/* Header Section */}
@@ -715,6 +740,8 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     transition={{ duration: 0.2 }}
+                    disabled={hasInputErrors()}
+                    style={hasInputErrors() ? { opacity: 0.5, cursor: "not-allowed" } : {}}
                 >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -857,7 +884,7 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
                                                     <>
                                                         <div className="flex justify-between items-center py-1">
                                                             <span className="text-sm text-gray-500">Phí quá khổ ({quote.overSize.name}):</span>
-                                                            <span className="text-sm font-medium text-red-500">{(quote.overSize.price)} đ</span>
+                                                            <span className="text-sm font-medium text-red-500">{formatCurrency((quote.overSize.price))} đ</span>
                                                         </div>
                                                         <div className="text-xs text-gray-400 italic mt-1">
                                                             {quote.overSize.description}

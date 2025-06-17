@@ -30,6 +30,7 @@ import Invoice from "../invoice/Invoice";
 import BillContent from "./BillContent";
 import { set } from "date-fns";
 import * as ExcelJS from "exceljs";
+import { useLoading } from "../../../hooks/useLoading";
 
 // Thêm component OrderDetailModal với tabs
 const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
@@ -396,11 +397,18 @@ export default function ContentTable({ data }) {
   // Thêm state để quản lý resize và hiển thị nút resize
   const [sidebarWidth, setSidebarWidth] = useState(700);
   const [isResizing, setIsResizing] = useState(false);
+  const { loading, withLoading } = useLoading();
 
   const fetchBillData = async () => {
     try {
-      const data = await GetAllBill();
-      setDataBill(data);
+      await withLoading(
+        async () => {
+          const data = await GetAllBill();
+          setDataBill(data);
+        },
+        "Tải dữ liệu thành công",
+        "Lỗi khi tải dữ liệu"
+      )
       console.log("Dữ liệu hóa đơn:", dataBill);
       // setState hoặc xử lý tiếp tại đây nếu cần
     } catch (error) {
@@ -515,6 +523,8 @@ export default function ContentTable({ data }) {
   }, [isResizing]);
 
   const [billEdit, setBillEdit] = useState({});
+
+  const [editErrors, setEditErrors] = useState({});
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -774,6 +784,24 @@ export default function ContentTable({ data }) {
 
   // Hàm lưu thay đổi
   const handleSaveChanges = async () => {
+
+    let hasError = false;
+    let allErrors = {};
+    billEdit.packages.forEach((pkg, idx) => {
+      const errors = validateEditPackage(pkg, idx);
+      allErrors = { ...allErrors, ...errors };
+      if (
+        errors[`${idx}-length`] ||
+        errors[`${idx}-width`] ||
+        errors[`${idx}-height`] ||
+        errors[`${idx}-weight`]
+      ) {
+        hasError = true;
+      }
+    });
+    setEditErrors(allErrors);
+    if (hasError) return;
+
     // Tính toán số lượng và cân nặng tổng
     const totalQuantity = billEdit.packages.length;
     const totalWeight = billEdit.packages.reduce((sum, pkg) => {
@@ -1014,6 +1042,45 @@ export default function ContentTable({ data }) {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+  };
+
+  const validateEditPackage = (pkg, index) => {
+    const errors = {};
+    const l = parseFloat(pkg.length) || 0;
+    const w = parseFloat(pkg.width) || 0;
+    const h = parseFloat(pkg.height) || 0;
+    const weight = parseFloat(pkg.weight) || 0;
+
+    // Xóa lỗi cũ
+    ["length", "width", "height", "weight"].forEach(f => {
+      errors[`${index}-${f}`] = "";
+    });
+
+    // Kiểm tra số dương
+    ["length", "width", "height", "weight"].forEach(f => {
+      const val = pkg[f];
+      if (val === "" || isNaN(val) || parseFloat(val) <= 0) {
+        errors[`${index}-${f}`] = "Vui lòng nhập số lớn hơn 0";
+      }
+    });
+
+    // Nếu weight hợp lệ thì xóa lỗi weight
+    if (pkg.weight !== "" && !isNaN(pkg.weight) && parseFloat(pkg.weight) > 0) {
+      errors[`${index}-weight`] = "";
+    }
+
+    // Kiểm tra logic
+    if (l < w || l < h) {
+      errors[`${index}-length`] = "Chiều dài phải lớn nhất (≥ rộng, cao)";
+    }
+    if (w > l) {
+      errors[`${index}-width`] = "Rộng không được lớn hơn chiều dài";
+    }
+    if (h > l) {
+      errors[`${index}-height`] = "Cao không được lớn hơn chiều dài";
+    }
+
+    return errors;
   };
 
   return (
@@ -1661,19 +1728,22 @@ export default function ContentTable({ data }) {
                                   type="number"
                                   value={pkg.weight || ""}
                                   onChange={(e) => {
-                                    const updatedPackages = [
-                                      ...billEdit.packages,
-                                    ];
-                                    updatedPackages[index].weight =
-                                      e.target.value;
+                                    const updatedPackages = [...billEdit.packages];
+                                    updatedPackages[index].weight = e.target.value;
                                     setBillEdit({
                                       ...billEdit,
                                       packages: updatedPackages,
                                     });
+                                    // Validate ngay khi nhập
+                                    const errors = validateEditPackage(updatedPackages[index], index);
+                                    setEditErrors(prev => ({ ...prev, ...errors }));
                                   }}
                                   placeholder="0.00"
                                   className="w-full"
                                 />
+                                {editErrors[`${index}-weight`] && (
+                                  <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-weight`]}</div>
+                                )}
                               </div>
 
                               {/* Dimensions */}
@@ -1683,40 +1753,22 @@ export default function ContentTable({ data }) {
                                   type="number"
                                   value={pkg.length || ""}
                                   onChange={(e) => {
-                                    const updatedPackages = [
-                                      ...billEdit.packages,
-                                    ];
-                                    updatedPackages[index].length =
-                                      e.target.value;
+                                    const updatedPackages = [...billEdit.packages];
+                                    updatedPackages[index].length = e.target.value;
                                     setBillEdit({
                                       ...billEdit,
                                       packages: updatedPackages,
                                     });
+                                    // Validate ngay khi nhập
+                                    const errors = validateEditPackage(updatedPackages[index], index);
+                                    setEditErrors(prev => ({ ...prev, ...errors }));
                                   }}
                                   placeholder="0.00"
                                   className="w-full"
                                 />
-                              </div>
-
-                              <div className="space-y-1">
-                                <Label className="text-xs">Cao (cm)</Label>
-                                <Input
-                                  type="number"
-                                  value={pkg.height || ""}
-                                  onChange={(e) => {
-                                    const updatedPackages = [
-                                      ...billEdit.packages,
-                                    ];
-                                    updatedPackages[index].height =
-                                      e.target.value;
-                                    setBillEdit({
-                                      ...billEdit,
-                                      packages: updatedPackages,
-                                    });
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-full"
-                                />
+                                {editErrors[`${index}-length`] && (
+                                  <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-length`]}</div>
+                                )}
                               </div>
 
                               <div className="space-y-1">
@@ -1725,19 +1777,46 @@ export default function ContentTable({ data }) {
                                   type="number"
                                   value={pkg.width || ""}
                                   onChange={(e) => {
-                                    const updatedPackages = [
-                                      ...billEdit.packages,
-                                    ];
-                                    updatedPackages[index].width =
-                                      e.target.value;
+                                    const updatedPackages = [...billEdit.packages];
+                                    updatedPackages[index].width = e.target.value;
                                     setBillEdit({
                                       ...billEdit,
                                       packages: updatedPackages,
                                     });
+                                    // Validate ngay khi nhập
+                                    const errors = validateEditPackage(updatedPackages[index], index);
+                                    setEditErrors(prev => ({ ...prev, ...errors }));
                                   }}
                                   placeholder="0.00"
                                   className="w-full"
                                 />
+                                {editErrors[`${index}-width`] && (
+                                  <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-width`]}</div>
+                                )}
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label className="text-xs">Cao (cm)</Label>
+                                <Input
+                                  type="number"
+                                  value={pkg.height || ""}
+                                  onChange={(e) => {
+                                    const updatedPackages = [...billEdit.packages];
+                                    updatedPackages[index].height = e.target.value;
+                                    setBillEdit({
+                                      ...billEdit,
+                                      packages: updatedPackages,
+                                    });
+                                    // Validate ngay khi nhập
+                                    const errors = validateEditPackage(updatedPackages[index], index);
+                                    setEditErrors(prev => ({ ...prev, ...errors }));
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-full"
+                                />
+                                {editErrors[`${index}-height`] && (
+                                  <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-height`]}</div>
+                                )}
                               </div>
 
                               {/* Delete Button (only show if more than one package) */}

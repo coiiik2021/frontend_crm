@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-
+import { motion, AnimatePresence } from "framer-motion";
 import { NavLink } from "react-router";
 import {
   Table,
@@ -42,6 +42,41 @@ export default function ContentTable({ data }) {
   const [priceOrders, setPriceOrders] = useState([]);
   const [billEdit, setBillEdit] = useState({});
 
+  const [showFilter, setShowFilter] = useState(false);
+
+  const scrollRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  // Mouse events
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = x - startX;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+  const handleMouseUp = () => setIsDragging(false);
+
+  // Touch events for mobile
+  const handleTouchStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
+    const walk = x - startX;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+  const handleTouchEnd = () => setIsDragging(false);
   // State bộ lọc
   const { RangePicker } = DatePicker;
   const [filterType, setFilterType] = useState(""); // "day" | "month" | "year" | "range" | ""
@@ -1514,182 +1549,186 @@ export default function ContentTable({ data }) {
   return (
     <div className="bg-white dark:bg-white/[0.03] rounded-xl">
       {/* Bộ lọc */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-4">
         {/* Header */}
-        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-              Bộ lọc
-            </h3>
-            <button
-              className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors duration-200 flex items-center gap-1"
-              onClick={() => {
-                setFilterType("");
-                resetAllFilters();
-              }}
+        <div
+          className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg flex items-center cursor-pointer select-none"
+          onClick={() => setShowFilter((prev) => !prev)}
+        >
+          <span className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
+            <svg
+              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${showFilter ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg
-                className="w-3 h-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-              Xóa bộ lọc
-            </button>
-          </div>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+            Bộ lọc
+          </span>
+          <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
+            {showFilter ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
+          </span>
         </div>
 
-        {/* Content */}
-        <div className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Lọc theo khoảng ngày */}
-            <div className="space-y-2 md:col-span-2 lg:col-span-1">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                📅 Khoảng ngày
-              </label>
-              <div className="space-y-2">
-                <RangePicker
-                  format={"DD/MM/YYYY"}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  value={
-                    filterType === "range" && filterRange.from && filterRange.to
-                      ? [filterRange.from, filterRange.to]
-                      : []
-                  }
-                  onChange={(dates) => {
-                    if (dates && dates.length === 2) {
-                      setFilterType("range");
-                      setFilterRange({ from: dates[0], to: dates[1] });
-                      setFilterDay(null);
-                      setFilterMonth(null);
-                      setFilterYear(null);
-                    } else {
-                      resetAllFilters();
-                    }
-                  }}
-                />
+        <AnimatePresence>
+          {showFilter && (
+            <motion.div
+              initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+              animate={{ height: "auto", opacity: 1, overflow: "visible" }}
+              exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+              transition={{ duration: 0.3 }}
+            >
+
+              {/* Content */}
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Lọc theo khoảng ngày */}
+                  <div className="space-y-2 md:col-span-2 lg:col-span-1">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      📅 Khoảng ngày
+                    </label>
+                    <div className="space-y-2">
+                      <RangePicker
+                        format={"DD/MM/YYYY"}
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        value={
+                          filterType === "range" && filterRange.from && filterRange.to
+                            ? [filterRange.from, filterRange.to]
+                            : []
+                        }
+                        onChange={(dates) => {
+                          if (dates && dates.length === 2) {
+                            setFilterType("range");
+                            setFilterRange({ from: dates[0], to: dates[1] });
+                            setFilterDay(null);
+                            setFilterMonth(null);
+                            setFilterYear(null);
+                          } else {
+                            resetAllFilters();
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Lọc theo ngày đơn */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      📅 Theo ngày
+                    </label>
+                    <DatePicker
+                      format={"DD/MM/YYYY"}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      value={filterType === "day" && filterDay ? filterDay : null}
+                      onChange={(date) => {
+                        if (date) {
+                          setFilterType("day");
+                          setFilterDay(date);
+                          setFilterMonth(null);
+                          setFilterYear(null);
+                          setFilterRange({ from: null, to: null });
+                        } else {
+                          resetAllFilters();
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Lọc theo tháng */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      📊 Theo tháng
+                    </label>
+                    <DatePicker
+                      picker="month"
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      value={
+                        filterType === "month" && filterMonth ? filterMonth : null
+                      }
+                      onChange={(date) => {
+                        if (date) {
+                          setFilterType("month");
+                          setFilterMonth(date);
+                          setFilterDay(null);
+                          setFilterYear(null);
+                          setFilterRange({ from: null, to: null });
+                        } else {
+                          resetAllFilters();
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Lọc theo năm */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      🗓️ Theo năm
+                    </label>
+                    <DatePicker
+                      picker="year"
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      value={filterType === "year" && filterYear ? filterYear : null}
+                      onChange={(date) => {
+                        if (date) {
+                          setFilterType("year");
+                          setFilterYear(date);
+                          setFilterDay(null);
+                          setFilterMonth(null);
+                          setFilterRange({ from: null, to: null });
+                        } else {
+                          resetAllFilters();
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Thông tin trạng thái filter */}
+                {filterType && (
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                    <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span className="font-medium">
+                        Đang lọc:
+                        {filterType === "day" &&
+                          filterDay &&
+                          ` Ngày ${filterDay.format("DD/MM/YYYY")}`}
+                        {filterType === "month" &&
+                          filterMonth &&
+                          ` Tháng ${filterMonth.format("MM/YYYY")}`}
+                        {filterType === "year" &&
+                          filterYear &&
+                          ` Năm ${filterYear.format("YYYY")}`}
+                        {filterType === "range" &&
+                          filterRange.from &&
+                          filterRange.to &&
+                          ` Từ ${filterRange.from.format(
+                            "DD/MM/YYYY"
+                          )} đến ${filterRange.to.format("DD/MM/YYYY")}`}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
 
-            {/* Lọc theo ngày đơn */}
-            <div className="space-y-2">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                📅 Theo ngày
-              </label>
-              <DatePicker
-                format={"DD/MM/YYYY"}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                value={filterType === "day" && filterDay ? filterDay : null}
-                onChange={(date) => {
-                  if (date) {
-                    setFilterType("day");
-                    setFilterDay(date);
-                    setFilterMonth(null);
-                    setFilterYear(null);
-                    setFilterRange({ from: null, to: null });
-                  } else {
-                    resetAllFilters();
-                  }
-                }}
-              />
-            </div>
-
-            {/* Lọc theo tháng */}
-            <div className="space-y-2">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                📊 Theo tháng
-              </label>
-              <DatePicker
-                picker="month"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                value={
-                  filterType === "month" && filterMonth ? filterMonth : null
-                }
-                onChange={(date) => {
-                  if (date) {
-                    setFilterType("month");
-                    setFilterMonth(date);
-                    setFilterDay(null);
-                    setFilterYear(null);
-                    setFilterRange({ from: null, to: null });
-                  } else {
-                    resetAllFilters();
-                  }
-                }}
-              />
-            </div>
-
-            {/* Lọc theo năm */}
-            <div className="space-y-2">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                🗓️ Theo năm
-              </label>
-              <DatePicker
-                picker="year"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                value={filterType === "year" && filterYear ? filterYear : null}
-                onChange={(date) => {
-                  if (date) {
-                    setFilterType("year");
-                    setFilterYear(date);
-                    setFilterDay(null);
-                    setFilterMonth(null);
-                    setFilterRange({ from: null, to: null });
-                  } else {
-                    resetAllFilters();
-                  }
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Thông tin trạng thái filter */}
-          {filterType && (
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-              <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span className="font-medium">
-                  Đang lọc:
-                  {filterType === "day" &&
-                    filterDay &&
-                    ` Ngày ${filterDay.format("DD/MM/YYYY")}`}
-                  {filterType === "month" &&
-                    filterMonth &&
-                    ` Tháng ${filterMonth.format("MM/YYYY")}`}
-                  {filterType === "year" &&
-                    filterYear &&
-                    ` Năm ${filterYear.format("YYYY")}`}
-                  {filterType === "range" &&
-                    filterRange.from &&
-                    filterRange.to &&
-                    ` Từ ${filterRange.from.format(
-                      "DD/MM/YYYY"
-                    )} đến ${filterRange.to.format("DD/MM/YYYY")}`}
-                </span>
-              </div>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
       </div>
+
 
       {/* Thêm 6 ô tổng quan ở đây */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
@@ -2637,7 +2676,18 @@ export default function ContentTable({ data }) {
         </div>
       </div>
 
-      <div className="max-w-full overflow-x-auto custom-scrollbar">
+      <div
+        className="max-w-full overflow-x-auto custom-scrollbar scrollable-table"
+        ref={scrollRef}
+        style={{ cursor: isDragging ? "grabbing" : "default" }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div>
           <Table className="w-full rounded-lg overflow-hidden shadow-sm">
             <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">

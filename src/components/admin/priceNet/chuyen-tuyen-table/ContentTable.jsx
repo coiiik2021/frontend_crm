@@ -446,7 +446,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                         name={nameHang}
                     />
                 ) : currentPage === 3 ? (
-                    <OverSizeTable />
+                    <OverSizeTable nameCompany={nameHang} />
                 ) : (
                     <PeakSeason
                         nameHang={nameHang}
