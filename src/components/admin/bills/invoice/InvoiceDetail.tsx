@@ -101,7 +101,19 @@ export default function InvoiceDetail({ bill_id }: { bill_id: string }) {
     <div className="flex flex-col w-full h-full gap-6 sm:gap-5 xl:flex-row">
       {/* <!-- Invoice Sidebar Start --> */}
       <div className="w-full xl:w-64 flex-shrink-0">
-        <InvoiceSidebar bill_id={id || ""} />
+        {recipientInfo && selectService ? (
+          <InvoiceSidebar
+            bill_id={bill_id}
+            recipientInfo={recipientInfo}
+            packages={packages}
+            products={products}
+            productsTotal={productsTotal}
+            selectedService={selectService}
+          />
+        ) : (
+          <div className="text-center text-gray-500">Loading sidebar...</div>
+        )}
+
       </div>
       {/* <!-- Invoice Sidebar End --> */}
 
