@@ -251,300 +251,388 @@ import { m } from "framer-motion/dist/types.d-DSjX-LJB.js";
     };
 
     const exportENExcel = async () => {
-    const shipper = invoiceData.shipper;
-    const consignee = invoiceData.consignee;
-    const items = invoiceData.items;
-    const invoiceNo = invoiceData.invoiceNo;
-    const date = invoiceData.date;
-    const airWaybillNo = invoiceData?.airWaybillNo || "";
-    const shippingMethod = selectedService?.carrier || "";
-    const weight = invoiceData.weight + " KGS";
-    const dimensions = invoiceData.dimensions;
-    const totalValue = invoiceData.totalValue;
-    const totalDimensions = dimensions.length;
+      const shipper = invoiceData.shipper;
+      const consignee = invoiceData.consignee;
+      const items = invoiceData.items;
+      const invoiceNo = invoiceData.invoiceNo;
+      const date = invoiceData.date;
+      const airWaybillNo = invoiceData?.airWaybillNo || "";
+      const shippingMethod = selectedService?.carrier || "";
+      const weight = invoiceData.weight + " KGS";
+      const dimensions = invoiceData.dimensions;
+      const totalValue = invoiceData.totalValue;
+      const totalDimensions = dimensions.length;
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Invoice');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Export Notice');
 
-    worksheet.columns = [
-        { width: 2 },    // A
-        { width: 5 },   // B
-        { width: 8 },   // C
-        { width: 22 },   // D
-        { width: 15 },   // E
-        { width: 15 },   // F
-        { width: 15 },   // G
-        { width: 15 },   // H
-        { width: 20 },   // I
-        { width: 15 },   // J
-    ];
+      worksheet.columns = [
+          { width: 2 },    // A
+          { width: 5 },   // B
+          { width: 8 },   // C
+          { width: 22 },   // D
+          { width: 15 },   // E
+          { width: 15 },   // F
+          { width: 15 },   // G
+          { width: 15 },   // H
+          { width: 20 },   // I
+          { width: 15 },   // J
+      ];
 
-    // Set default font size for cells with values
-    worksheet.eachRow((row) => {
-        row.eachCell((cell) => {
-            if (cell.value && !cell.font) {
-                cell.font = { size: 12 };
-            }
-        });
-    });
+      // Set default font size for cells with values
+      worksheet.eachRow((row) => {
+          row.eachCell((cell) => {
+              if (cell.value && !cell.font) {
+                  cell.font = { size: 12 };
+              }
+          });
+      });
 
-    worksheet.addRow(['', 'UPS VietNam', '', '', '', '', '', '', '', '']);
-    worksheet.addRow(['', '18A Cong Hoa, Ward 12, Tan Binh Dist', '', '', '', '', '', '', '', '']);
-    worksheet.addRow(['', 'Ho Chi Minh, VietNam', '', '', '', '', '', '', '', '']);
-    worksheet.addRow(['', 'Tel: 028 3848 8888', '', '', '', '', '', '', '', '']);
-    worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
+      worksheet.addRow(['', 'UPS VietNam', '', '', '', '', '', '', '', '']);
+      worksheet.addRow(['', '18A Cong Hoa, Ward 12, Tan Binh Dist', '', '', '', '', '', '', '', '']);
+      worksheet.addRow(['', 'Ho Chi Minh, VietNam', '', '', '', '', '', '', '', '']);
+      worksheet.addRow(['', 'Tel: 028 3848 8888', '', '', '', '', '', '', '', '']);
+      worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
 
-    worksheet.mergeCells('B1:D1');
-    worksheet.mergeCells('B2:D2');
-    worksheet.mergeCells('B3:D3');
-    worksheet.mergeCells('B4:D4');
-    worksheet.mergeCells('B5:D5');
+      worksheet.mergeCells('B1:D1');
+      worksheet.mergeCells('B2:D2');
+      worksheet.mergeCells('B3:D3');
+      worksheet.mergeCells('B4:D4');
+      worksheet.mergeCells('B5:D5');
 
-    const titleRow = worksheet.addRow(['', 'THÔNG TIN XUẤT KHẨU - EXPORT NOTICE', '', '', '', '', '', '', '', '', '']);
-    titleRow.height = 40;
-    worksheet.mergeCells('B6:J6');
-    const titleCell = worksheet.getCell('B6');
-    titleCell.font = { size: 22, bold: true };
-    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      const titleRow = worksheet.addRow(['', 'THÔNG TIN XUẤT KHẨU - EXPORT NOTICE', '', '', '', '', '', '', '', '', '']);
+      titleRow.height = 40;
+      worksheet.mergeCells('B6:J6');
+      const titleCell = worksheet.getCell('B6');
+      titleCell.font = { size: 22, bold: true };
+      titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-    const actual_package = worksheet.addRow(['', `Tổng số kiện: ${totalDimensions} (Actual weight: ${weight})`, '', '', '', '', '', '', '', '']);
-    actual_package.height = 30;
-    worksheet.mergeCells('B7:J7');
-    const packageCell = worksheet.getCell('B7');
-    packageCell.font = { size: 14, bold: true };
-    packageCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      const actual_package = worksheet.addRow(['', `Tổng số kiện: ${totalDimensions} (Actual weight: ${weight})`, '', '', '', '', '', '', '', '']);
+      actual_package.height = 30;
+      worksheet.mergeCells('B7:J7');
+      const packageCell = worksheet.getCell('B7');
+      packageCell.font = { size: 14, bold: true };
+      packageCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-    const awb = worksheet.addRow(['', 'AWB','', airWaybillNo, '', '', '', '', '', '', '']);
-    awb.height = 25;
-    awb.getCell(2).font = { size: 12, bold: true };
-    awb.getCell(4).font = { size: 12};
-    worksheet.mergeCells('B8:C8');
-    worksheet.mergeCells('D8:J8');
+      const awb = worksheet.addRow(['', 'AWB','', airWaybillNo, '', '', '', '', '', '', '']);
+      awb.height = 25;
+      awb.getCell(2).font = { size: 12, bold: true };
+      awb.getCell(4).font = { size: 12};
+      worksheet.mergeCells('B8:C8');
+      worksheet.mergeCells('D8:J8');
 
-    const nguoiGui = worksheet.addRow(['', 'Người gửi:','', shipper.companyName, '', '', '', '', '', '', '']);
-    nguoiGui.height = 25;
-    nguoiGui.getCell(2).font = { size: 12, bold: true };
-    nguoiGui.getCell(4).font = { size: 12};
-    nguoiGui.getCell(4).value = shipper.companyName.toUpperCase();
-    worksheet.mergeCells('D9:J9');
-    worksheet.mergeCells('B9:C9');
+      const nguoiGui = worksheet.addRow(['', 'Người gửi:','', shipper.companyName, '', '', '', '', '', '', '']);
+      nguoiGui.height = 25;
+      nguoiGui.getCell(2).font = { size: 12, bold: true };
+      nguoiGui.getCell(4).font = { size: 12};
+      nguoiGui.getCell(4).value = shipper.companyName.toUpperCase();
+      worksheet.mergeCells('D9:J9');
+      worksheet.mergeCells('B9:C9');
 
-    const diaChi = worksheet.addRow(['', 'Địa chỉ:','', shipper.address, '', '', '', '', '', '', '']);
-    diaChi.height = 25;
-    diaChi.getCell(2).font = { size: 12, bold: true };
-    diaChi.getCell(4).font = { size: 12 };
-    diaChi.getCell(4).value = shipper.address.toUpperCase();
-    worksheet.mergeCells('D10:J10');
-    worksheet.mergeCells('B10:C10');
+      const diaChi = worksheet.addRow(['', 'Địa chỉ:','', shipper.address, '', '', '', '', '', '', '']);
+      diaChi.height = 25;
+      diaChi.getCell(2).font = { size: 12, bold: true };
+      diaChi.getCell(4).font = { size: 12 };
+      diaChi.getCell(4).value = shipper.address.toUpperCase();
+      worksheet.mergeCells('D10:J10');
+      worksheet.mergeCells('B10:C10');
 
-    worksheet.addRow(['','','', '.....................................................................................', '', '', '', '', '', '', '']);
-    worksheet.mergeCells('D11:J11');
-    worksheet.addRow(['','','', '.....................................................................................', '', '', '', '', '', '', '']);
-    worksheet.mergeCells('D12:J12');
+      worksheet.addRow(['','','', '.....................................................................................', '', '', '', '', '', '', '']);
+      worksheet.mergeCells('D11:J11');
+      worksheet.addRow(['','','', '.....................................................................................', '', '', '', '', '', '', '']);
+      worksheet.mergeCells('D12:J12');
 
-    const tell = worksheet.addRow(['', 'Tel:','', shipper.phone, '', '', 'Fax:', '', '', '']);
-    tell.height = 25;
-    tell.getCell(2).font = { size: 12, bold: true };
-    tell.getCell(7).font = { size: 12, bold: true };
-    tell.getCell(4).font = { size: 12 };
+      const tell = worksheet.addRow(['', 'Tel:','', shipper.phone, '', '', 'Fax:', '', '', '']);
+      tell.height = 25;
+      tell.getCell(2).font = { size: 12, bold: true };
+      tell.getCell(7).font = { size: 12, bold: true };
+      tell.getCell(4).font = { size: 12 };
 
-    const duKien = worksheet.addRow(['', 'Dự kiến sẽ xuất qua UPS vào ngày 22/05/2025', '', '', '', '', '', '', '', '']);
-    duKien.height = 25;
-  
-    worksheet.mergeCells('B14:J14');
+      const duKien = worksheet.addRow(['', 'Dự kiến sẽ xuất qua UPS vào ngày 22/05/2025', '', '', '', '', '', '', '', '']);
+      duKien.height = 25;
+    
+      worksheet.mergeCells('B14:J14');
 
-    worksheet.addRow([''])
+      worksheet.addRow([''])
 
-    const x = worksheet.addRow(['', 'X', '', '', '', '', '', '', '', '']);
-    x.height = 25;
-    x.getCell(2).font = { size: 12, bold: true };
-    x.getCell(2).border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-    x.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+      const x = worksheet.addRow(['', 'X', '', '', '', '', '', '', '', '']);
+      x.height = 25;
+      x.getCell(2).font = { size: 12, bold: true };
+      x.getCell(2).border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+      x.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
 
-    const txt1 = worksheet.addRow(['', 'Quý khách vui lòng cung cấp những thông tin sau:', '', '', '', '', '', '', '', '']);
-    txt1.height = 25;
-    txt1.getCell(2).font = { size: 12, bold: true };
-    worksheet.mergeCells('B17:J17');
+      const txt1 = worksheet.addRow(['', 'Quý khách vui lòng cung cấp những thông tin sau:', '', '', '', '', '', '', '', '']);
+      txt1.height = 25;
+      txt1.getCell(2).font = { size: 12, bold: true };
+      worksheet.mergeCells('B17:J17');
 
-    const ma_so_thue = worksheet.addRow(['', '* Mã số thuế (công ty hoặc cá nhân):', '','', '2300680991', '', '', '', '', '', '']);
-    ma_so_thue.height = 25;
-    ma_so_thue.getCell(2).font = { size: 12 };
-    ma_so_thue.getCell(5).font = { size: 12 };
-    worksheet.mergeCells('B18:D18');
+      const ma_so_thue = worksheet.addRow(['', '* Mã số thuế (công ty hoặc cá nhân):', '','', '2300680991', '', '', '', '', '', '']);
+      ma_so_thue.height = 25;
+      ma_so_thue.getCell(2).font = { size: 12 };
+      ma_so_thue.getCell(5).font = { size: 12 };
+      worksheet.mergeCells('B18:D18');
 
-    const so_dien_thoai = worksheet.addRow(['', '* Số điện thoại di động:', '', '', '028 3848 8888', '', '', '', '', '', '']);
-    so_dien_thoai.height = 25;
-    so_dien_thoai.getCell(2).font = { size: 12 };
-    so_dien_thoai.getCell(5).font = { size: 12 };
-    worksheet.mergeCells('B19:D19');
+      const so_dien_thoai = worksheet.addRow(['', '* Số điện thoại di động:', '', '', '028 3848 8888', '', '', '', '', '', '']);
+      so_dien_thoai.height = 25;
+      so_dien_thoai.getCell(2).font = { size: 12 };
+      so_dien_thoai.getCell(5).font = { size: 12 };
+      worksheet.mergeCells('B19:D19');
 
-    const txt2 = worksheet.addRow(['', '* Quí khách vui lòng khai tên hàng bằng tiếng Việt theo thứ tự trong invoice ( mã HS, trị giá …..  nếu có )', '', '', '', '', '', '', '', '']);
-    txt2.height = 35;
-    txt2.getCell(2).font = { size: 12, bold: true, color: { argb: 'FF0070C0' } };
-    worksheet.mergeCells('B20:J20');
+      if (items.length <= 5) {
+        const txt2 = worksheet.addRow(['', '* Quí khách vui lòng khai tên hàng bằng tiếng Việt theo thứ tự trong invoice ( mã HS, trị giá …..  nếu có )', '', '', '', '', '', '', '', '']);
+        txt2.height = 35;
+        txt2.getCell(2).font = { size: 12, bold: true, color: { argb: 'FF0070C0' } };
+        worksheet.mergeCells('B20:J20');
 
-    worksheet.addRow(['', '']);
+        worksheet.addRow(['', '']);
 
-    const headerRow = worksheet.addRow([
-      '',
-      'STT',
-      'Tên hàng (mô tả chi tiết)',
-      '',
-      '',
-      'Mã HS',
-      'Xuất xứ',
-      'Số Lượng',
-      'Đơn giá hóa đơn\n(USD)',
-      'Trị giá hóa đơn\n(USD)',
-    ]);
-
-    headerRow.height = 45;
-
-    const rowIndex = headerRow.number; // <-- lấy dòng số hiện tại
-    worksheet.mergeCells(`C${rowIndex}:E${rowIndex}`);
-
-    headerRow.eachCell((cell, colNumber) => {
-      if (colNumber !== 1) {
-        cell.font = { bold: true, size: 12 };
-        cell.alignment = {
-          horizontal: 'center',
-          vertical: 'middle',
-          wrapText: true
-        };
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFF0F0F0' }
-        };
-        cell.border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' }
-        };
-      }
-    });
-
-
-    items.forEach(item => {
-        const row = worksheet.addRow([
-            '',
-            '',
-            item.description,
-            '',
-            '',
-            '',
-            item.origin,
-            item.quantity,
-            item.unitPrice,
-            item.subtotal,
+        const headerRow = worksheet.addRow([
+          '',
+          'STT',
+          'Tên hàng (mô tả chi tiết)',
+          '',
+          '',
+          'Mã HS',
+          'Xuất xứ',
+          'Số Lượng',
+          'Đơn giá hóa đơn\n(USD)',
+          'Trị giá hóa đơn\n(USD)',
         ]);
-        row.height = 250;
 
-        worksheet.mergeCells(`C${row.number}:E${row.number}`);
+        headerRow.height = 45;
 
-        row.eachCell((cell, colNumber) => {
-            if (colNumber !== 1) {
-                cell.font = { name: 'Times New Roman', size: 14 };
+        const rowIndex = headerRow.number; // <-- lấy dòng số hiện tại
+        worksheet.mergeCells(`C${rowIndex}:E${rowIndex}`);
+
+        headerRow.eachCell((cell, colNumber) => {
+          if (colNumber !== 1) {
+            cell.font = { bold: true, size: 12 };
+            cell.alignment = {
+              horizontal: 'center',
+              vertical: 'middle',
+              wrapText: true
+            };
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF0F0F0' }
+            };
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
+            };
+          }
+        });
+
+
+        items.forEach(item => {
+            const row = worksheet.addRow([
+                '',
+                items.indexOf(item) + 1,
+                item.description,
+                '',
+                '',
+                '',
+                item.origin,
+                item.quantity,
+                item.unitPrice,
+                item.subtotal,
+            ]);
+            row.height = 250;
+
+            worksheet.mergeCells(`C${row.number}:E${row.number}`);
+
+            row.eachCell((cell, colNumber) => {
+                if (colNumber !== 1) {
+                    cell.font = { name: 'Times New Roman', size: 14 };
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+
+                    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+
+                    // if (colNumber === 3) {
+                    //     cell.alignment = { wrapText: true, vertical: 'top' };
+                    // } else if (colNumber >= 5 && colNumber <= 10) {
+                    //     cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    // }
+                }
+            });
+        });
+
+        const totalRow = worksheet.addRow(['', 'Total Value (in USD)', '', '', '', '', '', '', '', totalValue]);
+        totalRow.height = 25;
+        totalRow.eachCell((cell, colNumber) => {
+            if (colNumber === 2 || colNumber === 10) {
+                cell.font = { name: 'Times New Roman', size: 12 };
                 cell.border = {
                     top: { style: 'thin' },
                     left: { style: 'thin' },
                     bottom: { style: 'thin' },
                     right: { style: 'thin' }
                 };
-
                 if (colNumber === 2) {
-                    cell.alignment = { wrapText: true, vertical: 'top' };
-                } else if (colNumber >= 5 && colNumber <= 10) {
+                    cell.alignment = { horizontal: 'right', vertical: 'middle' };
+                } else{
                     cell.alignment = { horizontal: 'center', vertical: 'middle' };
                 }
             }
         });
-    });
+
+        worksheet.mergeCells('B' + totalRow.number + ':I' + totalRow.number);
+
+      }
+
+      
+
+      worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
+
+      const txt3 = worksheet.addRow(['', '* Nếu trên 5 dòng hàng vui lòng điền vào sheet " Product details "', '', '', '', '', '', '', '']);
+      txt3.height = 25;
+      txt3.getCell(2).font = { size: 12, bold: true, color: { argb: 'FF0070C0' } };
+      worksheet.mergeCells('B' + txt3.number + ':J' + txt3.number);
+
+      const txt4 = worksheet.addRow(['', '* Nếu hàng là hóa chất (bột, lỏng): cung cấp C/A hoặc MSDS, Công văn cam kết, Tờ khai đường hàng không', '', '', '', '', '', '', '']);
+      txt4.height = 25;
+
+      const txt5 = worksheet.addRow(['', "* Nếu hàng là điện tử: cung cấp 'Tờ khai đường hàng không', MSDS (nếu có)'", '', '', '', '', '', '', '']);
+      txt5.height = 25;
+
+      const txt6 = worksheet.addRow(['', '* Nếu hàng xuất có điều kiện: vui lòng bổ sung Giấy phép xuất khẩu ngay khi khai thông tin cho thông báo này.', '', '', '', '', '', '', '']);
+      txt6.height = 25;
+
+      const txt7 = worksheet.addRow(['', 'Quý khách vui lòng gởi thông tin này qua những địa chỉ email sau :', '', '', '', '', '', '', '']);
+      txt7.height = 25;
+      txt7.getCell(2).font = { size: 12, bold: true };
+
+      const txt8 = worksheet.addRow(['', 'Công ty UPS Việt Nam - Phòng Thông quan - Bộ phận Hàng xuất: 028.3948.7999', '', '', '', '', '', '', '']);
+      txt8.height = 25;
+
+      const txt9 = worksheet.addRow(['', '* Mr. Giang (dhgiang@ups.com) - Ext : 212', '', '', '', '', '', '', '']);
+      txt9.height = 25; 
+
+      const txt10 = worksheet.addRow(['', '* Mr. Vinh (phantrongvinh@ups.com) - Ext : 112', '', '', '', '', '', '', '']);
+      txt10.height = 25;
+
+      const txt11 = worksheet.addRow(['', '* Mr. Khánh (dinhkhanhnguyen@ups.com) - Ext: 210', '', '', '', '', '', '']);
+      txt11.height = 25;
+
+      const txt12 = worksheet.addRow(['', '* Mr. Hải ( nhai@ups.com)', '', '', '', '', '', '', '']);
+      txt12.height = 25;
+
+      worksheet.addRow(['', '', '', '', '', '', '', '', '', '']);
+      const txt13 = worksheet.addRow(['', 'Cảm ơn Quí khách đã sử dụng dịch vụ UPS.', '', '', '', '', '', '', 'Xác nhận của khách hàng', '']);
+      txt13.height = 25;
+
+      const txt14 = worksheet.addRow(['', '', '', '', '', '', '', '', '(Đóng dấu, ký tên)', '']);
+      txt14.height = 25;
+
+      const lastRow = worksheet.lastRow?.number || 0;
+      if (lastRow > 0) {
+          
+          // worksheet.mergeCells('B' + (lastRow - 12) + ':J' + (lastRow - 12));
+          worksheet.mergeCells('B' + (lastRow - 11) + ':J' + (lastRow - 11));
+          worksheet.mergeCells('B' + (lastRow - 10) + ':J' + (lastRow - 10));
+          worksheet.mergeCells('B' + (lastRow - 9) + ':J' + (lastRow - 9));
+          worksheet.mergeCells('B' + (lastRow - 8) + ':J' + (lastRow - 8));
+          worksheet.mergeCells('B' + (lastRow - 7) + ':J' + (lastRow - 7));
+          worksheet.mergeCells('B' + (lastRow - 6) + ':J' + (lastRow - 6));
+          worksheet.mergeCells('B' + (lastRow - 5) + ':J' + (lastRow - 5));
+          worksheet.mergeCells('B' + (lastRow - 4) + ':J' + (lastRow - 4));
+          worksheet.mergeCells('B' + (lastRow - 3) + ':J' + (lastRow - 3));
+
+          worksheet.mergeCells('B' + (lastRow - 1) + ':D' + (lastRow - 1));
+          worksheet.mergeCells('I' + (lastRow - 1) + ':J' + (lastRow - 1));
+          worksheet.mergeCells('I' + lastRow + ':J' + lastRow);
+      }
+      worksheet.getCell('I' + lastRow).alignment = { horizontal: 'center' };
+      worksheet.getCell('I' + (lastRow - 1)).alignment = {horizontal: 'center' };
+
+      // Thêm sheet thứ hai cho chi tiết sản phẩm
+
+      const sheet2 = workbook.addWorksheet('Product details');
+      sheet2.columns = [
+        { header: 'STT', key: 'stt', width: 10 },
+        { header: 'Tên hàng (mô tả chi tiết)', key: 'description', width: 45 },
+        { header: 'Mã HS', key: 'codeHS', width: 20 },
+        { header: 'Xuất xứ', key: 'origin', width: 20 },
+        { header: 'Số lượng', key: 'quantity', width: 20 },
+        { header: 'Đơn vị', key: 'unit', width: 20 },
+        { header: 'Đơn giá hóa đơn\n(USD)', key: 'unitPrice', width: 30 },
+        { header: 'Trị giá hóa đơn\n(USD)', key: 'totalPrice', width: 30 },
+      ];
+
+      const headerRow2 = sheet2.getRow(1);
+
+      headerRow2.eachCell((cell, colNumber) => {
+        cell.font = { bold: true, size: 12 };
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+          wrapText: true,
+        };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF0F0F0' },
+        };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };      
+      });
+
+      headerRow2.height = 45;
 
 
-    // const totalRow = worksheet.addRow(['', '', '', '', '', '', 'Total Value (in USD)', '', '', totalValue]);
-
-    // totalRow.eachCell((cell, colNumber) => {
-    //     if (colNumber === 7 || colNumber === 10) {
-    //         cell.font = { name: 'Times New Roman', size: 14, bold: true };
-    //         cell.border = {
-    //             top: { style: 'thin' },
-    //             left: { style: 'thin' },
-    //             bottom: { style: 'thin' },
-    //             right: { style: 'thin' }
-    //         };
-    //         cell.alignment = { horizontal: 'center', vertical: 'middle' };
-    //     }
-    // });
-
-    // worksheet.mergeCells('G' + totalRow.number + ':I' + totalRow.number);
-
-    // const simple = worksheet.addRow(['', 'SAMPLE', '', '', '', '', '', '', '']);
-    // simple.font = { size: 14, bold: true };
-    // simple.alignment = { horizontal: 'center', vertical: 'middle' };
-
-    // worksheet.addRow(['', 'Reason for Export', '', '', '', '', '', '', '', '']);
-    // worksheet.addRow(['', 'I declare that the information is true and correct to the best of my knowledge,', '', '', '', '', '', '', '', '']);
-    // worksheet.addRow(['', 'and that the goods are of VIETNAM origin.', '', '', '', '', '', '', '', '']);
-    // worksheet.addRow(['', 'I (name)', '', '', '', '', 'certify that the particulars and', '', '', '']);
-    // worksheet.addRow(['', 'quantity of goods specified in this document are goods which are submitted for', '', '', '', '', '', '', '', '']);
-    // worksheet.addRow(['', 'clearance for export out of Vietnam.', '', '', '', '', '', '', '', '']);
-    // worksheet.addRow(['', '', '', '', '', '', 'Date: 01/04/2024', '', '', '']);
-    // worksheet.addRow(['', '', '', '', '', '', 'Signature/Title/Stamp', '', '', '']);
-
-    // const lastRow = worksheet.lastRow?.number || 0;
-    // if (lastRow > 0) {
-    //     worksheet.mergeCells('B' + (lastRow - 7) + ':C' + (lastRow - 7));
-    //     worksheet.mergeCells('D' + (lastRow - 7) + ':K' + (lastRow - 7));
-    //     worksheet.mergeCells('B' + (lastRow - 6) + ':K' + (lastRow - 6));
-    //     worksheet.mergeCells('B' + (lastRow - 5) + ':K' + (lastRow - 5));
-    //     worksheet.mergeCells('G' + (lastRow - 4) + ':K' + (lastRow - 4));
-    //     worksheet.mergeCells('C' + (lastRow - 4) + ':F' + (lastRow - 4));
-    //     worksheet.mergeCells('B' + (lastRow - 3) + ':K' + (lastRow - 3));
-    //     worksheet.mergeCells('B' + (lastRow - 2) + ':K' + (lastRow - 2));
-    //     worksheet.mergeCells('G' + (lastRow - 1) + ':K' + (lastRow - 1));
-    //     worksheet.mergeCells('G' + lastRow + ':K' + lastRow);
-    // }
-
-    // worksheet.getCell('G' + (lastRow - 1)).alignment = { vertical: 'middle', horizontal: 'center' };
-    // worksheet.getCell('G' + lastRow).alignment = { vertical: 'middle', horizontal: 'center' };
-    // worksheet.getCell('D' + (lastRow - 7)).border = { bottom: { style: 'thin' } }
-    // worksheet.getCell('C' + (lastRow - 4)).border = { bottom: { style: 'thin' } }
-
-    // for (let rowNum = lastRow; rowNum >= lastRow - 7; rowNum--) {
-    //     const row = worksheet.getRow(rowNum);
-    //     row.eachCell((cell) => {
-    //         cell.font = {
-    //             name: 'Century Gothic',
-    //             size: 12
-    //         };
-    //     });
-    // }
-
-    // const sRow = 4, eRow = 18;
-    // const col = 3;
-
-    // for (let row = sRow; row <= eRow; row++) {
-    //     if (row !== 11 && row !== 12) {
-    //         worksheet.getCell(row, col).border = {
-    //             bottom: { style: 'thin' }
-    //         };
-    //     }
-    // }
+      if (items.length > 5) {
+        
+        items.forEach((item, index) => {
+          const row = sheet2.addRow([
+          index + 1,
+          item.description,
+          '', // HS
+          item.origin,
+          item.quantity,
+          item.unit,
+          item.unitPrice,
+          item.subtotal
+        ]);
 
 
-    // Save file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `invoice_${invoiceNo}.xlsx`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
+          row.eachCell((cell) => {
+            cell.font = { name: 'Times New Roman', size: 14 };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' , wrapText: true };
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' },
+            };
+          });
+          row.height = 250;
+        });
+      }
 
+
+
+      // Save file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Export_Notice_${airWaybillNo}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    };
 
     return (
       <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg dark:bg-gray-800">
@@ -642,12 +730,15 @@ import { m } from "framer-motion/dist/types.d-DSjX-LJB.js";
           </div>
         </div>
         <div>
-            <button
-            onClick={exportENExcel}
-            className="w-full rounded-lg bg-green-500 px-6 py-3 text-center text-lg font-semibold text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
-          >
-            Xuất EN
-          </button>
+            {invoiceData.totalValue > 200 && selectedService.carrier.toLowerCase() === 'ups' && (
+              <button
+                onClick={exportENExcel}
+                className="w-full rounded-lg bg-green-500 px-6 py-3 text-center text-lg font-semibold text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+              >
+                Xuất EN
+              </button>
+            )}
+
         </div>
 
 
