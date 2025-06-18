@@ -25,7 +25,7 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
           bill_id,
           type: "excel",
         };
-        const response = await axios.post("http://localhost:8080/api/files/get", dataRequest);
+        const response = await axios.post("http://171.244.143.4:8080/api/files/get", dataRequest);
         setUploadedFiles(response.data.data);
         console.log("Fetched uploaded files:", response.data.data);
       } catch (error) {
@@ -62,7 +62,7 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
         name: "invoice " + bill_id.substring(0, 5),
       };
 
-      const newFile = await axios.post("http://localhost:8080/api/files", dataRequest);
+      const newFile = await axios.post("http://171.244.143.4:8080/api/files", dataRequest);
 
 
       setUploadedFiles((prev) => [
@@ -97,7 +97,7 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
 
     try {
       // Gửi yêu cầu xóa file lên server
-      const response = await axios.delete(`http://localhost:8080/api/files/${file.id}`);
+      const response = await axios.delete(`http://171.244.143.4:8080/api/files/${file.id}`);
       console.log("Response from delete API:", response.data);
 
       if (response.status === 200) {

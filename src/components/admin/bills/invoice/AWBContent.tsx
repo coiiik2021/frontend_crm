@@ -54,7 +54,7 @@ export default function AWBContent({
         const userRoles: string[] = decoded.authorities || [];
 
         setAuthorities(userRoles);
-        const response = await axios.get(`http://localhost:8080/api/bill/information-awb/${bill_id}`);
+        const response = await axios.get(`http://171.244.143.4:8080/api/bill/information-awb/${bill_id}`);
 
 
         setUploadedFiles(response.data.data.files);
@@ -93,7 +93,7 @@ export default function AWBContent({
         category: "awb",
       };
 
-      const saveRes = await axios.post("http://localhost:8080/api/files", dataRequest);
+      const saveRes = await axios.post("http://171.244.143.4:8080/api/files", dataRequest);
       const newFile: UploadedFile = saveRes.data.data;
 
       setUploadedFiles((prev) => [...prev, newFile]);
@@ -117,7 +117,7 @@ export default function AWBContent({
 
     try {
       // Gửi yêu cầu xóa file lên server
-      const response = await axios.delete(`http://localhost:8080/api/files/${file.id}`);
+      const response = await axios.delete(`http://171.244.143.4:8080/api/files/${file.id}`);
       console.log("Response from delete API:", response.data);
 
       if (response.status === 200) {
@@ -198,31 +198,31 @@ export default function AWBContent({
               </svg>
             </button>
 
-        {/* Form sẽ ẩn/hiện */}
-        {showForm && (
-          <div className="space-y-4">
-            {/* AWB Field */}
-            <div className="space-y-1">
-              <label
-                htmlFor="awb"
-                className="block text-sm font-medium text-gray-700"
-              >
-                AWB
-              </label>
-              <input
-                type="text"
-                id="awb"
-                value={dataInformation.awb}
-                onChange={(e) =>
-                  setDataInformation({
-                    ...dataInformation,
-                    awb: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
-                placeholder="Enter AWB number"
-              />
-            </div>
+            {/* Form sẽ ẩn/hiện */}
+            {showForm && (
+              <div className="space-y-4">
+                {/* AWB Field */}
+                <div className="space-y-1">
+                  <label
+                    htmlFor="awb"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    AWB
+                  </label>
+                  <input
+                    type="text"
+                    id="awb"
+                    value={dataInformation.awb}
+                    onChange={(e) =>
+                      setDataInformation({
+                        ...dataInformation,
+                        awb: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                    placeholder="Enter AWB number"
+                  />
+                </div>
 
                 {/* Bill Employee Field */}
                 <div className="space-y-1">
