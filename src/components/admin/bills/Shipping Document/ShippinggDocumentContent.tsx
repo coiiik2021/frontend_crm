@@ -26,7 +26,7 @@ export default function ShippingDocumentContent({ bill_id }: { bill_id: string }
           bill_id,
           type: "excel",
         };
-        const response = await axios.post("http://localhost:8080/api/files/get", dataRequest);
+        const response = await axios.post(import.meta.env.VITE_API_URL + "files/get", dataRequest);
         setUploadedFiles(response.data.data);
       } catch (error) {
         console.error("Error fetching uploaded files:", error);
@@ -62,7 +62,7 @@ export default function ShippingDocumentContent({ bill_id }: { bill_id: string }
         name: "invoice " + bill_id.substring(0, 5),
       };
 
-      const saveRes = await axios.post("http://localhost:8080/api/files", dataRequest);
+      const saveRes = await axios.post(import.meta.env.VITE_API_URL + "files", dataRequest);
 
       const newFile: UploadedFile = saveRes.data.data;
 
@@ -87,7 +87,7 @@ export default function ShippingDocumentContent({ bill_id }: { bill_id: string }
 
     try {
       // Gửi yêu cầu xóa file lên server
-      const response = await axios.delete(`http://localhost:8080/api/files/${file.id}`);
+      const response = await axios.delete(import.meta.env.VITE_API_URL + `files/${file.id}`);
       console.log("Response from delete API:", response.data);
 
       if (response.status === 200) {

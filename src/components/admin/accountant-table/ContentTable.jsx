@@ -42,7 +42,7 @@ export default function ContentTable(props) {
   const filteredAndSortedData = useMemo(() => {
     return users
       .filter((item) =>
-        item.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+        item?.fullName.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => {
         if (sortKey === "name") {
@@ -455,25 +455,25 @@ export default function ContentTable(props) {
                           state={{ user: item }}
                           className="block font-medium text-gray-800 text-theme-sm dark:text-white/90"
                         >
-                          {item.fullName}
+                          {item?.fullName}
                         </NavLink>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {item.email}
+                    {item?.email}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {item.phone}
+                    {item?.phone}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {calculateAge(item.dateOfBirth)}
+                    {calculateAge(item?.dateOfBirth)}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {item.createdAt}
+                    {item?.createdAt}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-normal dark:text-gray-400/90 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm whitespace-nowrap">
-                    {item.kpi}
+                    {item?.kpi}
                   </TableCell>
                 </TableRow>
               ))}

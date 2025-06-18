@@ -170,8 +170,8 @@ export default function ContentTable({ data }) {
             <span
                 className={`px-2 py-1 text-xs font-medium rounded-full ${colorClass}`}
             >
-        {status || "Unknown"}
-      </span>
+                {status || "Unknown"}
+            </span>
         );
     }
     useEffect(() => {
@@ -1463,27 +1463,26 @@ export default function ContentTable({ data }) {
                     className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg flex items-center cursor-pointer select-none"
                     onClick={() => setShowFilter((prev) => !prev)}
                 >
-          <span className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
-            <svg
-              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${
-                showFilter ? "rotate-180" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-            Bộ lọc
-          </span>
+                    <span className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
+                        <svg
+                            className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${showFilter ? "rotate-180" : ""
+                                }`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                            />
+                        </svg>
+                        Bộ lọc
+                    </span>
                     <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
-            {showFilter ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
-          </span>
+                        {showFilter ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
+                    </span>
                 </div>
 
                 <AnimatePresence>
@@ -1494,117 +1493,117 @@ export default function ContentTable({ data }) {
                             exit={{ height: 0, opacity: 0, overflow: "hidden" }}
                             transition={{ duration: 0.3 }}
                         >
-              {/* Content */}
-              <div className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Lọc theo khoảng ngày */}
-                  <div className="space-y-2 md:col-span-2 lg:col-span-1">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                      📅 Khoảng ngày
-                    </label>
-                    <div className="space-y-2">
-                      <RangePicker
-                        format={"DD/MM/YYYY"}
-                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        value={
-                          filterType === "range" &&
-                          filterRange.from &&
-                          filterRange.to
-                            ? [filterRange.from, filterRange.to]
-                            : []
-                        }
-                        onChange={(dates) => {
-                          if (dates && dates.length === 2) {
-                            setFilterType("range");
-                            setFilterRange({ from: dates[0], to: dates[1] });
-                            setFilterDay(null);
-                            setFilterMonth(null);
-                            setFilterYear(null);
-                          } else {
-                            resetAllFilters();
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
+                            {/* Content */}
+                            <div className="p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {/* Lọc theo khoảng ngày */}
+                                    <div className="space-y-2 md:col-span-2 lg:col-span-1">
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                                            📅 Khoảng ngày
+                                        </label>
+                                        <div className="space-y-2">
+                                            <RangePicker
+                                                format={"DD/MM/YYYY"}
+                                                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                value={
+                                                    filterType === "range" &&
+                                                        filterRange.from &&
+                                                        filterRange.to
+                                                        ? [filterRange.from, filterRange.to]
+                                                        : []
+                                                }
+                                                onChange={(dates) => {
+                                                    if (dates && dates.length === 2) {
+                                                        setFilterType("range");
+                                                        setFilterRange({ from: dates[0], to: dates[1] });
+                                                        setFilterDay(null);
+                                                        setFilterMonth(null);
+                                                        setFilterYear(null);
+                                                    } else {
+                                                        resetAllFilters();
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
 
-                  {/* Lọc theo ngày đơn */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                      📅 Theo ngày
-                    </label>
-                    <DatePicker
-                      format={"DD/MM/YYYY"}
-                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                      value={
-                        filterType === "day" && filterDay ? filterDay : null
-                      }
-                      onChange={(date) => {
-                        if (date) {
-                          setFilterType("day");
-                          setFilterDay(date);
-                          setFilterMonth(null);
-                          setFilterYear(null);
-                          setFilterRange({ from: null, to: null });
-                        } else {
-                          resetAllFilters();
-                        }
-                      }}
-                    />
-                  </div>
+                                    {/* Lọc theo ngày đơn */}
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                                            📅 Theo ngày
+                                        </label>
+                                        <DatePicker
+                                            format={"DD/MM/YYYY"}
+                                            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={
+                                                filterType === "day" && filterDay ? filterDay : null
+                                            }
+                                            onChange={(date) => {
+                                                if (date) {
+                                                    setFilterType("day");
+                                                    setFilterDay(date);
+                                                    setFilterMonth(null);
+                                                    setFilterYear(null);
+                                                    setFilterRange({ from: null, to: null });
+                                                } else {
+                                                    resetAllFilters();
+                                                }
+                                            }}
+                                        />
+                                    </div>
 
-                  {/* Lọc theo tháng */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                      📊 Theo tháng
-                    </label>
-                    <DatePicker
-                      picker="month"
-                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                      value={
-                        filterType === "month" && filterMonth
-                          ? filterMonth
-                          : null
-                      }
-                      onChange={(date) => {
-                        if (date) {
-                          setFilterType("month");
-                          setFilterMonth(date);
-                          setFilterDay(null);
-                          setFilterYear(null);
-                          setFilterRange({ from: null, to: null });
-                        } else {
-                          resetAllFilters();
-                        }
-                      }}
-                    />
-                  </div>
+                                    {/* Lọc theo tháng */}
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                                            📊 Theo tháng
+                                        </label>
+                                        <DatePicker
+                                            picker="month"
+                                            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={
+                                                filterType === "month" && filterMonth
+                                                    ? filterMonth
+                                                    : null
+                                            }
+                                            onChange={(date) => {
+                                                if (date) {
+                                                    setFilterType("month");
+                                                    setFilterMonth(date);
+                                                    setFilterDay(null);
+                                                    setFilterYear(null);
+                                                    setFilterRange({ from: null, to: null });
+                                                } else {
+                                                    resetAllFilters();
+                                                }
+                                            }}
+                                        />
+                                    </div>
 
-                  {/* Lọc theo năm */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                      🗓️ Theo năm
-                    </label>
-                    <DatePicker
-                      picker="year"
-                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                      value={
-                        filterType === "year" && filterYear ? filterYear : null
-                      }
-                      onChange={(date) => {
-                        if (date) {
-                          setFilterType("year");
-                          setFilterYear(date);
-                          setFilterDay(null);
-                          setFilterMonth(null);
-                          setFilterRange({ from: null, to: null });
-                        } else {
-                          resetAllFilters();
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
+                                    {/* Lọc theo năm */}
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                                            🗓️ Theo năm
+                                        </label>
+                                        <DatePicker
+                                            picker="year"
+                                            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={
+                                                filterType === "year" && filterYear ? filterYear : null
+                                            }
+                                            onChange={(date) => {
+                                                if (date) {
+                                                    setFilterType("year");
+                                                    setFilterYear(date);
+                                                    setFilterDay(null);
+                                                    setFilterMonth(null);
+                                                    setFilterRange({ from: null, to: null });
+                                                } else {
+                                                    resetAllFilters();
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
 
                                 {/* Thông tin trạng thái filter */}
                                 {filterType && (
@@ -1624,7 +1623,7 @@ export default function ContentTable({ data }) {
                                                 />
                                             </svg>
                                             <span className="font-medium">
-                        Đang lọc:
+                                                Đang lọc:
                                                 {filterType === "day" &&
                                                     filterDay &&
                                                     ` Ngày ${filterDay.format("DD/MM/YYYY")}`}
@@ -1640,7 +1639,7 @@ export default function ContentTable({ data }) {
                                                     ` Từ ${filterRange.from.format(
                                                         "DD/MM/YYYY"
                                                     )} đến ${filterRange.to.format("DD/MM/YYYY")}`}
-                      </span>
+                                            </span>
                                         </div>
                                     </div>
                                 )}
@@ -1657,20 +1656,20 @@ export default function ContentTable({ data }) {
                     className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg flex items-center cursor-pointer select-none"
                     onClick={() => setShowOverview((prev) => !prev)}
                 >
-          <span className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
-            <svg
-                className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${showOverview ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-            Tổng quan
-          </span>
+                    <span className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
+                        <svg
+                            className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${showOverview ? "rotate-180" : ""}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                        Tổng quan
+                    </span>
                     <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
-            {showOverview ? "Ẩn tổng quan" : "Hiện tổng quan"}
-          </span>
+                        {showOverview ? "Ẩn tổng quan" : "Hiện tổng quan"}
+                    </span>
                 </div>
 
                 <AnimatePresence>
@@ -1684,91 +1683,91 @@ export default function ContentTable({ data }) {
                             {/* Thêm 6 ô tổng quan ở đây */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
                                 <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex flex-col items-center">
-                  <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">
-                    Doanh số (Mastertracking)
-                  </span>
+                                    <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">
+                                        Doanh số (Mastertracking)
+                                    </span>
                                     <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                    {totalMastertracking}
-                  </span>
+                                        {totalMastertracking}
+                                    </span>
                                 </div>
                                 <div className="bg-orange-100 dark:bg-orange-900/60 rounded-lg p-4 flex flex-col items-center">
-                  <span className="text-xs text-orange-700 dark:text-orange-300 font-semibold mb-1">
-                    Tổng Debit
-                  </span>
+                                    <span className="text-xs text-orange-700 dark:text-orange-300 font-semibold mb-1">
+                                        Tổng Debit
+                                    </span>
                                     <span className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-                    {formatCurrency(totalDebit)} VNĐ
-                  </span>
+                                        {formatCurrency(totalDebit)} VNĐ
+                                    </span>
                                 </div>
                                 <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4 flex flex-col items-center">
-                  <span className="w-full max-w-md text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">
-                    Tổng Thanh toán
-                  </span>
+                                    <span className="w-full max-w-md text-xs text-yellow-700 dark:text-yellow-300 font-semibold mb-1">
+                                        Tổng Thanh toán
+                                    </span>
                                     <span className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">
-                    {formatCurrency(totalPayment)} VNĐ
-                  </span>
+                                        {formatCurrency(totalPayment)} VNĐ
+                                    </span>
                                 </div>
                                 <div className="bg-green-100 dark:bg-green-900/60 rounded-lg p-4 flex flex-col items-center">
-                  <span className="text-xs text-green-800 dark:text-green-200 font-semibold mb-1">
-                    Tiền mặt:
-                  </span>
+                                    <span className="text-xs text-green-800 dark:text-green-200 font-semibold mb-1">
+                                        Tiền mặt:
+                                    </span>
                                     <span className="text-2xl font-bold text-green-800 dark:text-green-200">
-                    {formatCurrency(
-                        filteredMastertracking.reduce(
-                            (sum, item) =>
-                                sum +
-                                (item?.pricePayment?.cashPayment?.active
-                                    ? item?.pricePayment?.cashPayment?.price || 0
-                                    : 0),
-                            0
-                        )
-                    )}{" "}
+                                        {formatCurrency(
+                                            filteredMastertracking.reduce(
+                                                (sum, item) =>
+                                                    sum +
+                                                    (item?.pricePayment?.cashPayment?.active
+                                                        ? item?.pricePayment?.cashPayment?.price || 0
+                                                        : 0),
+                                                0
+                                            )
+                                        )}{" "}
                                         VNĐ
-                  </span>
+                                    </span>
                                 </div>
                                 <div className="bg-blue-100 dark:bg-blue-900/60 rounded-lg p-4 flex flex-col items-center">
-                  <span className="text-xs text-blue-800 dark:text-blue-200 font-semibold mb-1">
-                    Chuyển khoản:
-                  </span>
+                                    <span className="text-xs text-blue-800 dark:text-blue-200 font-semibold mb-1">
+                                        Chuyển khoản:
+                                    </span>
                                     <span className="text-2xl font-bold text-blue-800 dark:text-blue-200">
-                    {formatCurrency(
-                        filteredMastertracking.reduce(
-                            (sum, item) =>
-                                sum +
-                                (item?.pricePayment?.cardPayment?.active
-                                    ? item?.pricePayment?.cardPayment?.price || 0
-                                    : 0),
-                            0
-                        )
-                    )}{" "}
+                                        {formatCurrency(
+                                            filteredMastertracking.reduce(
+                                                (sum, item) =>
+                                                    sum +
+                                                    (item?.pricePayment?.cardPayment?.active
+                                                        ? item?.pricePayment?.cardPayment?.price || 0
+                                                        : 0),
+                                                0
+                                            )
+                                        )}{" "}
                                         VNĐ
-                  </span>
+                                    </span>
                                 </div>
                                 <div className="bg-purple-100 dark:bg-purple-900/60 rounded-lg p-4 flex flex-col items-center">
-                  <span className="text-xs text-purple-800 dark:text-purple-200 font-semibold mb-1">
-                    Doanh nghiệp:
-                  </span>
+                                    <span className="text-xs text-purple-800 dark:text-purple-200 font-semibold mb-1">
+                                        Doanh nghiệp:
+                                    </span>
                                     <span className="text-2xl font-bold text-purple-800 dark:text-purple-200">
-                    {formatCurrency(
-                        filteredMastertracking.reduce(
-                            (sum, item) =>
-                                sum +
-                                (item?.pricePayment?.businessCardPayment?.active
-                                    ? item?.pricePayment?.businessCardPayment?.price || 0
-                                    : 0),
-                            0
-                        )
-                    )}{" "}
+                                        {formatCurrency(
+                                            filteredMastertracking.reduce(
+                                                (sum, item) =>
+                                                    sum +
+                                                    (item?.pricePayment?.businessCardPayment?.active
+                                                        ? item?.pricePayment?.businessCardPayment?.price || 0
+                                                        : 0),
+                                                0
+                                            )
+                                        )}{" "}
                                         VNĐ
-                  </span>
+                                    </span>
                                 </div>
 
                                 <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 flex flex-col items-center">
-                  <span className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">
-                    Tổng Còn lại
-                  </span>
+                                    <span className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">
+                                        Tổng Còn lại
+                                    </span>
                                     <span className="text-2xl font-bold text-red-700 dark:text-red-300">
-                    {formatCurrency(totalRemaining)} VNĐ
-                  </span>
+                                        {formatCurrency(totalRemaining)} VNĐ
+                                    </span>
                                 </div>
                             </div>
 
@@ -1798,23 +1797,23 @@ export default function ContentTable({ data }) {
                             ))}
                         </select>
                         <span className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400">
-              <svg
-                  className="stroke-current"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                    d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
-                    stroke=""
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
-              </svg>
-            </span>
+                            <svg
+                                className="stroke-current"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
+                                    stroke=""
+                                    strokeWidth="1.2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+                        </span>
                     </div>
                     <span className="text-gray-500 dark:text-gray-400"> entries </span>
 
@@ -1913,9 +1912,9 @@ export default function ContentTable({ data }) {
                                     {/* Nhóm THÔNG TIN CƠ BẢN */}
                                     <div className="mb-2">
                                         <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        THÔNG TIN CƠ BẢN
-                      </span>
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                THÔNG TIN CƠ BẢN
+                                            </span>
                                             <div className="flex gap-1">
                                                 <button
                                                     onClick={() => {
@@ -2002,9 +2001,9 @@ export default function ContentTable({ data }) {
                                     {/* Nhóm PRICE */}
                                     <div className="mb-2">
                                         <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        PRICE
-                      </span>
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                PRICE
+                                            </span>
                                             <div className="flex gap-1">
                                                 <button
                                                     onClick={() => {
@@ -2069,9 +2068,9 @@ export default function ContentTable({ data }) {
                                     {/* Nhóm DEBIT */}
                                     <div className="mb-2">
                                         <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        DEBIT
-                      </span>
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                DEBIT
+                                            </span>
                                             <div className="flex gap-1">
                                                 <button
                                                     onClick={() => {
@@ -2156,9 +2155,9 @@ export default function ContentTable({ data }) {
                                     {/* Nhóm TOTAL AR */}
                                     <div className="mb-2">
                                         <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        TOTAL AR
-                      </span>
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                TOTAL AR
+                                            </span>
                                             <div className="flex gap-1">
                                                 <button
                                                     onClick={() => {
@@ -2213,9 +2212,9 @@ export default function ContentTable({ data }) {
                                     {/* Nhóm GRAND TOTAL */}
                                     <div className="mb-2">
                                         <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        GRAND TOTAL
-                      </span>
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                GRAND TOTAL
+                                            </span>
                                             <div className="flex gap-1">
                                                 <button
                                                     onClick={() => {
@@ -2282,9 +2281,9 @@ export default function ContentTable({ data }) {
                                     {/* Nhóm PAYMENT */}
                                     <div className="mb-2">
                                         <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        PAYMENT
-                      </span>
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                PAYMENT
+                                            </span>
                                             <div className="flex gap-1">
                                                 <button
                                                     onClick={() => {
@@ -2354,9 +2353,9 @@ export default function ContentTable({ data }) {
                                     {/* Nhóm PROFIT */}
                                     <div className="mb-2">
                                         <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        PROFIT
-                      </span>
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                PROFIT
+                                            </span>
                                             <div className="flex gap-1">
                                                 <button
                                                     onClick={() => {
@@ -2429,9 +2428,9 @@ export default function ContentTable({ data }) {
                                     {/* Nhóm HH */}
                                     <div className="mb-2">
                                         <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        HH
-                      </span>
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                HH
+                                            </span>
                                             <div className="flex gap-1">
                                                 <button
                                                     onClick={() => {
@@ -2486,9 +2485,9 @@ export default function ContentTable({ data }) {
                                     {/* Nhóm LƯƠNG THƯỞNG */}
                                     <div className="mb-2">
                                         <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        LƯƠNG THƯỞNG
-                      </span>
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                LƯƠNG THƯỞNG
+                                            </span>
                                             <div className="flex gap-1">
                                                 <button
                                                     onClick={() => {
@@ -2604,23 +2603,23 @@ export default function ContentTable({ data }) {
                 </div>
 
                 <div className="relative">
-          <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none left-4 top-1/2 dark:text-gray-400">
-            <svg
-                className="fill-current"
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M3.04199 9.37363C3.04199 5.87693 5.87735 3.04199 9.37533 3.04199C12.8733 3.04199 15.7087 5.87693 15.7087 9.37363C15.7087 12.8703 12.8733 15.7053 9.37533 15.7053C5.87735 15.7053 3.04199 12.8703 3.04199 9.37363ZM9.37533 1.54199C5.04926 1.54199 1.54199 5.04817 1.54199 9.37363C1.54199 13.6991 5.04926 17.2053 9.37533 17.2053C11.2676 17.2053 13.0032 16.5344 14.3572 15.4176L17.1773 18.238C17.4702 18.5309 17.945 18.5309 18.2379 18.238C18.5308 17.9451 18.5309 17.4703 18.238 17.1773L15.4182 14.3573C16.5367 13.0033 17.2087 11.2669 17.2087 9.37363C17.2087 5.04817 13.7014 1.54199 9.37533 1.54199Z"
-                  fill=""
-              />
-            </svg>
-          </span>
+                    <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none left-4 top-1/2 dark:text-gray-400">
+                        <svg
+                            className="fill-current"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                d="M3.04199 9.37363C3.04199 5.87693 5.87735 3.04199 9.37533 3.04199C12.8733 3.04199 15.7087 5.87693 15.7087 9.37363C15.7087 12.8703 12.8733 15.7053 9.37533 15.7053C5.87735 15.7053 3.04199 12.8703 3.04199 9.37363ZM9.37533 1.54199C5.04926 1.54199 1.54199 5.04817 1.54199 9.37363C1.54199 13.6991 5.04926 17.2053 9.37533 17.2053C11.2676 17.2053 13.0032 16.5344 14.3572 15.4176L17.1773 18.238C17.4702 18.5309 17.945 18.5309 18.2379 18.238C18.5308 17.9451 18.5309 17.4703 18.238 17.1773L15.4182 14.3573C16.5367 13.0033 17.2087 11.2669 17.2087 9.37363C17.2087 5.04817 13.7014 1.54199 9.37533 1.54199Z"
+                                fill=""
+                            />
+                        </svg>
+                    </span>
                     <input
                         type="text"
                         value={searchTerm}
@@ -2646,11 +2645,11 @@ export default function ContentTable({ data }) {
                 <div>
                     <Table className="w-full rounded-lg overflow-hidden shadow-sm select-none pointer-events-none">
                         <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
-                                     style={{
-                                         WebkitUserSelect: "none",
-                                         userSelect: "none",
-                                         msUserSelect: "none",
-                                     }}>
+                            style={{
+                                WebkitUserSelect: "none",
+                                userSelect: "none",
+                                msUserSelect: "none",
+                            }}>
                             <TableRow>
                                 {Object.entries(columnLabels)
                                     .filter(
@@ -2702,8 +2701,8 @@ export default function ContentTable({ data }) {
 
                                             {isToday(item.date_create) && (
                                                 <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-md animate-pulse">
-                          NEW
-                        </span>
+                                                    NEW
+                                                </span>
                                             )}
                                         </div>
                                     </TableCell>
@@ -2768,9 +2767,9 @@ export default function ContentTable({ data }) {
                                     )}
                                     {visibleColumns.company_service && (
                                         <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                        {item.company_service}
-                      </span>
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                                {item.company_service}
+                                            </span>
                                         </TableCell>
                                     )}
                                     {visibleColumns.inwh_date && (
@@ -2838,36 +2837,36 @@ export default function ContentTable({ data }) {
                                         <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                                             <div className="relative flex flex-col items-start space-y-2">
                                                 {(authorities.includes("ADMIN") ||
-                                                    authorities.includes("CS") ||
-                                                    authorities.includes("TRANSPORTER")) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            openModal();
-                                                            setBillEdit(item);
-                                                        }}
-                                                        className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                                    >
-                                                        <PencilIcon className="w-5 h-5" />
-                                                    </button>
-                                                )}
+                                                    authorities.includes("ACCOUNTANT") ||
+                                                    authorities.includes("BD")) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                openModal();
+                                                                setBillEdit(item);
+                                                            }}
+                                                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5" />
+                                                        </button>
+                                                    )}
 
                                                 {/* Giá trị tiền order */}
                                                 <div className="flex flex-col space-y-1 pt-6">
                                                     {/* Giá trị xanh */}
                                                     <div className="flex items-center space-x-2">
-                            <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
-                              {formatCurrency(item.priceOrder.total_complete)}{" "}
-                                VNĐ
-                            </span>
+                                                        <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                                                            {formatCurrency(item.priceOrder.total_complete)}{" "}
+                                                            VNĐ
+                                                        </span>
                                                     </div>
 
                                                     {/* Giá trị đỏ */}
                                                     <div className="flex items-center space-x-2">
-                            <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
-                              {formatCurrency(item.priceOrder.total_process)}{" "}
-                                VNĐ
-                            </span>
+                                                        <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                                                            {formatCurrency(item.priceOrder.total_process)}{" "}
+                                                            VNĐ
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2900,35 +2899,35 @@ export default function ContentTable({ data }) {
                                             <div className="relative flex flex-col items-start space-y-2">
                                                 {/* Nút để mở modal thanh toán */}
                                                 {(authorities.includes("ADMIN") ||
-                                                    authorities.includes("CS") ||
-                                                    authorities.includes("TRANSPORTER")) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setEditType("CASH"); // Thêm dòng này
-                                                            handleViewPaymentDetails(item);
-                                                        }}
-                                                        className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                                    >
-                                                        <PencilIcon className="w-5 h-5" />
-                                                    </button>
-                                                )}
+                                                    authorities.includes("BD") ||
+                                                    authorities.includes("ACCOUNTANT")) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setEditType("CASH"); // Thêm dòng này
+                                                                handleViewPaymentDetails(item);
+                                                            }}
+                                                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5" />
+                                                        </button>
+                                                    )}
 
                                                 {/* Giá trị tiền order */}
                                                 <div className="flex flex-col space-y-1 pt-6">
                                                     {/* Giá trị xanh */}
                                                     <div className="flex items-center space-x-2">
-                            <span
-                                className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cashPayment.active
-                                    ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                    : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                                }`}
-                            >
-                              {formatCurrency(
-                                  item.pricePayment.cashPayment.price
-                              )}{" "}
-                                VNĐ
-                            </span>
+                                                        <span
+                                                            className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cashPayment.active
+                                                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                                                }`}
+                                                        >
+                                                            {formatCurrency(
+                                                                item.pricePayment.cashPayment.price
+                                                            )}{" "}
+                                                            VNĐ
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2940,35 +2939,35 @@ export default function ContentTable({ data }) {
                                             <div className="relative flex flex-col items-start space-y-2">
                                                 {/* Nút để mở modal thanh toán */}
                                                 {(authorities.includes("ADMIN") ||
-                                                    authorities.includes("CS") ||
-                                                    authorities.includes("TRANSPORTER")) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setEditType("CARD"); // Thêm dòng này
-                                                            handleViewPaymentDetails(item);
-                                                        }}
-                                                        className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                                    >
-                                                        <PencilIcon className="w-5 h-5" />
-                                                    </button>
-                                                )}
+                                                    authorities.includes("ACCOUNTANT") ||
+                                                    authorities.includes("BD")) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setEditType("CARD"); // Thêm dòng này
+                                                                handleViewPaymentDetails(item);
+                                                            }}
+                                                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5" />
+                                                        </button>
+                                                    )}
 
                                                 {/* Giá trị tiền order */}
                                                 <div className="flex flex-col space-y-1 pt-6">
                                                     {/* Giá trị xanh */}
                                                     <div className="flex items-center space-x-2">
-                            <span
-                                className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cardPayment.active
-                                    ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                    : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                                }`}
-                            >
-                              {formatCurrency(
-                                  item.pricePayment.cardPayment.price
-                              )}{" "}
-                                VNĐ
-                            </span>
+                                                        <span
+                                                            className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cardPayment.active
+                                                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                                                }`}
+                                                        >
+                                                            {formatCurrency(
+                                                                item.pricePayment.cardPayment.price
+                                                            )}{" "}
+                                                            VNĐ
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2979,35 +2978,35 @@ export default function ContentTable({ data }) {
                                             <div className="relative flex flex-col items-start space-y-2">
                                                 {/* Nút để mở modal thanh toán */}
                                                 {(authorities.includes("ADMIN") ||
-                                                    authorities.includes("CS") ||
-                                                    authorities.includes("TRANSPORTER")) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setEditType("BUSINESS_CARD"); // Thêm dòng này
-                                                            handleViewPaymentDetails(item);
-                                                        }}
-                                                        className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                                    >
-                                                        <PencilIcon className="w-5 h-5" />
-                                                    </button>
-                                                )}
+                                                    authorities.includes("ACCOUNTANT") ||
+                                                    authorities.includes("BD")) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setEditType("BUSINESS_CARD"); // Thêm dòng này
+                                                                handleViewPaymentDetails(item);
+                                                            }}
+                                                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5" />
+                                                        </button>
+                                                    )}
 
                                                 {/* Giá trị tiền order */}
                                                 <div className="flex flex-col space-y-1 pt-6">
                                                     {/* Giá trị xanh */}
                                                     <div className="flex items-center space-x-2">
-                            <span
-                                className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.businessCardPayment.active
-                                    ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                    : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                                }`}
-                            >
-                              {formatCurrency(
-                                  item.pricePayment.businessCardPayment.price
-                              )}{" "}
-                                VNĐ
-                            </span>
+                                                        <span
+                                                            className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.businessCardPayment.active
+                                                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                                                }`}
+                                                        >
+                                                            {formatCurrency(
+                                                                item.pricePayment.businessCardPayment.price
+                                                            )}{" "}
+                                                            VNĐ
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -3116,9 +3115,9 @@ export default function ContentTable({ data }) {
                                             <div className="flex items-center space-x-2">
                                                 <StatusBadge status={item.status_payment} />
 
-                                                {authorities.includes("ADMIN") ||
-                                                authorities.includes("CS") ||
-                                                authorities.includes("TRANSPORTER") ? (
+                                                {(authorities.includes("ADMIN") ||
+                                                    authorities.includes("ACCOUNTANT") ||
+                                                    authorities.includes("BD")) ? (
                                                     <select
                                                         value={item.status_payment || "pending"}
                                                         onChange={(e) =>
@@ -3191,194 +3190,195 @@ export default function ContentTable({ data }) {
                         </button>
                     </div>
 
-          {/* Form */}
-          <form className="space-y-6">
-            {/* Package Section */}
-            {authorities.includes("ADMIN") && (
-              <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                    Quản lý Price Orders
-                  </h4>
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-2 mt-2 inline-block shadow-sm">
-                    <span className="text-sm font-bold text-black dark:text-white">
-                      Tổng giá:&nbsp;
-                      <span className="text-base text-black dark:text-white">
-                        {priceOrders
-                          .filter((order) => order.active) // chỉ cộng order đã xác nhận
-                          .reduce(
-                            (sum, order) =>
-                              sum + (parseFloat(order.price) || 0),
-                            0
-                          )
-                          .toLocaleString()}{" "}
-                        VNĐ
-                      </span>
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const currentDate = new Date();
-                      const formattedDate = `${currentDate.getDate()}/${
-                        currentDate.getMonth() + 1
-                      }/${currentDate.getFullYear()}`;
-                      const newPriceOrder = {
-                        id: "",
-                        name: "",
-                        price: "",
-                        description: "",
-                        date: formattedDate,
-                      };
-                      setPriceOrders([...priceOrders, newPriceOrder]);
-                    }}
-                    className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                  >
-                    <PlusIcon className="w-4 h-4 mr-1" />
-                    Thêm Price Order
-                  </button>
-                </div>
+                    {/* Form */}
+                    <form className="space-y-6">
+                        {/* Package Section */}
+                        {(authorities.includes("ADMIN") ||
+                            authorities.includes("ACCOUNTANT") ||
+                            authorities.includes("BD")) && (
+                                <div className="space-y-6">
+                                    {/* Header */}
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
+                                            Quản lý Price Orders
+                                        </h4>
+                                        <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-2 mt-2 inline-block shadow-sm">
+                                            <span className="text-sm font-bold text-black dark:text-white">
+                                                Tổng giá:&nbsp;
+                                                <span className="text-base text-black dark:text-white">
+                                                    {priceOrders
+                                                        .filter((order) => order.active) // chỉ cộng order đã xác nhận
+                                                        .reduce(
+                                                            (sum, order) =>
+                                                                sum + (parseFloat(order.price) || 0),
+                                                            0
+                                                        )
+                                                        .toLocaleString()}{" "}
+                                                    VNĐ
+                                                </span>
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const currentDate = new Date();
+                                                const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
+                                                    }/${currentDate.getFullYear()}`;
+                                                const newPriceOrder = {
+                                                    id: "",
+                                                    name: "",
+                                                    price: "",
+                                                    description: "",
+                                                    date: formattedDate,
+                                                };
+                                                setPriceOrders([...priceOrders, newPriceOrder]);
+                                            }}
+                                            className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                        >
+                                            <PlusIcon className="w-4 h-4 mr-1" />
+                                            Thêm Price Order
+                                        </button>
+                                    </div>
 
-                {/* Price Order List */}
-                <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
-                  {(priceOrders || []).map((order, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
-                    >
-                      {/* STT */}
-                      <div className="w-1/12 text-center">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {index + 1}
-                        </p>
-                      </div>
+                                    {/* Price Order List */}
+                                    <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
+                                        {(priceOrders || []).map((order, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                                            >
+                                                {/* STT */}
+                                                <div className="w-1/12 text-center">
+                                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        {index + 1}
+                                                    </p>
+                                                </div>
 
-                                            {/* Name */}
-                                            <div className="w-full sm:w-1/4">
-                                                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                    Tên
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={order.name}
-                                                    onChange={(e) => {
-                                                        const updatedOrders = [...priceOrders];
-                                                        updatedOrders[index].name = e.target.value;
-                                                        setPriceOrders(updatedOrders);
-                                                    }}
-                                                    className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                                                />
-                                            </div>
-
-                                            {/* Price */}
-                                            <div className="w-full sm:w-1/4">
-                                                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                    Giá
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    value={order.price}
-                                                    onChange={(e) => {
-                                                        const updatedOrders = [...priceOrders];
-                                                        updatedOrders[index].price = e.target.value;
-                                                        setPriceOrders(updatedOrders);
-                                                    }}
-                                                    className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                                                />
-                                            </div>
-
-                                            {/* Description */}
-                                            <div className="w-full sm:w-1/4">
-                                                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                    Mô tả
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={order.description}
-                                                    onChange={(e) => {
-                                                        const updatedOrders = [...priceOrders];
-                                                        updatedOrders[index].description = e.target.value;
-                                                        setPriceOrders(updatedOrders);
-                                                    }}
-                                                    className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                                                />
-                                            </div>
-
-                      {/* DateTime */}
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Ngày tạo
-                        </label>
-                        <input
-                          type="text"
-                          value={order.created_at || "Chưa có ngày tạo"}
-                          readOnly
-                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
-
-                                            {/* Buttons */}
-                                            <div className="flex items-center gap-2">
-                                                {order.id === "" ? (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const dataRequest = {
-                                                                id: order.id,
-                                                                name: order.name,
-                                                                price: order.price,
-                                                                description: order.description,
-                                                                bill_id: billEdit.bill_house,
-                                                            };
-                                                            handleCreatePriceOrder(dataRequest);
-                                                            setIsDataChanged(true);
+                                                {/* Name */}
+                                                <div className="w-full sm:w-1/4">
+                                                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Tên
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={order.name}
+                                                        onChange={(e) => {
+                                                            const updatedOrders = [...priceOrders];
+                                                            updatedOrders[index].name = e.target.value;
+                                                            setPriceOrders(updatedOrders);
                                                         }}
-                                                        className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-                                                    >
-                                                        Lưu
-                                                    </button>
-                                                ) : (
-                                                    !order.active && (
+                                                        className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                    />
+                                                </div>
+
+                                                {/* Price */}
+                                                <div className="w-full sm:w-1/4">
+                                                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Giá
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        value={order.price}
+                                                        onChange={(e) => {
+                                                            const updatedOrders = [...priceOrders];
+                                                            updatedOrders[index].price = e.target.value;
+                                                            setPriceOrders(updatedOrders);
+                                                        }}
+                                                        className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                    />
+                                                </div>
+
+                                                {/* Description */}
+                                                <div className="w-full sm:w-1/4">
+                                                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Mô tả
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={order.description}
+                                                        onChange={(e) => {
+                                                            const updatedOrders = [...priceOrders];
+                                                            updatedOrders[index].description = e.target.value;
+                                                            setPriceOrders(updatedOrders);
+                                                        }}
+                                                        className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                    />
+                                                </div>
+
+                                                {/* DateTime */}
+                                                <div className="w-full sm:w-1/4">
+                                                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Ngày tạo
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={order.created_at || "Chưa có ngày tạo"}
+                                                        readOnly
+                                                        className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                                                    />
+                                                </div>
+
+                                                {/* Buttons */}
+                                                <div className="flex items-center gap-2">
+                                                    {order.id === "" ? (
                                                         <button
                                                             type="button"
-                                                            onClick={async () => {
-                                                                await PutPriceOrder(order.id);
-                                                                order.active = true;
-                                                                const updatedOrders = [...priceOrders];
-                                                                updatedOrders[index] = order;
-                                                                setPriceOrders(updatedOrders);
+                                                            onClick={() => {
+                                                                const dataRequest = {
+                                                                    id: order.id,
+                                                                    name: order.name,
+                                                                    price: order.price,
+                                                                    description: order.description,
+                                                                    bill_id: billEdit.bill_house,
+                                                                };
+                                                                handleCreatePriceOrder(dataRequest);
                                                                 setIsDataChanged(true);
                                                             }}
-                                                            className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
                                                         >
-                                                            Xác nhận
+                                                            Lưu
                                                         </button>
-                                                    )
-                                                )}
-                                                <button
-                                                    type="button"
-                                                    onClick={async () => {
-                                                        const updatedOrders = priceOrders.filter(
-                                                            (_, i) => i !== index
-                                                        );
-                                                        setPriceOrders(updatedOrders);
+                                                    ) : (
+                                                        !order.active && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={async () => {
+                                                                    await PutPriceOrder(order.id);
+                                                                    order.active = true;
+                                                                    const updatedOrders = [...priceOrders];
+                                                                    updatedOrders[index] = order;
+                                                                    setPriceOrders(updatedOrders);
+                                                                    setIsDataChanged(true);
+                                                                }}
+                                                                className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                                            >
+                                                                Xác nhận
+                                                            </button>
+                                                        )
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        onClick={async () => {
+                                                            const updatedOrders = priceOrders.filter(
+                                                                (_, i) => i !== index
+                                                            );
+                                                            setPriceOrders(updatedOrders);
 
-                                                        await DeletePriceOrder(order.id);
-                                                        setIsDataChanged(true);
+                                                            await DeletePriceOrder(order.id);
+                                                            setIsDataChanged(true);
 
-                                                        props.setDataBill(updatedDataBill); // Giả sử bạn có hàm `setDataBill` để cập nhật `dataBill`
-                                                    }}
-                                                    className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                                                >
-                                                    Xóa
-                                                </button>
+                                                            props.setDataBill(updatedDataBill); // Giả sử bạn có hàm `setDataBill` để cập nhật `dataBill`
+                                                        }}
+                                                        className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                                    >
+                                                        Xóa
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
                         {/* Action Buttons */}
                         <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
@@ -3415,8 +3415,9 @@ export default function ContentTable({ data }) {
                         <h3 className="text-xl font-bold text-gray-800 dark:text-white">
                             Chi tiết thanh toán: HB{billEdit.bill_house?.substring(0, 5)}
                         </h3>
-                        {authorities.includes("ADMIN") ||
-                            (authorities.includes("CS") && (
+                        {((authorities.includes("ADMIN") ||
+                            authorities.includes("ACCOUNTANT") ||
+                            authorities.includes("BD")) && (
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -3457,8 +3458,8 @@ export default function ContentTable({ data }) {
                                                     type="number"
                                                     value={
                                                         cashPayment.price === 0 &&
-                                                        document.activeElement ===
-                                                        document.getElementById("cash-input")
+                                                            document.activeElement ===
+                                                            document.getElementById("cash-input")
                                                             ? ""
                                                             : cashPayment.price
                                                     }
@@ -3551,8 +3552,8 @@ export default function ContentTable({ data }) {
                                                     type="number"
                                                     value={
                                                         bankingPayment.price === 0 &&
-                                                        document.activeElement ===
-                                                        document.getElementById("banking-input")
+                                                            document.activeElement ===
+                                                            document.getElementById("banking-input")
                                                             ? ""
                                                             : bankingPayment.price
                                                     }
@@ -3645,8 +3646,8 @@ export default function ContentTable({ data }) {
                                                     type="number"
                                                     value={
                                                         businessBankingPayment.price === 0 &&
-                                                        document.activeElement ===
-                                                        document.getElementById("business-input")
+                                                            document.activeElement ===
+                                                            document.getElementById("business-input")
                                                             ? ""
                                                             : businessBankingPayment.price
                                                     }

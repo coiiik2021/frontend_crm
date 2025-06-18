@@ -261,26 +261,26 @@ export default function InvoiceMain({ bill_id, recipientInfo, packages, products
     const worksheet = workbook.addWorksheet('Invoice');
 
     worksheet.columns = [
-        { width: 2 },    // A
-        { width: 20 },   // B
-        { width: 15 },   // C
-        { width: 30 },   // D
-        { width: 15 },   // E
-        { width: 15 },   // F
-        { width: 15 },   // G
-        { width: 15 },   // H
-        { width: 15 },   // I
-        { width: 15 },
-        { width: 15 }
+      { width: 2 },    // A
+      { width: 20 },   // B
+      { width: 15 },   // C
+      { width: 30 },   // D
+      { width: 15 },   // E
+      { width: 15 },   // F
+      { width: 15 },   // G
+      { width: 15 },   // H
+      { width: 15 },   // I
+      { width: 15 },
+      { width: 15 }
     ];
 
     // Set default font size for cells with values
     worksheet.eachRow((row) => {
-        row.eachCell((cell) => {
-            if (cell.value && !cell.font) {
-                cell.font = { size: 12 };
-            }
-        });
+      row.eachCell((cell) => {
+        if (cell.value && !cell.font) {
+          cell.font = { size: 12 };
+        }
+      });
     });
 
     const titleRow = worksheet.addRow(['', 'INVOICE', '', '', '', '', '', '', '', '', '']);
@@ -304,23 +304,23 @@ export default function InvoiceMain({ bill_id, recipientInfo, packages, products
 
     const company = worksheet.addRow(['', 'Company Name', shipper.companyName, '', '', '', '', '', '', shippingMethod, '']);
     company.getCell(3).font = { bold: true, size: 12 }
-    company.getCell(2).font = {size: 12 }
+    company.getCell(2).font = { size: 12 }
     company.getCell(10).font = { bold: true, size: 12 }
-    const noOfpkgs = worksheet.addRow(['', 'Address', shipper.address, '', '', '', '', '', 'No. of pkgs', '1','']);
+    const noOfpkgs = worksheet.addRow(['', 'Address', shipper.address, '', '', '', '', '', 'No. of pkgs', '1', '']);
     noOfpkgs.getCell(9).font = { bold: true, size: 12 }
-    noOfpkgs.getCell(2).font = {size: 12 }
-    noOfpkgs.getCell(3).font = {size: 12 }
+    noOfpkgs.getCell(2).font = { size: 12 }
+    noOfpkgs.getCell(3).font = { size: 12 }
     noOfpkgs.getCell(10).border = { bottom: { style: 'thin' } }
     noOfpkgs.getCell(10).font = { size: 12 }
-    const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.areaCode, '', '', '', '', '', 'Weight', weight,'']);
+    const rowWeight = worksheet.addRow(['', 'Town/ Area Code', shipper.areaCode, '', '', '', '', '', 'Weight', weight, '']);
     rowWeight.getCell(9).font = { bold: true, size: 12 }
-    rowWeight.getCell(2).font = {size: 12 }
-    rowWeight.getCell(3).font = {size: 12 }
+    rowWeight.getCell(2).font = { size: 12 }
+    rowWeight.getCell(3).font = { size: 12 }
     rowWeight.getCell(10).border = { bottom: { style: 'thin' } }
     rowWeight.getCell(10).font = { size: 12 }
-    const rowDimensions = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '', '', '', 'Dimensions', dimensions[0],'']);
+    const rowDimensions = worksheet.addRow(['', 'State/ Country', 'VIETNAM', '', '', '', '', '', 'Dimensions', dimensions[0], '']);
     rowDimensions.getCell(3).font = { bold: true, size: 12 }
-    rowDimensions.getCell(2).font = {size: 12 }
+    rowDimensions.getCell(2).font = { size: 12 }
     rowDimensions.getCell(9).font = { bold: true, size: 12 }
     rowDimensions.getCell(10).border = { bottom: { style: 'thin' } }
     rowDimensions.getCell(10).font = { size: 12 }
@@ -381,17 +381,17 @@ export default function InvoiceMain({ bill_id, recipientInfo, packages, products
     worksheet.mergeCells('C18:H18');
 
     const headerRow = worksheet.addRow([
-        '',
-        'Full Description of Goods\n(Name of goods, composition of material, marks, etc)',
-        '',
-        '',
-        'ORIGINAL',
-        'HS CODE',
-        'Q\'Ty\n(pcs)',
-        '',
-        'Unit Price\n(in USD)',
-        'Subtotal\n(in USD)',
-        'Uses\n(If any)'
+      '',
+      'Full Description of Goods\n(Name of goods, composition of material, marks, etc)',
+      '',
+      '',
+      'ORIGINAL',
+      'HS CODE',
+      'Q\'Ty\n(pcs)',
+      '',
+      'Unit Price\n(in USD)',
+      'Subtotal\n(in USD)',
+      'Uses\n(If any)'
     ]);
     headerRow.height = 45; // Tăng chiều cao để hiển thị xuống dòng
 
@@ -400,78 +400,78 @@ export default function InvoiceMain({ bill_id, recipientInfo, packages, products
     worksheet.mergeCells('G20:H20');
 
     headerRow.eachCell((cell, colNumber) => {
-        if (colNumber !== 1) {
-            cell.font = { bold: true, size: 12 };
-            cell.alignment = {
-                horizontal: 'center',
-                vertical: 'middle',
-                wrapText: true  // cho phép xuống dòng trong ô
-            };
-            cell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'FFF0F0F0' }
-            };
-            cell.border = {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' }
-            };
-        }
+      if (colNumber !== 1) {
+        cell.font = { bold: true, size: 12 };
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+          wrapText: true  // cho phép xuống dòng trong ô
+        };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF0F0F0' }
+        };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+      }
     });
 
     items.forEach(item => {
-        const row = worksheet.addRow([
-            '',
-            item.description,
-            '',
-            '',
-            item.origin,
-            '',
-            item.quantity,
-            item.unit,
-            item.unitPrice,
-            item.subtotal,
-            ''
-        ]);
-        row.height = 250;
+      const row = worksheet.addRow([
+        '',
+        item.description,
+        '',
+        '',
+        item.origin,
+        '',
+        item.quantity,
+        item.unit,
+        item.unitPrice,
+        item.subtotal,
+        ''
+      ]);
+      row.height = 250;
 
-        worksheet.mergeCells(`B${row.number}:D${row.number}`);
+      worksheet.mergeCells(`B${row.number}:D${row.number}`);
 
-        row.eachCell((cell, colNumber) => {
-            if (colNumber !== 1) {
-                cell.font = { name: 'Times New Roman', size: 14 };
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'thin' },
-                    right: { style: 'thin' }
-                };
+      row.eachCell((cell, colNumber) => {
+        if (colNumber !== 1) {
+          cell.font = { name: 'Times New Roman', size: 14 };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
 
-                if (colNumber === 2) {
-                    cell.alignment = { wrapText: true, vertical: 'top' };
-                } else if (colNumber >= 5 && colNumber <= 10) {
-                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                }
-            }
-        });
+          if (colNumber === 2) {
+            cell.alignment = { wrapText: true, vertical: 'top' };
+          } else if (colNumber >= 5 && colNumber <= 10) {
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          }
+        }
+      });
     });
 
 
     const totalRow = worksheet.addRow(['', '', '', '', '', '', 'Total Value (in USD)', '', '', totalValue]);
 
     totalRow.eachCell((cell, colNumber) => {
-        if (colNumber === 7 || colNumber === 10) {
-            cell.font = { name: 'Times New Roman', size: 14, bold: true };
-            cell.border = {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' }
-            };
-            cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        }
+      if (colNumber === 7 || colNumber === 10) {
+        cell.font = { name: 'Times New Roman', size: 14, bold: true };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      }
     });
 
     worksheet.mergeCells('G' + totalRow.number + ':I' + totalRow.number);
@@ -491,16 +491,16 @@ export default function InvoiceMain({ bill_id, recipientInfo, packages, products
 
     const lastRow = worksheet.lastRow?.number || 0;
     if (lastRow > 0) {
-        worksheet.mergeCells('B' + (lastRow - 7) + ':C' + (lastRow - 7));
-        worksheet.mergeCells('D' + (lastRow - 7) + ':K' + (lastRow - 7));
-        worksheet.mergeCells('B' + (lastRow - 6) + ':K' + (lastRow - 6));
-        worksheet.mergeCells('B' + (lastRow - 5) + ':K' + (lastRow - 5));
-        worksheet.mergeCells('G' + (lastRow - 4) + ':K' + (lastRow - 4));
-        worksheet.mergeCells('C' + (lastRow - 4) + ':F' + (lastRow - 4));
-        worksheet.mergeCells('B' + (lastRow - 3) + ':K' + (lastRow - 3));
-        worksheet.mergeCells('B' + (lastRow - 2) + ':K' + (lastRow - 2));
-        worksheet.mergeCells('G' + (lastRow - 1) + ':K' + (lastRow - 1));
-        worksheet.mergeCells('G' + lastRow + ':K' + lastRow);
+      worksheet.mergeCells('B' + (lastRow - 7) + ':C' + (lastRow - 7));
+      worksheet.mergeCells('D' + (lastRow - 7) + ':K' + (lastRow - 7));
+      worksheet.mergeCells('B' + (lastRow - 6) + ':K' + (lastRow - 6));
+      worksheet.mergeCells('B' + (lastRow - 5) + ':K' + (lastRow - 5));
+      worksheet.mergeCells('G' + (lastRow - 4) + ':K' + (lastRow - 4));
+      worksheet.mergeCells('C' + (lastRow - 4) + ':F' + (lastRow - 4));
+      worksheet.mergeCells('B' + (lastRow - 3) + ':K' + (lastRow - 3));
+      worksheet.mergeCells('B' + (lastRow - 2) + ':K' + (lastRow - 2));
+      worksheet.mergeCells('G' + (lastRow - 1) + ':K' + (lastRow - 1));
+      worksheet.mergeCells('G' + lastRow + ':K' + lastRow);
     }
 
     worksheet.getCell('G' + (lastRow - 1)).alignment = { vertical: 'middle', horizontal: 'center' };
@@ -516,24 +516,24 @@ export default function InvoiceMain({ bill_id, recipientInfo, packages, products
     // });
 
     for (let rowNum = lastRow; rowNum >= lastRow - 7; rowNum--) {
-        const row = worksheet.getRow(rowNum);
-        row.eachCell((cell) => {
-            cell.font = {
-                name: 'Century Gothic',
-                size: 12
-            };
-        });
+      const row = worksheet.getRow(rowNum);
+      row.eachCell((cell) => {
+        cell.font = {
+          name: 'Century Gothic',
+          size: 12
+        };
+      });
     }
 
     const sRow = 4, eRow = 18;
     const col = 3;
 
     for (let row = sRow; row <= eRow; row++) {
-        if (row !== 11 && row !== 12) {
-            worksheet.getCell(row, col).border = {
-                bottom: { style: 'thin' }
-            };
-        }
+      if (row !== 11 && row !== 12) {
+        worksheet.getCell(row, col).border = {
+          bottom: { style: 'thin' }
+        };
+      }
     }
 
 
@@ -541,76 +541,76 @@ export default function InvoiceMain({ bill_id, recipientInfo, packages, products
     const colIndex = 10;
 
     dimensions.forEach((d, index) => {
-        if (index !== 0) {
-            const row = startRow + index;
-            const col = colIndex;
+      if (index !== 0) {
+        const row = startRow + index;
+        const col = colIndex;
 
-            worksheet.getCell(row, col).value = d;
-            worksheet.getCell(row, col).border = { bottom: { style: 'thin' } };
-            worksheet.getCell(row, col).font = { size: 12 };
-            worksheet.mergeCells(row, col, row, col + 1);
-        }
+        worksheet.getCell(row, col).value = d;
+        worksheet.getCell(row, col).border = { bottom: { style: 'thin' } };
+        worksheet.getCell(row, col).font = { size: 12 };
+        worksheet.mergeCells(row, col, row, col + 1);
+      }
     });
 
 
     //Shipping Mark
     dimensions.forEach((dim, index) => {
-        const sheetName = `ShippingMark ${index + 1}`;
-        const sheet = workbook.addWorksheet(sheetName);
-        const totalDimensions = dimensions.length;
+      const sheetName = `ShippingMark ${index + 1}`;
+      const sheet = workbook.addWorksheet(sheetName);
+      const totalDimensions = dimensions.length;
 
-        sheet.pageSetup = {
-            paperSize: 9,
-            orientation: 'landscape',
-            fitToPage: true,
-            fitToWidth: 1,
-            fitToHeight: 0,
-            margins: {
-                left: 0.5, right: 0.5,
-                top: 0.75, bottom: 0.75,
-                header: 0.3, footer: 0.3
-            }
-        };
+      sheet.pageSetup = {
+        paperSize: 9,
+        orientation: 'landscape',
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+        margins: {
+          left: 0.5, right: 0.5,
+          top: 0.75, bottom: 0.75,
+          header: 0.3, footer: 0.3
+        }
+      };
 
-        sheet.columns = [
-            { width: 20 },
-            { width: 50 }
-        ];
+      sheet.columns = [
+        { width: 20 },
+        { width: 50 }
+      ];
 
-        const rows = [
-            ['', 'SHIP TO', '', '', '', '', '', '', '', '', ''],
-            ['SHIP TO', consignee.company, '', '', '', '', '', '', '', '', ''],
-            ['ADD', consignee.address, '', '', '', '', '', '', '', '', ''],
-            ['ATTN', consignee.company, '', '', '', '', '', '', '', '', ''],
-            ['CARTON', `${index + 1}/${totalDimensions}`, '', '', '', '', '', '', '', '', ''],
-            ['', shippingMethod, '', '', '', '', '', '', '', '', ''],
-            ['', '7777', '', '', '', '', '', '', '', '', '']
-        ];
+      const rows = [
+        ['', 'SHIP TO', '', '', '', '', '', '', '', '', ''],
+        ['SHIP TO', consignee.company, '', '', '', '', '', '', '', '', ''],
+        ['ADD', consignee.address, '', '', '', '', '', '', '', '', ''],
+        ['ATTN', consignee.company, '', '', '', '', '', '', '', '', ''],
+        ['CARTON', `${index + 1}/${totalDimensions}`, '', '', '', '', '', '', '', '', ''],
+        ['', shippingMethod, '', '', '', '', '', '', '', '', ''],
+        ['', '7777', '', '', '', '', '', '', '', '', '']
+      ];
 
-        rows.forEach((data, rowIndex) => {
-            const row = sheet.addRow(data);
-            row.eachCell((cell) => {
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'thin' },
-                    right: { style: 'thin' }
-                };
-                cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-            });
+      rows.forEach((data, rowIndex) => {
+        const row = sheet.addRow(data);
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
         });
+      });
 
-        sheet.getColumn('A').font = { name: 'Times New Roman', size: 20 };
-        sheet.getColumn('B').font = { name: 'Times New Roman', size: 30, bold: true };
-        sheet.getCell('B1').font = { name: 'Times New Roman', size: 20 }
-        sheet.getColumn('B').width = 40;
-        sheet.mergeCells('B1:K1');
-        sheet.mergeCells('B2:K2');
-        sheet.mergeCells('B3:K3');
-        sheet.mergeCells('B4:K4');
-        sheet.mergeCells('B5:K5');
-        sheet.mergeCells('B6:K6');
-        sheet.mergeCells('B7:K7');
+      sheet.getColumn('A').font = { name: 'Times New Roman', size: 20 };
+      sheet.getColumn('B').font = { name: 'Times New Roman', size: 30, bold: true };
+      sheet.getCell('B1').font = { name: 'Times New Roman', size: 20 }
+      sheet.getColumn('B').width = 40;
+      sheet.mergeCells('B1:K1');
+      sheet.mergeCells('B2:K2');
+      sheet.mergeCells('B3:K3');
+      sheet.mergeCells('B4:K4');
+      sheet.mergeCells('B5:K5');
+      sheet.mergeCells('B6:K6');
+      sheet.mergeCells('B7:K7');
     });
 
 
@@ -850,81 +850,7 @@ export default function InvoiceMain({ bill_id, recipientInfo, packages, products
         </div>
       )}
 
-      {!isConfirmed && (
-        <div className="mt-8 border-t pt-4">
-          <div className="flex flex-col items-end space-y-3">
-            <div className="flex items-center justify-between w-1/3">
-              <label className="font-medium">Tổng cũ:</label>
-              <input
-                type="text"
-                value={formatCurrency((selectedService.priceNet + (selectedService.overSize ? selectedService.overSize.price : 0)) * (1 + selectedService.constPPXD / 100) * (1 + selectedService.constVAT / 100) + priceTransport)}
-                className="border-2 border-gray-300 rounded-md p-2 w-48 text-right bg-gray-100"
-                readOnly
-              />
-            </div>
 
-
-
-            <div className="flex items-center justify-between w-1/3">
-              <label className="font-medium">Tiền vận chuyển (VND):</label>
-              <input
-                type="text"
-                value={formatCurrency(priceNetNew)}
-                className="border-2 border-gray-300 rounded-md p-2 w-48 text-right"
-                onChange={(e) => handlePriceChange(e.target.value, setPriceNetNew)}
-                onBlur={handlePriceConfirm}
-                onKeyDown={e => { if (e.key === 'Enter') handlePriceConfirm(); }}
-              />
-            </div>
-            <div className="flex items-center justify-between w-1/3">
-              <label className="font-medium">Phụ phí khác (VND):</label>
-              <input
-                type="text"
-                value={formatCurrency(priceTransport)}
-                className="border-2 border-gray-300 rounded-md p-2 w-48 text-right"
-                onChange={(e) => handlePriceChange(e.target.value, setPriceTransport)}
-              />
-            </div>
-
-
-          </div>
-          <div className="mt-6">
-            <button
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200"
-              onClick={async () => {
-                setPriceNetConfirm(serviceSelectNew.priceNet);
-                setPriceOtherConfirm(priceTransport);
-                setIsConfirmed(true);
-                await handleUpdatePriceOrder();
-              }}
-            >
-              Xác nhận thay đổi
-            </button>
-          </div>
-        </div>
-      )}
-
-      {isConfirmed && (
-
-        <div className="mt-8 border-t pt-4 flex flex-col items-end space-y-3">
-          <div className="flex items-center justify-between w-1/3 pt-3 border-t">
-
-            <label className="font-medium">Tổng cộng:</label>
-            <span className="font-bold text-lg text-blue-600 flex items-center space-x-2">
-              {formatCurrency(priceNet + priceTransport)} VND
-              <button
-                className="ml-2 text-gray-500 hover:text-blue-600"
-                onClick={() => setIsConfirmed(false)}
-                title="Chỉnh sửa"
-              >
-                <svg className="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m2-2l-6 6m2-2l6-6" />
-                </svg>
-              </button>
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

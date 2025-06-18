@@ -73,7 +73,7 @@ export default function InvoiceDetail({ bill_id }: { bill_id: string }) {
         }
 
         const dataRequestAPI = await axios.get(
-          "http://localhost:8080/api/invoice/" + id
+          import.meta.env.VITE_API_URL + "invoice/" + id
         );
 
         const data = dataRequestAPI.data.data;
