@@ -4,4 +4,9 @@ const APILogin = async (data) => {
     return await axios.post(API, data);
 }
 
-export { APILogin };
+const APIResetPassword = async (email) => {
+    const API = `account/reset/${email}`;
+    return await axios.put(API);
+}
+
+export { APILogin, APIResetPassword };

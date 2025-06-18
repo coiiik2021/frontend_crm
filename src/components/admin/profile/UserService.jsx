@@ -250,7 +250,7 @@ export default function UserService({ user }) {
 
       const dataRequest = {
         account_id: user?.id,
-        service_id: serviceNamePriceEdit?.service_id,
+        service_id: serviceSelect?.service_id,
         kgMin: row?.kgMin,
         kgMax: row?.kgMax,
         zone: row?.zone,

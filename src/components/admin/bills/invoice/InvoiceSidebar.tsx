@@ -25,10 +25,7 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
           bill_id,
           type: "excel",
         };
-        const response = await axios.post(
-          "http://localhost:8080/api/files/get",
-          dataRequest
-        );
+        const response = await axios.post("http://localhost:8080/api/files/get", dataRequest);
         setUploadedFiles(response.data.data);
         console.log("Fetched uploaded files:", response.data.data);
       } catch (error) {
@@ -55,19 +52,18 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
       );
 
       const fileUrl = res.data.secure_url;
-      console.log("File uploaded to:", fileUrl);
+      const publicId = res.data.public_id;
 
       const dataRequest = {
         bill_id,
         url: fileUrl,
-        type: "excel, pdf",
+        public_id: publicId,
+        type: "excel",
         name: "invoice " + bill_id.substring(0, 5),
       };
 
-      const newFile = await axios.post(
-        "http://localhost:8080/api/files",
-        dataRequest
-      );
+      const newFile = await axios.post("http://localhost:8080/api/files", dataRequest);
+
 
       setUploadedFiles((prev) => [
         ...prev,
@@ -76,7 +72,7 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
           url: newFile.data.url,
           created_at: newFile.data.created_at,
           bill_id: newFile.data.bill_id,
-          id: newFile.data.id,
+          id: newFile.data.id
         },
       ]);
 
@@ -92,9 +88,7 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
 
   const handleRemoveFile = async (file: UploadedFile) => {
     // Hiển thị hộp thoại xác nhận
-    const isConfirmed = window.confirm(
-      `Bạn có chắc chắn muốn xóa file "${file.name}" không?`
-    );
+    const isConfirmed = window.confirm(`Bạn có chắc chắn muốn xóa file "${file.name}" không?`);
 
     if (!isConfirmed) {
       // Nếu người dùng không xác nhận, hủy hành động xóa
@@ -103,9 +97,7 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
 
     try {
       // Gửi yêu cầu xóa file lên server
-      const response = await axios.delete(
-        `http://localhost:8080/api/files/${file.id}`
-      );
+      const response = await axios.delete(`http://localhost:8080/api/files/${file.id}`);
       console.log("Response from delete API:", response.data);
 
       if (response.status === 200) {
@@ -127,13 +119,15 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
   };
 
   return (
-    <div className="w-full mx-auto p-4 sm:p-6 bg-white shadow-lg rounded-lg dark:bg-gray-800 overflow-hidden">
-      <div className="relative w-full mb-4 sm:mb-6">
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg dark:bg-gray-800">
+      <div className="relative w-full mb-6">
         <form>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 rounded-full dark:bg-gray-700 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <button className="flex items-center justify-center w-12 h-12 bg-gray-200 rounded-full dark:bg-gray-700">
               <svg
-                className="fill-gray-500 dark:fill-gray-400 w-5 h-5 sm:w-6 sm:h-6"
+                className="fill-gray-500 dark:fill-gray-400"
+                width="24"
+                height="24"
                 viewBox="0 0 20 20"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -149,17 +143,17 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
             <input
               type="text"
               placeholder="Tìm kiếm file..."
-              className="flex-1 h-10 sm:h-12 rounded-lg border border-gray-300 bg-transparent px-3 sm:px-4 text-base sm:text-lg text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+              className="flex-1 h-12 rounded-lg border border-gray-300 bg-transparent px-4 text-lg text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
             />
           </div>
         </form>
       </div>
 
-      <div className="space-y-4 sm:space-y-6">
-        <div className="flex flex-col items-center gap-3 sm:gap-4">
+      <div className="space-y-6">
+        <div className="flex flex-col items-center gap-4">
           <label
             htmlFor="fileInput"
-            className="block w-full cursor-pointer rounded-lg bg-blue-500 px-4 sm:px-6 py-2 sm:py-3 text-center text-base sm:text-lg font-semibold text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+            className="block w-full cursor-pointer rounded-lg bg-blue-500 px-6 py-3 text-center text-lg font-semibold text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
           >
             Chọn File
           </label>
@@ -176,7 +170,7 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
             }}
           />
           {fileName && (
-            <div className="text-base sm:text-lg text-gray-700 dark:text-gray-300 text-center break-words w-full">
+            <div className="text-lg text-gray-700 dark:text-gray-300">
               File đã chọn: <strong>{fileName}</strong>
             </div>
           )}
@@ -184,23 +178,23 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
 
         <button
           onClick={handleUpload}
-          className="w-full rounded-lg bg-green-500 px-4 sm:px-6 py-2 sm:py-3 text-center text-base sm:text-lg font-semibold text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+          className="w-full rounded-lg bg-green-500 px-6 py-3 text-center text-lg font-semibold text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
         >
           Upload File
         </button>
 
-        <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+        <div className="mt-6 space-y-4">
           {uploadedFiles.map((file) => (
             <div
               key={file.url}
-              className="flex items-center justify-between rounded-lg bg-gray-100 p-3 sm:p-4 dark:bg-gray-700 cursor-pointer"
+              className="flex items-center justify-between rounded-lg bg-gray-100 p-4 dark:bg-gray-700 cursor-pointer"
               onClick={() => handleOpenFile(file.url)}
             >
-              <div className="flex-1 min-w-0">
-                <p className="text-base sm:text-lg font-medium text-gray-800 dark:text-white truncate">
+              <div>
+                <p className="text-lg font-medium text-gray-800 dark:text-white">
                   {file.name}
                 </p>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Ngày upload: {file.created_at}
                 </p>
               </div>
@@ -209,7 +203,7 @@ export default function InvoiceSidebar({ bill_id }: { bill_id: string }) {
                   e.stopPropagation();
                   await handleRemoveFile(file);
                 }}
-                className="text-red-500 hover:underline text-sm ml-2 flex-shrink-0"
+                className="text-red-500 hover:underline text-sm"
               >
                 Xóa
               </button>

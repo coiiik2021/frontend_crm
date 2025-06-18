@@ -64,24 +64,24 @@ export default function Footer({ currentStep, setCurrentStep, products, setProdu
         if (currentStep === 4) {
             try {
                 // Hiển thị thông báo đang xử lý
-                // const loadingToast = toast.loading("Đang tạo đơn hàng...");
+                const loadingToast = toast.loading("Đang tạo đơn hàng...");
 
                 console.log(dataRequest);
                 const response = await CreateBill(dataRequest);
                 console.log(response);
 
                 if (response === "created successfully") {
-                    // toast.update(loadingToast, {
-                    //     render: "Đơn hàng đã được tạo thành công!",
-                    //     type: "success",
-                    //     isLoading: false,
-                    //     autoClose: 3000
-                    // });
+                    toast.update(loadingToast, {
+                        render: "Đơn hàng đã được tạo thành công!",
+                        type: "success",
+                        isLoading: false,
+                        autoClose: 3000
+                    });
 
-                    // // Chuyển hướng sau khi hiển thị thông báo thành công
-                    // setTimeout(() => {
-                    //     window.location.href = "/";
-                    // }, 2000);
+                    // Chuyển hướng sau khi hiển thị thông báo thành công
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 2000);
                 } else {
                     toast.update(loadingToast, {
                         render: "Có lỗi xảy ra khi tạo đơn hàng.",
