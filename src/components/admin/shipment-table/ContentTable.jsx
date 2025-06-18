@@ -2701,9 +2701,9 @@ export default function ContentTable({ data }) {
         onTouchEnd={handleTouchEnd}
       >
         <div>
-          <Table className="min-w-[1000px] w-full rounded-lg overflow-hidden shadow-sm">
+          <Table className="w-full rounded-lg overflow-hidden shadow-sm">
             <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-              <TableRow className="sticky top-0 z-30 bg-gray-50 dark:bg-gray-800 shadow-sm">
+              <TableRow className="sticky top-0 z-20 bg-gray-50 dark:bg-gray-800">
                 {Object.entries(columnLabels)
                   .filter(
                     ([key]) => key === "house_bill" || visibleColumns[key]
