@@ -505,12 +505,16 @@ const GetAnalyticsCountry = async () => {
 export { GetAnalyticsCountry };
 
 const GetCurrentUser = async () => {
-  const API = `base_user/my_profile`; // Đổi endpoint theo API thực tế của bạn
+  const API = `base_user/my_profile`;
   return await axios.get(API);
 };
 
 const ChangePassword = async (data) => {
-  const API = "account/update-password"; // Đổi endpoint nếu cần
+  const API = "account/update-password";
   return await axios.put(API, data);
 };
-export { GetCurrentUser, ChangePassword };
+const PutMyProfile = async (data) => {
+  const API = `base_user/update/my-profile`;
+  return await axios.put(API, data);
+};
+export { GetCurrentUser, ChangePassword, PutMyProfile };

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { PutBaseUser } from "../../../service/api.admin.service";
+import { PutBaseUser, PutMyProfile } from "../../../service/api.admin.service";
 import { ChangePassword } from "../../../service/api.admin.service";
 import axios from "axios";
 
@@ -37,7 +37,7 @@ export default function UserInfoCard({ user, setUser }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await PutBaseUser(currentUser);
+            await PutMyProfile(currentUser);
             setUser((prevUser) => ({
                 ...prevUser,
                 ...currentUser,
