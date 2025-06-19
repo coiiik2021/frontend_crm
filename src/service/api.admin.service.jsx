@@ -503,3 +503,14 @@ const GetAnalyticsCountry = async () => {
 };
 
 export { GetAnalyticsCountry };
+
+const GetCurrentUser = async () => {
+  const API = `base_user/my_profile`; // Đổi endpoint theo API thực tế của bạn
+  return await axios.get(API);
+};
+
+const ChangePassword = async (data) => {
+  const API = "account/update-password"; // Đổi endpoint nếu cần
+  return await axios.put(API, data);
+};
+export { GetCurrentUser, ChangePassword };

@@ -1,6 +1,6 @@
 import { useModal } from "../../../hooks/useModal";
 import { Modal } from "../ui/modal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
@@ -9,7 +9,11 @@ import { PutBaseUser } from "../../../service/api.admin.service";
 export default function UserInfoCard({ user, setUser }) {
   const { isOpen, openModal, closeModal } = useModal();
   const [currentUser, setCurrentUser] = useState(user);
+  useEffect(() => {
+    setCurrentUser(user);
+  }, [user]);
 
+  // Initialize currentUser with user data
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCurrentUser((prev) => ({

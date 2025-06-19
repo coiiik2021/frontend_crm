@@ -86,6 +86,7 @@ import SeaTable from "./components/admin/priceNet/sea-table/SeaTable";
 import BDTable from "./components/admin/bd-table/BDTable";
 import EcommerceClient from "./pages/client/Dashboard/Ecommerce";
 import AnalyticsClient from "./pages/client/Dashboard/Analytics";
+import MyProfile from "./pages/ADMIN/MyProfile";
 
 export default function App() {
   return (
@@ -232,6 +233,7 @@ export default function App() {
 
             {/* Others Page */}
             <Route path="/quan-ly/profile" element={<UserProfiles />} />
+            <Route path="/profile" element={<MyProfile />} />
           </Route>
 
 
