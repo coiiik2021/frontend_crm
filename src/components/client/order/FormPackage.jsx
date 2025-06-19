@@ -335,12 +335,13 @@ const FormPackage = ({ packages, setPackages, nameCountry: initialNameCountry, z
         }
 
         if (!validateInputs()) {
+            toast.error("Vui lòng điền đầy đủ thông tin cho tất cả các kiện hàng trước khi chọn dịch vụ.");
             setShowQuote(false);
             setIsChangeCountry(true);
             return;
         }
         if (initialNameCountry === '') {
-            toast.error("Điền đầy đủ tên nước nhận");
+            toast.error("Vui lòng điền đầy đủ thông tin nhận hàng");
         } else {
             const dataRequest = {
                 nameCountry: initialNameCountry, // Tên quốc gia
