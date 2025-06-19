@@ -75,7 +75,7 @@ import SfTable from "./components/admin/priceNet/sf-table/SfTable.jsx";
 import FedexTable from "./components/admin/priceNet/fedex-table/FedexTable.jsx";
 import ZoneCountryTable from "./components/admin/priceNet/zone-country/ZoneCountryTable.jsx";
 import BillTable from "./components/admin/bills/BillTable.jsx";
-import ProtectedRoute from './ProtectedRoute';
+import ProtectedRoute from "./ProtectedRoute";
 import BillContent from "./components/admin/bills/BillContent.jsx";
 import CsTable from "./components/admin/cs-table/CsTable";
 import TransporterTable from "./components/admin/transporter-table/TransporterTable";
@@ -94,72 +94,61 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
-          <Route element={
-            <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "CS", "TRANSPORTER", "BD"]}>
-              <AppLayoutAdmin />
-            </ProtectedRoute>
-          }>
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={["ADMIN", "MANAGER", "CS", "TRANSPORTER", "BD"]}
+              >
+                <AppLayoutAdmin />
+              </ProtectedRoute>
+            }
+          >
             <Route index path="/quan-ly" element={<Ecommerce />} />
             <Route path="/quan-ly/analytics" element={<Analytics />} />
             <Route path="/quan-ly/marketing" element={<Marketing />} />
             <Route path="/quan-ly/crm" element={<Crm />} />
             <Route path="/quan-ly/stocks" element={<Stocks />} />
             <Route path="/quan-ly/saas" element={<Saas />} />
-
             {/* Others Page */}
             <Route path="/quan-ly/profile" element={<UserProfiles />} />
-
             <Route path="/quan-ly/user-table" element={<UserTable />} />
             <Route path="/quan-ly/manager-table" element={<ManagerTable />} />
             <Route path="/quan-ly/sale-table" element={<SaleTable />} />
             <Route path="/quan-ly/bd-table" element={<BDTable />} />
-
             BDTable
-
             <Route path="/quan-ly/ups-table" element={<UpsTable />} />
             <Route path="/quan-ly/dhl-table" element={<DhlTable />} />
-
-            <Route path="/quan-ly/chuyen-tuyen-table" element={<ChuyenTuyenTable />} />
+            <Route
+              path="/quan-ly/chuyen-tuyen-table"
+              element={<ChuyenTuyenTable />}
+            />
             <Route path="/quan-ly/sea-table" element={<SeaTable />} />
-
-
             <Route path="/quan-ly/fedex-table" element={<FedexTable />} />
             <Route path="/quan-ly/sf-table" element={<SfTable />} />
             <Route path="/quan-ly/bill-content/:id" element={<BillContent />} />
-
             <Route
               path="/quan-ly/zone-country"
               element={<ZoneCountryTable />}
             />
-
-
-
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/invoice" element={<Invoices />} />
             <Route path="/faq" element={<Faqs />} />
             <Route path="/pricing-tables" element={<PricingTables />} />
             <Route path="/blank" element={<Blank />} />
-
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
             <Route path="/form-layout" element={<FormLayout />} />
-
             {/* Applications */}
             <Route path="/chat" element={<Chats />} />
-
             <Route path="/task-list" element={<TaskList />} />
             <Route path="/task-kanban" element={<TaskKanban />} />
             <Route path="/file-manager" element={<FileManager />} />
-
             {/* Email */}
-
             <Route path="/inbox" element={<EmailInbox />} />
             <Route path="/inbox-details" element={<EmailDetails />} />
-
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />
             <Route path="/data-tables" element={<DataTables />} />
-
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/avatars" element={<Avatars />} />
@@ -183,7 +172,6 @@ export default function App() {
             <Route path="/tabs" element={<Tabs />} />
             <Route path="/tooltips" element={<Tooltips />} />
             <Route path="/videos" element={<Videos />} />
-
             {/* Charts */}
             <Route path="/line-chart" element={<LineChart />} />
             <Route path="/bar-chart" element={<BarChart />} />
@@ -194,42 +182,56 @@ export default function App() {
             <Route index path="/gia-van-chuyen" element={<GetAQuote />} />
           </Route>
 
-          <Route element={
-            <ProtectedRoute allowedRoles={["USER"]}>
-              <AppLayoutClient />
-            </ProtectedRoute>
-          }>
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={["USER"]}>
+                <AppLayoutClient />
+              </ProtectedRoute>
+            }
+          >
             <Route index path="/tao-don-hang" element={<OrderPage />} />
           </Route>
 
           {/* Dashboard Layout */}
 
-          <Route element={
-            <AppLayoutAdmin />
-          }>
+          <Route element={<AppLayoutAdmin />}>
             <Route path="/quan-ly/shipment" element={<BillTable />} />
 
             <Route
               path="/quan-ly/shipment-detail"
               element={<ShipmentDetail />}
             />
-            <Route index path="/quan-ly/analytics" element={<AnalyticsClient />} />
-            <Route index path="/quan-ly/thong-ke" element={<EcommerceClient />} />
+            <Route
+              index
+              path="/quan-ly/analytics"
+              element={<AnalyticsClient />}
+            />
+            <Route
+              index
+              path="/quan-ly/thong-ke"
+              element={<EcommerceClient />}
+            />
             <Route path="/quan-ly/my-debits" element={<ShipmentTable />} />
           </Route>
 
-
-          <Route element={
-
-            <ProtectedRoute allowedRoles={["MANAGER", "ADMIN"]}>
-              <AppLayoutAdmin />
-            </ProtectedRoute>
-          }>
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={["MANAGER", "ADMIN"]}>
+                <AppLayoutAdmin />
+              </ProtectedRoute>
+            }
+          >
             <Route path="/quan-ly/user-table" element={<UserTable />} />
 
             <Route path="/quan-ly/cs-table" element={<CsTable />} />
-            <Route path="/quan-ly/transporter-table" element={<TransporterTable />} />
-            <Route path="/quan-ly/accountant-table" element={<AccountantTable />} />
+            <Route
+              path="/quan-ly/transporter-table"
+              element={<TransporterTable />}
+            />
+            <Route
+              path="/quan-ly/accountant-table"
+              element={<AccountantTable />}
+            />
 
             {/* Others Page */}
             <Route path="/quan-ly/profile" element={<UserProfiles />} />
@@ -244,7 +246,6 @@ export default function App() {
             <Route path="/profile" element={<MyProfile />} />
 
           </Route>
-
 
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
@@ -262,7 +263,7 @@ export default function App() {
           <Route path="/five-zero-three" element={<FiveZeroThree />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
         </Routes>
-      </Router >
+      </Router>
     </>
   );
 }
