@@ -233,7 +233,16 @@ export default function App() {
 
             {/* Others Page */}
             <Route path="/quan-ly/profile" element={<UserProfiles />} />
+
+          </Route>
+          <Route element={
+
+            <ProtectedRoute allowedRoles={["MANAGER", "ADMIN", "CS", "TRANSPORTER", "USER", "ACCOUNTANT"]}>
+              <AppLayoutAdmin />
+            </ProtectedRoute>
+          }>
             <Route path="/profile" element={<MyProfile />} />
+
           </Route>
 
 
