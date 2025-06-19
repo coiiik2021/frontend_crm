@@ -11,6 +11,7 @@ import { GetCodeByCompany } from "../../../service/api.service.jsx";
 import { DeleteConsigneeFavorite, GetAllConsigneeFavorite, GetAllDeliveryFavorite, GetZoneCountry, PostConsigneeFavorite } from "../../../service/api.admin.service.jsx";
 import Document from "./Document.jsx";
 import { FileTextIcon, PackageIcon } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function InformationOrder(props) {
     const { addressBackup, setAddressBackup,
@@ -517,9 +518,10 @@ export default function InformationOrder(props) {
         } else {
             setShowForm(true);
 
+            toast.error("Vui lòng điền đầy đủ thông tin trước khi xác nhận.");
             // Hiển thị thông báo lỗi nếu form nhận hàng không hợp lệ
             if (showDeliveryForm && !isDeliveryValid) {
-                alert("Vui lòng điền đầy đủ thông tin nhận hàng");
+                toast.error("Vui lòng điền đầy đủ thông tin nhận hàng");
             }
         }
     };
