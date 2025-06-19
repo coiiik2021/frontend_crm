@@ -1364,61 +1364,61 @@ export default function ContentTable({ data }) {
   };
 
   const columnLabels = {
-    house_bill: "HOUSE BILL",
+    house_bill: "TTCB - HOUSE BILL",
     // Date: "NGÀY TẠO",
-    customer: "CUSTOMER",
-    country_name: "COUNTRY",
-    master_tracking: "MASTERTRACKING",
-    gw: "GW",
-    cw: "CW",
-    company_service: "DỊCH VỤ",
-    inwh_date: "In-WH DATE",
+    customer: "TTCB - CUSTOMER",
+    country_name: "TTCB - COUNTRY",
+    master_tracking: "TTCB - AWB",
+    gw: "TTCB - GW",
+    cw: "TTCB - CW",
+    company_service: "TTCB - SERVICE",
+    inwh_date: "TTCB - DATE",
     // Price
-    price_price: "PRICE (PRICE)",
-    fsc_price: "FSC (PRICE)",
-    surge_fee_price: "SURGE FEE (PRICE)",
+    price_price: "UCCB - PRICE",
+    fsc_price: "UCCB - FSC",
+    surge_fee_price: "UCCB - SURGE FEE",
     // Debit
-    afr_debit: "AFR (DEBIT)",
-    oversize_debit: "OVERSIZE (DEBIT)",
-    surge_fee_debit: "SURGE FEE (DEBIT)",
-    other_charges_debit: "OTHER CHARGES (DEBIT)",
-    fsc_debit: "FSC (DEBIT)",
+    afr_debit: "UDBU - AFR",
+    oversize_debit: "UDBU - OVERSIZE",
+    surge_fee_debit: "UDBU - SURGE FEE",
+    other_charges_debit: "UDBU - OTHER CHARGES",
+    fsc_debit: "UDBU - FSC",
     // Total AR
-    total_ar: "TOTAL AR (TOTAL AR)",
-    vat: "VAT (TOTAL AR)",
-    total: "TOTAL (TOTAL AR)",
+    total_ar: "UTC - TOTAL AR",
+    vat: "UTC - VAT",
+    total: "UTC - TOTAL",
     // Grand Total
-    order_grand_total: "ORDER ((GRAND TOTAL))",
-    other_charges_total: "OTHER CHARGES (GRAND TOTAL)",
-    grand_total: "GRAND TOTAL (GRAND TOTAL)",
+    order_grand_total: "UTHD - ORDER",
+    other_charges_total: "UTHD - OTHER CHARGES",
+    grand_total: "UTHD - GRAND TOTAL",
     // Thanh toan
-    payments_cash: "TIỀN MẶT (PAYMENT)",
-    payments_cash_status: "TRẠNG THÁI TIỀN MẶT (PAYMENT)",
-    payments_cash_date: "NGÀY THANH TOÁN TIỀN MẶT (PAYMENT)",
-    payments_banking: "CHUYỂN KHOẢN (PAYMENT)",
-    payments_banking_status: "TRẠNG THÁI CHUYỂN KHOẢN (PAYMENT)",
-    payments_banking_date: "NGÀY THANH TOÁN CHUYỂN KHOẢN (PAYMENT)",
-    payments_business: "DOANH NGHIỆP (PAYMENT)",
-    payments_business_status: "TRẠNG THÁI DOANH NGHIỆP (PAYMENT)",
-    payments_business_date: "NGÀY THANH TOÁN DOANH NGHIỆP (PAYMENT)",
-    payments_remaining: "CÒN LẠI (PAYMENT)",
+    payments_cash: "UTT - TIỀN MẶT",
+    // payments_cash_status: "TRẠNG THÁI TIỀN MẶT (PAYMENT)",
+    // payments_cash_date: "NGÀY THANH TOÁN TIỀN MẶT (PAYMENT)",
+    payments_banking: "UTT - CHUYỂN KHOẢN",
+    // payments_banking_status: "TRẠNG THÁI CHUYỂN KHOẢN (PAYMENT)",
+    // payments_banking_date: "NGÀY THANH TOÁN CHUYỂN KHOẢN (PAYMENT)",
+    payments_business: "UTT - DOANH NGHIỆP",
+    // payments_business_status: "TRẠNG THÁI DOANH NGHIỆP (PAYMENT)",
+    // payments_business_date: "NGÀY THANH TOÁN DOANH NGHIỆP (PAYMENT)",
+    payments_remaining: "UTT - CÒN LẠI",
 
     // DEBIT
-    gw_debit: "GW (DEBIT)",
-    cw_debit: "CW (DEBIT)",
-    bill: "THÀNH TIỀN (DEBIT)",
-    reconcile: "ĐỐI SOÁT (DEBIT)",
+    gw_debit: "QDB - GW",
+    cw_debit: "QDB - CW",
+    bill: "QDB - THÀNH TIỀN",
+    reconcile: "QDB - ĐỐI SOÁT",
     // Lợi nhuận
-    price_diff: "CHÊNH LỆCH GIÁ (PROFIT)",
-    packing: "ĐÓNG GÓI (PROFIT)",
-    pickup: "PICK UP (PROFIT)",
-    other_costs: "CHI PHÍ KHÁC (PROFIT)",
-    profit: "LỢI NHUẬN (PROFIT)",
+    price_diff: "QLN - CHÊNH LỆCH GIÁ",
+    packing: "QLN - ĐÓNG GÓI",
+    pickup: "QLN - PICK UP",
+    other_costs: "QLN - CHI PHÍ KHÁC",
+    profit: "QLN - LỢI NHUẬN",
     // HH
-    hh1: "HH 1 (HH)",
-    hh2: "HH 2 (HH)",
-    hh3: "HH 3 (HH)",
-    hh4: "HH 4 (HH)",
+    hh1: "QHH - HH 1",
+    hh2: "QHH - HH 2",
+    hh3: "QHH - HH 3",
+    hh4: "QHH - HH 4",
     // Lương thưởng
     base_salary: "LƯƠNG CĂN BẢN (LƯƠNG THƯỞNG)",
     kpi_bonus: "THƯỞNG KPI (LƯƠNG THƯỞNG)",
@@ -2008,7 +2008,7 @@ export default function ContentTable({ data }) {
                       htmlFor="col-house_bill"
                       className="ml-2 text-sm font-medium text-gray-800 dark:text-gray-200"
                     >
-                      HOUSE BILL
+                      TTCB - HOUSE BILL
                     </label>
                   </div>
 

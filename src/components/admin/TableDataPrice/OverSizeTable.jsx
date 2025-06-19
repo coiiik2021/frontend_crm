@@ -385,50 +385,62 @@ const OverSizeTable = () => {
               Chỉnh sửa phí quá khổ
             </h4>
           </div>
-          <form className="flex flex-col">
-            <div className="px-2 overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div>
-                  <Label>name</Label>
-                  <Input
-                    type="text"
-                    name="name"
-                    value={editForm.name}
-                    onChange={handleEditFormChange}
-                  />
-                </div>
-                <div>
-                  <Label>price</Label>
-                  <Input
-                    type="number"
-                    name="price"
-                    value={editForm.price}
-                    onChange={handleEditFormChange}
-                  />
-                </div>
-                <div>
-                  <Label>Description</Label>
-                  <Input
-                    type="text"
-                    name="description"
-                    value={editForm.description}
-                    onChange={handleEditFormChange}
-                  />
-                </div>
+          <form className="flex flex-col gap-6 p-4 rounded-lg border border-gray-200 shadow-sm bg-white">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Name */}
+              <div className="flex flex-col">
+                <Label htmlFor="name">Name</Label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={editForm.name}
+                  onChange={handleEditFormChange}
+                  readOnly
+                  className="mt-1 h-11 w-full rounded-md border border-gray-300 bg-gray-100 px-4 text-sm text-gray-700 shadow-sm outline-none focus:ring-2 focus:ring-brand-200 cursor-not-allowed"
+                />
+              </div>
+
+              {/* Price */}
+              <div className="flex flex-col">
+                <Label htmlFor="price">Price</Label>
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={editForm.price}
+                  onChange={handleEditFormChange}
+                  className="mt-1 h-11 w-full rounded-md border border-gray-300 px-4 text-sm text-gray-700 shadow-sm outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+
+              {/* Description */}
+              <div className="flex flex-col md:col-span-2">
+                <Label htmlFor="description">Description</Label>
+                <input
+                  type="text"
+                  id="description"
+                  name="description"
+                  value={editForm.description}
+                  onChange={handleEditFormChange}
+                  readOnly
+                  className="mt-1 h-11 w-full rounded-md border border-gray-300 bg-gray-100 px-4 text-sm text-gray-700 shadow-sm outline-none focus:ring-2 focus:ring-brand-200 cursor-not-allowed"
+                />
               </div>
             </div>
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button
-                size="sm"
-                variant="outline"
+
+            {/* Button Group */}
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                type="button"
                 onClick={() => setEditModalOpen(false)}
+                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
               >
                 Close
-              </Button>
-              <Button
-                size="sm"
-                onClick={async (e) => {
-                  //   e.preventDefault();
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
                   const updated = await PutOverSize(editForm);
                   if (updated) {
                     setOverSize((prev) =>
@@ -439,9 +451,10 @@ const OverSizeTable = () => {
                     setEditModalOpen(false);
                   }
                 }}
+                className="px-4 py-2 rounded-md bg-brand-600 text-white hover:bg-brand-700 transition"
               >
                 Cập nhật
-              </Button>
+              </button>
             </div>
           </form>
         </div>
