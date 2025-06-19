@@ -1366,6 +1366,11 @@ export default function ContentTable({ data }) {
   const columnLabels = {
     house_bill: "TTCB - HOUSE BILL",
     // Date: "NGÀY TẠO",
+    bd: "NS - BD",
+    manager: "NS - MANAGER",
+    user: "NS - USER",
+    cs: "NS - CS",
+    transporter: "NS - TRANSPORTER",
     customer: "TTCB - CUSTOMER",
     country_name: "TTCB - COUNTRY",
     master_tracking: "TTCB - AWB",
@@ -2011,7 +2016,6 @@ export default function ContentTable({ data }) {
                       TTCB - HOUSE BILL
                     </label>
                   </div>
-
                   {/* Nhóm THÔNG TIN CƠ BẢN */}
                   <div className="mb-2">
                     <div className="flex items-center justify-between mb-1">
@@ -2097,6 +2101,153 @@ export default function ContentTable({ data }) {
                       </div>
                     ))}
                   </div>
+                  {/* Nhóm THÔNG TIN NHÂN SỰ */}
+                  {(authorities.includes("ADMIN") ||
+                    authorities.includes("BD") ||
+                    authorities.includes("MANAGER")) && (
+                    <div className="mb-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                          THÔNG TIN NHÂN SỰ
+                        </span>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => {
+                              const newVisibleColumns = { ...visibleColumns };
+                              if (authorities.includes("ADMIN")) {
+                                ["bd", "manager"].forEach((column) => {
+                                  newVisibleColumns[column] = true;
+                                });
+                              } else if (authorities.includes("BD")) {
+                                newVisibleColumns["manager"] = true;
+                              } else if (authorities.includes("MANAGER")) {
+                                ["user", "cs", "transporter"].forEach(
+                                  (column) => {
+                                    newVisibleColumns[column] = true;
+                                  }
+                                );
+                              }
+                              setVisibleColumns(newVisibleColumns);
+                            }}
+                            className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                          >
+                            Chọn
+                          </button>
+                          <button
+                            onClick={() => {
+                              const newVisibleColumns = { ...visibleColumns };
+                              if (authorities.includes("ADMIN")) {
+                                ["bd", "manager"].forEach((column) => {
+                                  newVisibleColumns[column] = false;
+                                });
+                              } else if (authorities.includes("BD")) {
+                                newVisibleColumns["manager"] = false;
+                              } else if (authorities.includes("MANAGER")) {
+                                ["user", "cs", "transporter"].forEach(
+                                  (column) => {
+                                    newVisibleColumns[column] = false;
+                                  }
+                                );
+                              }
+                              setVisibleColumns(newVisibleColumns);
+                            }}
+                            className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                          >
+                            Bỏ chọn
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* ADMIN: hiển thị bd và manager */}
+                      {authorities.includes("ADMIN") && (
+                        <>
+                          {["bd", "manager"].map((column) => (
+                            <div
+                              key={column}
+                              className="flex items-center ml-2 mt-1"
+                            >
+                              <input
+                                type="checkbox"
+                                id={`col-${column}`}
+                                checked={visibleColumns[column]}
+                                onChange={() =>
+                                  setVisibleColumns({
+                                    ...visibleColumns,
+                                    [column]: !visibleColumns[column],
+                                  })
+                                }
+                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                              />
+                              <label
+                                htmlFor={`col-${column}`}
+                                className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                              >
+                                {columnLabels[column] || column}
+                              </label>
+                            </div>
+                          ))}
+                        </>
+                      )}
+
+                      {/* BD: chỉ hiển thị manager */}
+                      {authorities.includes("BD") &&
+                        !authorities.includes("ADMIN") && (
+                          <div className="flex items-center ml-2 mt-1">
+                            <input
+                              type="checkbox"
+                              id="col-manager"
+                              checked={visibleColumns["manager"]}
+                              onChange={() =>
+                                setVisibleColumns({
+                                  ...visibleColumns,
+                                  manager: !visibleColumns["manager"],
+                                })
+                              }
+                              className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                            />
+                            <label
+                              htmlFor="col-manager"
+                              className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                            >
+                              {columnLabels["manager"] || "manager"}
+                            </label>
+                          </div>
+                        )}
+
+                      {/* MANAGER: chỉ hiển thị user, cs, transporter */}
+                      {authorities.includes("MANAGER") &&
+                        !authorities.includes("ADMIN") &&
+                        !authorities.includes("BD") && (
+                          <>
+                            {["user", "cs", "transporter"].map((column) => (
+                              <div
+                                key={column}
+                                className="flex items-center ml-2 mt-1"
+                              >
+                                <input
+                                  type="checkbox"
+                                  id={`col-${column}`}
+                                  checked={visibleColumns[column]}
+                                  onChange={() =>
+                                    setVisibleColumns({
+                                      ...visibleColumns,
+                                      [column]: !visibleColumns[column],
+                                    })
+                                  }
+                                  className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                />
+                                <label
+                                  htmlFor={`col-${column}`}
+                                  className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                                >
+                                  {columnLabels[column] || column}
+                                </label>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                    </div>
+                  )}
 
                   {/* Nhóm PRICE */}
                   <div className="mb-2">
@@ -2167,7 +2318,6 @@ export default function ContentTable({ data }) {
                       )
                     )}
                   </div>
-
                   {/* Nhóm DEBIT */}
                   <div className="mb-2">
                     <div className="flex items-center justify-between mb-1">
@@ -2254,7 +2404,6 @@ export default function ContentTable({ data }) {
                       </div>
                     ))}
                   </div>
-
                   {/* Nhóm TOTAL AR */}
                   <div className="mb-2">
                     <div className="flex items-center justify-between mb-1">
@@ -2311,7 +2460,6 @@ export default function ContentTable({ data }) {
                       </div>
                     ))}
                   </div>
-
                   {/* Nhóm GRAND TOTAL */}
                   <div className="mb-2">
                     <div className="flex items-center justify-between mb-1">
@@ -2380,7 +2528,6 @@ export default function ContentTable({ data }) {
                       </div>
                     ))}
                   </div>
-
                   {/* Nhóm PAYMENT */}
                   <div className="mb-2">
                     <div className="flex items-center justify-between mb-1">
@@ -2452,7 +2599,6 @@ export default function ContentTable({ data }) {
                       </div>
                     ))}
                   </div>
-
                   {/* Nhóm PROFIT */}
                   <div className="mb-2">
                     <div className="flex items-center justify-between mb-1">
@@ -2527,7 +2673,6 @@ export default function ContentTable({ data }) {
                       </div>
                     ))}
                   </div>
-
                   {/* Nhóm HH */}
                   <div className="mb-2">
                     <div className="flex items-center justify-between mb-1">
@@ -2584,7 +2729,6 @@ export default function ContentTable({ data }) {
                       </div>
                     ))}
                   </div>
-
                   {/* Nhóm LƯƠNG THƯỞNG */}
                   <div className="mb-2">
                     <div className="flex items-center justify-between mb-1">
@@ -2659,7 +2803,6 @@ export default function ContentTable({ data }) {
                       </div>
                     ))}
                   </div>
-
                   {/* Trạng thái */}
                   <div className="flex items-center mt-2">
                     <input
@@ -2817,7 +2960,31 @@ export default function ContentTable({ data }) {
                                             {item.date_create}
                                         </TableCell>
                                     )} */}
-
+                  {visibleColumns.bd && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      {item?.employee.bd_name || "..."}
+                    </TableCell>
+                  )}
+                  {visibleColumns.manager && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      {item?.employee.manager_name || "..."}
+                    </TableCell>
+                  )}
+                  {visibleColumns.user && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      {item?.employee.user_name || "..."}
+                    </TableCell>
+                  )}
+                  {visibleColumns.cs && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      {item?.employee.cs_name || "..."}
+                    </TableCell>
+                  )}
+                  {visibleColumns.transporter && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      {item?.employee.transporter_name || "..."}
+                    </TableCell>
+                  )}
                   {visibleColumns.customer && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -2830,6 +2997,7 @@ export default function ContentTable({ data }) {
                       </p>
                     </TableCell>
                   )}
+
                   {visibleColumns.country_name && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.country_name || "..."}
