@@ -25,6 +25,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
     const [isImported, setIsImported] = useState(false);
     const [newShipper, setNewShipper] = useState({});
     const [newNameService, setNewNameService] = useState("");
+    const [newWeight, setNewWeight] = useState(0);
     const [newCurrency, setNewCurrency] = useState("VND");
     const [serviceCompany, setServiceCompany] = useState([]);
     const [zone, setZone] = useState([]);
@@ -87,6 +88,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                     name: nameHang,
                     nameService: newNameService,
                     currency: newCurrency,
+                    minWightCeil: newWeight,
                     shipperCompany: {
                         companyName: newShipper.companyName,
                         address: newShipper.address,
@@ -121,6 +123,8 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                 // Reset form
                 setNewNameService("");
                 setNewShipper({});
+                setNewWeight(0);
+
                 closeAddModal();
             },
             "Thêm dịch vụ thành công",
