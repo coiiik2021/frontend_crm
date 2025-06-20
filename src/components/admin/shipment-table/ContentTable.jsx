@@ -1527,6 +1527,7 @@ export default function ContentTable({ data }) {
     master_tracking: "TTCB - AWB",
     gw: "TTCB - GW",
     cw: "TTCB - CW",
+    new_cw: "TTCB - NEW CW",
     company_service: "TTCB - SERVICE",
     inwh_date: "TTCB - DATE",
     // Price
@@ -3322,6 +3323,20 @@ export default function ContentTable({ data }) {
                     </TableCell>
                   )}
                   {visibleColumns.cw && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      <div className="space-y-1">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <span className="font-medium">SL:</span>{" "}
+                          {item?.packageInfo_end?.quantity}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <span className="font-medium">Cân nặng:</span>{" "}
+                          {item?.packageInfo_end?.total_weight} KG
+                        </p>
+                      </div>
+                    </TableCell>
+                  )}
+                  {visibleColumns.new_cw && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       <div className="space-y-1">
                         <p className="text-sm text-gray-600 dark:text-gray-300">
