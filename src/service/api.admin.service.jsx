@@ -375,8 +375,6 @@ const DeleteProductFavorite = async (id) => {
   return await axios.delete(API);
 };
 
-
-
 export {
   GetAllConsigneeFavorite,
   PostConsigneeFavorite,
@@ -462,12 +460,18 @@ const UpdatePaymentDetails = async (data) => {
   return await axios.put(API, data);
 };
 
+const DeletePaymentDetails = async (id) => {
+  const API = `payment/${id}`;
+  return await axios.delete(API);
+};
+
 export {
   GetAllPermissions,
   GetUserPermissions,
   UpdateUserPermissions,
   GetPaymentDetails,
   UpdatePaymentDetails,
+  DeletePaymentDetails,
 };
 
 // Thêm hàm DeletePeakSeason
@@ -495,10 +499,9 @@ const PutPeakSeason = async (data) => {
 // Đảm bảo hàm được export
 export { DeletePeakSeason, PostPeakSeason, GetAllPeakSeason, PutPeakSeason };
 
-
 // dashboard user
 const GetAnalyticsCountry = async () => {
-  const API = '/dashboard/analytics/country';
+  const API = "/dashboard/analytics/country";
   return await axios.get(API);
 };
 
