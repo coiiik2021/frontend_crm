@@ -1443,7 +1443,7 @@ export default function ContentTable({ data }) {
         const worksheet = workbook.worksheets[0];
 
         const headerRow = worksheet.getRow(1);
-        const headersRaw = headerRow.values.slice(1); // Bỏ index 0
+        const headersRaw = headerRow.values.slice(1); // bỏ index 0
 
         const headers = headersRaw.map((h) =>
           String(h).toLowerCase().replace(/\s+/g, "_")
@@ -1463,29 +1463,42 @@ export default function ContentTable({ data }) {
           importedData.push(rowData);
         });
 
-        // Tạo map từ awb -> new_debit
-        const awbToNewDebit = {};
+        // Tạo map từ awb => { new_debit, cw_pgk, cw_weight }
+        const awbMap = {};
         importedData.forEach((row) => {
-          if (row.awb && row.new_debit !== undefined) {
-            awbToNewDebit[String(row.awb).trim()] = row.new_debit;
-          }
+          const awb = String(row.awb).trim();
+          awbMap[awb] = {
+            new_debit: row.new_debit,
+            cw_pgk: row.cw_pgk,
+            cw_weight: row.cw_weight,
+          };
         });
 
         // Cập nhật dataBill
         setDataBill((prev) =>
-          prev.map((item) => ({
-            ...item,
-            new_debit:
-              awbToNewDebit[String(item.awb).trim()] !== undefined
-                ? awbToNewDebit[String(item.awb).trim()]
-                : item.new_debit,
-          }))
+          prev.map((item) => {
+            const awbKey = String(item.awb).trim();
+            const update = awbMap[awbKey];
+            return {
+              ...item,
+              new_debit: update?.new_debit ?? item.new_debit,
+              packageInfo_end: {
+                ...item.packageInfo_end,
+                quantity: update?.cw_pgk ?? item.packageInfo_end?.quantity,
+                total_weight:
+                  update?.cw_weight ?? item.packageInfo_end?.total_weight,
+              },
+            };
+          })
         );
 
+        // Hiện cột
         setVisibleColumns((prev) => ({
           ...prev,
           new_debit: true,
+          new_cw: true,
         }));
+
         setImportedDebitData(importedData);
       };
 
@@ -1494,6 +1507,7 @@ export default function ContentTable({ data }) {
       console.error("❌ Lỗi khi đọc file Excel:", error);
     }
   };
+
 
   const columnLabels = {
     house_bill: "TTCB - HOUSE BILL",
