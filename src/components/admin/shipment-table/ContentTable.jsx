@@ -24,12 +24,12 @@ import {
   PutPriceOrder,
   UpdateBillAccountant,
   UpdatePaymentDetails,
-  DeletePaymentDetails,
 } from "../../../service/api.admin.service.jsx";
 import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import ExcelJS from "exceljs";
 import { DatePicker } from "antd"; // import { s } from "@fullcalendar/core/internal-common";
+
 export default function ContentTable({ data }) {
   const [dataBill, setDataBill] = useState(data || []);
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,6 +55,12 @@ export default function ContentTable({ data }) {
 
   // Mouse events
   const handleMouseDown = (e) => {
+    if (
+      e.target.closest('.dropdown-filter-ns') ||
+      e.target.closest('.icon-filter-ns')
+    ) {
+      return;
+    }
     setIsDragging(true);
     setStartX(e.pageX - scrollRef.current.offsetLeft);
     setScrollLeft(scrollRef.current.scrollLeft);
@@ -93,6 +99,16 @@ export default function ContentTable({ data }) {
   const [filterUser, setFilterUser] = useState("");
   const [filterCS, setFilterCS] = useState("");
   const [filterTransporter, setFilterTransporter] = useState("");
+
+  // state cho dropdown filter từng cột
+  const [showFilterDropdown, setShowFilterDropdown] = useState({
+    bd: false,
+    manager: false,
+    user: false,
+    cs: false,
+    transporter: false,
+  });
+
   console.log("Dữ liệu đơn hàng:", dataBill);
   const fetchBillData = async () => {
     try {
@@ -122,6 +138,7 @@ export default function ContentTable({ data }) {
       ),
     [dataBill]
   );
+
   const managerNames = useMemo(
     () =>
       Array.from(
@@ -338,31 +355,49 @@ export default function ContentTable({ data }) {
     }
     // Lọc theo quyền
     if (authorities.includes("ADMIN")) {
-      if (filterBD)
+      if (filterBD && filterBD.length)
         filtered = filtered.filter(
-          (item) => item?.employee?.bd_name === filterBD
+          (item) =>
+            Array.isArray(filterBD)
+              ? filterBD.includes(item?.employee?.bd_name)
+              : item?.employee?.bd_name === filterBD
         );
-      if (filterManager)
+      if (filterManager && filterManager.length)
         filtered = filtered.filter(
-          (item) => item?.employee?.manager_name === filterManager
+          (item) =>
+            Array.isArray(filterManager)
+              ? filterManager.includes(item?.employee?.manager_name)
+              : item?.employee?.manager_name === filterManager
         );
     } else if (authorities.includes("BD")) {
-      if (filterManager)
+      if (filterManager && filterManager.length)
         filtered = filtered.filter(
-          (item) => item?.employee?.manager_name === filterManager
+          (item) =>
+            Array.isArray(filterManager)
+              ? filterManager.includes(item?.employee?.manager_name)
+              : item?.employee?.manager_name === filterManager
         );
     } else if (authorities.includes("MANAGER")) {
-      if (filterUser)
+      if (filterUser && filterUser.length)
         filtered = filtered.filter(
-          (item) => item?.employee?.user_name === filterUser
+          (item) =>
+            Array.isArray(filterUser)
+              ? filterUser.includes(item?.employee?.user_name)
+              : item?.employee?.user_name === filterUser
         );
-      if (filterCS)
+      if (filterCS && filterCS.length)
         filtered = filtered.filter(
-          (item) => item?.employee?.cs_name === filterCS
+          (item) =>
+            Array.isArray(filterCS)
+              ? filterCS.includes(item?.employee?.cs_name)
+              : item?.employee?.cs_name === filterCS
         );
-      if (filterTransporter)
+      if (filterTransporter && filterTransporter.length)
         filtered = filtered.filter(
-          (item) => item?.employee?.transporter_name === filterTransporter
+          (item) =>
+            Array.isArray(filterTransporter)
+              ? filterTransporter.includes(item?.employee?.transporter_name)
+              : item?.employee?.transporter_name === filterTransporter
         );
     }
 
@@ -430,10 +465,6 @@ export default function ContentTable({ data }) {
     banking: 0,
     businessBanking: 0,
   });
-
-  const [cashPayments, setCashPayments] = useState([]);
-  const [bankingPayments, setBankingPayments] = useState([]);
-  const [businessPayments, setBusinessPayments] = useState([]);
 
   const [cashPayment, setCashPayment] = useState({
     price: 0,
@@ -516,103 +547,139 @@ export default function ContentTable({ data }) {
   // Hàm xử lý khi người dùng bấm vào nút xem chi tiết thanh toán
   const handleViewPaymentDetails = (item) => {
     setBillEdit(item);
+    fetchPaymentDetails(item.bill_house);
     setIsOpenFormPayment(true);
-    setCashPayments(item.pricePayment?.cashPayment || []);
-    setBankingPayments(item.pricePayment?.cardPayment || []);
-    setBusinessPayments(item.pricePayment?.businessCardPayment || []);
   };
 
-  const handleUpdatePayment = async (payment, index) => {
-    const dataRequest = {
-      id: payment.id,
-      bill_id: billEdit.bill_house,
-      price: payment.price,
-      methodPayment: payment.methodPayment,
-      active: payment.active,
-    };
-
+  // Hàm xử lý khi người dùng bấm Save
+  const handleUpdatePayment = async () => {
+    let price = 0;
+    switch (editType) {
+      case "CASH":
+        price = cashPayment.price;
+        break;
+      case "CARD":
+        price = bankingPayment.price;
+        break;
+      case "BUSINESS_CARD":
+        price = businessBankingPayment.price;
+        break;
+      default:
+        break;
+    }
     try {
-      const response = await UpdatePaymentDetails(dataRequest);
-      const updated = response;
-      if (payment.methodPayment === "CASH") {
-        setCashPayments((prev) => {
-          const newArr = [...prev];
-          newArr[index] = updated;
-          return newArr;
-        });
-      } else if (payment.methodPayment === "CARD") {
-        setBankingPayments((prev) => {
-          const newArr = [...prev];
-          newArr[index] = updated;
-          return newArr;
-        });
-      } else {
-        setBusinessPayments((prev) => {
-          const newArr = [...prev];
-          newArr[index] = updated;
-          return newArr;
-        });
-      }
+      const dataRequest = {
+        bill_id: billEdit.bill_house,
+        active: false,
+        price: price,
+        methodPayment: editType,
+      };
 
-      fetchBillData();
+      console.log("Updating payment with data:", dataRequest);
+      const dataResponse = await UpdatePaymentDetails(dataRequest);
+
+      console.log("Payment updated:", dataResponse);
+
+      // Đánh dấu dữ liệu đã thay đổi
+
+      // Đóng modal
+      setIsOpenFormPayment(false);
+
+      // Thông báo thành công
+      alert("Cập nhật thanh toán thành công!");
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
     } catch (error) {
-      console.error(error);
+      console.error("Error updating payment:", error);
       alert("Lỗi khi cập nhật thanh toán!");
     }
   };
 
-  const handleConfirmPayment = async (payment) => {
-    let payments = [];
-    let setPayments;
-
-    if (payment.methodPayment === "CASH") {
-      payments = cashPayments;
-      setPayments = setCashPayments;
-    } else if (payment.methodPayment === "CARD") {
-      payments = bankingPayments;
-      setPayments = setBankingPayments;
-    } else {
-      payments = businessPayments;
-      setPayments = setBusinessPayments;
+  // Hàm xử lý khi người dùng bấm Save
+  const handleConfirmPayment = async () => {
+    let price = 0;
+    switch (editType) {
+      case "CASH":
+        price = cashPayment.price;
+        break;
+      case "CARD":
+        price = bankingPayment.price;
+        break;
+      case "BUSINESS_CARD":
+        price = businessBankingPayment.price;
+        break;
+      default:
+        break;
     }
-
-    // ✅ Chỉ cập nhật 1 item có id trùng khớp
-
-    const updatedPayment = {
-      ...payment,
-      bill_id: billEdit.bill_house,
-      active: true,
-    };
-
     try {
-      const response = await UpdatePaymentDetails(updatedPayment); // gửi 1 payment
-      const updated = response;
+      const dataRequest = {
+        bill_id: billEdit.bill_house,
+        active: true,
+        price: price,
+        methodPayment: editType,
+      };
 
-      setPayments((prev) =>
-        prev.map((p) => (p.id === updated.id ? updated : p))
-      );
+      console.log("Confirming payment with data:", dataRequest);
+      const dataResponse = await UpdatePaymentDetails(dataRequest);
 
-      fetchBillData();
+      console.log("Payment confirmed:", dataResponse);
+
+      // Đánh dấu dữ liệu đã thay đổi
+
+      // Đóng modal
+      setIsOpenFormPayment(false);
+
+      // Thông báo thành công
+      alert("Xác nhận thanh toán thành công!");
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
     } catch (error) {
-      console.error("Lỗi khi xác nhận thanh toán:", error);
-      alert("Lỗi khi xác nhận thanh toán!");
+      console.error("Error confirming payment:", error);
+      alert("Lỗi khi xac nhận thanh toán!");
     }
   };
 
-  const handleCancelPayment = async (payment) => {
-    await DeletePaymentDetails(payment.id);
-
-    if (payment.methodPayment === "CASH") {
-      setCashPayments((prev) => prev.filter((p) => p.id !== payment.id));
-    } else if (payment.methodPayment === "CARD") {
-      setBankingPayments((prev) => prev.filter((p) => p.id !== payment.id));
-    } else if (payment.methodPayment === "BUSINESS_CARD") {
-      setBusinessPayments((prev) => prev.filter((p) => p.id !== payment.id));
+  // Hàm xử lý khi người dùng bấm Save
+  const handleCancelPayment = async () => {
+    let price = 0;
+    switch (editType) {
+      case "CASH":
+        price = cashPayment.price;
+        break;
+      case "CARD":
+        price = bankingPayment.price;
+        break;
+      case "BUSINESS_CARD":
+        price = businessBankingPayment.price;
+        break;
+      default:
+        break;
     }
+    try {
+      const dataRequest = {
+        bill_id: billEdit.bill_house,
+        active: false,
+        price: price,
+        methodPayment: editType,
+      };
 
-    fetchBillData();
+      console.log("Cancelling payment with data:", dataRequest);
+      const dataResponse = await UpdatePaymentDetails(dataRequest);
+
+      console.log("Payment cancelled:", dataResponse);
+
+      // Đánh dấu dữ liệu đã thay đổi
+
+      // Đóng modal
+      setIsOpenFormPayment(false);
+
+      // Thông báo thành công
+      alert("Hủy thanh toán thành công!");
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
+    } catch (error) {
+      console.error("Error cancelling payment:", error);
+      alert("Lỗi khi hủy thanh toán!");
+    }
   };
-
+  // Hàm gọi API lấy dữ liệu priceOrders
   const fetchPriceOrders = async (billHouse) => {
     try {
       const response = await GetAllPriceOrder(billEdit.bill_house);
@@ -704,60 +771,50 @@ export default function ContentTable({ data }) {
 
   const [isOpenFormPayment, setIsOpenFormPayment] = useState(false);
 
-  const handlePaymentArrayInputChange = (type, idx, value) => {
+  // Cập nhật hàm xử lý thay đổi giá trị input
+  const handlePaymentInputChange = (field, value) => {
+    // Chuyển đổi giá trị thành số
     let numericValue = Number(value);
-    // Không cho nhập giá trị âm hoặc lớn hơn 0 nếu đã có createdAt
-    if (numericValue < 0) numericValue = 0;
 
-    let payments, setPayments;
-    if (type === "cash") {
-      payments = cashPayments;
-      setPayments = setCashPayments;
-    } else if (type === "banking") {
-      payments = bankingPayments;
-      setPayments = setBankingPayments;
-    } else if (type === "business") {
-      payments = businessPayments;
-      setPayments = setBusinessPayments;
+    // Nếu người dùng xóa hết và để trống, đặt giá trị là 0
+    if (value === "") {
+      numericValue = 0;
     }
+    console.log("value:", value);
+    switch (field) {
+      case "cash":
+        setCashPayment((prev) => ({
+          price: value,
+          dateUpdate: prev.dateUpdate,
+          active: prev.active,
+        }));
+        break;
+      case "banking":
+        setBankingPayment((prev) => ({
+          price: value,
+          dateUpdate: prev.dateUpdate,
+          active: prev.active,
+        }));
+        break;
+      case "businessBanking":
+        setBusinessBankingPayment((prev) => ({
+          price: value,
+          dateUpdate: prev.dateUpdate,
+          active: prev.active,
+        }));
+        break;
+      default:
+        break;
+    }
+    console.log("Payment details set cash:", cashPayment);
 
-    // Nếu đã có createdAt thì không cho nhập tiếp
-    if (payments[idx]?.createdAt) return;
-
-    setPayments((prev) =>
-      prev.map((p, i) =>
-        i === idx ? { ...p, price: numericValue > 0 ? numericValue : "" } : p
-      )
-    );
+    // Cập nhật state
+    // setPaymentDetails((prev) => ({
+    //   ...prev,
+    //   [field]: numericValue,
+    // }));
   };
 
-  const handleAddPayment = (type) => {
-    const newPayment = {
-      id: "",
-      bill_id: billEdit.bill_house,
-      price: "",
-      methodPayment:
-        type === "cash"
-          ? "CASH"
-          : type === "banking"
-          ? "CARD"
-          : "BUSINESS_CARD",
-      active: false,
-    };
-    if (type === "cash") setCashPayments((prev) => [...prev, newPayment]);
-    if (type === "banking") setBankingPayments((prev) => [...prev, newPayment]);
-    if (type === "business")
-      setBusinessPayments((prev) => [...prev, newPayment]);
-  };
-
-  const handleDeletePayment = (type, idx) => {
-    if (type === "cash")
-      setCashPayments((prev) => prev.filter((_, i) => i !== idx));
-    if (type === "banking")
-      setBankingPayments((prev) => prev.filter((_, i) => i !== idx));
-    if (type === "business")
-      setBusinessPayments((prev) => prev.filter((_, i) => i !== idx));
-  };
   const handleUpdateStatus = async (billId, newStatus) => {
     try {
       const dataRequest = {
@@ -1416,9 +1473,8 @@ export default function ContentTable({ data }) {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `shipment_report_${
-      new Date().toISOString().split("T")[0]
-    }.xlsx`;
+    a.download = `shipment_report_${new Date().toISOString().split("T")[0]
+      }.xlsx`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -1595,49 +1651,150 @@ export default function ContentTable({ data }) {
     (sum, item) => sum + (item?.grand_total?.grand_total || 0),
     0
   );
-  // Tổng tiền mặt đã xác nhận
-  const totalCashActive = filteredMastertracking.reduce(
+  const totalPayment = filteredMastertracking.reduce(
     (sum, item) =>
       sum +
-      (Array.isArray(item?.pricePayment?.cashPayment)
-        ? item.pricePayment.cashPayment
-            .filter((p) => p.active)
-            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
+      (item?.pricePayment?.cashPayment?.active
+        ? item?.pricePayment?.cashPayment?.price || 0
+        : 0) +
+      (item?.pricePayment?.cardPayment?.active
+        ? item?.pricePayment?.cardPayment?.price || 0
+        : 0) +
+      (item?.pricePayment?.businessCardPayment?.active
+        ? item?.pricePayment?.businessCardPayment?.price || 0
         : 0),
     0
   );
-
-  // Tổng chuyển khoản đã xác nhận
-  const totalBankingActive = filteredMastertracking.reduce(
-    (sum, item) =>
-      sum +
-      (Array.isArray(item?.pricePayment?.cardPayment)
-        ? item.pricePayment.cardPayment
-            .filter((p) => p.active)
-            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
-        : 0),
-    0
-  );
-
-  // Tổng doanh nghiệp đã xác nhận
-  const totalBusinessActive = filteredMastertracking.reduce(
-    (sum, item) =>
-      sum +
-      (Array.isArray(item?.pricePayment?.businessCardPayment)
-        ? item.pricePayment.businessCardPayment
-            .filter((p) => p.active)
-            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
-        : 0),
-    0
-  );
-
-  // Tổng thu = tổng thanh toán đã xác nhận (tổng tiền mặt, chuyển khoản, doanh nghiệp đã active)
-  const totalThu = totalCashActive + totalBankingActive + totalBusinessActive;
   const totalRemaining = filteredMastertracking.reduce(
     (sum, item) =>
       sum + Math.max(0, item?.pricePayment?.payments_remaining || 0),
     0
   );
+
+
+  function DropdownFilterNS({
+    keyName,
+    names,
+    selectedNames,
+    setSelectedNames,
+    onClose,
+  }) {
+    const [tempSelected, setTempSelected] = useState(
+      Array.isArray(selectedNames)
+        ? selectedNames
+        : selectedNames
+          ? [selectedNames]
+          : []
+    );
+
+    // Chọn tất cả
+    const handleSelectAll = () => setTempSelected(names);
+
+    // Bỏ chọn tất cả
+    const handleDeselectAll = () => setTempSelected([]);
+
+    // Áp dụng filter
+    const handleApply = () => {
+      setSelectedNames(tempSelected.length === 0 ? "" : tempSelected);
+      onClose();
+    };
+
+    // Xóa lọc
+    const handleClear = () => {
+      setTempSelected([]);
+      setSelectedNames("");
+      onClose();
+    };
+
+    // Đóng khi click ngoài
+    useEffect(() => {
+      const handleClickOutside = (e) => {
+        if (!e.target.closest(`#dropdown-ns-${keyName}`)) onClose();
+      };
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }, [onClose, keyName]);
+
+    return (
+      <div
+        id={`dropdown-ns-${keyName}`}
+        className="dropdown-filter-ns absolute left-8 top-full z-[9999] bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 w-60 p-0"
+        style={{ minWidth: 220 }}
+      >
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+          <span className="normal-case font-semibold text-sm text-gray-700 dark:text-gray-200">
+            Lọc nhân sự
+          </span>
+          <span className="normal-case text-xs text-gray-500 dark:text-gray-400">
+            {tempSelected.length}/{names.length} đã chọn
+          </span>
+        </div>
+        <div className="max-h-48 overflow-y-auto py-2 px-4">
+          {names.length === 0 && (
+            <div className="normal-case text-xs text-gray-400 text-center py-2">
+              Không có nhân sự
+            </div>
+          )}
+          {names.map((name) => (
+            <label
+              key={name}
+              className="flex items-center gap-2 py-1 cursor-pointer text-sm text-gray-700 dark:text-gray-200"
+            >
+              <input
+                type="checkbox"
+                checked={tempSelected.includes(name)}
+                onChange={() => {
+                  setTempSelected((prev) =>
+                    prev.includes(name)
+                      ? prev.filter((n) => n !== name)
+                      : [...prev, name]
+                  );
+                }}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="truncate normal-case">{name}</span>
+
+            </label>
+          ))}
+        </div>
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-xl">
+          <div className="flex gap-1">
+            <button
+              type="button"
+              className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-200 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+              onClick={handleDeselectAll}
+            >
+              Bỏ chọn
+            </button>
+            <button
+              type="button"
+              className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+              onClick={handleSelectAll}
+            >
+              Chọn tất cả
+            </button>
+          </div>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              className="px-2 py-1 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
+              onClick={handleClear}
+            >
+              Xóa lọc
+            </button>
+            <button
+              type="button"
+              className="px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700 shadow"
+              onClick={handleApply}
+            >
+              Áp dụng
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-white/[0.03] rounded-xl">
@@ -1650,9 +1807,8 @@ export default function ContentTable({ data }) {
         >
           <span className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
             <svg
-              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${
-                showFilter ? "rotate-180" : ""
-              }`}
+              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${showFilter ? "rotate-180" : ""
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -1693,8 +1849,8 @@ export default function ContentTable({ data }) {
                         className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                         value={
                           filterType === "range" &&
-                          filterRange.from &&
-                          filterRange.to
+                            filterRange.from &&
+                            filterRange.to
                             ? [filterRange.from, filterRange.to]
                             : []
                         }
@@ -1830,128 +1986,6 @@ export default function ContentTable({ data }) {
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 mb-1">
-                {authorities.includes("ADMIN") && (
-                  <>
-                    {/* Filter NS - BD */}
-                    <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        NS - BD
-                      </label>
-                      <select
-                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        value={filterBD}
-                        onChange={(e) => setFilterBD(e.target.value)}
-                      >
-                        <option value="">Tất cả</option>
-                        {bdNames.map((name) => (
-                          <option key={name} value={name}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {/* Filter NS - MANAGER */}
-                    <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        NS - MANAGER
-                      </label>
-                      <select
-                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        value={filterManager}
-                        onChange={(e) => setFilterManager(e.target.value)}
-                      >
-                        <option value="">Tất cả</option>
-                        {managerNames.map((name) => (
-                          <option key={name} value={name}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </>
-                )}
-                {authorities.includes("BD") &&
-                  !authorities.includes("ADMIN") && (
-                    <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        NS - MANAGER
-                      </label>
-                      <select
-                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        value={filterManager}
-                        onChange={(e) => setFilterManager(e.target.value)}
-                      >
-                        <option value="">Tất cả</option>
-                        {managerNames.map((name) => (
-                          <option key={name} value={name}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                {authorities.includes("MANAGER") &&
-                  !authorities.includes("ADMIN") &&
-                  !authorities.includes("BD") && (
-                    <>
-                      {/* Filter NS - USER */}
-                      <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
-                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                          NS - USER
-                        </label>
-                        <select
-                          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          value={filterUser}
-                          onChange={(e) => setFilterUser(e.target.value)}
-                        >
-                          <option value="">Tất cả</option>
-                          {userNames.map((name) => (
-                            <option key={name} value={name}>
-                              {name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      {/* Filter NS - CS */}
-                      <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
-                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                          NS - CS
-                        </label>
-                        <select
-                          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          value={filterCS}
-                          onChange={(e) => setFilterCS(e.target.value)}
-                        >
-                          <option value="">Tất cả</option>
-                          {csNames.map((name) => (
-                            <option key={name} value={name}>
-                              {name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      {/* Filter NS - TRANSPORTER */}
-                      <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
-                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                          NS - TRANSPORTER
-                        </label>
-                        <select
-                          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          value={filterTransporter}
-                          onChange={(e) => setFilterTransporter(e.target.value)}
-                        >
-                          <option value="">Tất cả</option>
-                          {transporterNames.map((name) => (
-                            <option key={name} value={name}>
-                              {name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </>
-                  )}
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -1966,9 +2000,8 @@ export default function ContentTable({ data }) {
         >
           <span className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
             <svg
-              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${
-                showOverview ? "rotate-180" : ""
-              }`}
+              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${showOverview ? "rotate-180" : ""
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -1995,7 +2028,7 @@ export default function ContentTable({ data }) {
               exit={{ height: 0, opacity: 0, overflow: "hidden" }}
               transition={{ duration: 0.3 }}
             >
-              {/* Thêm 7 ô tổng quan ở đây */}
+              {/* Thêm 6 ô tổng quan ở đây */}
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
                 <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex flex-col items-center">
                   <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">
@@ -2018,7 +2051,7 @@ export default function ContentTable({ data }) {
                     Tổng Thanh toán
                   </span>
                   <span className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">
-                    {formatCurrency(totalThu)} VNĐ
+                    {formatCurrency(totalPayment)} VNĐ
                   </span>
                 </div>
                 <div className="bg-green-100 dark:bg-green-900/60 rounded-lg p-4 flex flex-col items-center">
@@ -2026,7 +2059,17 @@ export default function ContentTable({ data }) {
                     Tiền mặt:
                   </span>
                   <span className="text-2xl font-bold text-green-800 dark:text-green-200">
-                    {formatCurrency(totalCashActive)} VNĐ
+                    {formatCurrency(
+                      filteredMastertracking.reduce(
+                        (sum, item) =>
+                          sum +
+                          (item?.pricePayment?.cashPayment?.active
+                            ? item?.pricePayment?.cashPayment?.price || 0
+                            : 0),
+                        0
+                      )
+                    )}{" "}
+                    VNĐ
                   </span>
                 </div>
                 <div className="bg-blue-100 dark:bg-blue-900/60 rounded-lg p-4 flex flex-col items-center">
@@ -2034,7 +2077,17 @@ export default function ContentTable({ data }) {
                     Chuyển khoản:
                   </span>
                   <span className="text-2xl font-bold text-blue-800 dark:text-blue-200">
-                    {formatCurrency(totalBankingActive)} VNĐ
+                    {formatCurrency(
+                      filteredMastertracking.reduce(
+                        (sum, item) =>
+                          sum +
+                          (item?.pricePayment?.cardPayment?.active
+                            ? item?.pricePayment?.cardPayment?.price || 0
+                            : 0),
+                        0
+                      )
+                    )}{" "}
+                    VNĐ
                   </span>
                 </div>
                 <div className="bg-purple-100 dark:bg-purple-900/60 rounded-lg p-4 flex flex-col items-center">
@@ -2042,9 +2095,21 @@ export default function ContentTable({ data }) {
                     Doanh nghiệp:
                   </span>
                   <span className="text-2xl font-bold text-purple-800 dark:text-purple-200">
-                    {formatCurrency(totalBusinessActive)} VNĐ
+                    {formatCurrency(
+                      filteredMastertracking.reduce(
+                        (sum, item) =>
+                          sum +
+                          (item?.pricePayment?.businessCardPayment?.active
+                            ? item?.pricePayment?.businessCardPayment?.price ||
+                            0
+                            : 0),
+                        0
+                      )
+                    )}{" "}
+                    VNĐ
                   </span>
                 </div>
+
                 <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 flex flex-col items-center">
                   <span className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">
                     Tổng Còn lại
@@ -2279,121 +2344,63 @@ export default function ContentTable({ data }) {
                   {(authorities.includes("ADMIN") ||
                     authorities.includes("BD") ||
                     authorities.includes("MANAGER")) && (
-                    <div className="mb-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                          THÔNG TIN NHÂN SỰ
-                        </span>
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => {
-                              const newVisibleColumns = { ...visibleColumns };
-                              if (authorities.includes("ADMIN")) {
-                                ["bd", "manager"].forEach((column) => {
-                                  newVisibleColumns[column] = true;
-                                });
-                              } else if (authorities.includes("BD")) {
-                                newVisibleColumns["manager"] = true;
-                              } else if (authorities.includes("MANAGER")) {
-                                ["user", "cs", "transporter"].forEach(
-                                  (column) => {
+                      <div className="mb-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                            THÔNG TIN NHÂN SỰ
+                          </span>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => {
+                                const newVisibleColumns = { ...visibleColumns };
+                                if (authorities.includes("ADMIN")) {
+                                  ["bd", "manager"].forEach((column) => {
                                     newVisibleColumns[column] = true;
-                                  }
-                                );
-                              }
-                              setVisibleColumns(newVisibleColumns);
-                            }}
-                            className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                          >
-                            Chọn
-                          </button>
-                          <button
-                            onClick={() => {
-                              const newVisibleColumns = { ...visibleColumns };
-                              if (authorities.includes("ADMIN")) {
-                                ["bd", "manager"].forEach((column) => {
-                                  newVisibleColumns[column] = false;
-                                });
-                              } else if (authorities.includes("BD")) {
-                                newVisibleColumns["manager"] = false;
-                              } else if (authorities.includes("MANAGER")) {
-                                ["user", "cs", "transporter"].forEach(
-                                  (column) => {
-                                    newVisibleColumns[column] = false;
-                                  }
-                                );
-                              }
-                              setVisibleColumns(newVisibleColumns);
-                            }}
-                            className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                          >
-                            Bỏ chọn
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* ADMIN: hiển thị bd và manager */}
-                      {authorities.includes("ADMIN") && (
-                        <>
-                          {["bd", "manager"].map((column) => (
-                            <div
-                              key={column}
-                              className="flex items-center ml-2 mt-1"
-                            >
-                              <input
-                                type="checkbox"
-                                id={`col-${column}`}
-                                checked={visibleColumns[column]}
-                                onChange={() =>
-                                  setVisibleColumns({
-                                    ...visibleColumns,
-                                    [column]: !visibleColumns[column],
-                                  })
+                                  });
+                                } else if (authorities.includes("BD")) {
+                                  newVisibleColumns["manager"] = true;
+                                } else if (authorities.includes("MANAGER")) {
+                                  ["user", "cs", "transporter"].forEach(
+                                    (column) => {
+                                      newVisibleColumns[column] = true;
+                                    }
+                                  );
                                 }
-                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                              />
-                              <label
-                                htmlFor={`col-${column}`}
-                                className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                              >
-                                {columnLabels[column] || column}
-                              </label>
-                            </div>
-                          ))}
-                        </>
-                      )}
-
-                      {/* BD: chỉ hiển thị manager */}
-                      {authorities.includes("BD") &&
-                        !authorities.includes("ADMIN") && (
-                          <div className="flex items-center ml-2 mt-1">
-                            <input
-                              type="checkbox"
-                              id="col-manager"
-                              checked={visibleColumns["manager"]}
-                              onChange={() =>
-                                setVisibleColumns({
-                                  ...visibleColumns,
-                                  manager: !visibleColumns["manager"],
-                                })
-                              }
-                              className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                            />
-                            <label
-                              htmlFor="col-manager"
-                              className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                                setVisibleColumns(newVisibleColumns);
+                              }}
+                              className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
                             >
-                              {columnLabels["manager"] || "manager"}
-                            </label>
+                              Chọn
+                            </button>
+                            <button
+                              onClick={() => {
+                                const newVisibleColumns = { ...visibleColumns };
+                                if (authorities.includes("ADMIN")) {
+                                  ["bd", "manager"].forEach((column) => {
+                                    newVisibleColumns[column] = false;
+                                  });
+                                } else if (authorities.includes("BD")) {
+                                  newVisibleColumns["manager"] = false;
+                                } else if (authorities.includes("MANAGER")) {
+                                  ["user", "cs", "transporter"].forEach(
+                                    (column) => {
+                                      newVisibleColumns[column] = false;
+                                    }
+                                  );
+                                }
+                                setVisibleColumns(newVisibleColumns);
+                              }}
+                              className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                            >
+                              Bỏ chọn
+                            </button>
                           </div>
-                        )}
+                        </div>
 
-                      {/* MANAGER: chỉ hiển thị user, cs, transporter */}
-                      {authorities.includes("MANAGER") &&
-                        !authorities.includes("ADMIN") &&
-                        !authorities.includes("BD") && (
+                        {/* ADMIN: hiển thị bd và manager */}
+                        {authorities.includes("ADMIN") && (
                           <>
-                            {["user", "cs", "transporter"].map((column) => (
+                            {["bd", "manager"].map((column) => (
                               <div
                                 key={column}
                                 className="flex items-center ml-2 mt-1"
@@ -2420,8 +2427,66 @@ export default function ContentTable({ data }) {
                             ))}
                           </>
                         )}
-                    </div>
-                  )}
+
+                        {/* BD: chỉ hiển thị manager */}
+                        {authorities.includes("BD") &&
+                          !authorities.includes("ADMIN") && (
+                            <div className="flex items-center ml-2 mt-1">
+                              <input
+                                type="checkbox"
+                                id="col-manager"
+                                checked={visibleColumns["manager"]}
+                                onChange={() =>
+                                  setVisibleColumns({
+                                    ...visibleColumns,
+                                    manager: !visibleColumns["manager"],
+                                  })
+                                }
+                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                              />
+                              <label
+                                htmlFor="col-manager"
+                                className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                              >
+                                {columnLabels["manager"] || "manager"}
+                              </label>
+                            </div>
+                          )}
+
+                        {/* MANAGER: chỉ hiển thị user, cs, transporter */}
+                        {authorities.includes("MANAGER") &&
+                          !authorities.includes("ADMIN") &&
+                          !authorities.includes("BD") && (
+                            <>
+                              {["user", "cs", "transporter"].map((column) => (
+                                <div
+                                  key={column}
+                                  className="flex items-center ml-2 mt-1"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    id={`col-${column}`}
+                                    checked={visibleColumns[column]}
+                                    onChange={() =>
+                                      setVisibleColumns({
+                                        ...visibleColumns,
+                                        [column]: !visibleColumns[column],
+                                      })
+                                    }
+                                    className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                  />
+                                  <label
+                                    htmlFor={`col-${column}`}
+                                    className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                                  >
+                                    {columnLabels[column] || column}
+                                  </label>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                      </div>
+                    )}
 
                   {/* Nhóm PRICE */}
                   <div className="mb-2">
@@ -3062,43 +3127,134 @@ export default function ContentTable({ data }) {
         onTouchEnd={handleTouchEnd}
       >
         <div>
-          <Table className="w-full rounded-lg overflow-hidden shadow-sm select-none pointer-events-none">
-            <TableHeader
-              className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
-              style={{
-                WebkitUserSelect: "none",
-                userSelect: "none",
-                msUserSelect: "none",
-              }}
-            >
+          <Table className="w-full rounded-lg overflow-hidden shadow-sm select-none">
+            <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               <TableRow>
                 {Object.entries(columnLabels)
-                  .filter(
-                    ([key]) => key === "house_bill" || visibleColumns[key]
-                  )
+                  .filter(([key]) => key === "house_bill" || visibleColumns[key])
                   .map(([key, label]) => (
                     <TableCell
                       key={key}
                       isHeader
-                      className="px-6 py-4 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs"
+                      className="px-6 py-4 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs relative"
                     >
-                      <div className="flex items-center justify-between">
-                        <span>{label}</span>
-                        <button
-                          onClick={() => handleSort(key)}
-                          className="pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
-                        >
-                          {sortKey === key ? (
-                            sortOrder === "asc" ? (
-                              <ChevronUpIcon className="h-4 w-4 text-brand-500" />
+                      <div className="flex items-center justify-between cursor-pointer">
+                        <span className="pointer-events-auto select-auto">
+                          {label}
+                        </span>
+                        {["bd", "manager", "user", "cs", "transporter"].includes(key) ? (
+                          <span
+                            className="icon-filter-ns pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
+                            onClick={e => {
+                              e.stopPropagation();
+                              e.preventDefault(); // Thêm dòng này để ngăn sự kiện click bubble lên document
+                              console.log("Click filter icon", key);
+                              setShowFilterDropdown(prev => ({
+                                ...Object.fromEntries(Object.keys(prev).map(k => [k, false])), // Đóng tất cả dropdown khác
+                                [key]: !prev[key],
+                              }));
+                            }}
+                            style={{ cursor: "pointer" }}
+                            title="Lọc nhân sự"
+                          >
+                            <ArrowsUpDownIcon className="pointer-events-auto select-auto h-4 w-4" />
+                          </span>
+                        ) : (
+                          <span
+                            className="icon-filter-ns pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
+                            onClick={() => handleSort(key)}
+                            style={{ cursor: "pointer" }}
+                            title="Sắp xếp"
+                          >
+                            {sortKey === key ? (
+                              sortOrder === "asc" ? (
+                                <ChevronUpIcon className="h-4 w-4 text-brand-500" />
+                              ) : (
+                                <ChevronDownIcon className="h-4 w-4 text-brand-500" />
+                              )
                             ) : (
-                              <ChevronDownIcon className="h-4 w-4 text-brand-500" />
-                            )
-                          ) : (
-                            <ArrowsUpDownIcon className="h-3 w-3" />
-                          )}
-                        </button>
+                              <ArrowsUpDownIcon className="h-3 w-3" />
+                            )}
+                          </span>
+                        )}
                       </div>
+                      {/* Dropdown filter nhân sự */}
+                      {showFilterDropdown[key] &&
+                        ["bd", "manager", "user", "cs", "transporter"].includes(key) && (
+                          <DropdownFilterNS
+                            keyName={key}
+                            names={
+                              key === "bd"
+                                ? bdNames
+                                : key === "manager"
+                                  ? managerNames
+                                  : key === "user"
+                                    ? userNames
+                                    : key === "cs"
+                                      ? csNames
+                                      : key === "transporter"
+                                        ? transporterNames
+                                        : []
+                            }
+                            selectedNames={
+                              Array.isArray(
+                                key === "bd"
+                                  ? filterBD
+                                  : key === "manager"
+                                    ? filterManager
+                                    : key === "user"
+                                      ? filterUser
+                                      : key === "cs"
+                                        ? filterCS
+                                        : key === "transporter"
+                                          ? filterTransporter
+                                          : ""
+                              )
+                                ? (
+                                  key === "bd"
+                                    ? filterBD
+                                    : key === "manager"
+                                      ? filterManager
+                                      : key === "user"
+                                        ? filterUser
+                                        : key === "cs"
+                                          ? filterCS
+                                          : key === "transporter"
+                                            ? filterTransporter
+                                            : []
+                                ) || []
+                                : [
+                                  key === "bd"
+                                    ? filterBD
+                                    : key === "manager"
+                                      ? filterManager
+                                      : key === "user"
+                                        ? filterUser
+                                        : key === "cs"
+                                          ? filterCS
+                                          : key === "transporter"
+                                            ? filterTransporter
+                                            : "",
+                                ].filter(Boolean)
+                            }
+                            setSelectedNames={
+                              key === "bd"
+                                ? setFilterBD
+                                : key === "manager"
+                                  ? setFilterManager
+                                  : key === "user"
+                                    ? setFilterUser
+                                    : key === "cs"
+                                      ? setFilterCS
+                                      : key === "transporter"
+                                        ? setFilterTransporter
+                                        : () => { }
+                            }
+                            onClose={() =>
+                              setShowFilterDropdown((prev) => ({ ...prev, [key]: false }))
+                            }
+                          />
+                        )}
                     </TableCell>
                   ))}
               </TableRow>
@@ -3285,17 +3441,17 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("ACCOUNTANT") ||
                           authorities.includes("BD")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              openModal();
-                              setBillEdit(item);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                openModal();
+                                setBillEdit(item);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
@@ -3343,48 +3499,34 @@ export default function ContentTable({ data }) {
                   {visibleColumns.payments_cash && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                       <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán tiền mặt */}
+                        {/* Nút để mở modal thanh toán */}
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("BD") ||
                           authorities.includes("ACCOUNTANT")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("CASH");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
-                        {/* Tổng đã xác nhận và chưa xác nhận */}
-                        <div className="flex flex-col gap-1 pt-6">
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CASH"); // Thêm dòng này
+                                handleViewPaymentDetails(item);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
+
+                        {/* Giá trị tiền order */}
+                        <div className="flex flex-col space-y-1 pt-6">
+                          {/* Giá trị xanh */}
+                          <div className="flex items-center space-x-2">
+                            <span
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cashPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
+                            >
                               {formatCurrency(
-                                (item.pricePayment.cashPayment || [])
-                                  .filter((p) => p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
-                              )}{" "}
-                              VNĐ
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
-                              {formatCurrency(
-                                (item.pricePayment.cashPayment || [])
-                                  .filter((p) => !p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
+                                item.pricePayment.cashPayment.price
                               )}{" "}
                               VNĐ
                             </span>
@@ -3397,48 +3539,73 @@ export default function ContentTable({ data }) {
                   {visibleColumns.payments_banking && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                       <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán chuyển khoản */}
+                        {/* Nút để mở modal thanh toán */}
                         {(authorities.includes("ADMIN") ||
-                          authorities.includes("BD") ||
-                          authorities.includes("ACCOUNTANT")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("CARD");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
-                        {/* Tổng đã xác nhận và chưa xác nhận */}
-                        <div className="flex flex-col gap-1 pt-6">
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                          authorities.includes("ACCOUNTANT") ||
+                          authorities.includes("BD")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CARD"); // Thêm dòng này
+                                handleViewPaymentDetails(item);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
+
+                        {/* Giá trị tiền order */}
+                        <div className="flex flex-col space-y-1 pt-6">
+                          {/* Giá trị xanh */}
+                          <div className="flex items-center space-x-2">
+                            <span
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.cardPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
+                            >
                               {formatCurrency(
-                                (item.pricePayment.cardPayment || [])
-                                  .filter((p) => p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
+                                item.pricePayment.cardPayment.price
                               )}{" "}
                               VNĐ
                             </span>
                           </div>
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
+                        </div>
+                      </div>
+                    </TableCell>
+                  )}
+                  {visibleColumns.payments_business && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="relative flex flex-col items-start space-y-2">
+                        {/* Nút để mở modal thanh toán */}
+                        {(authorities.includes("ADMIN") ||
+                          authorities.includes("ACCOUNTANT") ||
+                          authorities.includes("BD")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("BUSINESS_CARD"); // Thêm dòng này
+                                handleViewPaymentDetails(item);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
+
+                        {/* Giá trị tiền order */}
+                        <div className="flex flex-col space-y-1 pt-6">
+                          {/* Giá trị xanh */}
+                          <div className="flex items-center space-x-2">
+                            <span
+                              className={`px-2 py-1 text-sm font-medium rounded-md ${item.pricePayment.businessCardPayment.active
+                                ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
+                                : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
+                                }`}
+                            >
                               {formatCurrency(
-                                (item.pricePayment.cardPayment || [])
-                                  .filter((p) => !p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
+                                item.pricePayment.businessCardPayment.price
                               )}{" "}
                               VNĐ
                             </span>
@@ -3448,59 +3615,6 @@ export default function ContentTable({ data }) {
                     </TableCell>
                   )}
 
-                  {visibleColumns.payments_business && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                      <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán doanh nghiệp */}
-                        {(authorities.includes("ADMIN") ||
-                          authorities.includes("BD") ||
-                          authorities.includes("ACCOUNTANT")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("BUSINESS_CARD");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
-                        {/* Tổng đã xác nhận và chưa xác nhận */}
-                        <div className="flex flex-col gap-1 pt-6">
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                              {formatCurrency(
-                                (item.pricePayment.businessCardPayment || [])
-                                  .filter((p) => p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
-                              )}{" "}
-                              VNĐ
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
-                              {formatCurrency(
-                                (item.pricePayment.businessCardPayment || [])
-                                  .filter((p) => !p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
-                              )}{" "}
-                              VNĐ
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                  )}
                   {visibleColumns.payments_remaining && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.pricePayment.payments_remaining)}{" "}
@@ -3604,8 +3718,8 @@ export default function ContentTable({ data }) {
                         <StatusBadge status={item.status_payment} />
 
                         {authorities.includes("ADMIN") ||
-                        authorities.includes("ACCOUNTANT") ||
-                        authorities.includes("BD") ? (
+                          authorities.includes("ACCOUNTANT") ||
+                          authorities.includes("BD") ? (
                           <select
                             value={item.status_payment || "pending"}
                             onChange={(e) =>
@@ -3684,190 +3798,189 @@ export default function ContentTable({ data }) {
             {(authorities.includes("ADMIN") ||
               authorities.includes("ACCOUNTANT") ||
               authorities.includes("BD")) && (
-              <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                    Quản lý Price Orders
-                  </h4>
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-2 mt-2 inline-block shadow-sm">
-                    <span className="text-sm font-bold text-black dark:text-white">
-                      Tổng giá:&nbsp;
-                      <span className="text-base text-black dark:text-white">
-                        {priceOrders
-                          .filter((order) => order.active) // chỉ cộng order đã xác nhận
-                          .reduce(
-                            (sum, order) =>
-                              sum + (parseFloat(order.price) || 0),
-                            0
-                          )
-                          .toLocaleString()}{" "}
-                        VNĐ
+                <div className="space-y-6">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
+                      Quản lý Price Orders
+                    </h4>
+                    <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-2 mt-2 inline-block shadow-sm">
+                      <span className="text-sm font-bold text-black dark:text-white">
+                        Tổng giá:&nbsp;
+                        <span className="text-base text-black dark:text-white">
+                          {priceOrders
+                            .filter((order) => order.active) // chỉ cộng order đã xác nhận
+                            .reduce(
+                              (sum, order) =>
+                                sum + (parseFloat(order.price) || 0),
+                              0
+                            )
+                            .toLocaleString()}{" "}
+                          VNĐ
+                        </span>
                       </span>
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const currentDate = new Date();
-                      const formattedDate = `${currentDate.getDate()}/${
-                        currentDate.getMonth() + 1
-                      }/${currentDate.getFullYear()}`;
-                      const newPriceOrder = {
-                        id: "",
-                        name: "",
-                        price: "",
-                        description: "",
-                        date: formattedDate,
-                      };
-                      setPriceOrders([...priceOrders, newPriceOrder]);
-                    }}
-                    className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                  >
-                    <PlusIcon className="w-4 h-4 mr-1" />
-                    Thêm Price Order
-                  </button>
-                </div>
-
-                {/* Price Order List */}
-                <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
-                  {(priceOrders || []).map((order, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currentDate = new Date();
+                        const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
+                          }/${currentDate.getFullYear()}`;
+                        const newPriceOrder = {
+                          id: "",
+                          name: "",
+                          price: "",
+                          description: "",
+                          date: formattedDate,
+                        };
+                        setPriceOrders([...priceOrders, newPriceOrder]);
+                      }}
+                      className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
                     >
-                      {/* STT */}
-                      <div className="w-1/12 text-center">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {index + 1}
-                        </p>
-                      </div>
+                      <PlusIcon className="w-4 h-4 mr-1" />
+                      Thêm Price Order
+                    </button>
+                  </div>
 
-                      {/* Name */}
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Tên
-                        </label>
-                        <input
-                          type="text"
-                          value={order.name}
-                          onChange={(e) => {
-                            const updatedOrders = [...priceOrders];
-                            updatedOrders[index].name = e.target.value;
-                            setPriceOrders(updatedOrders);
-                          }}
-                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
+                  {/* Price Order List */}
+                  <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
+                    {(priceOrders || []).map((order, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                      >
+                        {/* STT */}
+                        <div className="w-1/12 text-center">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {index + 1}
+                          </p>
+                        </div>
 
-                      {/* Price */}
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Giá
-                        </label>
-                        <input
-                          type="number"
-                          value={order.price}
-                          onChange={(e) => {
-                            const updatedOrders = [...priceOrders];
-                            updatedOrders[index].price = e.target.value;
-                            setPriceOrders(updatedOrders);
-                          }}
-                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
-
-                      {/* Description */}
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Mô tả
-                        </label>
-                        <input
-                          type="text"
-                          value={order.description}
-                          onChange={(e) => {
-                            const updatedOrders = [...priceOrders];
-                            updatedOrders[index].description = e.target.value;
-                            setPriceOrders(updatedOrders);
-                          }}
-                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
-
-                      {/* DateTime */}
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Ngày tạo
-                        </label>
-                        <input
-                          type="text"
-                          value={order.created_at || "Chưa có ngày tạo"}
-                          readOnly
-                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
-
-                      {/* Buttons */}
-                      <div className="flex items-center gap-2">
-                        {order.id === "" ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const dataRequest = {
-                                id: order.id,
-                                name: order.name,
-                                price: order.price,
-                                description: order.description,
-                                bill_id: billEdit.bill_house,
-                              };
-                              handleCreatePriceOrder(dataRequest);
-                              setIsDataChanged(true);
+                        {/* Name */}
+                        <div className="w-full sm:w-1/4">
+                          <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Tên
+                          </label>
+                          <input
+                            type="text"
+                            value={order.name}
+                            onChange={(e) => {
+                              const updatedOrders = [...priceOrders];
+                              updatedOrders[index].name = e.target.value;
+                              setPriceOrders(updatedOrders);
                             }}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-                          >
-                            Lưu
-                          </button>
-                        ) : (
-                          !order.active && (
+                            className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                          />
+                        </div>
+
+                        {/* Price */}
+                        <div className="w-full sm:w-1/4">
+                          <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Giá
+                          </label>
+                          <input
+                            type="number"
+                            value={order.price}
+                            onChange={(e) => {
+                              const updatedOrders = [...priceOrders];
+                              updatedOrders[index].price = e.target.value;
+                              setPriceOrders(updatedOrders);
+                            }}
+                            className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                          />
+                        </div>
+
+                        {/* Description */}
+                        <div className="w-full sm:w-1/4">
+                          <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Mô tả
+                          </label>
+                          <input
+                            type="text"
+                            value={order.description}
+                            onChange={(e) => {
+                              const updatedOrders = [...priceOrders];
+                              updatedOrders[index].description = e.target.value;
+                              setPriceOrders(updatedOrders);
+                            }}
+                            className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                          />
+                        </div>
+
+                        {/* DateTime */}
+                        <div className="w-full sm:w-1/4">
+                          <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Ngày tạo
+                          </label>
+                          <input
+                            type="text"
+                            value={order.created_at || "Chưa có ngày tạo"}
+                            readOnly
+                            className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                          />
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex items-center gap-2">
+                          {order.id === "" ? (
                             <button
                               type="button"
-                              onClick={async () => {
-                                await PutPriceOrder(order.id);
-                                order.active = true;
-                                const updatedOrders = [...priceOrders];
-                                updatedOrders[index] = order;
-                                setPriceOrders(updatedOrders);
+                              onClick={() => {
+                                const dataRequest = {
+                                  id: order.id,
+                                  name: order.name,
+                                  price: order.price,
+                                  description: order.description,
+                                  bill_id: billEdit.bill_house,
+                                };
+                                handleCreatePriceOrder(dataRequest);
                                 setIsDataChanged(true);
                               }}
-                              className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
                             >
-                              Xác nhận
+                              Lưu
                             </button>
-                          )
-                        )}
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            const updatedOrders = priceOrders.filter(
-                              (_, i) => i !== index
-                            );
-                            setPriceOrders(updatedOrders);
+                          ) : (
+                            !order.active && (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  await PutPriceOrder(order.id);
+                                  order.active = true;
+                                  const updatedOrders = [...priceOrders];
+                                  updatedOrders[index] = order;
+                                  setPriceOrders(updatedOrders);
+                                  setIsDataChanged(true);
+                                }}
+                                className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                              >
+                                Xác nhận
+                              </button>
+                            )
+                          )}
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const updatedOrders = priceOrders.filter(
+                                (_, i) => i !== index
+                              );
+                              setPriceOrders(updatedOrders);
 
-                            await DeletePriceOrder(order.id);
-                            setIsDataChanged(true);
+                              await DeletePriceOrder(order.id);
+                              setIsDataChanged(true);
 
-                            props.setDataBill(updatedDataBill); // Giả sử bạn có hàm `setDataBill` để cập nhật `dataBill`
-                          }}
-                          className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                        >
-                          Xóa
-                        </button>
+                              props.setDataBill(updatedDataBill); // Giả sử bạn có hàm `setDataBill` để cập nhật `dataBill`
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                          >
+                            Xóa
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Action Buttons */}
             <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
@@ -3907,19 +4020,19 @@ export default function ContentTable({ data }) {
             {(authorities.includes("ADMIN") ||
               authorities.includes("ACCOUNTANT") ||
               authorities.includes("BD")) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpenFormPayment(false);
-                  if (isDataChanged) {
-                    fetchBillData();
-                  }
-                }}
-                className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-              >
-                <XIcon className="w-5 h-5" />
-              </button>
-            )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpenFormPayment(false);
+                    if (isDataChanged) {
+                      fetchBillData();
+                    }
+                  }}
+                  className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                >
+                  <XIcon className="w-5 h-5" />
+                </button>
+              )}
           </div>
 
           {/* Form */}
@@ -3937,370 +4050,288 @@ export default function ContentTable({ data }) {
               <div className="space-y-4">
                 {editType === "CASH" && (
                   <div className="space-y-4">
-                    {/* Tổng tiền đã xác nhận */}
-                    <div className="flex items-center justify-begin mb-2">
-                      <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                        Tổng tiền đã xác nhận:&nbsp;
-                        {formatCurrency(
-                          (cashPayments || [])
-                            .filter((p) => p.active)
-                            .reduce(
-                              (sum, p) => sum + (parseFloat(p.price) || 0),
-                              0
-                            )
-                        )}{" "}
-                        VNĐ
-                      </span>
+                    {/* Form nội dung */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                      <div className="flex-1">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Tiền mặt (VNĐ)
+                        </label>
+                        <input
+                          type="number"
+                          value={
+                            cashPayment.price === 0 &&
+                              document.activeElement ===
+                              document.getElementById("cash-input")
+                              ? ""
+                              : cashPayment.price
+                          }
+                          onChange={(e) =>
+                            handlePaymentInputChange("cash", e.target.value)
+                          }
+                          onFocus={(e) => {
+                            if (cashPayment.price === 0) e.target.value = "";
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value === "")
+                              handlePaymentInputChange("cash", "0");
+                          }}
+                          readOnly={cashPayment.dateUpdate !== null}
+                          id="cash-input"
+                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
+
+                      <div className="w-full sm:w-1/4">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Ngày tạo
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            cashPayment.dateUpdate
+                              ? formatDateTime(cashPayment.dateUpdate)
+                              : "Chưa có ngày tạo"
+                          }
+                          readOnly
+                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
                     </div>
-                    <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
-                      {(cashPayments || []).map((payment, idx) => (
-                        <div
-                          key={payment.id || idx}
-                          className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
-                        >
-                          <div className="flex-1">
-                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Tiền mặt (VNĐ)
-                            </label>
-                            <input
-                              type="number"
-                              min={0}
-                              value={payment.price}
-                              onChange={(e) =>
-                                handlePaymentArrayInputChange(
-                                  "cash",
-                                  idx,
-                                  e.target.value
-                                )
-                              }
-                              readOnly={
-                                payment.active || payment.createdAt != null
-                              }
-                              disabled={payment.createdAt}
-                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                            />
-                          </div>
-                          <div className="w-full sm:w-1/4">
-                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Ngày tạo
-                            </label>
-                            <input
-                              type="text"
-                              value={
-                                payment.createdAt
-                                  ? formatDateTime(payment.createdAt)
-                                  : "Chưa có ngày tạo"
-                              }
-                              readOnly
-                              className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                            />
-                          </div>
-                          <div className="w-full flex items-center gap-2 mt-2">
-                            {!payment.active && (
-                              <>
-                                {payment.createdAt == null ? (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleUpdatePayment(payment, idx)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                                    >
-                                      Lưu thay đổi
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleDeletePayment("cash", idx)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                                    >
-                                      Xóa
-                                    </button>
-                                  </>
-                                ) : (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleConfirmPayment(payment)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-                                    >
-                                      Xác nhận
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleCancelPayment(payment)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                                    >
-                                      Huỷ
-                                    </button>
-                                  </>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+
+                    {/* ✅ Nút hành động bên dưới */}
+
+                    <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpenFormPayment(false);
+                          if (isDataChanged) fetchBillData();
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Đóng
+                      </button>
+                      {!cashPayment.active &&
+                        (cashPayment.dateUpdate === null ? (
+                          <button
+                            type="button"
+                            onClick={handleUpdatePayment}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            Lưu thay đổi
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleConfirmPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                              Xác nhận
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                            >
+                              Huỷ
+                            </button>
+                          </>
+                        ))}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleAddPayment("cash")}
-                      className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                    >
-                      <PlusIcon className="w-4 h-4 mr-1" />
-                      Thêm thanh toán
-                    </button>
                   </div>
                 )}
 
                 {editType === "CARD" && (
                   <div className="space-y-4">
-                    {/* Tổng tiền đã xác nhận */}
-                    <div className="flex items-center justify-begin mb-2">
-                      <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                        Tổng tiền đã xác nhận:&nbsp;
-                        {formatCurrency(
-                          (bankingPayments || [])
-                            .filter((p) => p.active)
-                            .reduce(
-                              (sum, p) => sum + (parseFloat(p.price) || 0),
-                              0
-                            )
-                        )}{" "}
-                        VNĐ
-                      </span>
+                    {/* Form nội dung */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                      <div className="flex-1">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Tiền chuyển khoản (VNĐ)
+                        </label>
+                        <input
+                          type="number"
+                          value={
+                            bankingPayment.price === 0 &&
+                              document.activeElement ===
+                              document.getElementById("banking-input")
+                              ? ""
+                              : bankingPayment.price
+                          }
+                          onChange={(e) =>
+                            handlePaymentInputChange("banking", e.target.value)
+                          }
+                          onFocus={(e) => {
+                            if (bankingPayment.price === 0) e.target.value = "";
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value === "")
+                              handlePaymentInputChange("banking", "0");
+                          }}
+                          readOnly={bankingPayment.dateUpdate !== null}
+                          id="banking-input"
+                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
+
+                      <div className="w-full sm:w-1/4">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Ngày tạo
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            bankingPayment.dateUpdate
+                              ? formatDateTime(bankingPayment.dateUpdate)
+                              : "Chưa có ngày tạo"
+                          }
+                          readOnly
+                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
                     </div>
-                    <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
-                      {(bankingPayments || []).map((payment, idx) => (
-                        <div
-                          key={payment.id || idx}
-                          className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
-                        >
-                          <div className="flex-1">
-                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Tiền chuyển khoản (VNĐ)
-                            </label>
-                            <input
-                              type="number"
-                              min={0}
-                              value={payment.price}
-                              onChange={(e) =>
-                                handlePaymentArrayInputChange(
-                                  "banking",
-                                  idx,
-                                  e.target.value
-                                )
-                              }
-                              readOnly={
-                                payment.active || payment.createdAt != null
-                              }
-                              disabled={payment.createdAt}
-                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                            />
-                          </div>
-                          <div className="w-full sm:w-1/4">
-                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Ngày tạo
-                            </label>
-                            <input
-                              type="text"
-                              value={
-                                payment.createdAt
-                                  ? formatDateTime(payment.createdAt)
-                                  : "Chưa có ngày tạo"
-                              }
-                              readOnly
-                              className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                            />
-                          </div>
-                          <div className="w-full flex items-center gap-2 mt-2">
-                            {!payment.active && (
-                              <>
-                                {payment.createdAt == null ? (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleUpdatePayment(payment, idx)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                                    >
-                                      Lưu thay đổi
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleDeletePayment("banking", idx)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                                    >
-                                      Xóa
-                                    </button>
-                                  </>
-                                ) : (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleConfirmPayment(payment)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-                                    >
-                                      Xác nhận
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleCancelPayment(payment)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                                    >
-                                      Huỷ
-                                    </button>
-                                  </>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+
+                    {/* ✅ Nút hành động bên dưới */}
+
+                    <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpenFormPayment(false);
+                          if (isDataChanged) fetchBillData();
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Đóng
+                      </button>
+                      {!bankingPayment.active &&
+                        (bankingPayment.dateUpdate === null ? (
+                          <button
+                            type="button"
+                            onClick={handleUpdatePayment}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            Lưu thay đổi
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleConfirmPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                              Xác nhận
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                            >
+                              Huỷ
+                            </button>
+                          </>
+                        ))}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleAddPayment("banking")}
-                      className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                    >
-                      <PlusIcon className="w-4 h-4 mr-1" />
-                      Thêm thanh toán
-                    </button>
                   </div>
                 )}
 
                 {editType === "BUSINESS_CARD" && (
                   <div className="space-y-4">
-                    {/* Tổng tiền đã xác nhận */}
-                    <div className="flex items-center justify-begin mb-2">
-                      <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                        Tổng tiền đã xác nhận:&nbsp;
-                        {formatCurrency(
-                          (businessPayments || [])
-                            .filter((p) => p.active)
-                            .reduce(
-                              (sum, p) => sum + (parseFloat(p.price) || 0),
-                              0
+                    {/* Form nội dung */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                      <div className="flex-1">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Tiền chuyển khoản doanh nghiệp (VNĐ)
+                        </label>
+                        <input
+                          type="number"
+                          value={
+                            businessBankingPayment.price === 0 &&
+                              document.activeElement ===
+                              document.getElementById("business-input")
+                              ? ""
+                              : businessBankingPayment.price
+                          }
+                          onChange={(e) =>
+                            handlePaymentInputChange(
+                              "businessBanking",
+                              e.target.value
                             )
-                        )}{" "}
-                        VNĐ
-                      </span>
+                          }
+                          onFocus={(e) => {
+                            if (businessBankingPayment.price === 0)
+                              e.target.value = "";
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value === "")
+                              handlePaymentInputChange("businessBanking", "0");
+                          }}
+                          readOnly={businessBankingPayment.dateUpdate !== null}
+                          id="business-input"
+                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
+
+                      <div className="w-full sm:w-1/4">
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Ngày tạo
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            businessBankingPayment.dateUpdate
+                              ? formatDateTime(
+                                businessBankingPayment.dateUpdate
+                              )
+                              : "Chưa có ngày tạo"
+                          }
+                          readOnly
+                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                        />
+                      </div>
                     </div>
-                    <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
-                      {(businessPayments || []).map((payment, idx) => (
-                        <div
-                          key={payment.id || idx}
-                          className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
-                        >
-                          <div className="flex-1">
-                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Tiền chuyển khoản doanh nghiệp (VNĐ)
-                            </label>
-                            <input
-                              type="number"
-                              min={0}
-                              value={payment.price}
-                              onChange={(e) =>
-                                handlePaymentArrayInputChange(
-                                  "business",
-                                  idx,
-                                  e.target.value
-                                )
-                              }
-                              readOnly={
-                                payment.active || payment.createdAt != null
-                              }
-                              disabled={payment.createdAt}
-                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                            />
-                          </div>
-                          <div className="w-full sm:w-1/4">
-                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Ngày tạo
-                            </label>
-                            <input
-                              type="text"
-                              value={
-                                payment.createdAt
-                                  ? formatDateTime(payment.createdAt)
-                                  : "Chưa có ngày tạo"
-                              }
-                              readOnly
-                              className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                            />
-                          </div>
-                          <div className="w-full flex items-center gap-2 mt-2">
-                            {!payment.active && (
-                              <>
-                                {payment.createdAt == null ? (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleUpdatePayment(payment, idx)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                                    >
-                                      Lưu thay đổi
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleDeletePayment("business", idx)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                                    >
-                                      Xóa
-                                    </button>
-                                  </>
-                                ) : (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleConfirmPayment(payment)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-                                    >
-                                      Xác nhận
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleCancelPayment(payment)
-                                      }
-                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                                    >
-                                      Huỷ
-                                    </button>
-                                  </>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+
+                    {/* ✅ Nút hành động nằm dưới toàn bộ form */}
+                    <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpenFormPayment(false);
+                          if (isDataChanged) fetchBillData();
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Đóng
+                      </button>
+                      {!businessBankingPayment.active &&
+                        (businessBankingPayment.dateUpdate === null ? (
+                          <button
+                            type="button"
+                            onClick={handleUpdatePayment}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            Lưu thay đổi
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleConfirmPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                              Xác nhận
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelPayment}
+                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                            >
+                              Huỷ
+                            </button>
+                          </>
+                        ))}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleAddPayment("business")}
-                      className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                    >
-                      <PlusIcon className="w-4 h-4 mr-1" />
-                      Thêm thanh toán
-                    </button>
                   </div>
                 )}
               </div>
