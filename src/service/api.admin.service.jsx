@@ -233,9 +233,10 @@ const GetShipment = async () => {
 export { GetShipment };
 
 // bill
-const GetAllBill = async () => {
-  const API = `bill/all`;
-  return await axios.get(API);
+const GetAllBill = async (page = 0, size = 10) => {
+  return await axios.get(`/bill/all`, {
+    params: { page, size }
+  });
 };
 
 const CreateBill = async (data) => {
