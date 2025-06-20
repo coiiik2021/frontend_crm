@@ -4279,13 +4279,6 @@ export default function ContentTable({ data }) {
                               <>
                                 <button
                                   type="button"
-                                  onClick={() => handleConfirmPayment(payment)}
-                                  className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-                                >
-                                  Xác nhận
-                                </button>
-                                <button
-                                  type="button"
                                   onClick={() => handleCancelPayment(payment)}
                                   className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
                                 >
