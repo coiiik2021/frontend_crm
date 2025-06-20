@@ -173,6 +173,14 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
                       {orderData.packageInfo_end?.total_weight || 0} KG
                     </p>
                   </div>
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Cân nặng tính phí:
+                    </p>
+                    <p className="font-medium">
+                      {orderData.packageInfo_end?.total_weight_charge || 0} KG
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -1511,6 +1519,10 @@ export default function ContentTable({ data }) {
                           <span className="font-medium">Cân nặng:</span>{" "}
                           {item.packageInfo_begin.total_weight} KG
                         </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <span className="font-medium">Cân nặng tính phí:</span>{" "}
+                          {item.packageInfo_begin.total_weight_charge} KG
+                        </p>
                       </div>
                     </TableCell>
                   )}
@@ -1527,6 +1539,10 @@ export default function ContentTable({ data }) {
                             <span className="font-medium">Cân nặng:</span>{" "}
                             {item?.packageInfo_end?.total_weight} KG
                           </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">Cân nặng tính phí:</span>{" "}
+                            {item?.packageInfo_end?.total_weight_charge} KG
+                          </p>
                         </div>
 
                         {
@@ -1538,6 +1554,7 @@ export default function ContentTable({ data }) {
                               setIsFinish(false);
                               handleOpenEditPackageModal({
                                 ...item,
+
                                 isFinish: false,
                               });
                             }}
@@ -1575,6 +1592,10 @@ export default function ContentTable({ data }) {
                             <span className="font-medium">Cân nặng:</span>{" "}
                             {item.packageInfo_finish?.total_weight || 0} KG
                           </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">Cân nặng tính phí:</span>{" "}
+                            {item.packageInfo_finish?.total_weight_charge || 0} KG
+                          </p>
                         </div>
                         {
                           ["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role))
@@ -1584,8 +1605,11 @@ export default function ContentTable({ data }) {
                               className="pointer-events-auto select-auto ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                               title="Sửa"
                               onClick={() => {
+                                setIsFinish(true);
+
                                 handleOpenEditPackageModal({
                                   ...item,
+                                  packages: item.packages_finish,
                                   isFinish: true,
                                 });
                               }}

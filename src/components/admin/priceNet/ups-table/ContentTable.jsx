@@ -26,6 +26,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
     const [newShipper, setNewShipper] = useState({});
     const [newNameService, setNewNameService] = useState("");
     const [newCurrency, setNewCurrency] = useState("VND");
+    const [newWeight, setNewWeight] = useState(0);
     const [serviceCompany, setServiceCompany] = useState([]);
     const [zone, setZone] = useState([]);
     const [constNet, setConstNet] = useState({});
@@ -87,6 +88,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                     name: nameHang,
                     nameService: newNameService,
                     currency: newCurrency,
+                    minWightCeil: newWeight,
                     shipperCompany: {
                         companyName: newShipper.companyName,
                         address: newShipper.address,
@@ -121,6 +123,7 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                 // Reset form
                 setNewNameService("");
                 setNewShipper({});
+                setNewWeight(0);
                 closeAddModal();
             },
             "Thêm dịch vụ thành công",
@@ -477,6 +480,15 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                                     value={newNameService}
                                     onChange={(e) => setNewNameService(e.target.value)}
                                     placeholder="Nhập tên dịch vụ"
+                                />
+                            </div>
+                            <div>
+                                <Label>KG <span className="text-red-500">*</span></Label>
+                                <Input
+                                    type="number"
+                                    value={newWeight}
+                                    onChange={(e) => setNewWeight(e.target.value)}
+                                    placeholder="Nhập số kg"
                                 />
                             </div>
 
