@@ -31,6 +31,8 @@ import ExcelJS from "exceljs";
 import { DatePicker } from "antd"; // import { s } from "@fullcalendar/core/internal-common";
 
 export default function ContentTable({ data }) {
+  const fileInputRef = useRef(null);
+
   const [dataBill, setDataBill] = useState(data || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -1445,6 +1447,73 @@ export default function ContentTable({ data }) {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const reader = new FileReader();
+
+      reader.onload = async (e) => {
+        const buffer = e.target.result;
+
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer);
+        const worksheet = workbook.worksheets[0];
+
+        const headerRow = worksheet.getRow(1);
+        const headersRaw = headerRow.values.slice(1); // Bỏ index 0
+
+        const headers = headersRaw.map((h) =>
+          String(h).toLowerCase().replace(/\s+/g, "_")
+        );
+
+        const importedData = [];
+
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return;
+
+          const rowData = {};
+          row.eachCell((cell, colNumber) => {
+            const headerKey = headers[colNumber - 1];
+            rowData[headerKey] = cell.value;
+          });
+
+          importedData.push(rowData);
+        });
+
+        // Tạo map từ awb -> new_debit
+        const awbToNewDebit = {};
+        importedData.forEach((row) => {
+          if (row.awb && row.new_debit !== undefined) {
+            awbToNewDebit[String(row.awb).trim()] = row.new_debit;
+          }
+        });
+
+        // Cập nhật dataBill
+        setDataBill((prev) =>
+          prev.map((item) => ({
+            ...item,
+            new_debit:
+              awbToNewDebit[String(item.awb).trim()] !== undefined
+                ? awbToNewDebit[String(item.awb).trim()]
+                : item.new_debit,
+          }))
+        );
+
+        setVisibleColumns((prev) => ({
+          ...prev,
+          new_debit: true,
+        }));
+        setImportedDebitData(importedData);
+      };
+
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error("❌ Lỗi khi đọc file Excel:", error);
+    }
+  };
+
   const columnLabels = {
     house_bill: "TTCB - HOUSE BILL",
     // Date: "NGÀY TẠO",
@@ -1494,6 +1563,7 @@ export default function ContentTable({ data }) {
     gw_debit: "QDB - GW",
     cw_debit: "QDB - CW",
     bill: "QDB - THÀNH TIỀN",
+    new_debit: "QDB - DEBIT MỚI",
     reconcile: "QDB - ĐỐI SOÁT",
     // Lợi nhuận
     price_diff: "QLN - CHÊNH LỆCH GIÁ",
@@ -3049,6 +3119,30 @@ export default function ContentTable({ data }) {
             </svg>
             Xuất Excel
           </button>
+
+          <button
+            onClick={() => fileInputRef.current.click()}
+            className="ml-2 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 flex items-center transition-all duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-1"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+              <path d="M8.354 13.854a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L7.5 12.293V3.5a.5.5 0 0 1 1 0v8.793l2.146-2.147a.5.5 0 1 1 .708.708l-3 3z" />
+            </svg>
+            Import New Debit
+          </button>
+           <input
+              type="file"
+              accept=".xlsx, .xls"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+            />
+
         </div>
 
         <div className="relative">
@@ -3511,6 +3605,13 @@ export default function ContentTable({ data }) {
                   {visibleColumns.bill && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.bill || "..."}
+                    </TableCell>
+                  )}
+                  {visibleColumns.new_debit && (
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      {item?.new_debit !== undefined && item?.new_debit !== null && item?.new_debit !== ""
+                        ? item.new_debit
+                        : "..."}
                     </TableCell>
                   )}
                   {visibleColumns.reconcile && (
