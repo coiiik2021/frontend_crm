@@ -24,12 +24,12 @@ import {
   PutPriceOrder,
   UpdateBillAccountant,
   UpdatePaymentDetails,
+  DeletePaymentDetails,
 } from "../../../service/api.admin.service.jsx";
 import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import ExcelJS from "exceljs";
 import { DatePicker } from "antd"; // import { s } from "@fullcalendar/core/internal-common";
-
 export default function ContentTable({ data }) {
   const [dataBill, setDataBill] = useState(data || []);
   const [currentPage, setCurrentPage] = useState(1);
@@ -431,6 +431,10 @@ export default function ContentTable({ data }) {
     businessBanking: 0,
   });
 
+  const [cashPayments, setCashPayments] = useState([]);
+  const [bankingPayments, setBankingPayments] = useState([]);
+  const [businessPayments, setBusinessPayments] = useState([]);
+
   const [cashPayment, setCashPayment] = useState({
     price: 0,
     dateUpdate: null,
@@ -512,139 +516,103 @@ export default function ContentTable({ data }) {
   // Hàm xử lý khi người dùng bấm vào nút xem chi tiết thanh toán
   const handleViewPaymentDetails = (item) => {
     setBillEdit(item);
-    fetchPaymentDetails(item.bill_house);
     setIsOpenFormPayment(true);
+    setCashPayments(item.pricePayment?.cashPayment || []);
+    setBankingPayments(item.pricePayment?.cardPayment || []);
+    setBusinessPayments(item.pricePayment?.businessCardPayment || []);
   };
 
-  // Hàm xử lý khi người dùng bấm Save
-  const handleUpdatePayment = async () => {
-    let price = 0;
-    switch (editType) {
-      case "CASH":
-        price = cashPayment.price;
-        break;
-      case "CARD":
-        price = bankingPayment.price;
-        break;
-      case "BUSINESS_CARD":
-        price = businessBankingPayment.price;
-        break;
-      default:
-        break;
-    }
+  const handleUpdatePayment = async (payment, index) => {
+    const dataRequest = {
+      id: payment.id,
+      bill_id: billEdit.bill_house,
+      price: payment.price,
+      methodPayment: payment.methodPayment,
+      active: payment.active,
+    };
+
     try {
-      const dataRequest = {
-        bill_id: billEdit.bill_house,
-        active: false,
-        price: price,
-        methodPayment: editType,
-      };
+      const response = await UpdatePaymentDetails(dataRequest);
+      const updated = response;
+      if (payment.methodPayment === "CASH") {
+        setCashPayments((prev) => {
+          const newArr = [...prev];
+          newArr[index] = updated;
+          return newArr;
+        });
+      } else if (payment.methodPayment === "CARD") {
+        setBankingPayments((prev) => {
+          const newArr = [...prev];
+          newArr[index] = updated;
+          return newArr;
+        });
+      } else {
+        setBusinessPayments((prev) => {
+          const newArr = [...prev];
+          newArr[index] = updated;
+          return newArr;
+        });
+      }
 
-      console.log("Updating payment with data:", dataRequest);
-      const dataResponse = await UpdatePaymentDetails(dataRequest);
-
-      console.log("Payment updated:", dataResponse);
-
-      // Đánh dấu dữ liệu đã thay đổi
-
-      // Đóng modal
-      setIsOpenFormPayment(false);
-
-      // Thông báo thành công
-      alert("Cập nhật thanh toán thành công!");
-      fetchBillData(); // Cập nhật lại dữ liệu bảng
+      fetchBillData();
     } catch (error) {
-      console.error("Error updating payment:", error);
+      console.error(error);
       alert("Lỗi khi cập nhật thanh toán!");
     }
   };
 
-  // Hàm xử lý khi người dùng bấm Save
-  const handleConfirmPayment = async () => {
-    let price = 0;
-    switch (editType) {
-      case "CASH":
-        price = cashPayment.price;
-        break;
-      case "CARD":
-        price = bankingPayment.price;
-        break;
-      case "BUSINESS_CARD":
-        price = businessBankingPayment.price;
-        break;
-      default:
-        break;
+  const handleConfirmPayment = async (payment) => {
+    let payments = [];
+    let setPayments;
+
+    if (payment.methodPayment === "CASH") {
+      payments = cashPayments;
+      setPayments = setCashPayments;
+    } else if (payment.methodPayment === "CARD") {
+      payments = bankingPayments;
+      setPayments = setBankingPayments;
+    } else {
+      payments = businessPayments;
+      setPayments = setBusinessPayments;
     }
+
+    // ✅ Chỉ cập nhật 1 item có id trùng khớp
+
+    const updatedPayment = {
+      ...payment,
+      bill_id: billEdit.bill_house,
+      active: true,
+    };
+
     try {
-      const dataRequest = {
-        bill_id: billEdit.bill_house,
-        active: true,
-        price: price,
-        methodPayment: editType,
-      };
+      const response = await UpdatePaymentDetails(updatedPayment); // gửi 1 payment
+      const updated = response;
 
-      console.log("Confirming payment with data:", dataRequest);
-      const dataResponse = await UpdatePaymentDetails(dataRequest);
+      setPayments((prev) =>
+        prev.map((p) => (p.id === updated.id ? updated : p))
+      );
 
-      console.log("Payment confirmed:", dataResponse);
-
-      // Đánh dấu dữ liệu đã thay đổi
-
-      // Đóng modal
-      setIsOpenFormPayment(false);
-
-      // Thông báo thành công
-      alert("Xác nhận thanh toán thành công!");
-      fetchBillData(); // Cập nhật lại dữ liệu bảng
+      fetchBillData();
     } catch (error) {
-      console.error("Error confirming payment:", error);
-      alert("Lỗi khi xac nhận thanh toán!");
+      console.error("Lỗi khi xác nhận thanh toán:", error);
+      alert("Lỗi khi xác nhận thanh toán!");
     }
   };
 
-  // Hàm xử lý khi người dùng bấm Save
-  const handleCancelPayment = async () => {
-    let price = 0;
-    switch (editType) {
-      case "CASH":
-        price = cashPayment.price;
-        break;
-      case "CARD":
-        price = bankingPayment.price;
-        break;
-      case "BUSINESS_CARD":
-        price = businessBankingPayment.price;
-        break;
-      default:
-        break;
+  const handleCancelPayment = async (payment) => {
+    await DeletePaymentDetails(payment.id);
+
+    if (payment.methodPayment === "CASH") {
+      setCashPayments((prev) => prev.filter((p) => p.id !== payment.id));
+    } else if (payment.methodPayment === "CARD") {
+      setBankingPayments((prev) => prev.filter((p) => p.id !== payment.id));
+    } else if (payment.methodPayment === "BUSINESS_CARD") {
+      setBusinessPayments((prev) => prev.filter((p) => p.id !== payment.id));
     }
-    try {
-      const dataRequest = {
-        bill_id: billEdit.bill_house,
-        active: false,
-        price: price,
-        methodPayment: editType,
-      };
 
-      console.log("Cancelling payment with data:", dataRequest);
-      const dataResponse = await UpdatePaymentDetails(dataRequest);
-
-      console.log("Payment cancelled:", dataResponse);
-
-      // Đánh dấu dữ liệu đã thay đổi
-
-      // Đóng modal
-      setIsOpenFormPayment(false);
-
-      // Thông báo thành công
-      alert("Hủy thanh toán thành công!");
-      fetchBillData(); // Cập nhật lại dữ liệu bảng
-    } catch (error) {
-      console.error("Error cancelling payment:", error);
-      alert("Lỗi khi hủy thanh toán!");
-    }
+    fetchBillData();
   };
-  // Hàm gọi API lấy dữ liệu priceOrders
+
   const fetchPriceOrders = async (billHouse) => {
     try {
       const response = await GetAllPriceOrder(billEdit.bill_house);
@@ -736,50 +704,60 @@ export default function ContentTable({ data }) {
 
   const [isOpenFormPayment, setIsOpenFormPayment] = useState(false);
 
-  // Cập nhật hàm xử lý thay đổi giá trị input
-  const handlePaymentInputChange = (field, value) => {
-    // Chuyển đổi giá trị thành số
+  const handlePaymentArrayInputChange = (type, idx, value) => {
     let numericValue = Number(value);
+    // Không cho nhập giá trị âm hoặc lớn hơn 0 nếu đã có createdAt
+    if (numericValue < 0) numericValue = 0;
 
-    // Nếu người dùng xóa hết và để trống, đặt giá trị là 0
-    if (value === "") {
-      numericValue = 0;
+    let payments, setPayments;
+    if (type === "cash") {
+      payments = cashPayments;
+      setPayments = setCashPayments;
+    } else if (type === "banking") {
+      payments = bankingPayments;
+      setPayments = setBankingPayments;
+    } else if (type === "business") {
+      payments = businessPayments;
+      setPayments = setBusinessPayments;
     }
-    console.log("value:", value);
-    switch (field) {
-      case "cash":
-        setCashPayment((prev) => ({
-          price: value,
-          dateUpdate: prev.dateUpdate,
-          active: prev.active,
-        }));
-        break;
-      case "banking":
-        setBankingPayment((prev) => ({
-          price: value,
-          dateUpdate: prev.dateUpdate,
-          active: prev.active,
-        }));
-        break;
-      case "businessBanking":
-        setBusinessBankingPayment((prev) => ({
-          price: value,
-          dateUpdate: prev.dateUpdate,
-          active: prev.active,
-        }));
-        break;
-      default:
-        break;
-    }
-    console.log("Payment details set cash:", cashPayment);
 
-    // Cập nhật state
-    // setPaymentDetails((prev) => ({
-    //   ...prev,
-    //   [field]: numericValue,
-    // }));
+    // Nếu đã có createdAt thì không cho nhập tiếp
+    if (payments[idx]?.createdAt) return;
+
+    setPayments((prev) =>
+      prev.map((p, i) =>
+        i === idx ? { ...p, price: numericValue > 0 ? numericValue : "" } : p
+      )
+    );
   };
 
+  const handleAddPayment = (type) => {
+    const newPayment = {
+      id: "",
+      bill_id: billEdit.bill_house,
+      price: "",
+      methodPayment:
+        type === "cash"
+          ? "CASH"
+          : type === "banking"
+          ? "CARD"
+          : "BUSINESS_CARD",
+      active: false,
+    };
+    if (type === "cash") setCashPayments((prev) => [...prev, newPayment]);
+    if (type === "banking") setBankingPayments((prev) => [...prev, newPayment]);
+    if (type === "business")
+      setBusinessPayments((prev) => [...prev, newPayment]);
+  };
+
+  const handleDeletePayment = (type, idx) => {
+    if (type === "cash")
+      setCashPayments((prev) => prev.filter((_, i) => i !== idx));
+    if (type === "banking")
+      setBankingPayments((prev) => prev.filter((_, i) => i !== idx));
+    if (type === "business")
+      setBusinessPayments((prev) => prev.filter((_, i) => i !== idx));
+  };
   const handleUpdateStatus = async (billId, newStatus) => {
     try {
       const dataRequest = {
@@ -1617,20 +1595,44 @@ export default function ContentTable({ data }) {
     (sum, item) => sum + (item?.grand_total?.grand_total || 0),
     0
   );
-  const totalPayment = filteredMastertracking.reduce(
+  // Tổng tiền mặt đã xác nhận
+  const totalCashActive = filteredMastertracking.reduce(
     (sum, item) =>
       sum +
-      (item?.pricePayment?.cashPayment?.active
-        ? item?.pricePayment?.cashPayment?.price || 0
-        : 0) +
-      (item?.pricePayment?.cardPayment?.active
-        ? item?.pricePayment?.cardPayment?.price || 0
-        : 0) +
-      (item?.pricePayment?.businessCardPayment?.active
-        ? item?.pricePayment?.businessCardPayment?.price || 0
+      (Array.isArray(item?.pricePayment?.cashPayment)
+        ? item.pricePayment.cashPayment
+            .filter((p) => p.active)
+            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
         : 0),
     0
   );
+
+  // Tổng chuyển khoản đã xác nhận
+  const totalBankingActive = filteredMastertracking.reduce(
+    (sum, item) =>
+      sum +
+      (Array.isArray(item?.pricePayment?.cardPayment)
+        ? item.pricePayment.cardPayment
+            .filter((p) => p.active)
+            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
+        : 0),
+    0
+  );
+
+  // Tổng doanh nghiệp đã xác nhận
+  const totalBusinessActive = filteredMastertracking.reduce(
+    (sum, item) =>
+      sum +
+      (Array.isArray(item?.pricePayment?.businessCardPayment)
+        ? item.pricePayment.businessCardPayment
+            .filter((p) => p.active)
+            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
+        : 0),
+    0
+  );
+
+  // Tổng thu = tổng thanh toán đã xác nhận (tổng tiền mặt, chuyển khoản, doanh nghiệp đã active)
+  const totalThu = totalCashActive + totalBankingActive + totalBusinessActive;
   const totalRemaining = filteredMastertracking.reduce(
     (sum, item) =>
       sum + Math.max(0, item?.pricePayment?.payments_remaining || 0),
@@ -1993,7 +1995,7 @@ export default function ContentTable({ data }) {
               exit={{ height: 0, opacity: 0, overflow: "hidden" }}
               transition={{ duration: 0.3 }}
             >
-              {/* Thêm 6 ô tổng quan ở đây */}
+              {/* Thêm 7 ô tổng quan ở đây */}
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
                 <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex flex-col items-center">
                   <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">
@@ -2016,7 +2018,7 @@ export default function ContentTable({ data }) {
                     Tổng Thanh toán
                   </span>
                   <span className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">
-                    {formatCurrency(totalPayment)} VNĐ
+                    {formatCurrency(totalThu)} VNĐ
                   </span>
                 </div>
                 <div className="bg-green-100 dark:bg-green-900/60 rounded-lg p-4 flex flex-col items-center">
@@ -2024,17 +2026,7 @@ export default function ContentTable({ data }) {
                     Tiền mặt:
                   </span>
                   <span className="text-2xl font-bold text-green-800 dark:text-green-200">
-                    {formatCurrency(
-                      filteredMastertracking.reduce(
-                        (sum, item) =>
-                          sum +
-                          (item?.pricePayment?.cashPayment?.active
-                            ? item?.pricePayment?.cashPayment?.price || 0
-                            : 0),
-                        0
-                      )
-                    )}{" "}
-                    VNĐ
+                    {formatCurrency(totalCashActive)} VNĐ
                   </span>
                 </div>
                 <div className="bg-blue-100 dark:bg-blue-900/60 rounded-lg p-4 flex flex-col items-center">
@@ -2042,17 +2034,7 @@ export default function ContentTable({ data }) {
                     Chuyển khoản:
                   </span>
                   <span className="text-2xl font-bold text-blue-800 dark:text-blue-200">
-                    {formatCurrency(
-                      filteredMastertracking.reduce(
-                        (sum, item) =>
-                          sum +
-                          (item?.pricePayment?.cardPayment?.active
-                            ? item?.pricePayment?.cardPayment?.price || 0
-                            : 0),
-                        0
-                      )
-                    )}{" "}
-                    VNĐ
+                    {formatCurrency(totalBankingActive)} VNĐ
                   </span>
                 </div>
                 <div className="bg-purple-100 dark:bg-purple-900/60 rounded-lg p-4 flex flex-col items-center">
@@ -2060,21 +2042,9 @@ export default function ContentTable({ data }) {
                     Doanh nghiệp:
                   </span>
                   <span className="text-2xl font-bold text-purple-800 dark:text-purple-200">
-                    {formatCurrency(
-                      filteredMastertracking.reduce(
-                        (sum, item) =>
-                          sum +
-                          (item?.pricePayment?.businessCardPayment?.active
-                            ? item?.pricePayment?.businessCardPayment?.price ||
-                              0
-                            : 0),
-                        0
-                      )
-                    )}{" "}
-                    VNĐ
+                    {formatCurrency(totalBusinessActive)} VNĐ
                   </span>
                 </div>
-
                 <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 flex flex-col items-center">
                   <span className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">
                     Tổng Còn lại
@@ -3373,35 +3343,48 @@ export default function ContentTable({ data }) {
                   {visibleColumns.payments_cash && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                       <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán */}
+                        {/* Nút để mở modal thanh toán tiền mặt */}
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("BD") ||
                           authorities.includes("ACCOUNTANT")) && (
                           <button
                             type="button"
                             onClick={() => {
-                              setEditType("CASH"); // Thêm dòng này
+                              setEditType("CASH");
                               handleViewPaymentDetails(item);
+                              setIsOpenFormPayment(true);
                             }}
                             className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                           >
                             <PencilIcon className="w-5 h-5" />
                           </button>
                         )}
-
-                        {/* Giá trị tiền order */}
-                        <div className="flex flex-col space-y-1 pt-6">
-                          {/* Giá trị xanh */}
-                          <div className="flex items-center space-x-2">
-                            <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${
-                                item.pricePayment.cashPayment.active
-                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                              }`}
-                            >
+                        {/* Tổng đã xác nhận và chưa xác nhận */}
+                        <div className="flex flex-col gap-1 pt-6">
+                          <div className="flex items-center">
+                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
                               {formatCurrency(
-                                item.pricePayment.cashPayment.price
+                                (item.pricePayment.cashPayment || [])
+                                  .filter((p) => p.active)
+                                  .reduce(
+                                    (sum, p) =>
+                                      sum + (parseFloat(p.price) || 0),
+                                    0
+                                  )
+                              )}{" "}
+                              VNĐ
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
+                              {formatCurrency(
+                                (item.pricePayment.cashPayment || [])
+                                  .filter((p) => !p.active)
+                                  .reduce(
+                                    (sum, p) =>
+                                      sum + (parseFloat(p.price) || 0),
+                                    0
+                                  )
                               )}{" "}
                               VNĐ
                             </span>
@@ -3414,35 +3397,48 @@ export default function ContentTable({ data }) {
                   {visibleColumns.payments_banking && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                       <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán */}
+                        {/* Nút để mở modal thanh toán chuyển khoản */}
                         {(authorities.includes("ADMIN") ||
-                          authorities.includes("ACCOUNTANT") ||
-                          authorities.includes("BD")) && (
+                          authorities.includes("BD") ||
+                          authorities.includes("ACCOUNTANT")) && (
                           <button
                             type="button"
                             onClick={() => {
-                              setEditType("CARD"); // Thêm dòng này
+                              setEditType("CARD");
                               handleViewPaymentDetails(item);
+                              setIsOpenFormPayment(true);
                             }}
                             className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                           >
                             <PencilIcon className="w-5 h-5" />
                           </button>
                         )}
-
-                        {/* Giá trị tiền order */}
-                        <div className="flex flex-col space-y-1 pt-6">
-                          {/* Giá trị xanh */}
-                          <div className="flex items-center space-x-2">
-                            <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${
-                                item.pricePayment.cardPayment.active
-                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                              }`}
-                            >
+                        {/* Tổng đã xác nhận và chưa xác nhận */}
+                        <div className="flex flex-col gap-1 pt-6">
+                          <div className="flex items-center">
+                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
                               {formatCurrency(
-                                item.pricePayment.cardPayment.price
+                                (item.pricePayment.cardPayment || [])
+                                  .filter((p) => p.active)
+                                  .reduce(
+                                    (sum, p) =>
+                                      sum + (parseFloat(p.price) || 0),
+                                    0
+                                  )
+                              )}{" "}
+                              VNĐ
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
+                              {formatCurrency(
+                                (item.pricePayment.cardPayment || [])
+                                  .filter((p) => !p.active)
+                                  .reduce(
+                                    (sum, p) =>
+                                      sum + (parseFloat(p.price) || 0),
+                                    0
+                                  )
                               )}{" "}
                               VNĐ
                             </span>
@@ -3451,38 +3447,52 @@ export default function ContentTable({ data }) {
                       </div>
                     </TableCell>
                   )}
+
                   {visibleColumns.payments_business && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                       <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán */}
+                        {/* Nút để mở modal thanh toán doanh nghiệp */}
                         {(authorities.includes("ADMIN") ||
-                          authorities.includes("ACCOUNTANT") ||
-                          authorities.includes("BD")) && (
+                          authorities.includes("BD") ||
+                          authorities.includes("ACCOUNTANT")) && (
                           <button
                             type="button"
                             onClick={() => {
-                              setEditType("BUSINESS_CARD"); // Thêm dòng này
+                              setEditType("BUSINESS_CARD");
                               handleViewPaymentDetails(item);
+                              setIsOpenFormPayment(true);
                             }}
                             className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                           >
                             <PencilIcon className="w-5 h-5" />
                           </button>
                         )}
-
-                        {/* Giá trị tiền order */}
-                        <div className="flex flex-col space-y-1 pt-6">
-                          {/* Giá trị xanh */}
-                          <div className="flex items-center space-x-2">
-                            <span
-                              className={`px-2 py-1 text-sm font-medium rounded-md ${
-                                item.pricePayment.businessCardPayment.active
-                                  ? "text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300" // Xanh lá (khi active)
-                                  : "text-blue-800 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" // Xanh lục (khi inactive)
-                              }`}
-                            >
+                        {/* Tổng đã xác nhận và chưa xác nhận */}
+                        <div className="flex flex-col gap-1 pt-6">
+                          <div className="flex items-center">
+                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
                               {formatCurrency(
-                                item.pricePayment.businessCardPayment.price
+                                (item.pricePayment.businessCardPayment || [])
+                                  .filter((p) => p.active)
+                                  .reduce(
+                                    (sum, p) =>
+                                      sum + (parseFloat(p.price) || 0),
+                                    0
+                                  )
+                              )}{" "}
+                              VNĐ
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
+                              {formatCurrency(
+                                (item.pricePayment.businessCardPayment || [])
+                                  .filter((p) => !p.active)
+                                  .reduce(
+                                    (sum, p) =>
+                                      sum + (parseFloat(p.price) || 0),
+                                    0
+                                  )
                               )}{" "}
                               VNĐ
                             </span>
@@ -3491,7 +3501,6 @@ export default function ContentTable({ data }) {
                       </div>
                     </TableCell>
                   )}
-
                   {visibleColumns.payments_remaining && (
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.pricePayment.payments_remaining)}{" "}
@@ -3928,288 +3937,370 @@ export default function ContentTable({ data }) {
               <div className="space-y-4">
                 {editType === "CASH" && (
                   <div className="space-y-4">
-                    {/* Form nội dung */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                      <div className="flex-1">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Tiền mặt (VNĐ)
-                        </label>
-                        <input
-                          type="number"
-                          value={
-                            cashPayment.price === 0 &&
-                            document.activeElement ===
-                              document.getElementById("cash-input")
-                              ? ""
-                              : cashPayment.price
-                          }
-                          onChange={(e) =>
-                            handlePaymentInputChange("cash", e.target.value)
-                          }
-                          onFocus={(e) => {
-                            if (cashPayment.price === 0) e.target.value = "";
-                          }}
-                          onBlur={(e) => {
-                            if (e.target.value === "")
-                              handlePaymentInputChange("cash", "0");
-                          }}
-                          readOnly={cashPayment.dateUpdate !== null}
-                          id="cash-input"
-                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
-
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Ngày tạo
-                        </label>
-                        <input
-                          type="text"
-                          value={
-                            cashPayment.dateUpdate
-                              ? formatDateTime(cashPayment.dateUpdate)
-                              : "Chưa có ngày tạo"
-                          }
-                          readOnly
-                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
+                    {/* Tổng tiền đã xác nhận */}
+                    <div className="flex items-center justify-begin mb-2">
+                      <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                        Tổng tiền đã xác nhận:&nbsp;
+                        {formatCurrency(
+                          (cashPayments || [])
+                            .filter((p) => p.active)
+                            .reduce(
+                              (sum, p) => sum + (parseFloat(p.price) || 0),
+                              0
+                            )
+                        )}{" "}
+                        VNĐ
+                      </span>
                     </div>
-
-                    {/* ✅ Nút hành động bên dưới */}
-
-                    <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsOpenFormPayment(false);
-                          if (isDataChanged) fetchBillData();
-                        }}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-                      >
-                        Đóng
-                      </button>
-                      {!cashPayment.active &&
-                        (cashPayment.dateUpdate === null ? (
-                          <button
-                            type="button"
-                            onClick={handleUpdatePayment}
-                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            Lưu thay đổi
-                          </button>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              onClick={handleConfirmPayment}
-                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            >
-                              Xác nhận
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleCancelPayment}
-                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                            >
-                              Huỷ
-                            </button>
-                          </>
-                        ))}
+                    <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
+                      {(cashPayments || []).map((payment, idx) => (
+                        <div
+                          key={payment.id || idx}
+                          className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                        >
+                          <div className="flex-1">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Tiền mặt (VNĐ)
+                            </label>
+                            <input
+                              type="number"
+                              min={0}
+                              value={payment.price}
+                              onChange={(e) =>
+                                handlePaymentArrayInputChange(
+                                  "cash",
+                                  idx,
+                                  e.target.value
+                                )
+                              }
+                              readOnly={
+                                payment.active || payment.createdAt != null
+                              }
+                              disabled={payment.createdAt}
+                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          <div className="w-full sm:w-1/4">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Ngày tạo
+                            </label>
+                            <input
+                              type="text"
+                              value={
+                                payment.createdAt
+                                  ? formatDateTime(payment.createdAt)
+                                  : "Chưa có ngày tạo"
+                              }
+                              readOnly
+                              className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          <div className="w-full flex items-center gap-2 mt-2">
+                            {!payment.active && (
+                              <>
+                                {payment.createdAt == null ? (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleUpdatePayment(payment, idx)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                    >
+                                      Lưu thay đổi
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleDeletePayment("cash", idx)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                    >
+                                      Xóa
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleConfirmPayment(payment)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                                    >
+                                      Xác nhận
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleCancelPayment(payment)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                    >
+                                      Huỷ
+                                    </button>
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => handleAddPayment("cash")}
+                      className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                    >
+                      <PlusIcon className="w-4 h-4 mr-1" />
+                      Thêm thanh toán
+                    </button>
                   </div>
                 )}
 
                 {editType === "CARD" && (
                   <div className="space-y-4">
-                    {/* Form nội dung */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                      <div className="flex-1">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Tiền chuyển khoản (VNĐ)
-                        </label>
-                        <input
-                          type="number"
-                          value={
-                            bankingPayment.price === 0 &&
-                            document.activeElement ===
-                              document.getElementById("banking-input")
-                              ? ""
-                              : bankingPayment.price
-                          }
-                          onChange={(e) =>
-                            handlePaymentInputChange("banking", e.target.value)
-                          }
-                          onFocus={(e) => {
-                            if (bankingPayment.price === 0) e.target.value = "";
-                          }}
-                          onBlur={(e) => {
-                            if (e.target.value === "")
-                              handlePaymentInputChange("banking", "0");
-                          }}
-                          readOnly={bankingPayment.dateUpdate !== null}
-                          id="banking-input"
-                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
-
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Ngày tạo
-                        </label>
-                        <input
-                          type="text"
-                          value={
-                            bankingPayment.dateUpdate
-                              ? formatDateTime(bankingPayment.dateUpdate)
-                              : "Chưa có ngày tạo"
-                          }
-                          readOnly
-                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
+                    {/* Tổng tiền đã xác nhận */}
+                    <div className="flex items-center justify-begin mb-2">
+                      <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                        Tổng tiền đã xác nhận:&nbsp;
+                        {formatCurrency(
+                          (bankingPayments || [])
+                            .filter((p) => p.active)
+                            .reduce(
+                              (sum, p) => sum + (parseFloat(p.price) || 0),
+                              0
+                            )
+                        )}{" "}
+                        VNĐ
+                      </span>
                     </div>
-
-                    {/* ✅ Nút hành động bên dưới */}
-
-                    <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsOpenFormPayment(false);
-                          if (isDataChanged) fetchBillData();
-                        }}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-                      >
-                        Đóng
-                      </button>
-                      {!bankingPayment.active &&
-                        (bankingPayment.dateUpdate === null ? (
-                          <button
-                            type="button"
-                            onClick={handleUpdatePayment}
-                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            Lưu thay đổi
-                          </button>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              onClick={handleConfirmPayment}
-                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            >
-                              Xác nhận
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleCancelPayment}
-                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                            >
-                              Huỷ
-                            </button>
-                          </>
-                        ))}
+                    <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
+                      {(bankingPayments || []).map((payment, idx) => (
+                        <div
+                          key={payment.id || idx}
+                          className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                        >
+                          <div className="flex-1">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Tiền chuyển khoản (VNĐ)
+                            </label>
+                            <input
+                              type="number"
+                              min={0}
+                              value={payment.price}
+                              onChange={(e) =>
+                                handlePaymentArrayInputChange(
+                                  "banking",
+                                  idx,
+                                  e.target.value
+                                )
+                              }
+                              readOnly={
+                                payment.active || payment.createdAt != null
+                              }
+                              disabled={payment.createdAt}
+                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          <div className="w-full sm:w-1/4">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Ngày tạo
+                            </label>
+                            <input
+                              type="text"
+                              value={
+                                payment.createdAt
+                                  ? formatDateTime(payment.createdAt)
+                                  : "Chưa có ngày tạo"
+                              }
+                              readOnly
+                              className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          <div className="w-full flex items-center gap-2 mt-2">
+                            {!payment.active && (
+                              <>
+                                {payment.createdAt == null ? (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleUpdatePayment(payment, idx)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                    >
+                                      Lưu thay đổi
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleDeletePayment("banking", idx)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                    >
+                                      Xóa
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleConfirmPayment(payment)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                                    >
+                                      Xác nhận
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleCancelPayment(payment)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                    >
+                                      Huỷ
+                                    </button>
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => handleAddPayment("banking")}
+                      className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                    >
+                      <PlusIcon className="w-4 h-4 mr-1" />
+                      Thêm thanh toán
+                    </button>
                   </div>
                 )}
 
                 {editType === "BUSINESS_CARD" && (
                   <div className="space-y-4">
-                    {/* Form nội dung */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                      <div className="flex-1">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Tiền chuyển khoản doanh nghiệp (VNĐ)
-                        </label>
-                        <input
-                          type="number"
-                          value={
-                            businessBankingPayment.price === 0 &&
-                            document.activeElement ===
-                              document.getElementById("business-input")
-                              ? ""
-                              : businessBankingPayment.price
-                          }
-                          onChange={(e) =>
-                            handlePaymentInputChange(
-                              "businessBanking",
-                              e.target.value
+                    {/* Tổng tiền đã xác nhận */}
+                    <div className="flex items-center justify-begin mb-2">
+                      <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                        Tổng tiền đã xác nhận:&nbsp;
+                        {formatCurrency(
+                          (businessPayments || [])
+                            .filter((p) => p.active)
+                            .reduce(
+                              (sum, p) => sum + (parseFloat(p.price) || 0),
+                              0
                             )
-                          }
-                          onFocus={(e) => {
-                            if (businessBankingPayment.price === 0)
-                              e.target.value = "";
-                          }}
-                          onBlur={(e) => {
-                            if (e.target.value === "")
-                              handlePaymentInputChange("businessBanking", "0");
-                          }}
-                          readOnly={businessBankingPayment.dateUpdate !== null}
-                          id="business-input"
-                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
-
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Ngày tạo
-                        </label>
-                        <input
-                          type="text"
-                          value={
-                            businessBankingPayment.dateUpdate
-                              ? formatDateTime(
-                                  businessBankingPayment.dateUpdate
+                        )}{" "}
+                        VNĐ
+                      </span>
+                    </div>
+                    <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
+                      {(businessPayments || []).map((payment, idx) => (
+                        <div
+                          key={payment.id || idx}
+                          className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                        >
+                          <div className="flex-1">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Tiền chuyển khoản doanh nghiệp (VNĐ)
+                            </label>
+                            <input
+                              type="number"
+                              min={0}
+                              value={payment.price}
+                              onChange={(e) =>
+                                handlePaymentArrayInputChange(
+                                  "business",
+                                  idx,
+                                  e.target.value
                                 )
-                              : "Chưa có ngày tạo"
-                          }
-                          readOnly
-                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
+                              }
+                              readOnly={
+                                payment.active || payment.createdAt != null
+                              }
+                              disabled={payment.createdAt}
+                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          <div className="w-full sm:w-1/4">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Ngày tạo
+                            </label>
+                            <input
+                              type="text"
+                              value={
+                                payment.createdAt
+                                  ? formatDateTime(payment.createdAt)
+                                  : "Chưa có ngày tạo"
+                              }
+                              readOnly
+                              className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          <div className="w-full flex items-center gap-2 mt-2">
+                            {!payment.active && (
+                              <>
+                                {payment.createdAt == null ? (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleUpdatePayment(payment, idx)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                    >
+                                      Lưu thay đổi
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleDeletePayment("business", idx)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                    >
+                                      Xóa
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleConfirmPayment(payment)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                                    >
+                                      Xác nhận
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleCancelPayment(payment)
+                                      }
+                                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                    >
+                                      Huỷ
+                                    </button>
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-
-                    {/* ✅ Nút hành động nằm dưới toàn bộ form */}
-                    <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsOpenFormPayment(false);
-                          if (isDataChanged) fetchBillData();
-                        }}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-                      >
-                        Đóng
-                      </button>
-                      {!businessBankingPayment.active &&
-                        (businessBankingPayment.dateUpdate === null ? (
-                          <button
-                            type="button"
-                            onClick={handleUpdatePayment}
-                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            Lưu thay đổi
-                          </button>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              onClick={handleConfirmPayment}
-                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            >
-                              Xác nhận
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleCancelPayment}
-                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                            >
-                              Huỷ
-                            </button>
-                          </>
-                        ))}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleAddPayment("business")}
+                      className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                    >
+                      <PlusIcon className="w-4 h-4 mr-1" />
+                      Thêm thanh toán
+                    </button>
                   </div>
                 )}
               </div>
