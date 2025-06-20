@@ -522,38 +522,40 @@ export default function ContentTable({ data }) {
     setBusinessPayments(item.pricePayment?.businessCardPayment || []);
   };
 
-  const handleUpdatePayment = async (payment, index) => {
+  const handleUpdatePayment = async (payment, idx, type) => {
+    // Thêm name và description vào dataRequest nếu có
     const dataRequest = {
       id: payment.id,
       bill_id: billEdit.bill_house,
       price: payment.price,
       methodPayment: payment.methodPayment,
       active: payment.active,
+      name: payment.name || "",
+      description: payment.description || "",
     };
 
     try {
       const response = await UpdatePaymentDetails(dataRequest);
       const updated = response;
-      if (payment.methodPayment === "CASH") {
+      if (type === "cash" || payment.methodPayment === "CASH") {
         setCashPayments((prev) => {
           const newArr = [...prev];
-          newArr[index] = updated;
+          newArr[idx] = updated;
           return newArr;
         });
-      } else if (payment.methodPayment === "CARD") {
+      } else if (type === "banking" || payment.methodPayment === "CARD") {
         setBankingPayments((prev) => {
           const newArr = [...prev];
-          newArr[index] = updated;
+          newArr[idx] = updated;
           return newArr;
         });
       } else {
         setBusinessPayments((prev) => {
           const newArr = [...prev];
-          newArr[index] = updated;
+          newArr[idx] = updated;
           return newArr;
         });
       }
-
       fetchBillData();
     } catch (error) {
       console.error(error);
@@ -704,11 +706,7 @@ export default function ContentTable({ data }) {
 
   const [isOpenFormPayment, setIsOpenFormPayment] = useState(false);
 
-  const handlePaymentArrayInputChange = (type, idx, value) => {
-    let numericValue = Number(value);
-    // Không cho nhập giá trị âm hoặc lớn hơn 0 nếu đã có createdAt
-    if (numericValue < 0) numericValue = 0;
-
+  const handlePaymentArrayInputChange = (type, idx, field, value) => {
     let payments, setPayments;
     if (type === "cash") {
       payments = cashPayments;
@@ -726,7 +724,12 @@ export default function ContentTable({ data }) {
 
     setPayments((prev) =>
       prev.map((p, i) =>
-        i === idx ? { ...p, price: numericValue > 0 ? numericValue : "" } : p
+        i === idx
+          ? {
+              ...p,
+              [field]: field === "price" ? Math.max(0, Number(value)) : value,
+            }
+          : p
       )
     );
   };
@@ -3690,20 +3693,17 @@ export default function ContentTable({ data }) {
                   <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
                     Quản lý Price Orders
                   </h4>
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-2 mt-2 inline-block shadow-sm">
-                    <span className="text-sm font-bold text-black dark:text-white">
+                  <div className="bg-green-100 dark:bg-green-800 rounded-xl px-4 py-2 mt-2 inline-block shadow-sm">
+                    <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
                       Tổng giá:&nbsp;
-                      <span className="text-base text-black dark:text-white">
-                        {priceOrders
-                          .filter((order) => order.active) // chỉ cộng order đã xác nhận
-                          .reduce(
-                            (sum, order) =>
-                              sum + (parseFloat(order.price) || 0),
-                            0
-                          )
-                          .toLocaleString()}{" "}
-                        VNĐ
-                      </span>
+                      {priceOrders
+                        .filter((order) => order.active) // chỉ cộng order đã xác nhận
+                        .reduce(
+                          (sum, order) => sum + (parseFloat(order.price) || 0),
+                          0
+                        )
+                        .toLocaleString()}{" "}
+                      VNĐ
                     </span>
                   </div>
                   <button
@@ -3896,7 +3896,7 @@ export default function ContentTable({ data }) {
             fetchBillData();
           }
         }}
-        className="max-w-[800px] m-4"
+        className="max-w-[1100px] m-4"
       >
         <div className="relative w-full p-6 bg-white rounded-2xl dark:bg-gray-800 shadow-xl">
           {/* Header */}
@@ -3958,6 +3958,53 @@ export default function ContentTable({ data }) {
                           key={payment.id || idx}
                           className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
                         >
+                          {/* Name */}
+                          <div className="w-full sm:w-1/4">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Tên khoản thanh toán
+                            </label>
+                            <input
+                              type="text"
+                              value={payment.name || ""}
+                              onChange={(e) =>
+                                handlePaymentArrayInputChange(
+                                  "cash",
+                                  idx,
+                                  "name",
+                                  e.target.value
+                                )
+                              }
+                              readOnly={
+                                payment.active || payment.createdAt != null
+                              }
+                              disabled={payment.createdAt}
+                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          {/* Description */}
+                          <div className="w-full sm:w-1/4">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Mô tả
+                            </label>
+                            <input
+                              type="text"
+                              value={payment.description || ""}
+                              onChange={(e) =>
+                                handlePaymentArrayInputChange(
+                                  "cash",
+                                  idx,
+                                  "description",
+                                  e.target.value
+                                )
+                              }
+                              readOnly={
+                                payment.active || payment.createdAt != null
+                              }
+                              disabled={payment.createdAt}
+                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          {/* Price */}
                           <div className="flex-1">
                             <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                               Tiền mặt (VNĐ)
@@ -3970,6 +4017,7 @@ export default function ContentTable({ data }) {
                                 handlePaymentArrayInputChange(
                                   "cash",
                                   idx,
+                                  "price",
                                   e.target.value
                                 )
                               }
@@ -3980,6 +4028,7 @@ export default function ContentTable({ data }) {
                               className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                             />
                           </div>
+                          {/* Ngày tạo */}
                           <div className="w-full sm:w-1/4">
                             <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                               Ngày tạo
@@ -3995,8 +4044,9 @@ export default function ContentTable({ data }) {
                               className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                             />
                           </div>
-                          <div className="w-full flex items-center gap-2 mt-2">
-                            {!payment.active && (
+                          {/* Nút thao tác */}
+                          <div className="w-full flex justify-end items-center gap-3 mt-4">
+                            {!payment.active ? (
                               <>
                                 {payment.createdAt == null ? (
                                   <>
@@ -4037,10 +4087,20 @@ export default function ContentTable({ data }) {
                                       }
                                       className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
                                     >
-                                      Huỷ
+                                      Xóa
                                     </button>
                                   </>
                                 )}
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCancelPayment(payment)}
+                                  className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                >
+                                  Xóa
+                                </button>
                               </>
                             )}
                           </div>
@@ -4081,6 +4141,53 @@ export default function ContentTable({ data }) {
                           key={payment.id || idx}
                           className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
                         >
+                          {/* Name */}
+                          <div className="w-full sm:w-1/4">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Tên khoản thanh toán
+                            </label>
+                            <input
+                              type="text"
+                              value={payment.name || ""}
+                              onChange={(e) =>
+                                handlePaymentArrayInputChange(
+                                  "banking",
+                                  idx,
+                                  "name",
+                                  e.target.value
+                                )
+                              }
+                              readOnly={
+                                payment.active || payment.createdAt != null
+                              }
+                              disabled={payment.createdAt}
+                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          {/* Description */}
+                          <div className="w-full sm:w-1/4">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Mô tả
+                            </label>
+                            <input
+                              type="text"
+                              value={payment.description || ""}
+                              onChange={(e) =>
+                                handlePaymentArrayInputChange(
+                                  "banking",
+                                  idx,
+                                  "description",
+                                  e.target.value
+                                )
+                              }
+                              readOnly={
+                                payment.active || payment.createdAt != null
+                              }
+                              disabled={payment.createdAt}
+                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          {/* Price */}
                           <div className="flex-1">
                             <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                               Tiền chuyển khoản (VNĐ)
@@ -4093,6 +4200,7 @@ export default function ContentTable({ data }) {
                                 handlePaymentArrayInputChange(
                                   "banking",
                                   idx,
+                                  "price",
                                   e.target.value
                                 )
                               }
@@ -4103,6 +4211,7 @@ export default function ContentTable({ data }) {
                               className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                             />
                           </div>
+                          {/* Ngày tạo */}
                           <div className="w-full sm:w-1/4">
                             <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                               Ngày tạo
@@ -4118,8 +4227,9 @@ export default function ContentTable({ data }) {
                               className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                             />
                           </div>
-                          <div className="w-full flex items-center gap-2 mt-2">
-                            {!payment.active && (
+                          {/* Nút thao tác */}
+                          <div className="w-full  flex justify-end items-center gap-3 mt-4">
+                            {!payment.active ? (
                               <>
                                 {payment.createdAt == null ? (
                                   <>
@@ -4160,10 +4270,27 @@ export default function ContentTable({ data }) {
                                       }
                                       className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
                                     >
-                                      Huỷ
+                                      Xóa
                                     </button>
                                   </>
                                 )}
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleConfirmPayment(payment)}
+                                  className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                                >
+                                  Xác nhận
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCancelPayment(payment)}
+                                  className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                >
+                                  Xóa
+                                </button>
                               </>
                             )}
                           </div>
@@ -4204,18 +4331,19 @@ export default function ContentTable({ data }) {
                           key={payment.id || idx}
                           className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
                         >
-                          <div className="flex-1">
+                          {/* Name */}
+                          <div className="w-full sm:w-1/4">
                             <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Tiền chuyển khoản doanh nghiệp (VNĐ)
+                              Tên khoản thanh toán
                             </label>
                             <input
-                              type="number"
-                              min={0}
-                              value={payment.price}
+                              type="text"
+                              value={payment.name || ""}
                               onChange={(e) =>
                                 handlePaymentArrayInputChange(
                                   "business",
                                   idx,
+                                  "name",
                                   e.target.value
                                 )
                               }
@@ -4226,6 +4354,54 @@ export default function ContentTable({ data }) {
                               className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                             />
                           </div>
+                          {/* Description */}
+                          <div className="w-full sm:w-1/4">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Mô tả
+                            </label>
+                            <input
+                              type="text"
+                              value={payment.description || ""}
+                              onChange={(e) =>
+                                handlePaymentArrayInputChange(
+                                  "business",
+                                  idx,
+                                  "description",
+                                  e.target.value
+                                )
+                              }
+                              readOnly={
+                                payment.active || payment.createdAt != null
+                              }
+                              disabled={payment.createdAt}
+                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          {/* Price */}
+                          <div className="flex-1">
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Tiền doanh nghiệp (VNĐ)
+                            </label>
+                            <input
+                              type="number"
+                              min={0}
+                              value={payment.price}
+                              onChange={(e) =>
+                                handlePaymentArrayInputChange(
+                                  "business",
+                                  idx,
+                                  "price",
+                                  e.target.value
+                                )
+                              }
+                              readOnly={
+                                payment.active || payment.createdAt != null
+                              }
+                              disabled={payment.createdAt}
+                              className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                          {/* Ngày tạo */}
                           <div className="w-full sm:w-1/4">
                             <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                               Ngày tạo
@@ -4241,8 +4417,9 @@ export default function ContentTable({ data }) {
                               className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
                             />
                           </div>
-                          <div className="w-full flex items-center gap-2 mt-2">
-                            {!payment.active && (
+                          {/* Nút thao tác */}
+                          <div className="w-full flex justify-end items-center gap-3 mt-4">
+                            {!payment.active ? (
                               <>
                                 {payment.createdAt == null ? (
                                   <>
@@ -4283,10 +4460,20 @@ export default function ContentTable({ data }) {
                                       }
                                       className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
                                     >
-                                      Huỷ
+                                      Xóa
                                     </button>
                                   </>
                                 )}
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCancelPayment(payment)}
+                                  className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                >
+                                  Xóa
+                                </button>
                               </>
                             )}
                           </div>
