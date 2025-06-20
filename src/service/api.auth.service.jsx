@@ -9,4 +9,9 @@ const APIResetPassword = async (email) => {
     return await axios.put(API);
 }
 
-export { APILogin, APIResetPassword };
+const APIInformation = async () => {
+    const API = "base_user/fill_information";
+    return await axios.get(API);
+}
+
+export { APILogin, APIResetPassword , APIInformation };

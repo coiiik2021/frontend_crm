@@ -479,6 +479,15 @@ export default function ContentTable({ isPriceNetPackage, setIsPriceNetPackage }
                                     placeholder="Nhập tên dịch vụ"
                                 />
                             </div>
+                            <div>
+                                <Label>KG <span className="text-red-500">*</span></Label>
+                                <Input
+                                    type="number"
+                                    value={newWeight}
+                                    onChange={(e) => setNewWeight(e.target.value)}
+                                    placeholder="Nhập số kg"
+                                />
+                            </div>
 
                             <div>
                                 <Label>Loại tiền<span className="text-red-500">*</span></Label>

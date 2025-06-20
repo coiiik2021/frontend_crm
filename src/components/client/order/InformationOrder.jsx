@@ -12,6 +12,7 @@ import { DeleteConsigneeFavorite, GetAllConsigneeFavorite, GetAllDeliveryFavorit
 import Document from "./Document.jsx";
 import { FileTextIcon, PackageIcon } from "lucide-react";
 import { toast } from "react-toastify";
+import { APIInformation } from "../../../service/api.auth.service.jsx";
 
 export default function InformationOrder(props) {
     const { addressBackup, setAddressBackup,
@@ -61,6 +62,28 @@ export default function InformationOrder(props) {
             });
         }
     }, [senderInfo]);
+
+    useEffect(() => {
+        const fetchSenderInfo = async () => {
+            try {
+                const res = await APIInformation();
+                console.log("API response:", res);
+
+                if (res) {
+                    const senderData = {
+                        ...res,
+                        postCode: res.postalCode || "",
+                    };
+                    setSenderForm(senderData);
+                    setSenderInfo?.(senderData);
+                }
+            } catch (error) {
+                console.error("Không thể lấy thông tin người gửi:", error);
+            }
+        };
+        fetchSenderInfo();
+    }, []);
+
 
     const [recipientForm, setRecipientForm] = useState(recipientInfo || {});
     const [savedList, setSavedList] = useState([]);
@@ -1141,7 +1164,6 @@ export default function InformationOrder(props) {
                                 type="button" // Đảm bảo type là "button" để không submit form
                                 onClick={(e) => {
                                     e.preventDefault(); // Ngăn chặn hành vi mặc định
-                                    e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
                                     setShowDeliveryForm(!showDeliveryForm);
                                 }}
                                 className={`flex items-center gap-1.5 ${showDeliveryForm

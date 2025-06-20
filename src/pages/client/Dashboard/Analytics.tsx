@@ -45,7 +45,7 @@ export default function Analytics() {
           <DemographicCard />
         </div>
 
-        <div className="col-span-12 xl:col-span-12">
+        <div className="col-span-12 xl:col-span-7">
           <RecentOrderAnalytics />
         </div>
 
