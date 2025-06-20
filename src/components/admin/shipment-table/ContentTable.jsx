@@ -88,6 +88,11 @@ export default function ContentTable({ data }) {
   const [filterMonth, setFilterMonth] = useState(null);
   const [filterYear, setFilterYear] = useState(null);
   const [filterRange, setFilterRange] = useState({ from: null, to: null });
+  const [filterBD, setFilterBD] = useState("");
+  const [filterManager, setFilterManager] = useState("");
+  const [filterUser, setFilterUser] = useState("");
+  const [filterCS, setFilterCS] = useState("");
+  const [filterTransporter, setFilterTransporter] = useState("");
   console.log("Dữ liệu đơn hàng:", dataBill);
   const fetchBillData = async () => {
     try {
@@ -110,6 +115,49 @@ export default function ContentTable({ data }) {
     setFilterYear(null);
     setFilterRange({ from: null, to: null });
   };
+  const bdNames = useMemo(
+    () =>
+      Array.from(
+        new Set(dataBill.map((item) => item?.employee?.bd_name).filter(Boolean))
+      ),
+    [dataBill]
+  );
+  const managerNames = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          dataBill.map((item) => item?.employee?.manager_name).filter(Boolean)
+        )
+      ),
+    [dataBill]
+  );
+  const userNames = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          dataBill.map((item) => item?.employee?.user_name).filter(Boolean)
+        )
+      ),
+    [dataBill]
+  );
+  const csNames = useMemo(
+    () =>
+      Array.from(
+        new Set(dataBill.map((item) => item?.employee?.cs_name).filter(Boolean))
+      ),
+    [dataBill]
+  );
+  const transporterNames = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          dataBill
+            .map((item) => item?.employee?.transporter_name)
+            .filter(Boolean)
+        )
+      ),
+    [dataBill]
+  );
   function formatDateTime(isoString, format = "DD/MM/YYYY HH:mm") {
     if (!isoString) return "";
 
@@ -288,6 +336,35 @@ export default function ContentTable({ data }) {
         );
       });
     }
+    // Lọc theo quyền
+    if (authorities.includes("ADMIN")) {
+      if (filterBD)
+        filtered = filtered.filter(
+          (item) => item?.employee?.bd_name === filterBD
+        );
+      if (filterManager)
+        filtered = filtered.filter(
+          (item) => item?.employee?.manager_name === filterManager
+        );
+    } else if (authorities.includes("BD")) {
+      if (filterManager)
+        filtered = filtered.filter(
+          (item) => item?.employee?.manager_name === filterManager
+        );
+    } else if (authorities.includes("MANAGER")) {
+      if (filterUser)
+        filtered = filtered.filter(
+          (item) => item?.employee?.user_name === filterUser
+        );
+      if (filterCS)
+        filtered = filtered.filter(
+          (item) => item?.employee?.cs_name === filterCS
+        );
+      if (filterTransporter)
+        filtered = filtered.filter(
+          (item) => item?.employee?.transporter_name === filterTransporter
+        );
+    }
 
     // Sắp xếp
     return filtered.sort((a, b) => {
@@ -317,6 +394,11 @@ export default function ContentTable({ data }) {
     filterMonth,
     filterYear,
     filterRange,
+    filterBD,
+    filterManager,
+    filterUser,
+    filterCS,
+    filterTransporter,
   ]);
 
   const totalItems = filteredAndSortedData.length;
@@ -1745,6 +1827,128 @@ export default function ContentTable({ data }) {
                     </div>
                   </div>
                 )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 mb-1">
+                {authorities.includes("ADMIN") && (
+                  <>
+                    {/* Filter NS - BD */}
+                    <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                        NS - BD
+                      </label>
+                      <select
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        value={filterBD}
+                        onChange={(e) => setFilterBD(e.target.value)}
+                      >
+                        <option value="">Tất cả</option>
+                        {bdNames.map((name) => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {/* Filter NS - MANAGER */}
+                    <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                        NS - MANAGER
+                      </label>
+                      <select
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        value={filterManager}
+                        onChange={(e) => setFilterManager(e.target.value)}
+                      >
+                        <option value="">Tất cả</option>
+                        {managerNames.map((name) => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
+                {authorities.includes("BD") &&
+                  !authorities.includes("ADMIN") && (
+                    <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                        NS - MANAGER
+                      </label>
+                      <select
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        value={filterManager}
+                        onChange={(e) => setFilterManager(e.target.value)}
+                      >
+                        <option value="">Tất cả</option>
+                        {managerNames.map((name) => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                {authorities.includes("MANAGER") &&
+                  !authorities.includes("ADMIN") &&
+                  !authorities.includes("BD") && (
+                    <>
+                      {/* Filter NS - USER */}
+                      <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                          NS - USER
+                        </label>
+                        <select
+                          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                          value={filterUser}
+                          onChange={(e) => setFilterUser(e.target.value)}
+                        >
+                          <option value="">Tất cả</option>
+                          {userNames.map((name) => (
+                            <option key={name} value={name}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Filter NS - CS */}
+                      <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                          NS - CS
+                        </label>
+                        <select
+                          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                          value={filterCS}
+                          onChange={(e) => setFilterCS(e.target.value)}
+                        >
+                          <option value="">Tất cả</option>
+                          {csNames.map((name) => (
+                            <option key={name} value={name}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Filter NS - TRANSPORTER */}
+                      <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                          NS - TRANSPORTER
+                        </label>
+                        <select
+                          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                          value={filterTransporter}
+                          onChange={(e) => setFilterTransporter(e.target.value)}
+                        >
+                          <option value="">Tất cả</option>
+                          {transporterNames.map((name) => (
+                            <option key={name} value={name}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
               </div>
             </motion.div>
           )}
