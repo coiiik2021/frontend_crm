@@ -105,6 +105,7 @@ const PeakSeason = ({ nameHang }) => {
 
                     const dataResponsePeakSeason = await GetAllPeakSeason(nameHang);
                     console.log("dataResponsePeakSeason", dataResponsePeakSeason);
+                    setIsLoading(false);
                     if (dataResponsePeakSeason) {
                         // Chuyển đổi dữ liệu từ mảng sang đối tượng nếu cần
                         const formattedPeakSeasons = dataResponsePeakSeason.map(season => ({

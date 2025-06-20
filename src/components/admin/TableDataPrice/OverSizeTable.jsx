@@ -22,7 +22,7 @@ import {
 import { useLoading } from "../../../hooks/useLoading";
 import { Spin } from "antd";
 
-const OverSizeTable = () => {
+const OverSizeTable = ({ nameCompany }) => {
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [isEditing, setIsEditing] = useState(false);
@@ -45,7 +45,7 @@ const OverSizeTable = () => {
 
   const [overSize, setOverSize] = useState([]);
 
-  const nameCompany = "ups";
+  // const nameCompany = "ups";
 
   const [newOverSize, setNewOverSize] = useState({
     name: "",
@@ -286,11 +286,10 @@ const OverSizeTable = () => {
                   </p>
                   <button className="flex flex-col gap-0.5">
                     <svg
-                      className={`text-gray-300 dark:text-gray-700  ${
-                        sortKey === key && sortOrder === "asc"
-                          ? "text-brand-500"
-                          : ""
-                      }`}
+                      className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "asc"
+                        ? "text-brand-500"
+                        : ""
+                        }`}
                       width="8"
                       height="5"
                       viewBox="0 0 8 5"
@@ -303,11 +302,10 @@ const OverSizeTable = () => {
                       />
                     </svg>
                     <svg
-                      className={`text-gray-300 dark:text-gray-700  ${
-                        sortKey === key && sortOrder === "desc"
-                          ? "text-brand-500"
-                          : ""
-                      }`}
+                      className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "desc"
+                        ? "text-brand-500"
+                        : ""
+                        }`}
                       width="8"
                       height="5"
                       viewBox="0 0 8 5"

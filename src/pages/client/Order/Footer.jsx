@@ -78,10 +78,10 @@ export default function Footer({ currentStep, setCurrentStep, products, setProdu
                         autoClose: 3000
                     });
 
-                    // Chuyển hướng sau khi hiển thị thông báo thành công
-                    setTimeout(() => {
-                        window.location.href = "/";
-                    }, 2000);
+                    // // Chuyển hướng sau khi hiển thị thông báo thành công
+                    // setTimeout(() => {
+                    //     window.location.href = "/";
+                    // }, 2000);
                 } else {
                     toast.update(loadingToast, {
                         render: "Có lỗi xảy ra khi tạo đơn hàng.",
