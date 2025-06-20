@@ -366,9 +366,11 @@ const OrderInfoTooltip = ({ isVisible, orderData, position, onClose }) => {
 };
 
 export default function ContentTable({ data }) {
-  const [dataBill, setDataBill] = useState(data || []);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [dataBill, setDataBill] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1); // 1-based
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
@@ -435,25 +437,30 @@ export default function ContentTable({ data }) {
   const handleTouchEnd = () => setIsDragging(false);
 
 
-  const fetchBillData = async () => {
+  const fetchBillData = async (page = 1, size = itemsPerPage) => {
     try {
       await withLoading(
         async () => {
-          const data = await GetAllBill();
-          setDataBill(data);
+          const responseData = await GetAllBill(page - 1, size); // backend 0-based
+
+          if (responseData) {
+            setDataBill(responseData.content || []);
+            setCurrentPage(responseData.pageNumber + 1);
+            setItemsPerPage(responseData.pageSize);
+            setTotalPages(responseData.totalPages);
+            setTotalElements(responseData.totalElements);
+          }
         },
         "Tải dữ liệu thành công",
         "Lỗi khi tải dữ liệu"
-      )
-      console.log("Dữ liệu hóa đơn:", dataBill);
-      // setState hoặc xử lý tiếp tại đây nếu cần
+      );
     } catch (error) {
-      console.error("Lỗi khi gọi GetShipment:", error);
+      console.error("Lỗi khi gọi GetAllBill:", error);
     }
   };
   useEffect(() => {
-    setDataBill(data || []);
-  }, [data]);
+    fetchBillData(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage]);
   // Thêm state để quản lý các cột hiển thị
   const [visibleColumns, setVisibleColumns] = useState({
     house_bill: true,
@@ -658,14 +665,12 @@ export default function ContentTable({ data }) {
       });
   }, [dataBill, sortKey, sortOrder, searchTerm]);
 
-  const totalItems = filteredAndSortedData.length;
+  const start = (currentPage - 1) * itemsPerPage + 1;
+  const end = Math.min(currentPage * itemsPerPage, totalElements);
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const currentData = filteredAndSortedData; // hoặc currentData = dataBill nếu không filter/search
 
-  const currentData = filteredAndSortedData.slice(startIndex, endIndex);
-
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  // const totalPages = Math.ceil(totalItems / itemsPerPage);
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -1130,7 +1135,7 @@ export default function ContentTable({ data }) {
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
             >
-              {[5, 8, 10].map((value) => (
+              {[5, 10, 15].map((value) => (
                 <option
                   key={value}
                   value={value}
@@ -1945,7 +1950,7 @@ export default function ContentTable({ data }) {
           {/* Left side: Showing entries */}
           <div className="pb-3 xl:pb-0">
             <p className="pb-3 text-sm font-medium text-center text-gray-500 border-b border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-b-0 xl:pb-0 xl:text-left">
-              Showing {startIndex + 1} to {endIndex} of {totalItems} entries
+              Showing {start} to {end} of {totalElements} entries
             </p>
           </div>
           <PaginationWithIcon
