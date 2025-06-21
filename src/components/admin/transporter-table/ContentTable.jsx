@@ -20,7 +20,7 @@ import {
   PostBaseUser,
 } from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
-
+import { toast } from "react-toastify";
 export default function ContentTable(props) {
   const { users, setUsers } = props;
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,7 +28,6 @@ export default function ContentTable(props) {
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
-
   const filteredAndSortedData = useMemo(() => {
     console.log(users);
     return users
@@ -61,11 +60,34 @@ export default function ContentTable(props) {
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const { isOpen, openModal, closeModal } = useModal();
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  const [newDataUser, setNewDataUser] = useState({});
+  const [newDataUser, setNewDataUser] = useState({
+    email: "",
+    fullName: "",
+    gender: "",
+    phone: "",
+    salary: "",
+    kpi: "",
+    dateOfBirth: "",
+  });
+  const handleCloseModal = () => {
+    setNewDataUser({
+      email: "",
+      fullName: "",
+      gender: "",
+      phone: "",
+      salary: "",
+      kpi: "",
+      dateOfBirth: "",
+    });
+    setErrors({});
+    closeModal();
+  };
   const handleSort = (key) => {
     if (sortKey === key) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -74,22 +96,74 @@ export default function ContentTable(props) {
       setSortOrder("asc");
     }
   };
+  const validate = () => {
+    const newErrors = {};
+    if (!newDataUser.fullName)
+      newErrors.fullName = "Họ tên không được để trống";
+    if (!newDataUser.email) newErrors.email = "Email không được để trống";
+    else if (!/\S+@\S+\.\S+/.test(newDataUser.email))
+      newErrors.email = "Email không hợp lệ";
 
+    if (!newDataUser.gender) newErrors.gender = "Vui lòng chọn giới tính";
+    if (!newDataUser.phone) newErrors.phone = "SĐT không được để trống";
+    else if (!/^[0-9]{10,11}$/.test(newDataUser.phone))
+      newErrors.phone = "SĐT không hợp lệ";
+
+    if (
+      !newDataUser.salary ||
+      isNaN(newDataUser.salary) ||
+      Number(newDataUser.salary) <= 0
+    )
+      newErrors.salary = "Lương phải là số dương";
+
+    if (
+      !newDataUser.kpi ||
+      isNaN(newDataUser.kpi) ||
+      Number(newDataUser.kpi) <= 0
+    )
+      newErrors.kpi = "KPI phải là số dương ";
+
+    const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!newDataUser.dateOfBirth)
+      newErrors.dateOfBirth = "Vui lòng chọn ngày sinh";
+    else if (!dobRegex.test(newDataUser.dateOfBirth))
+      newErrors.dateOfBirth = "Ngày sinh phải theo định dạng mm/dd/yyyy";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   const handleCreateUser = async () => {
-    const data = { ...newDataUser, nameRole: "TRANSPORTER" };
+    if (validate()) {
+      setLoading(true);
+      const data = { ...newDataUser, nameRole: "TRANSPORTER" };
 
-    console.log(data);
+      console.log(data);
 
-    const dataResponse = await PostBaseUser(data);
+      try {
+        const dataResponse = await PostBaseUser(data);
 
-    const dataInsert = {
-      ...newDataUser,
-      id: dataResponse
+        if (dataResponse) {
+          const dataInsert = { ...newDataUser, id: dataResponse };
+          setUsers([...users, dataInsert]);
+          toast.success("Tạo tải khoản thành công");
+        }
+      } catch (error) {
+        toast.error(error?.response?.data?.message);
+      } finally {
+        setLoading(false);
+        setErrors({});
+        setNewDataUser({
+          email: "",
+          fullName: "",
+          gender: "",
+          phone: "",
+          salary: "",
+          kpi: "",
+          dateOfBirth: "",
+        });
+        closeModal();
+      }
     }
-
-    setUsers([...users, dataInsert]);
-
-    closeModal();
   };
 
   return (
@@ -102,15 +176,23 @@ export default function ContentTable(props) {
         ADD TRANSPORTER
       </Button>
 
-      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
+      <Modal
+        isOpen={isOpen}
+        onClose={handleCloseModal}
+        className="max-w-[700px] m-4"
+      >
         <div className="relative w-full p-6 overflow-y-auto bg-white rounded-3xl dark:bg-gray-900 lg:p-8">
           <div className="flex items-center justify-between mb-6">
             <h4 className="text-2xl font-bold text-gray-800 dark:text-white/90">
               Add New TRANSPORTER
             </h4>
-            <button
-              onClick={closeModal}
-              className="p-1 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+            <Button
+              onClick={() => {
+                setNewDataUser({});
+                setErrors({});
+                closeModal();
+              }}
+              className="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white sm:right-6 sm:top-6 sm:h-11 sm:w-11"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -126,19 +208,18 @@ export default function ContentTable(props) {
                   d="M6 18L18 6M6 6l12 12"
                 />
               </svg>
-            </button>
+            </Button>
           </div>
 
           <form
-            className="space-y-6"
             onSubmit={async (e) => {
               e.preventDefault();
               await handleCreateUser();
             }}
           >
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Email Field */}
-              <div className="space-y-2">
+              <div>
                 <Label
                   htmlFor="email"
                   className="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -155,10 +236,20 @@ export default function ContentTable(props) {
                     setNewDataUser({ ...newDataUser, email: e.target.value })
                   }
                 />
+
+                <p
+                  className={
+                    errors.email
+                      ? "text-xs text-red-500  "
+                      : "text-xs invisible  "
+                  }
+                >
+                  {errors.email || "placeholder"}
+                </p>
               </div>
 
               {/* Full Name Field */}
-              <div className="space-y-2">
+              <div>
                 <Label
                   htmlFor="fullName"
                   className="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -175,10 +266,19 @@ export default function ContentTable(props) {
                     setNewDataUser({ ...newDataUser, fullName: e.target.value })
                   }
                 />
+                <p
+                  className={
+                    errors.fullName
+                      ? "text-xs text-red-500  "
+                      : "text-xs invisible  "
+                  }
+                >
+                  {errors.fullName || "placeholder"}
+                </p>
               </div>
 
               {/* Gender Field */}
-              <div className="space-y-2">
+              <div>
                 <Label
                   htmlFor="gender"
                   className="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -198,10 +298,19 @@ export default function ContentTable(props) {
                   <option value="female">Female</option>
                   <option value="other">Other</option>
                 </select>
+                <p
+                  className={
+                    errors.gender
+                      ? "text-xs text-red-500  "
+                      : "text-xs invisible  "
+                  }
+                >
+                  {errors.gender || "placeholder"}
+                </p>
               </div>
 
               {/* Phone Field */}
-              <div className="space-y-2">
+              <div>
                 <Label
                   htmlFor="phone"
                   className="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -217,9 +326,18 @@ export default function ContentTable(props) {
                     setNewDataUser({ ...newDataUser, phone: e.target.value })
                   }
                 />
+                <p
+                  className={
+                    errors.phone
+                      ? "text-xs text-red-500  "
+                      : "text-xs invisible  "
+                  }
+                >
+                  {errors.phone || "placeholder"}
+                </p>
               </div>
 
-              <div className="space-y-2">
+              <div>
                 <Label
                   htmlFor="salary"
                   className="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -235,9 +353,18 @@ export default function ContentTable(props) {
                     setNewDataUser({ ...newDataUser, salary: e.target.value })
                   }
                 />
+                <p
+                  className={
+                    errors.salary
+                      ? "text-xs text-red-500  "
+                      : "text-xs invisible  "
+                  }
+                >
+                  {errors.salary || "placeholder"}
+                </p>
               </div>
 
-              <div className="space-y-2">
+              <div>
                 <Label
                   htmlFor="kpi"
                   className="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -247,16 +374,25 @@ export default function ContentTable(props) {
                 <Input
                   id="kpi"
                   type="number"
-                  placeholder="VND7"
+                  placeholder="VND"
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700"
                   onChange={(e) =>
                     setNewDataUser({ ...newDataUser, kpi: e.target.value })
                   }
                 />
+                <p
+                  className={
+                    errors.kpi
+                      ? "text-xs text-red-500  "
+                      : "text-xs invisible  "
+                  }
+                >
+                  {errors.kpi || "placeholder"}
+                </p>
               </div>
 
               {/* Date of Birth Field */}
-              <div className="space-y-2">
+              <div>
                 <Label
                   htmlFor="dob"
                   className="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -274,6 +410,15 @@ export default function ContentTable(props) {
                   } // Xử lý giá trị khi thay đổi
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700"
                 />
+                <p
+                  className={
+                    errors.dateOfBirth
+                      ? "text-xs text-red-500  "
+                      : "text-xs invisible  "
+                  }
+                >
+                  {errors.dateOfBirth || "placeholder"}
+                </p>
               </div>
             </div>
 
@@ -284,6 +429,7 @@ export default function ContentTable(props) {
                 variant="outline"
                 onClick={() => {
                   setNewDataUser({});
+                  setErrors({});
                   closeModal();
                 }}
                 className="w-full md:w-auto px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700"
@@ -294,13 +440,22 @@ export default function ContentTable(props) {
                 type="submit"
                 size="lg"
                 className="w-full md:w-auto px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700"
-
               >
-                Save TRANSPORTER
+                Save Transporter
               </Button>
             </div>
           </form>
         </div>
+        {loading && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm rounded-3xl">
+            <div className="flex flex-col items-center justify-center gap-2">
+              <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Đang xử lý...
+              </p>
+            </div>
+          </div>
+        )}
       </Modal>
       <div className="flex flex-col gap-2 px-4 py-4 border border-b-0 border-gray-100 dark:border-white/[0.05] rounded-t-xl sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
@@ -398,10 +553,11 @@ export default function ContentTable(props) {
                       </p>
                       <button className="flex flex-col gap-0.5">
                         <svg
-                          className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "asc"
-                            ? "text-brand-500"
-                            : ""
-                            }`}
+                          className={`text-gray-300 dark:text-gray-700  ${
+                            sortKey === key && sortOrder === "asc"
+                              ? "text-brand-500"
+                              : ""
+                          }`}
                           width="8"
                           height="5"
                           viewBox="0 0 8 5"
@@ -414,10 +570,11 @@ export default function ContentTable(props) {
                           />
                         </svg>
                         <svg
-                          className={`text-gray-300 dark:text-gray-700  ${sortKey === key && sortOrder === "desc"
-                            ? "text-brand-500"
-                            : ""
-                            }`}
+                          className={`text-gray-300 dark:text-gray-700  ${
+                            sortKey === key && sortOrder === "desc"
+                              ? "text-brand-500"
+                              : ""
+                          }`}
                           width="8"
                           height="5"
                           viewBox="0 0 8 5"
