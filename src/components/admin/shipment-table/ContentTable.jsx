@@ -57,12 +57,6 @@ export default function ContentTable({ data }) {
 
   // Mouse events
   const handleMouseDown = (e) => {
-    if (
-      e.target.closest('.dropdown-filter-ns') ||
-      e.target.closest('.icon-filter-ns')
-    ) {
-      return;
-    }
     setIsDragging(true);
     setStartX(e.pageX - scrollRef.current.offsetLeft);
     setScrollLeft(scrollRef.current.scrollLeft);
@@ -101,16 +95,6 @@ export default function ContentTable({ data }) {
   const [filterUser, setFilterUser] = useState("");
   const [filterCS, setFilterCS] = useState("");
   const [filterTransporter, setFilterTransporter] = useState("");
-
-  // state cho dropdown filter từng cột
-  const [showFilterDropdown, setShowFilterDropdown] = useState({
-    bd: false,
-    manager: false,
-    user: false,
-    cs: false,
-    transporter: false,
-  });
-
   console.log("Dữ liệu đơn hàng:", dataBill);
   const fetchBillData = async () => {
     try {
@@ -140,7 +124,6 @@ export default function ContentTable({ data }) {
       ),
     [dataBill]
   );
-
   const managerNames = useMemo(
     () =>
       Array.from(
@@ -357,49 +340,31 @@ export default function ContentTable({ data }) {
     }
     // Lọc theo quyền
     if (authorities.includes("ADMIN")) {
-      if (filterBD && filterBD.length)
+      if (filterBD)
         filtered = filtered.filter(
-          (item) =>
-            Array.isArray(filterBD)
-              ? filterBD.includes(item?.employee?.bd_name)
-              : item?.employee?.bd_name === filterBD
+          (item) => item?.employee?.bd_name === filterBD
         );
-      if (filterManager && filterManager.length)
+      if (filterManager)
         filtered = filtered.filter(
-          (item) =>
-            Array.isArray(filterManager)
-              ? filterManager.includes(item?.employee?.manager_name)
-              : item?.employee?.manager_name === filterManager
+          (item) => item?.employee?.manager_name === filterManager
         );
     } else if (authorities.includes("BD")) {
-      if (filterManager && filterManager.length)
+      if (filterManager)
         filtered = filtered.filter(
-          (item) =>
-            Array.isArray(filterManager)
-              ? filterManager.includes(item?.employee?.manager_name)
-              : item?.employee?.manager_name === filterManager
+          (item) => item?.employee?.manager_name === filterManager
         );
     } else if (authorities.includes("MANAGER")) {
-      if (filterUser && filterUser.length)
+      if (filterUser)
         filtered = filtered.filter(
-          (item) =>
-            Array.isArray(filterUser)
-              ? filterUser.includes(item?.employee?.user_name)
-              : item?.employee?.user_name === filterUser
+          (item) => item?.employee?.user_name === filterUser
         );
-      if (filterCS && filterCS.length)
+      if (filterCS)
         filtered = filtered.filter(
-          (item) =>
-            Array.isArray(filterCS)
-              ? filterCS.includes(item?.employee?.cs_name)
-              : item?.employee?.cs_name === filterCS
+          (item) => item?.employee?.cs_name === filterCS
         );
-      if (filterTransporter && filterTransporter.length)
+      if (filterTransporter)
         filtered = filtered.filter(
-          (item) =>
-            Array.isArray(filterTransporter)
-              ? filterTransporter.includes(item?.employee?.transporter_name)
-              : item?.employee?.transporter_name === filterTransporter
+          (item) => item?.employee?.transporter_name === filterTransporter
         );
     }
 
@@ -763,9 +728,9 @@ export default function ContentTable({ data }) {
       prev.map((p, i) =>
         i === idx
           ? {
-              ...p,
-              [field]: field === "price" ? Math.max(0, Number(value)) : value,
-            }
+            ...p,
+            [field]: field === "price" ? Math.max(0, Number(value)) : value,
+          }
           : p
       )
     );
@@ -780,8 +745,8 @@ export default function ContentTable({ data }) {
         type === "cash"
           ? "CASH"
           : type === "banking"
-          ? "CARD"
-          : "BUSINESS_CARD",
+            ? "CARD"
+            : "BUSINESS_CARD",
       active: false,
     };
     if (type === "cash") setCashPayments((prev) => [...prev, newPayment]);
@@ -1456,9 +1421,8 @@ export default function ContentTable({ data }) {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `shipment_report_${
-      new Date().toISOString().split("T")[0]
-    }.xlsx`;
+    a.download = `shipment_report_${new Date().toISOString().split("T")[0]
+      }.xlsx`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -1724,8 +1688,8 @@ export default function ContentTable({ data }) {
       sum +
       (Array.isArray(item?.pricePayment?.cashPayment)
         ? item.pricePayment.cashPayment
-            .filter((p) => p.active)
-            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
+          .filter((p) => p.active)
+          .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
         : 0),
     0
   );
@@ -1736,8 +1700,8 @@ export default function ContentTable({ data }) {
       sum +
       (Array.isArray(item?.pricePayment?.cardPayment)
         ? item.pricePayment.cardPayment
-            .filter((p) => p.active)
-            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
+          .filter((p) => p.active)
+          .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
         : 0),
     0
   );
@@ -1748,8 +1712,8 @@ export default function ContentTable({ data }) {
       sum +
       (Array.isArray(item?.pricePayment?.businessCardPayment)
         ? item.pricePayment.businessCardPayment
-            .filter((p) => p.active)
-            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
+          .filter((p) => p.active)
+          .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
         : 0),
     0
   );
@@ -1761,106 +1725,6 @@ export default function ContentTable({ data }) {
       sum + Math.max(0, item?.pricePayment?.payments_remaining || 0),
     0
   );
-
-
-  function DropdownFilterNS({
-    keyName,
-    names,
-    selectedNames,
-    setSelectedNames,
-    onClose,
-  }) {
-    const [tempSelected, setTempSelected] = useState(
-      Array.isArray(selectedNames)
-        ? selectedNames
-        : selectedNames
-          ? [selectedNames]
-          : []
-    );
-
-    // Áp dụng filter
-    const handleApply = () => {
-      setSelectedNames(tempSelected.length === 0 ? "" : tempSelected);
-      onClose();
-    };
-
-    // Xóa lọc
-    const handleClear = () => {
-      setTempSelected([]);
-      setSelectedNames("");
-      onClose();
-    };
-
-    // Đóng khi click ngoài
-    useEffect(() => {
-      const handleClickOutside = (e) => {
-        if (!e.target.closest(`#dropdown-ns-${keyName}`)) onClose();
-      };
-      document.addEventListener("mousedown", handleClickOutside);
-      return () =>
-        document.removeEventListener("mousedown", handleClickOutside);
-    }, [onClose, keyName]);
-
-    return (
-      <div
-        id={`dropdown-ns-${keyName}`}
-        className="dropdown-filter-ns absolute left-8 top-full z-[99999] bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 w-60 p-0"
-        style={{ minWidth: 220 }}
-      >
-        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-          <span className="normal-case font-semibold text-sm text-gray-700 dark:text-gray-200">
-            Lọc nhân sự
-          </span>
-          <span className="normal-case text-xs text-gray-500 dark:text-gray-400">
-            {tempSelected.length}/{names.length} đã chọn
-          </span>
-        </div>
-        <div className="max-h-48 overflow-y-auto py-2 px-4">
-          {names.length === 0 && (
-            toast.error("Không có dữ liệu cần lọc")
-          )}
-          {names.map((name) => (
-            <label
-              key={name}
-              className="flex items-center gap-2 py-1 cursor-pointer text-sm text-gray-700 dark:text-gray-200"
-            >
-              <input
-                type="checkbox"
-                checked={tempSelected.includes(name)}
-                onChange={() => {
-                  setTempSelected((prev) =>
-                    prev.includes(name)
-                      ? prev.filter((n) => n !== name)
-                      : [...prev, name]
-                  );
-                }}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="truncate normal-case">{name}</span>
-
-            </label>
-          ))}
-        </div>
-        <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-xl">
-          <button
-            type="button"
-            className="px-2 py-1 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
-            onClick={handleClear}
-          >
-            Xóa lọc
-          </button>
-          <button
-            type="button"
-            className="px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700 shadow"
-            onClick={handleApply}
-          >
-            Áp dụng
-          </button>
-
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white dark:bg-white/[0.03] rounded-xl">
@@ -2052,6 +1916,128 @@ export default function ContentTable({ data }) {
                   </div>
                 )}
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 mb-1">
+                {authorities.includes("ADMIN") && (
+                  <>
+                    {/* Filter NS - BD */}
+                    <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                        NS - BD
+                      </label>
+                      <select
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        value={filterBD}
+                        onChange={(e) => setFilterBD(e.target.value)}
+                      >
+                        <option value="">Tất cả</option>
+                        {bdNames.map((name) => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {/* Filter NS - MANAGER */}
+                    <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                        NS - MANAGER
+                      </label>
+                      <select
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        value={filterManager}
+                        onChange={(e) => setFilterManager(e.target.value)}
+                      >
+                        <option value="">Tất cả</option>
+                        {managerNames.map((name) => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
+                {authorities.includes("BD") &&
+                  !authorities.includes("ADMIN") && (
+                    <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                        NS - MANAGER
+                      </label>
+                      <select
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        value={filterManager}
+                        onChange={(e) => setFilterManager(e.target.value)}
+                      >
+                        <option value="">Tất cả</option>
+                        {managerNames.map((name) => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                {authorities.includes("MANAGER") &&
+                  !authorities.includes("ADMIN") &&
+                  !authorities.includes("BD") && (
+                    <>
+                      {/* Filter NS - USER */}
+                      <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                          NS - USER
+                        </label>
+                        <select
+                          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                          value={filterUser}
+                          onChange={(e) => setFilterUser(e.target.value)}
+                        >
+                          <option value="">Tất cả</option>
+                          {userNames.map((name) => (
+                            <option key={name} value={name}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Filter NS - CS */}
+                      <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                          NS - CS
+                        </label>
+                        <select
+                          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                          value={filterCS}
+                          onChange={(e) => setFilterCS(e.target.value)}
+                        >
+                          <option value="">Tất cả</option>
+                          {csNames.map((name) => (
+                            <option key={name} value={name}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Filter NS - TRANSPORTER */}
+                      <div className="space-y-2 md:col-span-2 lg:col-span-1 pl-4 mb-2">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                          NS - TRANSPORTER
+                        </label>
+                        <select
+                          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                          value={filterTransporter}
+                          onChange={(e) => setFilterTransporter(e.target.value)}
+                        >
+                          <option value="">Tất cả</option>
+                          {transporterNames.map((name) => (
+                            <option key={name} value={name}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -2094,7 +2080,7 @@ export default function ContentTable({ data }) {
               exit={{ height: 0, opacity: 0, overflow: "hidden" }}
               transition={{ duration: 0.3 }}
             >
-              {/* Thêm 6 ô tổng quan ở đây */}
+              {/* Thêm 7 ô tổng quan ở đây */}
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
                 <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex flex-col items-center">
                   <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">
@@ -3134,13 +3120,13 @@ export default function ContentTable({ data }) {
             </svg>
             Import New Debit
           </button>
-           <input
-              type="file"
-              accept=".xlsx, .xls"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-            />
+          <input
+            type="file"
+            accept=".xlsx, .xls"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
 
         </div>
 
@@ -3185,145 +3171,43 @@ export default function ContentTable({ data }) {
         onTouchEnd={handleTouchEnd}
       >
         <div>
-          <Table className="w-full rounded-lg overflow-hidden shadow-sm select-none">
-            <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <Table className="w-full rounded-lg overflow-hidden shadow-sm select-none pointer-events-none">
+            <TableHeader
+              className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
+              style={{
+                WebkitUserSelect: "none",
+                userSelect: "none",
+                msUserSelect: "none",
+              }}
+            >
               <TableRow>
                 {Object.entries(columnLabels)
-                  .filter(([key]) => key === "house_bill" || visibleColumns[key])
+                  .filter(
+                    ([key]) => key === "house_bill" || visibleColumns[key]
+                  )
                   .map(([key, label]) => (
                     <TableCell
                       key={key}
                       isHeader
-                      className={`px-2 py-3 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs relative text-center
-                                ${key === "house_bill" ? "min-w-[120px] max-w-[160px] w-[140px]" : ""}
-                                ${key === "customer" ? "min-w-[180px] max-w-[220px] w-[200px]" : ""}
-                                ${key === "country_name" ? "min-w-[100px] max-w-[140px] w-[120px]" : ""}
-                                ${key === "master_tracking" ? "min-w-[120px] max-w-[160px] w-[140px]" : ""}
-                                ${key === "company_service" ? "min-w-[120px] max-w-[160px] w-[140px]" : ""}
-                                ${key === "inwh_date" ? "min-w-[120px] max-w-[160px] w-[140px]" : ""}
-                                ${key.includes("price") || key.includes("total") || key.includes("payments") || key.includes("profit") ? "min-w-[120px] max-w-[160px] w-[130px] text-right" : ""}
-                                ${key.startsWith("hh") ? "min-w-[80px] max-w-[100px] w-[90px]" : ""}
-                                ${key === "status" ? "min-w-[120px] max-w-[140px] w-[120px]" : ""}
-                                ${key === "bd" || key === "manager" || key === "user" || key === "cs" || key === "transporter" ? "min-w-[120px] max-w-[160px] w-[140px]" : ""}
-                              `}
+                      className="px-6 py-4 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs"
                     >
-                      <div className="flex items-center justify-between cursor-pointer">
-                        <span className="w-full text-center">
-                          {label}
-                        </span>
-                        {["bd", "manager", "user", "cs", "transporter"].includes(key) ? (
-                          <span
-                            className="icon-filter-ns pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
-                            onClick={e => {
-                              e.stopPropagation();
-                              e.preventDefault(); // Thêm dòng này để ngăn sự kiện click bubble lên document
-                              console.log("Click filter icon", key);
-                              setShowFilterDropdown(prev => ({
-                                ...Object.fromEntries(Object.keys(prev).map(k => [k, false])), // Đóng tất cả dropdown khác
-                                [key]: !prev[key],
-                              }));
-                            }}
-                            style={{ cursor: "pointer" }}
-                            title="Lọc nhân sự"
-                          >
-                            <ArrowsUpDownIcon className="pointer-events-auto select-auto h-4 w-4" />
-                          </span>
-                        ) : (
-                          <span
-                            className="icon-filter-ns pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
-                            onClick={() => handleSort(key)}
-                            style={{ cursor: "pointer" }}
-                            title="Sắp xếp"
-                          >
-                            {sortKey === key ? (
-                              sortOrder === "asc" ? (
-                                <ChevronUpIcon className="h-4 w-4 text-brand-500" />
-                              ) : (
-                                <ChevronDownIcon className="h-4 w-4 text-brand-500" />
-                              )
+                      <div className="flex items-center justify-between">
+                        <span>{label}</span>
+                        <button
+                          onClick={() => handleSort(key)}
+                          className="pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
+                        >
+                          {sortKey === key ? (
+                            sortOrder === "asc" ? (
+                              <ChevronUpIcon className="h-4 w-4 text-brand-500" />
                             ) : (
-                              <ArrowsUpDownIcon className="h-3 w-3" />
-                            )}
-                          </span>
-                        )}
+                              <ChevronDownIcon className="h-4 w-4 text-brand-500" />
+                            )
+                          ) : (
+                            <ArrowsUpDownIcon className="h-3 w-3" />
+                          )}
+                        </button>
                       </div>
-                      {/* Dropdown filter nhân sự */}
-                      {showFilterDropdown[key] &&
-                        ["bd", "manager", "user", "cs", "transporter"].includes(key) && (
-                          <DropdownFilterNS
-                            keyName={key}
-                            names={
-                              key === "bd"
-                                ? bdNames
-                                : key === "manager"
-                                  ? managerNames
-                                  : key === "user"
-                                    ? userNames
-                                    : key === "cs"
-                                      ? csNames
-                                      : key === "transporter"
-                                        ? transporterNames
-                                        : []
-                            }
-                            selectedNames={
-                              Array.isArray(
-                                key === "bd"
-                                  ? filterBD
-                                  : key === "manager"
-                                    ? filterManager
-                                    : key === "user"
-                                      ? filterUser
-                                      : key === "cs"
-                                        ? filterCS
-                                        : key === "transporter"
-                                          ? filterTransporter
-                                          : ""
-                              )
-                                ? (
-                                  key === "bd"
-                                    ? filterBD
-                                    : key === "manager"
-                                      ? filterManager
-                                      : key === "user"
-                                        ? filterUser
-                                        : key === "cs"
-                                          ? filterCS
-                                          : key === "transporter"
-                                            ? filterTransporter
-                                            : []
-                                ) || []
-                                : [
-                                  key === "bd"
-                                    ? filterBD
-                                    : key === "manager"
-                                      ? filterManager
-                                      : key === "user"
-                                        ? filterUser
-                                        : key === "cs"
-                                          ? filterCS
-                                          : key === "transporter"
-                                            ? filterTransporter
-                                            : "",
-                                ].filter(Boolean)
-                            }
-                            setSelectedNames={
-                              key === "bd"
-                                ? setFilterBD
-                                : key === "manager"
-                                  ? setFilterManager
-                                  : key === "user"
-                                    ? setFilterUser
-                                    : key === "cs"
-                                      ? setFilterCS
-                                      : key === "transporter"
-                                        ? setFilterTransporter
-                                        : () => { }
-                            }
-                            onClose={() =>
-                              setShowFilterDropdown((prev) => ({ ...prev, [key]: false }))
-                            }
-                          />
-                        )}
                     </TableCell>
                   ))}
               </TableRow>
@@ -3336,8 +3220,8 @@ export default function ContentTable({ data }) {
                   className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
                   {/* House Bill - luôn hiển thị */}
-                  <TableCell className="text-center py-1 whitespace-nowrap">
-                    <div className="flex justify-center items-center w-full h-full">
+                  <TableCell className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
                       <NavLink
                         to="/profile"
                         className="pointer-events-auto select-auto font-medium text-brand-600 dark:text-brand-400 hover:underline"
@@ -3355,37 +3239,37 @@ export default function ContentTable({ data }) {
 
                   {/* Các cột khác chỉ hiển thị khi được chọn */}
                   {/* {visibleColumns.Date && (
-                                        <TableCell className="text-center px-6 py-4 whitespace-nowrap">
+                                        <TableCell className="px-6 py-4 whitespace-nowrap">
                                             {item.date_create}
                                         </TableCell>
                                     )} */}
                   {visibleColumns.bd && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[140px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.employee.bd_name || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.manager && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[140px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.employee.manager_name || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.user && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[140px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.employee.user_name || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.cs && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[140px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.employee.cs_name || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.transporter && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[140px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.employee.transporter_name || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.customer && (
-                    <TableCell className="px-2 py-1 min-w-[180px] max-w-[220px] w-[200px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       <p className="text-sm text-gray-600 dark:text-gray-300">
                         <span className="font-medium">Người gửi:</span>{" "}
                         {item.information_human.from}
@@ -3398,18 +3282,18 @@ export default function ContentTable({ data }) {
                   )}
 
                   {visibleColumns.country_name && (
-                    <TableCell className="text-center px-2 py-1 min-w-[100px] max-w-[140px] w-[120px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.country_name || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.master_tracking && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[140px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.awb || "..."}
                     </TableCell>
                   )}
 
                   {visibleColumns.gw && (
-                    <TableCell className="text-center px-2 py-1 min-w-[100px] max-w-[140px] w-[120px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       <div className="space-y-1">
                         <p className="text-sm text-gray-600 dark:text-gray-300">
                           <span className="font-medium">SL:</span>{" "}
@@ -3423,7 +3307,7 @@ export default function ContentTable({ data }) {
                     </TableCell>
                   )}
                   {visibleColumns.cw && (
-                    <TableCell className="text-center px-2 py-1 min-w-[100px] max-w-[140px] w-[120px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       <div className="space-y-1">
                         <p className="text-sm text-gray-600 dark:text-gray-300">
                           <span className="font-medium">SL:</span>{" "}
@@ -3451,161 +3335,153 @@ export default function ContentTable({ data }) {
                     </TableCell>
                   )}
                   {visibleColumns.company_service && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[140px] whitespace-nowrap">
+                    <TableCell className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
                         {item.company_service}
                       </span>
                     </TableCell>
                   )}
                   {visibleColumns.inwh_date && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[140px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.date_create || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.price_price && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.price.priceNet)} VNĐ
                     </TableCell>
                   )}
                   {visibleColumns.fsc_price && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.price.fsc_price} %
                     </TableCell>
                   )}
                   {visibleColumns.surge_fee_price && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.price.surge_fee_price}
                     </TableCell>
                   )}
                   {visibleColumns.afr_debit && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.debit.afr_debit)} VNĐ
                     </TableCell>
                   )}
                   {visibleColumns.oversize_debit && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.debit.oversize_debit)} VNĐ
                     </TableCell>
                   )}
                   {visibleColumns.surge_fee_debit && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.debit.surge_fee_debit || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.other_charges_debit && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.debit.other_charges_debit || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.fsc_debit && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.debit.fsc_debit)} VNĐ
                     </TableCell>
                   )}
                   {visibleColumns.total_ar && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.total_ar.total_ar)} VNĐ
                     </TableCell>
                   )}
                   {visibleColumns.vat && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.total_ar.vat)} VNĐ
                     </TableCell>
                   )}
                   {visibleColumns.total && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.total_ar.total)} VNĐ
                     </TableCell>
                   )}
 
                   {visibleColumns.order_grand_total && (
-                    <TableCell className="text-center px-2 py-1 whitespace-normal text-xs font-medium text-gray-700 dark:text-gray-300 relative">
-                      {(authorities.includes("ADMIN") ||
-                        authorities.includes("ACCOUNTANT") ||
-                        authorities.includes("BD")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              openModal();
-                              setBillEdit(item);
-                            }}
-                            className="absolute top-1 right-1 pointer-events-auto select-auto text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 z-10"
-                            style={{ zIndex: 2 }}
-                            tabIndex={-1}
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
-                      <div className="flex flex-col items-center justify-center pt-5 min-h-[48px]">
-                        <div className="flex items-center justify-center w-full">
-                          <span
-                            className="px-2 py-1 text-sm font-medium rounded-md break-words text-center border text-green-800 bg-green-100 border-green-200 dark:bg-green-900/50 dark:text-green-300"
-                            style={{
-                              display: "inline-block",
-                              textAlign: "center",
-                              wordBreak: "break-word",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {formatCurrency(item.priceOrder.total_complete)} VNĐ
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-center w-full mt-1">
-                          <span className="px-2 py-1 text-sm font-medium rounded-md break-words text-center border text-red-800 bg-red-100 border-red-200 dark:bg-red-900/50 dark:text-red-300"
-                            style={{
-                              display: "inline-block",
-                              textAlign: "center",
-                              wordBreak: "break-word",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {formatCurrency(item.priceOrder.total_process)} VNĐ
-                          </span>
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="relative flex flex-col items-start space-y-2">
+                        {(authorities.includes("ADMIN") ||
+                          authorities.includes("ACCOUNTANT") ||
+                          authorities.includes("BD")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                openModal();
+                                setBillEdit(item);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
+
+                        {/* Giá trị tiền order */}
+                        <div className="flex flex-col space-y-1 pt-6">
+                          {/* Giá trị xanh */}
+                          <div className="flex items-center space-x-2">
+                            <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                              {formatCurrency(item.priceOrder.total_complete)}{" "}
+                              VNĐ
+                            </span>
+                          </div>
+
+                          {/* Giá trị đỏ */}
+                          <div className="flex items-center space-x-2">
+                            <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                              {formatCurrency(item.priceOrder.total_process)}{" "}
+                              VNĐ
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </TableCell>
                   )}
 
                   {visibleColumns.other_charges_total && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.grand_total.other_charges_total || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.grand_total && (
-                    <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.grand_total.grand_total)} VNĐ
                     </TableCell>
                   )}
                   {/* {visibleColumns.payments_cash && (
-                                        <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                             {item?.payments_cash || "..."}
                                         </TableCell>
                                     )}
                                     {visibleColumns.payments_banking && (
-                                        <TableCell className="text-center px-2 py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                        <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                             {item?.payments_banking || "..."}
                                         </TableCell>
                                     )} */}
 
                   {visibleColumns.payments_cash && (
-                    <TableCell className="text-center px-3 py-1 whitespace-normal text-sm font-medium text-gray-700 dark:text-gray-300 relative">
-                      {(authorities.includes("ADMIN") ||
-                        authorities.includes("BD") ||
-                        authorities.includes("ACCOUNTANT")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("CASH");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="absolute top-1 right-1 pointer-events-auto select-auto text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 z-10"
-                            style={{ zIndex: 2 }}
-                            tabIndex={-1}
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="relative flex flex-col items-start space-y-2">
+                        {/* Nút để mở modal thanh toán tiền mặt */}
+                        {(authorities.includes("ADMIN") ||
+                          authorities.includes("BD") ||
+                          authorities.includes("ACCOUNTANT")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CASH");
+                                handleViewPaymentDetails(item);
+                                setIsOpenFormPayment(true);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
                         {/* Tổng đã xác nhận và chưa xác nhận */}
                         <div className="flex flex-col gap-1 pt-6">
                           <div className="flex items-center">
@@ -3642,24 +3518,24 @@ export default function ContentTable({ data }) {
                   )}
 
                   {visibleColumns.payments_banking && (
-                    <TableCell className="text-center px-3 py-1 whitespace-normal text-sm font-medium text-gray-700 dark:text-gray-300 relative">
-                      {(authorities.includes("ADMIN") ||
-                        authorities.includes("ACCOUNTANT") ||
-                        authorities.includes("BD")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("CARD");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="absolute top-1 right-1 pointer-events-auto select-auto text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 z-10"
-                            style={{ zIndex: 2 }}
-                            tabIndex={-1}
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="relative flex flex-col items-start space-y-2">
+                        {/* Nút để mở modal thanh toán chuyển khoản */}
+                        {(authorities.includes("ADMIN") ||
+                          authorities.includes("BD") ||
+                          authorities.includes("ACCOUNTANT")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CARD");
+                                handleViewPaymentDetails(item);
+                                setIsOpenFormPayment(true);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
                         {/* Tổng đã xác nhận và chưa xác nhận */}
                         <div className="flex flex-col gap-1 pt-6">
                           <div className="flex items-center">
@@ -3696,24 +3572,24 @@ export default function ContentTable({ data }) {
                   )}
 
                   {visibleColumns.payments_business && (
-                    <TableCell className="text-center px-3 py-1 whitespace-normal text-sm font-medium text-gray-700 dark:text-gray-300 relative">
-                      {(authorities.includes("ADMIN") ||
-                        authorities.includes("ACCOUNTANT") ||
-                        authorities.includes("BD")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("BUSINESS_CARD");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="absolute top-1 right-1 pointer-events-auto select-auto text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 z-10"
-                            style={{ zIndex: 2 }}
-                            tabIndex={-1}
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="relative flex flex-col items-start space-y-2">
+                        {/* Nút để mở modal thanh toán doanh nghiệp */}
+                        {(authorities.includes("ADMIN") ||
+                          authorities.includes("BD") ||
+                          authorities.includes("ACCOUNTANT")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("BUSINESS_CARD");
+                                handleViewPaymentDetails(item);
+                                setIsOpenFormPayment(true);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
                         {/* Tổng đã xác nhận và chưa xác nhận */}
                         <div className="flex flex-col gap-1 pt-6">
                           <div className="flex items-center">
@@ -3749,23 +3625,23 @@ export default function ContentTable({ data }) {
                     </TableCell>
                   )}
                   {visibleColumns.payments_remaining && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {formatCurrency(item?.pricePayment.payments_remaining)}{" "}
                       VNĐ
                     </TableCell>
                   )}
                   {visibleColumns.gw_debit && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.gw_debit || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.cw_debit && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.cw_debit || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.bill && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.bill || "..."}
                     </TableCell>
                   )}
@@ -3777,83 +3653,83 @@ export default function ContentTable({ data }) {
                     </TableCell>
                   )}
                   {visibleColumns.reconcile && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.reconcile || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.price_diff && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.price_diff || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.packing && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.packing || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.pickup && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.pickup || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.other_costs && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.other_costs || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.profit && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.profit || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.hh1 && (
-                    <TableCell className="text-center py-1 min-w-[80px] max-w-[100px] w-[90px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.hh1 || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.hh2 && (
-                    <TableCell className="text-center py-1 min-w-[80px] max-w-[100px] w-[90px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.hh2 || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.hh3 && (
-                    <TableCell className="text-center py-1 min-w-[80px] max-w-[100px] w-[90px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.hh3 || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.hh4 && (
-                    <TableCell className="text-center py-1 min-w-[80px] max-w-[100px] w-[90px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.hh4 || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.base_salary && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.base_salary || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.kpi_bonus && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.kpi_bonus || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.bonus_1_2_3 && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.bonus_1_2_3 || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.allowance && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.allowance || "..."}
                     </TableCell>
                   )}
                   {visibleColumns.other_bonus && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[160px] w-[130px] whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item?.other_bonus || "..."}
                     </TableCell>
                   )}
 
                   {visibleColumns.status && (
-                    <TableCell className="text-center py-1 min-w-[120px] max-w-[140px] w-[120px] whitespace-nowrap">
+                    <TableCell className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
                         <StatusBadge status={item.status_payment} />
 
@@ -3938,47 +3814,46 @@ export default function ContentTable({ data }) {
             {(authorities.includes("ADMIN") ||
               authorities.includes("ACCOUNTANT") ||
               authorities.includes("BD")) && (
-              <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                    Quản lý Price Orders
-                  </h4>
-                  <div className="bg-green-100 dark:bg-green-800 rounded-xl px-4 py-2 mt-2 inline-block shadow-sm">
-                    <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                      Tổng giá:&nbsp;
-                      {priceOrders
-                        .filter((order) => order.active) // chỉ cộng order đã xác nhận
-                        .reduce(
-                          (sum, order) => sum + (parseFloat(order.price) || 0),
-                          0
-                        )
-                        .toLocaleString()}{" "}
-                      VNĐ
-                    </span>
+                <div className="space-y-6">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
+                      Quản lý Price Orders
+                    </h4>
+                    <div className="bg-green-100 dark:bg-green-800 rounded-xl px-4 py-2 mt-2 inline-block shadow-sm">
+                      <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                        Tổng giá:&nbsp;
+                        {priceOrders
+                          .filter((order) => order.active) // chỉ cộng order đã xác nhận
+                          .reduce(
+                            (sum, order) => sum + (parseFloat(order.price) || 0),
+                            0
+                          )
+                          .toLocaleString()}{" "}
+                        VNĐ
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currentDate = new Date();
+                        const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
+                          }/${currentDate.getFullYear()}`;
+                        const newPriceOrder = {
+                          id: "",
+                          name: "",
+                          price: "",
+                          description: "",
+                          date: formattedDate,
+                        };
+                        setPriceOrders([...priceOrders, newPriceOrder]);
+                      }}
+                      className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                    >
+                      <PlusIcon className="w-4 h-4 mr-1" />
+                      Thêm Price Order
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const currentDate = new Date();
-                      const formattedDate = `${currentDate.getDate()}/${
-                        currentDate.getMonth() + 1
-                      }/${currentDate.getFullYear()}`;
-                      const newPriceOrder = {
-                        id: "",
-                        name: "",
-                        price: "",
-                        description: "",
-                        date: formattedDate,
-                      };
-                      setPriceOrders([...priceOrders, newPriceOrder]);
-                    }}
-                    className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                  >
-                    <PlusIcon className="w-4 h-4 mr-1" />
-                    Thêm Price Order
-                  </button>
-                </div>
 
                   {/* Price Order List */}
                   <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
@@ -4158,19 +4033,19 @@ export default function ContentTable({ data }) {
             {(authorities.includes("ADMIN") ||
               authorities.includes("ACCOUNTANT") ||
               authorities.includes("BD")) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpenFormPayment(false);
-                  if (isDataChanged) {
-                    fetchBillData();
-                  }
-                }}
-                className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-              >
-                <XIcon className="w-5 h-5" />
-              </button>
-            )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpenFormPayment(false);
+                    if (isDataChanged) {
+                      fetchBillData();
+                    }
+                  }}
+                  className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                >
+                  <XIcon className="w-5 h-5" />
+                </button>
+              )}
           </div>
 
           {/* Form */}
