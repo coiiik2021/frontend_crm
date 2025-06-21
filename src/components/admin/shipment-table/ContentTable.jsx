@@ -13,6 +13,7 @@ import {
 import PaginationWithIcon from "../tables/DataTables/TableOne/PaginationWithIcon";
 import { Modal } from "../ui/modal/index.js";
 import { useModal } from "../../../hooks/useModal.js";
+import { Spin } from "antd";
 import {
   DeletePriceOrder,
   GetAllBaseUser,
@@ -30,10 +31,11 @@ import { PlusIcon, XIcon, PencilIcon, Delete } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import ExcelJS from "exceljs";
 import { DatePicker } from "antd"; // import { s } from "@fullcalendar/core/internal-common";
-export default function ContentTable({ data }) {
+import { useLoading } from "../../../hooks/useLoading.js";
+export default function ContentTable() {
   const fileInputRef = useRef(null);
-
-  const [dataBill, setDataBill] = useState(data || []);
+  const { loading, withLoading } = useLoading();
+  const [dataBill, setDataBill] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState("name");
@@ -97,18 +99,20 @@ export default function ContentTable({ data }) {
   const [filterTransporter, setFilterTransporter] = useState("");
   console.log("Dữ liệu đơn hàng:", dataBill);
   const fetchBillData = async () => {
-    try {
-      const data = await GetShipment();
-      setDataBill(data);
-      console.log("Dữ liệu đơn hàng:", dataBill);
-      // setState hoặc xử lý tiếp tại đây nếu cần
-    } catch (error) {
-      console.error("Lỗi khi gọi GetShipment:", error);
-    }
+    await withLoading(
+      async () => {
+        const data = await GetShipment();
+        setDataBill(data);
+        console.log("Dữ liệu đơn hàng:", data);
+      },
+      "Tải dữ liệu thành công",
+      "Không thể tải dữ liệu"
+    );
+    setIsDataChanged(false);
   };
   useEffect(() => {
-    setDataBill(data || []);
-  }, [data]);
+    fetchBillData();
+  }, []);
   // reset bộ lọc
   const resetAllFilters = () => {
     setFilterType("");
@@ -558,11 +562,11 @@ export default function ContentTable({ data }) {
           return newArr;
         });
       }
-      fetchBillData();
     } catch (error) {
       console.error(error);
       alert("Lỗi khi cập nhật thanh toán!");
     }
+    setIsDataChanged(true);
   };
 
   const handleConfirmPayment = async (payment) => {
@@ -595,12 +599,11 @@ export default function ContentTable({ data }) {
       setPayments((prev) =>
         prev.map((p) => (p.id === updated.id ? updated : p))
       );
-
-      fetchBillData();
     } catch (error) {
       console.error("Lỗi khi xác nhận thanh toán:", error);
       alert("Lỗi khi xác nhận thanh toán!");
     }
+    setIsDataChanged(true);
   };
 
   const handleCancelPayment = async (payment) => {
@@ -613,8 +616,7 @@ export default function ContentTable({ data }) {
     } else if (payment.methodPayment === "BUSINESS_CARD") {
       setBusinessPayments((prev) => prev.filter((p) => p.id !== payment.id));
     }
-
-    fetchBillData();
+    setIsDataChanged(true);
   };
 
   const fetchPriceOrders = async (billHouse) => {
@@ -753,6 +755,7 @@ export default function ContentTable({ data }) {
     if (type === "banking") setBankingPayments((prev) => [...prev, newPayment]);
     if (type === "business")
       setBusinessPayments((prev) => [...prev, newPayment]);
+    setIsDataChanged(true);
   };
 
   const handleDeletePayment = (type, idx) => {
@@ -762,7 +765,9 @@ export default function ContentTable({ data }) {
       setBankingPayments((prev) => prev.filter((_, i) => i !== idx));
     if (type === "business")
       setBusinessPayments((prev) => prev.filter((_, i) => i !== idx));
+    setIsDataChanged(true);
   };
+
   const handleUpdateStatus = async (billId, newStatus) => {
     try {
       const dataRequest = {
@@ -782,7 +787,6 @@ export default function ContentTable({ data }) {
 
       // Thông báo thành công
       alert("Cập nhật trạng thái thành công!");
-      fetchBillData(); // Cập nhật lại dữ liệu bảng
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Lỗi khi cập nhật trạng thái!");
@@ -1507,7 +1511,6 @@ export default function ContentTable({ data }) {
       console.error("❌ Lỗi khi đọc file Excel:", error);
     }
   };
-
 
   const columnLabels = {
     house_bill: "TTCB - HOUSE BILL",
@@ -3123,14 +3126,13 @@ export default function ContentTable({ data }) {
             </svg>
             Import New Debit
           </button>
-           <input
-              type="file"
-              accept=".xlsx, .xls"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-            />
-
+          <input
+            type="file"
+            accept=".xlsx, .xls"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
         </div>
 
         <div className="relative">
@@ -3160,302 +3162,306 @@ export default function ContentTable({ data }) {
           />
         </div>
       </div>
-
-      <div
-        className="max-w-full overflow-x-auto custom-scrollbar scrollable-table"
-        ref={scrollRef}
-        style={{ cursor: isDragging ? "grabbing" : "default" }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div>
-          <Table className="w-full rounded-lg overflow-hidden shadow-sm select-none pointer-events-none">
-            <TableHeader
-              className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
-              style={{
-                WebkitUserSelect: "none",
-                userSelect: "none",
-                msUserSelect: "none",
-              }}
-            >
-              <TableRow>
-                {Object.entries(columnLabels)
-                  .filter(
-                    ([key]) => key === "house_bill" || visibleColumns[key]
-                  )
-                  .map(([key, label]) => (
-                    <TableCell
-                      key={key}
-                      isHeader
-                      className="px-6 py-4 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>{label}</span>
-                        <button
-                          onClick={() => handleSort(key)}
-                          className="pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
-                        >
-                          {sortKey === key ? (
-                            sortOrder === "asc" ? (
-                              <ChevronUpIcon className="h-4 w-4 text-brand-500" />
+      {loading ? (
+        <div className="flex items-center justify-center h-full">
+          <Spin size="large" />
+        </div>
+      ) : (
+        <div
+          className="max-w-full overflow-x-auto custom-scrollbar scrollable-table"
+          ref={scrollRef}
+          style={{ cursor: isDragging ? "grabbing" : "default" }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div>
+            <Table className="w-full rounded-lg overflow-hidden shadow-sm select-none pointer-events-none">
+              <TableHeader
+                className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
+                style={{
+                  WebkitUserSelect: "none",
+                  userSelect: "none",
+                  msUserSelect: "none",
+                }}
+              >
+                <TableRow>
+                  {Object.entries(columnLabels)
+                    .filter(
+                      ([key]) => key === "house_bill" || visibleColumns[key]
+                    )
+                    .map(([key, label]) => (
+                      <TableCell
+                        key={key}
+                        isHeader
+                        className="px-6 py-4 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{label}</span>
+                          <button
+                            onClick={() => handleSort(key)}
+                            className="pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
+                          >
+                            {sortKey === key ? (
+                              sortOrder === "asc" ? (
+                                <ChevronUpIcon className="h-4 w-4 text-brand-500" />
+                              ) : (
+                                <ChevronDownIcon className="h-4 w-4 text-brand-500" />
+                              )
                             ) : (
-                              <ChevronDownIcon className="h-4 w-4 text-brand-500" />
-                            )
-                          ) : (
-                            <ArrowsUpDownIcon className="h-3 w-3" />
-                          )}
-                        </button>
+                              <ArrowsUpDownIcon className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                      </TableCell>
+                    ))}
+                </TableRow>
+              </TableHeader>
+
+              <TableBody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                {currentData.map((item, i) => (
+                  <TableRow
+                    key={i + 1}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  >
+                    {/* House Bill - luôn hiển thị */}
+                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <NavLink
+                          to="/profile"
+                          className="pointer-events-auto select-auto font-medium text-brand-600 dark:text-brand-400 hover:underline"
+                        >
+                          EB{item.bill_house.substring(0, 5)}
+                        </NavLink>
+
+                        {isToday(item.date_create) && (
+                          <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-md animate-pulse">
+                            NEW
+                          </span>
+                        )}
                       </div>
                     </TableCell>
-                  ))}
-              </TableRow>
-            </TableHeader>
 
-            <TableBody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
-              {currentData.map((item, i) => (
-                <TableRow
-                  key={i + 1}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                >
-                  {/* House Bill - luôn hiển thị */}
-                  <TableCell className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <NavLink
-                        to="/profile"
-                        className="pointer-events-auto select-auto font-medium text-brand-600 dark:text-brand-400 hover:underline"
-                      >
-                        EB{item.bill_house.substring(0, 5)}
-                      </NavLink>
-
-                      {isToday(item.date_create) && (
-                        <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-md animate-pulse">
-                          NEW
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  {/* Các cột khác chỉ hiển thị khi được chọn */}
-                  {/* {visibleColumns.Date && (
+                    {/* Các cột khác chỉ hiển thị khi được chọn */}
+                    {/* {visibleColumns.Date && (
                                         <TableCell className="px-6 py-4 whitespace-nowrap">
                                             {item.date_create}
                                         </TableCell>
                                     )} */}
-                  {visibleColumns.bd && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.employee.bd_name || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.manager && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.employee.manager_name || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.user && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.employee.user_name || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.cs && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.employee.cs_name || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.transporter && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.employee.transporter_name || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.customer && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        <span className="font-medium">Người gửi:</span>{" "}
-                        {item.information_human.from}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        <span className="font-medium">Người nhận:</span>{" "}
-                        {item.information_human.to}
-                      </p>
-                    </TableCell>
-                  )}
+                    {visibleColumns.bd && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.employee.bd_name || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.manager && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.employee.manager_name || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.user && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.employee.user_name || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.cs && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.employee.cs_name || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.transporter && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.employee.transporter_name || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.customer && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <span className="font-medium">Người gửi:</span>{" "}
+                          {item.information_human.from}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <span className="font-medium">Người nhận:</span>{" "}
+                          {item.information_human.to}
+                        </p>
+                      </TableCell>
+                    )}
 
-                  {visibleColumns.country_name && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.country_name || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.master_tracking && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.awb || "..."}
-                    </TableCell>
-                  )}
+                    {visibleColumns.country_name && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.country_name || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.master_tracking && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.awb || "..."}
+                      </TableCell>
+                    )}
 
-                  {visibleColumns.gw && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">SL:</span>{" "}
-                          {item?.packageInfo_begin?.quantity}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">Cân nặng:</span>{" "}
-                          {item?.packageInfo_begin?.total_weight} KG
-                        </p>
-                      </div>
-                    </TableCell>
-                  )}
-                  {visibleColumns.cw && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">SL:</span>{" "}
-                          {item?.packageInfo_end?.quantity}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">Cân nặng:</span>{" "}
-                          {item?.packageInfo_end?.total_weight} KG
-                        </p>
-                      </div>
-                    </TableCell>
-                  )}
-                  {visibleColumns.new_cw && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">SL:</span>{" "}
-                          {item?.packageInfo_end?.quantity}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">Cân nặng:</span>{" "}
-                          {item?.packageInfo_end?.total_weight} KG
-                        </p>
-                      </div>
-                    </TableCell>
-                  )}
-                  {visibleColumns.company_service && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                        {item.company_service}
-                      </span>
-                    </TableCell>
-                  )}
-                  {visibleColumns.inwh_date && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.date_create || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.price_price && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {formatCurrency(item?.price.priceNet)} VNĐ
-                    </TableCell>
-                  )}
-                  {visibleColumns.fsc_price && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.price.fsc_price} %
-                    </TableCell>
-                  )}
-                  {visibleColumns.surge_fee_price && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.price.surge_fee_price}
-                    </TableCell>
-                  )}
-                  {visibleColumns.afr_debit && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {formatCurrency(item?.debit.afr_debit)} VNĐ
-                    </TableCell>
-                  )}
-                  {visibleColumns.oversize_debit && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {formatCurrency(item?.debit.oversize_debit)} VNĐ
-                    </TableCell>
-                  )}
-                  {visibleColumns.surge_fee_debit && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.debit.surge_fee_debit || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.other_charges_debit && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.debit.other_charges_debit || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.fsc_debit && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {formatCurrency(item?.debit.fsc_debit)} VNĐ
-                    </TableCell>
-                  )}
-                  {visibleColumns.total_ar && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {formatCurrency(item?.total_ar.total_ar)} VNĐ
-                    </TableCell>
-                  )}
-                  {visibleColumns.vat && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {formatCurrency(item?.total_ar.vat)} VNĐ
-                    </TableCell>
-                  )}
-                  {visibleColumns.total && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {formatCurrency(item?.total_ar.total)} VNĐ
-                    </TableCell>
-                  )}
+                    {visibleColumns.gw && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">SL:</span>{" "}
+                            {item?.packageInfo_begin?.quantity}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">Cân nặng:</span>{" "}
+                            {item?.packageInfo_begin?.total_weight} KG
+                          </p>
+                        </div>
+                      </TableCell>
+                    )}
+                    {visibleColumns.cw && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">SL:</span>{" "}
+                            {item?.packageInfo_end?.quantity}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">Cân nặng:</span>{" "}
+                            {item?.packageInfo_end?.total_weight} KG
+                          </p>
+                        </div>
+                      </TableCell>
+                    )}
+                    {visibleColumns.new_cw && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">SL:</span>{" "}
+                            {item?.packageInfo_end?.quantity}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">Cân nặng:</span>{" "}
+                            {item?.packageInfo_end?.total_weight} KG
+                          </p>
+                        </div>
+                      </TableCell>
+                    )}
+                    {visibleColumns.company_service && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                          {item.company_service}
+                        </span>
+                      </TableCell>
+                    )}
+                    {visibleColumns.inwh_date && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.date_create || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.price_price && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {formatCurrency(item?.price.priceNet)} VNĐ
+                      </TableCell>
+                    )}
+                    {visibleColumns.fsc_price && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.price.fsc_price} %
+                      </TableCell>
+                    )}
+                    {visibleColumns.surge_fee_price && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.price.surge_fee_price}
+                      </TableCell>
+                    )}
+                    {visibleColumns.afr_debit && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {formatCurrency(item?.debit.afr_debit)} VNĐ
+                      </TableCell>
+                    )}
+                    {visibleColumns.oversize_debit && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {formatCurrency(item?.debit.oversize_debit)} VNĐ
+                      </TableCell>
+                    )}
+                    {visibleColumns.surge_fee_debit && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.debit.surge_fee_debit || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.other_charges_debit && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.debit.other_charges_debit || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.fsc_debit && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {formatCurrency(item?.debit.fsc_debit)} VNĐ
+                      </TableCell>
+                    )}
+                    {visibleColumns.total_ar && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {formatCurrency(item?.total_ar.total_ar)} VNĐ
+                      </TableCell>
+                    )}
+                    {visibleColumns.vat && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {formatCurrency(item?.total_ar.vat)} VNĐ
+                      </TableCell>
+                    )}
+                    {visibleColumns.total && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {formatCurrency(item?.total_ar.total)} VNĐ
+                      </TableCell>
+                    )}
 
-                  {visibleColumns.order_grand_total && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                      <div className="relative flex flex-col items-start space-y-2">
-                        {(authorities.includes("ADMIN") ||
-                          authorities.includes("ACCOUNTANT") ||
-                          authorities.includes("BD")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              openModal();
-                              setBillEdit(item);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                    {visibleColumns.order_grand_total && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <div className="relative flex flex-col items-start space-y-2">
+                          {(authorities.includes("ADMIN") ||
+                            authorities.includes("ACCOUNTANT") ||
+                            authorities.includes("BD")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                openModal();
+                                setBillEdit(item);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
-                        {/* Giá trị tiền order */}
-                        <div className="flex flex-col space-y-1 pt-6">
-                          {/* Giá trị xanh */}
-                          <div className="flex items-center space-x-2">
-                            <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
-                              {formatCurrency(item.priceOrder.total_complete)}{" "}
-                              VNĐ
-                            </span>
-                          </div>
+                          {/* Giá trị tiền order */}
+                          <div className="flex flex-col space-y-1 pt-6">
+                            {/* Giá trị xanh */}
+                            <div className="flex items-center space-x-2">
+                              <span className="px-2 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-md dark:bg-green-900/50 dark:text-green-300">
+                                {formatCurrency(item.priceOrder.total_complete)}{" "}
+                                VNĐ
+                              </span>
+                            </div>
 
-                          {/* Giá trị đỏ */}
-                          <div className="flex items-center space-x-2">
-                            <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
-                              {formatCurrency(item.priceOrder.total_process)}{" "}
-                              VNĐ
-                            </span>
+                            {/* Giá trị đỏ */}
+                            <div className="flex items-center space-x-2">
+                              <span className="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-md dark:bg-red-900/50 dark:text-red-300">
+                                {formatCurrency(item.priceOrder.total_process)}{" "}
+                                VNĐ
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                  )}
+                      </TableCell>
+                    )}
 
-                  {visibleColumns.other_charges_total && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.grand_total.other_charges_total || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.grand_total && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {formatCurrency(item?.grand_total.grand_total)} VNĐ
-                    </TableCell>
-                  )}
-                  {/* {visibleColumns.payments_cash && (
+                    {visibleColumns.other_charges_total && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.grand_total.other_charges_total || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.grand_total && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {formatCurrency(item?.grand_total.grand_total)} VNĐ
+                      </TableCell>
+                    )}
+                    {/* {visibleColumns.payments_cash && (
                                         <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                             {item?.payments_cash || "..."}
                                         </TableCell>
@@ -3466,305 +3472,308 @@ export default function ContentTable({ data }) {
                                         </TableCell>
                                     )} */}
 
-                  {visibleColumns.payments_cash && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                      <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán tiền mặt */}
-                        {(authorities.includes("ADMIN") ||
-                          authorities.includes("BD") ||
-                          authorities.includes("ACCOUNTANT")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("CASH");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
-                        {/* Tổng đã xác nhận và chưa xác nhận */}
-                        <div className="flex flex-col gap-1 pt-6">
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                              {formatCurrency(
-                                (item.pricePayment.cashPayment || [])
-                                  .filter((p) => p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
-                              )}{" "}
-                              VNĐ
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
-                              {formatCurrency(
-                                (item.pricePayment.cashPayment || [])
-                                  .filter((p) => !p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
-                              )}{" "}
-                              VNĐ
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                  )}
-
-                  {visibleColumns.payments_banking && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                      <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán chuyển khoản */}
-                        {(authorities.includes("ADMIN") ||
-                          authorities.includes("BD") ||
-                          authorities.includes("ACCOUNTANT")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("CARD");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
-                        {/* Tổng đã xác nhận và chưa xác nhận */}
-                        <div className="flex flex-col gap-1 pt-6">
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                              {formatCurrency(
-                                (item.pricePayment.cardPayment || [])
-                                  .filter((p) => p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
-                              )}{" "}
-                              VNĐ
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
-                              {formatCurrency(
-                                (item.pricePayment.cardPayment || [])
-                                  .filter((p) => !p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
-                              )}{" "}
-                              VNĐ
-                            </span>
+                    {visibleColumns.payments_cash && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <div className="relative flex flex-col items-start space-y-2">
+                          {/* Nút để mở modal thanh toán tiền mặt */}
+                          {(authorities.includes("ADMIN") ||
+                            authorities.includes("BD") ||
+                            authorities.includes("ACCOUNTANT")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CASH");
+                                handleViewPaymentDetails(item);
+                                setIsOpenFormPayment(true);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
+                          {/* Tổng đã xác nhận và chưa xác nhận */}
+                          <div className="flex flex-col gap-1 pt-6">
+                            <div className="flex items-center">
+                              <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                                {formatCurrency(
+                                  (item.pricePayment.cashPayment || [])
+                                    .filter((p) => p.active)
+                                    .reduce(
+                                      (sum, p) =>
+                                        sum + (parseFloat(p.price) || 0),
+                                      0
+                                    )
+                                )}{" "}
+                                VNĐ
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
+                                {formatCurrency(
+                                  (item.pricePayment.cashPayment || [])
+                                    .filter((p) => !p.active)
+                                    .reduce(
+                                      (sum, p) =>
+                                        sum + (parseFloat(p.price) || 0),
+                                      0
+                                    )
+                                )}{" "}
+                                VNĐ
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                  )}
+                      </TableCell>
+                    )}
 
-                  {visibleColumns.payments_business && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                      <div className="relative flex flex-col items-start space-y-2">
-                        {/* Nút để mở modal thanh toán doanh nghiệp */}
-                        {(authorities.includes("ADMIN") ||
-                          authorities.includes("BD") ||
-                          authorities.includes("ACCOUNTANT")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("BUSINESS_CARD");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
-                        {/* Tổng đã xác nhận và chưa xác nhận */}
-                        <div className="flex flex-col gap-1 pt-6">
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                              {formatCurrency(
-                                (item.pricePayment.businessCardPayment || [])
-                                  .filter((p) => p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
-                              )}{" "}
-                              VNĐ
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
-                              {formatCurrency(
-                                (item.pricePayment.businessCardPayment || [])
-                                  .filter((p) => !p.active)
-                                  .reduce(
-                                    (sum, p) =>
-                                      sum + (parseFloat(p.price) || 0),
-                                    0
-                                  )
-                              )}{" "}
-                              VNĐ
-                            </span>
+                    {visibleColumns.payments_banking && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <div className="relative flex flex-col items-start space-y-2">
+                          {/* Nút để mở modal thanh toán chuyển khoản */}
+                          {(authorities.includes("ADMIN") ||
+                            authorities.includes("BD") ||
+                            authorities.includes("ACCOUNTANT")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CARD");
+                                handleViewPaymentDetails(item);
+                                setIsOpenFormPayment(true);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
+                          {/* Tổng đã xác nhận và chưa xác nhận */}
+                          <div className="flex flex-col gap-1 pt-6">
+                            <div className="flex items-center">
+                              <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                                {formatCurrency(
+                                  (item.pricePayment.cardPayment || [])
+                                    .filter((p) => p.active)
+                                    .reduce(
+                                      (sum, p) =>
+                                        sum + (parseFloat(p.price) || 0),
+                                      0
+                                    )
+                                )}{" "}
+                                VNĐ
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
+                                {formatCurrency(
+                                  (item.pricePayment.cardPayment || [])
+                                    .filter((p) => !p.active)
+                                    .reduce(
+                                      (sum, p) =>
+                                        sum + (parseFloat(p.price) || 0),
+                                      0
+                                    )
+                                )}{" "}
+                                VNĐ
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                  )}
-                  {visibleColumns.payments_remaining && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {formatCurrency(item?.pricePayment.payments_remaining)}{" "}
-                      VNĐ
-                    </TableCell>
-                  )}
-                  {visibleColumns.gw_debit && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.gw_debit || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.cw_debit && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.cw_debit || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.bill && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.bill || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.new_debit && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.new_debit !== undefined && item?.new_debit !== null && item?.new_debit !== ""
-                        ? item.new_debit
-                        : "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.reconcile && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.reconcile || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.price_diff && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.price_diff || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.packing && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.packing || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.pickup && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.pickup || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.other_costs && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.other_costs || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.profit && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.profit || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.hh1 && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.hh1 || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.hh2 && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.hh2 || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.hh3 && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.hh3 || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.hh4 && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.hh4 || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.base_salary && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.base_salary || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.kpi_bonus && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.kpi_bonus || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.bonus_1_2_3 && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.bonus_1_2_3 || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.allowance && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.allowance || "..."}
-                    </TableCell>
-                  )}
-                  {visibleColumns.other_bonus && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.other_bonus || "..."}
-                    </TableCell>
-                  )}
+                      </TableCell>
+                    )}
 
-                  {visibleColumns.status && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <StatusBadge status={item.status_payment} />
+                    {visibleColumns.payments_business && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <div className="relative flex flex-col items-start space-y-2">
+                          {/* Nút để mở modal thanh toán doanh nghiệp */}
+                          {(authorities.includes("ADMIN") ||
+                            authorities.includes("BD") ||
+                            authorities.includes("ACCOUNTANT")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("BUSINESS_CARD");
+                                handleViewPaymentDetails(item);
+                                setIsOpenFormPayment(true);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
+                          {/* Tổng đã xác nhận và chưa xác nhận */}
+                          <div className="flex flex-col gap-1 pt-6">
+                            <div className="flex items-center">
+                              <span className="px-2 py-1 text-sm font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                                {formatCurrency(
+                                  (item.pricePayment.businessCardPayment || [])
+                                    .filter((p) => p.active)
+                                    .reduce(
+                                      (sum, p) =>
+                                        sum + (parseFloat(p.price) || 0),
+                                      0
+                                    )
+                                )}{" "}
+                                VNĐ
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="px-2 py-1 text-sm font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
+                                {formatCurrency(
+                                  (item.pricePayment.businessCardPayment || [])
+                                    .filter((p) => !p.active)
+                                    .reduce(
+                                      (sum, p) =>
+                                        sum + (parseFloat(p.price) || 0),
+                                      0
+                                    )
+                                )}{" "}
+                                VNĐ
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                    )}
+                    {visibleColumns.payments_remaining && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {formatCurrency(item?.pricePayment.payments_remaining)}{" "}
+                        VNĐ
+                      </TableCell>
+                    )}
+                    {visibleColumns.gw_debit && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.gw_debit || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.cw_debit && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.cw_debit || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.bill && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.bill || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.new_debit && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.new_debit !== undefined &&
+                        item?.new_debit !== null &&
+                        item?.new_debit !== ""
+                          ? item.new_debit
+                          : "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.reconcile && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.reconcile || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.price_diff && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.price_diff || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.packing && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.packing || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.pickup && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.pickup || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.other_costs && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.other_costs || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.profit && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.profit || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.hh1 && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.hh1 || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.hh2 && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.hh2 || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.hh3 && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.hh3 || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.hh4 && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.hh4 || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.base_salary && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.base_salary || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.kpi_bonus && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.kpi_bonus || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.bonus_1_2_3 && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.bonus_1_2_3 || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.allowance && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.allowance || "..."}
+                      </TableCell>
+                    )}
+                    {visibleColumns.other_bonus && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.other_bonus || "..."}
+                      </TableCell>
+                    )}
 
-                        {authorities.includes("ADMIN") ||
-                        authorities.includes("ACCOUNTANT") ||
-                        authorities.includes("BD") ? (
-                          <select
-                            value={item.status_payment || "pending"}
-                            onChange={(e) =>
-                              handleUpdateStatus(
-                                item.bill_house,
-                                e.target.value
-                              )
-                            }
-                            className="pointer-events-auto select-auto ml-2 text-xs border border-gray-300 rounded p-1 bg-white dark:bg-gray-700 dark:border-gray-600"
-                          >
-                            {availableStatuses.map((status) => (
-                              <option key={status.value} value={status.value}>
-                                {status.label}
-                              </option>
-                            ))}
-                          </select>
-                        ) : null}
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    {visibleColumns.status && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-2">
+                          <StatusBadge status={item.status_payment} />
+
+                          {authorities.includes("ADMIN") ||
+                          authorities.includes("ACCOUNTANT") ||
+                          authorities.includes("BD") ? (
+                            <select
+                              value={item.status_payment || "pending"}
+                              onChange={(e) =>
+                                handleUpdateStatus(
+                                  item.bill_house,
+                                  e.target.value
+                                )
+                              }
+                              className="pointer-events-auto select-auto ml-2 text-xs border border-gray-300 rounded p-1 bg-white dark:bg-gray-700 dark:border-gray-600"
+                            >
+                              {availableStatuses.map((status) => (
+                                <option key={status.value} value={status.value}>
+                                  {status.label}
+                                </option>
+                              ))}
+                            </select>
+                          ) : null}
+                        </div>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="border border-t-0 rounded-b-xl border-gray-100 py-4 pl-[18px] pr-4 dark:border-white/[0.05]">
         <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">

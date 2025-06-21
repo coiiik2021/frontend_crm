@@ -21,6 +21,7 @@ import {
 } from "../../../service/api.admin.service.jsx";
 import Button from "../../../elements/Button/index.jsx";
 import { toast } from "react-toastify";
+import { useLoading } from "../../../hooks/useLoading.js";
 export default function ContentTable(props) {
   const { users, setUsers } = props;
   const [currentPage, setCurrentPage] = useState(1);
@@ -62,7 +63,8 @@ export default function ContentTable(props) {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const { isOpen, openModal, closeModal } = useModal();
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const { loading, withLoading } = useLoading(); // Sử dụng useLoading thay cho state loading
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -136,23 +138,23 @@ export default function ContentTable(props) {
   };
   const handleCreateUser = async () => {
     if (validate()) {
-      setLoading(true);
       const data = { ...newDataUser, nameRole: "USER" };
-
-      console.log(data);
-
       try {
-        const dataResponse = await PostBaseUser(data);
-
-        if (dataResponse) {
-          const dataInsert = { ...newDataUser, id: dataResponse };
-          setUsers([...users, dataInsert]);
-          toast.success("Tạo tải khoản thành công");
-        }
+        await withLoading(
+          async () => {
+            const dataResponse = await PostBaseUser(data);
+            if (dataResponse) {
+              const dataInsert = { ...newDataUser, id: dataResponse };
+              setUsers([...users, dataInsert]);
+              toast.success("Tạo tải khoản thành công");
+            }
+          },
+          "Tạo tài khoản thành công",
+          "Tạo tài khoản thất bại"
+        );
       } catch (error) {
         toast.error(error?.response?.data?.message);
       } finally {
-        setLoading(false);
         setErrors({});
         setNewDataUser({
           email: "",

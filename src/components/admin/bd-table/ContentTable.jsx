@@ -22,14 +22,18 @@ import {
 import Button from "../../../elements/Button/index.jsx";
 import { toast } from "react-toastify";
 import { set } from "date-fns";
+import { useLoading } from "../../../hooks/useLoading.js";
 export default function ContentTable(props) {
   const { users, setUsers } = props;
+  const { isOpen, openModal, closeModal } = useModal();
+  const [errors, setErrors] = useState({});
+  const { loading, withLoading } = useLoading(); // Sử dụng useLoading thay vì state loading
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
-  const [errors, setErrors] = useState({});
   const filteredAndSortedData = useMemo(() => {
     console.log(users);
     return users
@@ -56,13 +60,11 @@ export default function ContentTable(props) {
   }, [users, sortKey, sortOrder, searchTerm]);
 
   const totalItems = filteredAndSortedData.length;
-  const [loading, setLoading] = useState(false);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const { isOpen, openModal, closeModal } = useModal();
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -134,23 +136,19 @@ export default function ContentTable(props) {
   };
   const handleCreateUser = async () => {
     if (validate()) {
-      setLoading(true);
       const data = { ...newDataUser, nameRole: "BD" };
-
-      console.log(data);
-
       try {
-        const dataResponse = await PostBaseUser(data);
-
-        if (dataResponse) {
-          const dataInsert = { ...newDataUser, id: dataResponse };
-          setUsers([...users, dataInsert]);
-          toast.success("Tạo tài khoản thành công");
-        }
+        await withLoading(async () => {
+          const dataResponse = await PostBaseUser(data);
+          if (dataResponse) {
+            const dataInsert = { ...newDataUser, id: dataResponse };
+            setUsers([...users, dataInsert]);
+            toast.success("Tạo tài khoản thành công");
+          }
+        });
       } catch (error) {
         toast.error(error?.response?.data?.message);
       } finally {
-        setLoading(false);
         setErrors({});
         setNewDataUser({
           email: "",

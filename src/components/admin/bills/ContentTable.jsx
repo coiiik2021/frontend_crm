@@ -31,7 +31,7 @@ import BillContent from "./BillContent";
 import { set } from "date-fns";
 import * as ExcelJS from "exceljs";
 import { useLoading } from "../../../hooks/useLoading";
-
+import { Spin } from "antd";
 // Thêm component OrderDetailModal với tabs
 const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
   const [activeTab, setActiveTab] = useState("info");
@@ -62,28 +62,31 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
         {/* Tabs */}
         <div className="flex border-b border-gray-200 dark:border-gray-700 mb-3">
           <button
-            className={`px-3 py-2 text-xs font-medium ${activeTab === "info"
-              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              }`}
+            className={`px-3 py-2 text-xs font-medium ${
+              activeTab === "info"
+                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            }`}
             onClick={() => setActiveTab("info")}
           >
             Thông tin người
           </button>
           <button
-            className={`px-3 py-2 text-xs font-medium ${activeTab === "package"
-              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              }`}
+            className={`px-3 py-2 text-xs font-medium ${
+              activeTab === "package"
+                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            }`}
             onClick={() => setActiveTab("package")}
           >
             Thông tin package
           </button>
           <button
-            className={`px-3 py-2 text-xs font-medium ${activeTab === "other"
-              ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              }`}
+            className={`px-3 py-2 text-xs font-medium ${
+              activeTab === "other"
+                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
+                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            }`}
             onClick={() => setActiveTab("other")}
           >
             Thông tin khác
@@ -292,7 +295,6 @@ const OrderDetailModal = ({ isOpen, onClose, orderData }) => {
   );
 };
 
-
 // Thêm component cho tooltip thông tin nhanh
 const OrderInfoTooltip = ({ isVisible, orderData, position, onClose }) => {
   if (!isVisible || !orderData) return null;
@@ -373,7 +375,7 @@ const OrderInfoTooltip = ({ isVisible, orderData, position, onClose }) => {
   );
 };
 
-export default function ContentTable({ data }) {
+export default function ContentTable() {
   const [dataBill, setDataBill] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // 1-based
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -443,7 +445,6 @@ export default function ContentTable({ data }) {
     scrollRef.current.scrollLeft = scrollLeft - walk;
   };
   const handleTouchEnd = () => setIsDragging(false);
-
 
   const fetchBillData = async (page = 1, size = itemsPerPage) => {
     try {
@@ -760,7 +761,7 @@ export default function ContentTable({ data }) {
   };
 
   const handleUpdateBill = async (bill) => {
-    if (["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role))) {
+    if (["TRANSPORTER", "ADMIN"].some((role) => authorities.includes(role))) {
       const dataRequest = {
         id: bill.bill_house,
         package_end: bill.packages.map((pkg) => ({
@@ -833,7 +834,6 @@ export default function ContentTable({ data }) {
 
   // Hàm lưu thay đổi
   const handleSaveChanges = async () => {
-
     let hasError = false;
     let allErrors = {};
     billEdit.packages.forEach((pkg, idx) => {
@@ -1101,12 +1101,12 @@ export default function ContentTable({ data }) {
     const weight = parseFloat(pkg.weight) || 0;
 
     // Xóa lỗi cũ
-    ["length", "width", "height", "weight"].forEach(f => {
+    ["length", "width", "height", "weight"].forEach((f) => {
       errors[`${index}-${f}`] = "";
     });
 
     // Kiểm tra số dương
-    ["length", "width", "height", "weight"].forEach(f => {
+    ["length", "width", "height", "weight"].forEach((f) => {
       const val = pkg[f];
       if (val === "" || isNaN(val) || parseFloat(val) <= 0) {
         errors[`${index}-${f}`] = "Vui lòng nhập số lớn hơn 0";
@@ -1246,43 +1246,45 @@ export default function ContentTable({ data }) {
                         });
                       }}
                       disabled={column === "house_bill"} // Disable checkbox nếu là house_bill
-                      className={`w-4 h-4 ${column === "house_bill"
-                        ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
-                        : "text-blue-600 bg-gray-100"
-                        } border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
+                      className={`w-4 h-4 ${
+                        column === "house_bill"
+                          ? "bg-blue-600 text-blue-600 cursor-not-allowed opacity-70"
+                          : "text-blue-600 bg-gray-100"
+                      } border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600`}
                     />
                     <label
                       htmlFor={`col-${column}`}
-                      className={`ml-2 text-sm ${column === "house_bill"
-                        ? "text-gray-800 font-medium dark:text-gray-200"
-                        : "text-gray-600 dark:text-gray-400"
-                        }`}
+                      className={`ml-2 text-sm ${
+                        column === "house_bill"
+                          ? "text-gray-800 font-medium dark:text-gray-200"
+                          : "text-gray-600 dark:text-gray-400"
+                      }`}
                     >
                       {column === "house_bill"
                         ? "HOUSE BILL"
                         : column === "information_human"
-                          ? "THÔNG TIN NGƯỜI"
-                          : column === "bill_employee"
-                            ? "BILL PHỤ"
-                            : column === "awb"
-                              ? "AWB"
-                              : column === "company_service"
-                                ? "DỊCH VỤ"
-                                : column === "country_name"
-                                  ? "NƯỚC ĐẾN"
-                                  : column === "packageInfo_begin"
-                                    ? "PACKAGE KHAI BÁO"
-                                    : column === "packageInfo_end"
-                                      ? "PACKAGE CHỐT"
-                                      : column === "packageInfo_finish"
-                                        ? "PACKAGE KẾT THÚC"
-                                        : column === "status"
-                                          ? "TRẠNG THÁI"
-                                          : column === "File"
-                                            ? "FILE"
-                                            : column === "Detail"
-                                              ? "CHI TIẾT"
-                                              : column}
+                        ? "THÔNG TIN NGƯỜI"
+                        : column === "bill_employee"
+                        ? "BILL PHỤ"
+                        : column === "awb"
+                        ? "AWB"
+                        : column === "company_service"
+                        ? "DỊCH VỤ"
+                        : column === "country_name"
+                        ? "NƯỚC ĐẾN"
+                        : column === "packageInfo_begin"
+                        ? "PACKAGE KHAI BÁO"
+                        : column === "packageInfo_end"
+                        ? "PACKAGE CHỐT"
+                        : column === "packageInfo_finish"
+                        ? "PACKAGE KẾT THÚC"
+                        : column === "status"
+                        ? "TRẠNG THÁI"
+                        : column === "File"
+                        ? "FILE"
+                        : column === "Detail"
+                        ? "CHI TIẾT"
+                        : column}
                     </label>
                   </div>
                 ))}
@@ -1364,7 +1366,10 @@ export default function ContentTable({ data }) {
               </div>
 
               <div style={isResizing ? { pointerEvents: "none" } : {}}>
-                <BillContent id={billContent?.bill_house} fetchBillData={fetchBillData}></BillContent>
+                <BillContent
+                  id={billContent?.bill_house}
+                  fetchBillData={fetchBillData}
+                ></BillContent>
               </div>
             </div>
           </div>
@@ -1372,250 +1377,210 @@ export default function ContentTable({ data }) {
       )}
 
       {/* Table */}
-      <div
-        className="max-w-full overflow-x-auto custom-scrollbar scrollable-table"
-        ref={scrollRef}
-        style={{ cursor: isDragging ? "grabbing" : "default" }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div>
-          <Table className="w-full rounded-lg overflow-hidden shadow-sm select-none pointer-events-none"
-            style={{
-              WebkitUserSelect: "none",
-              userSelect: "none",
-              msUserSelect: "none",
-            }}>
-            <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-              <TableRow>
-                {[
-                  { key: "house_bill", label: "HOUSE BILL" },
-                  { key: "information_human", label: "THÔNG TIN NGƯỜI" },
-                  { key: "bill_employee", label: "BILL PHỤ" },
-                  { key: "awb", label: "AWB" },
-                  { key: "company_service", label: "DỊCH VỤ" },
-                  { key: "country_name", label: "NƯỚC ĐẾN" },
-                  { key: "packageInfo_begin", label: "PACKAGE KHAI BÁO" },
-                  { key: "packageInfo_end", label: "PACKAGE CHỐT" },
-                  { key: "packageInfo_finish", label: "PACKAGE KẾT THÚC" },
-                  { key: "status", label: "TRẠNG THÁI" },
+      {loading ? (
+        <div className="flex items-center justify-center h-full">
+          <Spin size="large" />
+        </div>
+      ) : (
+        <div
+          className="max-w-full overflow-x-auto custom-scrollbar scrollable-table"
+          ref={scrollRef}
+          style={{ cursor: isDragging ? "grabbing" : "default" }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div>
+            <Table
+              className="w-full rounded-lg overflow-hidden shadow-sm select-none pointer-events-none"
+              style={{
+                WebkitUserSelect: "none",
+                userSelect: "none",
+                msUserSelect: "none",
+              }}
+            >
+              <TableHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <TableRow>
+                  {[
+                    { key: "house_bill", label: "HOUSE BILL" },
+                    { key: "information_human", label: "THÔNG TIN NGƯỜI" },
+                    { key: "bill_employee", label: "BILL PHỤ" },
+                    { key: "awb", label: "AWB" },
+                    { key: "company_service", label: "DỊCH VỤ" },
+                    { key: "country_name", label: "NƯỚC ĐẾN" },
+                    { key: "packageInfo_begin", label: "PACKAGE KHAI BÁO" },
+                    { key: "packageInfo_end", label: "PACKAGE CHỐT" },
+                    { key: "packageInfo_finish", label: "PACKAGE KẾT THÚC" },
+                    { key: "status", label: "TRẠNG THÁI" },
 
-                  { key: "File", label: "File" },
-                  { key: "Detail", label: "Chi tiết" },
-                ]
-                  .filter(
-                    (column) =>
-                      column.key === "house_bill" || visibleColumns[column.key]
-                  )
-                  .map((column, i) => (
-                    <TableCell
-                      key={column.key}
-                      isHeader
-                      className="px-6 py-4 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>{column.label}</span>
-                        {column.key !== "Detail" && (
-                          <button
-                            onClick={() => handleSort(column.key)}
-                            className="pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
-                          >
-                            {sortKey === column.key ? (
-                              sortOrder === "asc" ? (
-                                <ChevronUpIcon className="h-4 w-4 text-brand-500" />
-                              ) : (
-                                <ChevronDownIcon className="h-4 w-4 text-brand-500" />
-                              )
-                            ) : (
-                              <ArrowsUpDownIcon className="h-3 w-3" />
-                            )}
-                          </button>
-                        )}
-                      </div>
-                    </TableCell>
-                  ))}
-              </TableRow>
-            </TableHeader>
-
-            <TableBody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
-              {currentData.map((item, i) => (
-                <TableRow
-                  key={i + 1}
-                  className={`transition-colors ${highlightedOrderId === item.bill_house
-                    ? "bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400"
-                    : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                    }`}
-                >
-                  {/* House Bill - luôn hiển thị */}
-                  <TableCell className="px-6 py-4 whitespace-nowrap">
-                    <div
-                      className={`pointer-events-auto select-auto font-medium hover:underline cursor-pointer ${highlightedOrderId === item.bill_house
-                        ? "text-blue-700 font-bold dark:text-blue-300"
-                        : "text-brand-600 dark:text-brand-400"
-                        }`}
-                      onMouseEnter={(e) => handleShowTooltip(item, e)}
-                      onMouseLeave={handleCloseTooltip}
-                      onClick={() => handleViewOrderDetail(item)}
-                    >
-                      EB{item.bill_house.substring(0, 5)}
-                    </div>
-                  </TableCell>
-
-                  {/* Các cột khác chỉ hiển thị khi được chọn */}
-                  {visibleColumns.information_human && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">Người gửi:</span>{" "}
-                          {item.information_human.from}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">Người nhận:</span>{" "}
-                          {item.information_human.to}
-                        </p>
-                      </div>
-                    </TableCell>
-                  )}
-
-                  {/* Bill phụ */}
-                  {visibleColumns.bill_employee && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.bill_employee || "..."}
-                    </TableCell>
-                  )}
-
-                  {/* AWB */}
-                  {visibleColumns.awb && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item?.awb || "..."}
-                    </TableCell>
-                  )}
-
-                  {/* Dịch vụ */}
-                  {visibleColumns.company_service && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                        {item.company_service}
-                      </span>
-                    </TableCell>
-                  )}
-
-                  {/* Nước đến */}
-                  {visibleColumns.country_name && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {item.country_name}
-                    </TableCell>
-                  )}
-
-                  {/* Package khai báo */}
-                  {visibleColumns.packageInfo_begin && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">SL:</span>{" "}
-                          {item.packageInfo_begin.quantity}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">Cân nặng:</span>{" "}
-                          {item.packageInfo_begin.total_weight} KG
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          <span className="font-medium">Cân nặng tính phí:</span>{" "}
-                          {item.packageInfo_begin.total_weight_charge} KG
-                        </p>
-                      </div>
-                    </TableCell>
-                  )}
-
-                  {visibleColumns.packageInfo_end && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
-                            <span className="font-medium">SL:</span>{" "}
-                            {item?.packageInfo_end?.quantity}
-                          </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
-                            <span className="font-medium">Cân nặng:</span>{" "}
-                            {item?.packageInfo_end?.total_weight} KG
-                          </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
-                            <span className="font-medium">Cân nặng tính phí:</span>{" "}
-                            {item?.packageInfo_end?.total_weight_charge} KG
-                          </p>
-                        </div>
-
-                        {
-                          ["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role)) &&
-                          (<button
-                            className="pointer-events-auto select-auto ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                            title="Sửa"
-                            onClick={() => {
-                              setIsFinish(false);
-                              handleOpenEditPackageModal({
-                                ...item,
-
-                                isFinish: false,
-                              });
-                            }}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="pointer-events-auto select-auto h-5 w-5 text-blue-500"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
+                    { key: "File", label: "File" },
+                    { key: "Detail", label: "Chi tiết" },
+                  ]
+                    .filter(
+                      (column) =>
+                        column.key === "house_bill" ||
+                        visibleColumns[column.key]
+                    )
+                    .map((column, i) => (
+                      <TableCell
+                        key={column.key}
+                        isHeader
+                        className="px-6 py-4 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{column.label}</span>
+                          {column.key !== "Detail" && (
+                            <button
+                              onClick={() => handleSort(column.key)}
+                              className="pointer-events-auto select-auto ml-2 text-gray-400 hover:text-brand-500 transition-colors"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z"
-                              />
-                            </svg>
-                          </button>)
-                        }
+                              {sortKey === column.key ? (
+                                sortOrder === "asc" ? (
+                                  <ChevronUpIcon className="h-4 w-4 text-brand-500" />
+                                ) : (
+                                  <ChevronDownIcon className="h-4 w-4 text-brand-500" />
+                                )
+                              ) : (
+                                <ArrowsUpDownIcon className="h-3 w-3" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </TableCell>
+                    ))}
+                </TableRow>
+              </TableHeader>
 
+              <TableBody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                {currentData.map((item, i) => (
+                  <TableRow
+                    key={i + 1}
+                    className={`transition-colors ${
+                      highlightedOrderId === item.bill_house
+                        ? "bg-blue-100 border-l-4 border-blue-500 dark:bg-blue-900/30 dark:border-blue-400"
+                        : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    }`}
+                  >
+                    {/* House Bill - luôn hiển thị */}
+                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                      <div
+                        className={`pointer-events-auto select-auto font-medium hover:underline cursor-pointer ${
+                          highlightedOrderId === item.bill_house
+                            ? "text-blue-700 font-bold dark:text-blue-300"
+                            : "text-brand-600 dark:text-brand-400"
+                        }`}
+                        onMouseEnter={(e) => handleShowTooltip(item, e)}
+                        onMouseLeave={handleCloseTooltip}
+                        onClick={() => handleViewOrderDetail(item)}
+                      >
+                        EB{item.bill_house.substring(0, 5)}
                       </div>
                     </TableCell>
-                  )}
 
-                  {visibleColumns.packageInfo_finish && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-start justify-between">
+                    {/* Các cột khác chỉ hiển thị khi được chọn */}
+                    {visibleColumns.information_human && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap">
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">Người gửi:</span>{" "}
+                            {item.information_human.from}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium">Người nhận:</span>{" "}
+                            {item.information_human.to}
+                          </p>
+                        </div>
+                      </TableCell>
+                    )}
+
+                    {/* Bill phụ */}
+                    {visibleColumns.bill_employee && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.bill_employee || "..."}
+                      </TableCell>
+                    )}
+
+                    {/* AWB */}
+                    {visibleColumns.awb && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {item?.awb || "..."}
+                      </TableCell>
+                    )}
+
+                    {/* Dịch vụ */}
+                    {visibleColumns.company_service && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                          {item.company_service}
+                        </span>
+                      </TableCell>
+                    )}
+
+                    {/* Nước đến */}
+                    {visibleColumns.country_name && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {item.country_name}
+                      </TableCell>
+                    )}
+
+                    {/* Package khai báo */}
+                    {visibleColumns.packageInfo_begin && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap">
                         <div className="space-y-1">
                           <p className="text-sm text-gray-600 dark:text-gray-300">
                             <span className="font-medium">SL:</span>{" "}
-                            {item.packageInfo_finish?.quantity || 0}
+                            {item.packageInfo_begin.quantity}
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-300">
                             <span className="font-medium">Cân nặng:</span>{" "}
-                            {item.packageInfo_finish?.total_weight || 0} KG
+                            {item.packageInfo_begin.total_weight} KG
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-300">
-                            <span className="font-medium">Cân nặng tính phí:</span>{" "}
-                            {item.packageInfo_finish?.total_weight_charge || 0} KG
+                            <span className="font-medium">
+                              Cân nặng tính phí:
+                            </span>{" "}
+                            {item.packageInfo_begin.total_weight_charge} KG
                           </p>
                         </div>
-                        {
-                          ["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role))
-                          && authorities.includes("GET_ALL_ADMIN")
-                          && (
+                      </TableCell>
+                    )}
+
+                    {visibleColumns.packageInfo_end && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <span className="font-medium">SL:</span>{" "}
+                              {item?.packageInfo_end?.quantity}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <span className="font-medium">Cân nặng:</span>{" "}
+                              {item?.packageInfo_end?.total_weight} KG
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <span className="font-medium">
+                                Cân nặng tính phí:
+                              </span>{" "}
+                              {item?.packageInfo_end?.total_weight_charge} KG
+                            </p>
+                          </div>
+
+                          {["TRANSPORTER", "ADMIN"].some((role) =>
+                            authorities.includes(role)
+                          ) && (
                             <button
                               className="pointer-events-auto select-auto ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                               title="Sửa"
                               onClick={() => {
-                                setIsFinish(true);
-
+                                setIsFinish(false);
                                 handleOpenEditPackageModal({
                                   ...item,
-                                  packages: item.packages_finish,
-                                  isFinish: true,
+
+                                  isFinish: false,
                                 });
                               }}
                             >
@@ -1634,46 +1599,132 @@ export default function ContentTable({ data }) {
                                 />
                               </svg>
                             </button>
-                          )
-                        }
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
 
-                      </div>
-                    </TableCell>
-                  )}
+                    {visibleColumns.packageInfo_finish && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <span className="font-medium">SL:</span>{" "}
+                              {item.packageInfo_finish?.quantity || 0}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <span className="font-medium">Cân nặng:</span>{" "}
+                              {item.packageInfo_finish?.total_weight || 0} KG
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <span className="font-medium">
+                                Cân nặng tính phí:
+                              </span>{" "}
+                              {item.packageInfo_finish?.total_weight_charge ||
+                                0}{" "}
+                              KG
+                            </p>
+                          </div>
+                          {["TRANSPORTER", "ADMIN"].some((role) =>
+                            authorities.includes(role)
+                          ) &&
+                            authorities.includes("GET_ALL_ADMIN") && (
+                              <button
+                                className="pointer-events-auto select-auto ml-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                                title="Sửa"
+                                onClick={() => {
+                                  setIsFinish(true);
 
-                  {/* Trạng thái */}
-                  {visibleColumns.status && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={item.status} />
-                    </TableCell>
-                  )}
+                                  handleOpenEditPackageModal({
+                                    ...item,
+                                    packages: item.packages_finish,
+                                    isFinish: true,
+                                  });
+                                }}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="pointer-events-auto select-auto h-5 w-5 text-blue-500"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L5 11.828a2 2 0 010-2.828L9 13z"
+                                  />
+                                </svg>
+                              </button>
+                            )}
+                        </div>
+                      </TableCell>
+                    )}
 
-                  {/* File */}
-                  {visibleColumns.File && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col space-y-2">
-                        {item.files && item.files.length > 0 ? (
-                          item.files.map((file, index) => (
-                            <div
-                              key={index}
-                              className={`pointer-events-auto select-auto flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
-                                ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                    {/* Trạng thái */}
+                    {visibleColumns.status && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap">
+                        <StatusBadge status={item.status} />
+                      </TableCell>
+                    )}
+
+                    {/* File */}
+                    {visibleColumns.File && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex flex-col space-y-2">
+                          {item.files && item.files.length > 0 ? (
+                            item.files.map((file, index) => (
+                              <div
+                                key={index}
+                                className={`pointer-events-auto select-auto flex items-center space-x-2 text-sm cursor-pointer transition-colors ${
+                                  highlightedOrderId === item.bill_house
+                                    ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                    : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
                                 }`}
-                              onClick={() => {
-                                console.log(
-                                  `Clicked file: ${file.name || `File ${index + 1}`
-                                  }`,
-                                  file
-                                );
-                                setSelectedFile({
-                                  name: file.name || `File ${index + 1}`,
-                                  awb: item.awb || "Không có thông tin AWB",
-                                });
-                                setShowFileSidebar(true);
-                                setBillContent(item);
-                                setHighlightedOrderId(item.bill_house);
-                              }}
+                                onClick={() => {
+                                  console.log(
+                                    `Clicked file: ${
+                                      file.name || `File ${index + 1}`
+                                    }`,
+                                    file
+                                  );
+                                  setSelectedFile({
+                                    name: file.name || `File ${index + 1}`,
+                                    awb: item.awb || "Không có thông tin AWB",
+                                  });
+                                  setShowFileSidebar(true);
+                                  setBillContent(item);
+                                  setHighlightedOrderId(item.bill_house);
+                                }}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-5 w-5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  />
+                                </svg>
+                                <span className="truncate max-w-[120px]">
+                                  {file.name || `File ${index + 1}`}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <div
+                              className={`pointer-events-auto select-auto flex items-center space-x-2 text-sm cursor-pointer transition-colors ${
+                                highlightedOrderId === item.bill_house
+                                  ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                  : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                              }`}
+                              onClick={() => handleViewFile(item)}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -1689,59 +1740,32 @@ export default function ContentTable({ data }) {
                                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                               </svg>
-                              <span className="truncate max-w-[120px]">
-                                {file.name || `File ${index + 1}`}
-                              </span>
+                              <span className="truncate max-w-[120px]">{`File `}</span>
                             </div>
-                          ))
-                        ) : (
-                          <div
-                            className={`pointer-events-auto select-auto flex items-center space-x-2 text-sm cursor-pointer transition-colors ${highlightedOrderId === item.bill_house
-                              ? "text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                              : "text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
-                              }`}
-                            onClick={() => handleViewFile(item)}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                              />
-                            </svg>
-                            <span className="truncate max-w-[120px]">{`File `}</span>
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                  )}
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
 
-                  {/* Chi tiết */}
-                  {visibleColumns.Detail && (
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleViewOrderDetail(item)}
-                        className="pointer-events-auto select-auto flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
-                      >
-                        <InfoIcon className="w-4 h-4" />
-                        <span>Chi tiết</span>
-                      </button>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    {/* Chi tiết */}
+                    {visibleColumns.Detail && (
+                      <TableCell className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          onClick={() => handleViewOrderDetail(item)}
+                          className="pointer-events-auto select-auto flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+                        >
+                          <InfoIcon className="w-4 h-4" />
+                          <span>Chi tiết</span>
+                        </button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
-      </div>
-
+      )}
       {/* new */}
       <Modal
         isOpen={isOpenPackages}
@@ -1766,13 +1790,14 @@ export default function ContentTable({ data }) {
           {/* Form */}
           <form className="space-y-6">
             {/* Package Section */}
-            {["TRANSPORTER", "ADMIN"].some(role => authorities.includes(role)) && (
+            {["TRANSPORTER", "ADMIN"].some((role) =>
+              authorities.includes(role)
+            ) && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      KG Chốt (SL:{" "}
-                      {billEdit.packageInfo_end?.quantity || 0} /{" "}
+                      KG Chốt (SL: {billEdit.packageInfo_end?.quantity || 0} /{" "}
                       {billEdit.packageInfo_end?.total_weight || 0} KG)
                     </h4>
                   </div>
@@ -1787,10 +1812,7 @@ export default function ContentTable({ data }) {
                       };
                       setBillEdit({
                         ...billEdit,
-                        packages: [
-                          ...(billEdit.packages || []),
-                          newPackage,
-                        ],
+                        packages: [...(billEdit.packages || []), newPackage],
                       });
                     }}
                     className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
@@ -1821,14 +1843,19 @@ export default function ContentTable({ data }) {
                               packages: updatedPackages,
                             });
                             // Validate ngay khi nhập
-                            const errors = validateEditPackage(updatedPackages[index], index);
-                            setEditErrors(prev => ({ ...prev, ...errors }));
+                            const errors = validateEditPackage(
+                              updatedPackages[index],
+                              index
+                            );
+                            setEditErrors((prev) => ({ ...prev, ...errors }));
                           }}
                           placeholder="0.00"
                           className="w-full"
                         />
                         {editErrors[`${index}-weight`] && (
-                          <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-weight`]}</div>
+                          <div className="text-xs text-red-500 mt-1">
+                            {editErrors[`${index}-weight`]}
+                          </div>
                         )}
                       </div>
 
@@ -1846,14 +1873,19 @@ export default function ContentTable({ data }) {
                               packages: updatedPackages,
                             });
                             // Validate ngay khi nhập
-                            const errors = validateEditPackage(updatedPackages[index], index);
-                            setEditErrors(prev => ({ ...prev, ...errors }));
+                            const errors = validateEditPackage(
+                              updatedPackages[index],
+                              index
+                            );
+                            setEditErrors((prev) => ({ ...prev, ...errors }));
                           }}
                           placeholder="0.00"
                           className="w-full"
                         />
                         {editErrors[`${index}-length`] && (
-                          <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-length`]}</div>
+                          <div className="text-xs text-red-500 mt-1">
+                            {editErrors[`${index}-length`]}
+                          </div>
                         )}
                       </div>
 
@@ -1870,14 +1902,19 @@ export default function ContentTable({ data }) {
                               packages: updatedPackages,
                             });
                             // Validate ngay khi nhập
-                            const errors = validateEditPackage(updatedPackages[index], index);
-                            setEditErrors(prev => ({ ...prev, ...errors }));
+                            const errors = validateEditPackage(
+                              updatedPackages[index],
+                              index
+                            );
+                            setEditErrors((prev) => ({ ...prev, ...errors }));
                           }}
                           placeholder="0.00"
                           className="w-full"
                         />
                         {editErrors[`${index}-width`] && (
-                          <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-width`]}</div>
+                          <div className="text-xs text-red-500 mt-1">
+                            {editErrors[`${index}-width`]}
+                          </div>
                         )}
                       </div>
 
@@ -1894,14 +1931,19 @@ export default function ContentTable({ data }) {
                               packages: updatedPackages,
                             });
                             // Validate ngay khi nhập
-                            const errors = validateEditPackage(updatedPackages[index], index);
-                            setEditErrors(prev => ({ ...prev, ...errors }));
+                            const errors = validateEditPackage(
+                              updatedPackages[index],
+                              index
+                            );
+                            setEditErrors((prev) => ({ ...prev, ...errors }));
                           }}
                           placeholder="0.00"
                           className="w-full"
                         />
                         {editErrors[`${index}-height`] && (
-                          <div className="text-xs text-red-500 mt-1">{editErrors[`${index}-height`]}</div>
+                          <div className="text-xs text-red-500 mt-1">
+                            {editErrors[`${index}-height`]}
+                          </div>
                         )}
                       </div>
 
@@ -1911,10 +1953,9 @@ export default function ContentTable({ data }) {
                           <button
                             type="button"
                             onClick={() => {
-                              const updatedPackages =
-                                billEdit.packages.filter(
-                                  (_, i) => i !== index
-                                );
+                              const updatedPackages = billEdit.packages.filter(
+                                (_, i) => i !== index
+                              );
                               setBillEdit({
                                 ...billEdit,
                                 packages: updatedPackages,
@@ -1952,7 +1993,6 @@ export default function ContentTable({ data }) {
             </div>
           </form>
         </div>
-
       </Modal>
       {/* Tooltip thông tin nhanh */}
       <OrderInfoTooltip

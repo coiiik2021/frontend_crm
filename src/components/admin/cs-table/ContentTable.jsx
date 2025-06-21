@@ -22,6 +22,7 @@ import {
 import Button from "../../../elements/Button/index.jsx";
 import { toast } from "react-toastify";
 import { set } from "date-fns";
+import { useLoading } from "../../../hooks/useLoading.js";
 export default function ContentTable(props) {
   const { users, setUsers } = props;
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,7 +56,6 @@ export default function ContentTable(props) {
       });
   }, [users, sortKey, sortOrder, searchTerm]);
   const totalItems = filteredAndSortedData.length;
-  const [loading, setLoading] = useState(false);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
@@ -132,25 +132,23 @@ export default function ContentTable(props) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  const { loading, withLoading } = useLoading(); // Thay thế state loading
+
   const handleCreateUser = async () => {
     if (validate()) {
-      setLoading(true);
       const data = { ...newDataUser, nameRole: "CS" };
-
-      console.log(data);
-
       try {
-        const dataResponse = await PostBaseUser(data);
-
-        if (dataResponse) {
-          const dataInsert = { ...newDataUser, id: dataResponse };
-          setUsers([...users, dataInsert]);
-          toast.success("Tạo tài khoản thành công");
-        }
+        await withLoading(async () => {
+          const dataResponse = await PostBaseUser(data);
+          if (dataResponse) {
+            const dataInsert = { ...newDataUser, id: dataResponse };
+            setUsers([...users, dataInsert]);
+            toast.success("Tạo tài khoản thành công");
+          }
+        });
       } catch (error) {
         toast.error(error?.response?.data?.message);
       } finally {
-        setLoading(false);
         setErrors({});
         setNewDataUser({
           email: "",
