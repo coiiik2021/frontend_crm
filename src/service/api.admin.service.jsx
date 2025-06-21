@@ -226,9 +226,10 @@ export {
 //const_user
 
 //shipment
-const GetShipment = async () => {
-  const API = `shipment`;
-  return await axios.get(API);
+const GetShipment = async (page = 0, size = 10) => {
+  return await axios.get(`/shipment`, {
+    params: { page, size }
+  });
 };
 export { GetShipment };
 
