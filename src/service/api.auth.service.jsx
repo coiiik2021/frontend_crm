@@ -1,17 +1,7 @@
 import axios from "./axios.admin.customize";
 const APILogin = async (data) => {
     const API = "auth/login";
-    // return await axios.post(API, data);
-    try {
-        const response = await axios.post(API, data);
-        return response; // ✅ Chỉ trả response.data
-    } catch (error) {
-        if (error.response?.message) {
-        throw new Error(error.response.data.message);
-        } else {
-        throw new Error("Không thể kết nối tới máy chủ");
-        }
-    }
+    return await axios.post(API, data);
 }
 
 const APIResetPassword = async (email) => {
