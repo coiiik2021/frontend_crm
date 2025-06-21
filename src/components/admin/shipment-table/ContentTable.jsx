@@ -38,6 +38,8 @@ export default function ContentTable() {
   const [dataBill, setDataBill] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
@@ -98,7 +100,7 @@ export default function ContentTable() {
   const [filterCS, setFilterCS] = useState("");
   const [filterTransporter, setFilterTransporter] = useState("");
   console.log("Dữ liệu đơn hàng:", dataBill);
-  const fetchBillData = async () => {
+  const fetchBillData = async (page = currentPage, size = itemsPerPage) => {
     await withLoading(
       async () => {
         const data = await GetShipment();
@@ -111,8 +113,9 @@ export default function ContentTable() {
     setIsDataChanged(false);
   };
   useEffect(() => {
-    fetchBillData();
-  }, []);
+    fetchBillData(currentPage, itemsPerPage);
+    // eslint-disable-next-line
+  }, [currentPage, itemsPerPage]);
   // reset bộ lọc
   const resetAllFilters = () => {
     setFilterType("");
@@ -407,14 +410,11 @@ export default function ContentTable() {
     filterTransporter,
   ]);
 
-  const totalItems = filteredAndSortedData.length;
+  const hasData = totalElements > 0;
+  const start = hasData ? (currentPage - 1) * itemsPerPage + 1 : 0;
+  const end = hasData ? Math.min(currentPage * itemsPerPage, totalElements) : 0;
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-  const currentData = filteredAndSortedData.slice(startIndex, endIndex);
-
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const currentData = filteredAndSortedData;
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -616,6 +616,7 @@ export default function ContentTable() {
     } else if (payment.methodPayment === "BUSINESS_CARD") {
       setBusinessPayments((prev) => prev.filter((p) => p.id !== payment.id));
     }
+
     setIsDataChanged(true);
   };
 
@@ -755,7 +756,6 @@ export default function ContentTable() {
     if (type === "banking") setBankingPayments((prev) => [...prev, newPayment]);
     if (type === "business")
       setBusinessPayments((prev) => [...prev, newPayment]);
-    setIsDataChanged(true);
   };
 
   const handleDeletePayment = (type, idx) => {
@@ -765,9 +765,7 @@ export default function ContentTable() {
       setBankingPayments((prev) => prev.filter((_, i) => i !== idx));
     if (type === "business")
       setBusinessPayments((prev) => prev.filter((_, i) => i !== idx));
-    setIsDataChanged(true);
   };
-
   const handleUpdateStatus = async (billId, newStatus) => {
     try {
       const dataRequest = {
@@ -787,6 +785,7 @@ export default function ContentTable() {
 
       // Thông báo thành công
       alert("Cập nhật trạng thái thành công!");
+      fetchBillData(); // Cập nhật lại dữ liệu bảng
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Lỗi khi cập nhật trạng thái!");
@@ -2159,7 +2158,7 @@ export default function ContentTable() {
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
             >
-              {[5, 8, 10].map((value) => (
+              {[5, 10, 15].map((value) => (
                 <option
                   key={value}
                   value={value}
@@ -3779,14 +3778,16 @@ export default function ContentTable() {
         <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
           {/* Left side: Showing entries */}
           <div className="pb-3 xl:pb-0">
-            <p className="pb-3 text-sm font-medium text-center text-gray-500 border-b border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-b-0 xl:pb-0 xl:text-left">
-              Showing {startIndex + 1} to {endIndex} of {totalItems} entries
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {hasData
+                ? `Showing ${start} to ${end} of ${totalElements} entries`
+                : "No entries to display"}
             </p>
           </div>
           <PaginationWithIcon
             totalPages={totalPages}
             initialPage={currentPage}
-            onPageChange={handlePageChange}
+            onPageChange={setCurrentPage}
           />
         </div>
       </div>
