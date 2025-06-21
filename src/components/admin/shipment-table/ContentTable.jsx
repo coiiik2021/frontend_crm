@@ -36,6 +36,8 @@ export default function ContentTable({ data }) {
   const [dataBill, setDataBill] = useState(data || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
@@ -96,19 +98,22 @@ export default function ContentTable({ data }) {
   const [filterCS, setFilterCS] = useState("");
   const [filterTransporter, setFilterTransporter] = useState("");
   console.log("Dữ liệu đơn hàng:", dataBill);
-  const fetchBillData = async () => {
+  const fetchBillData = async (page = currentPage, size = itemsPerPage) => {
     try {
-      const data = await GetShipment();
-      setDataBill(data);
-      console.log("Dữ liệu đơn hàng:", dataBill);
-      // setState hoặc xử lý tiếp tại đây nếu cần
+      const responseData = await GetShipment(page - 1, size); // backend page 0-based
+      setDataBill(responseData.content || []);
+      setCurrentPage((responseData.pageNumber ?? 0) + 1);
+      setItemsPerPage(responseData.pageSize ?? size);
+      setTotalPages(responseData.totalPages ?? 1);
+      setTotalElements(responseData.totalElements ?? 0);
     } catch (error) {
       console.error("Lỗi khi gọi GetShipment:", error);
     }
   };
   useEffect(() => {
-    setDataBill(data || []);
-  }, [data]);
+    fetchBillData(currentPage, itemsPerPage);
+    // eslint-disable-next-line
+  }, [currentPage, itemsPerPage]);
   // reset bộ lọc
   const resetAllFilters = () => {
     setFilterType("");
@@ -403,14 +408,11 @@ export default function ContentTable({ data }) {
     filterTransporter,
   ]);
 
-  const totalItems = filteredAndSortedData.length;
+  const hasData = totalElements > 0;
+  const start = hasData ? (currentPage - 1) * itemsPerPage + 1 : 0;
+  const end = hasData ? Math.min(currentPage * itemsPerPage, totalElements) : 0;
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-  const currentData = filteredAndSortedData.slice(startIndex, endIndex);
-
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const currentData = filteredAndSortedData;
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -728,9 +730,9 @@ export default function ContentTable({ data }) {
       prev.map((p, i) =>
         i === idx
           ? {
-              ...p,
-              [field]: field === "price" ? Math.max(0, Number(value)) : value,
-            }
+            ...p,
+            [field]: field === "price" ? Math.max(0, Number(value)) : value,
+          }
           : p
       )
     );
@@ -745,8 +747,8 @@ export default function ContentTable({ data }) {
         type === "cash"
           ? "CASH"
           : type === "banking"
-          ? "CARD"
-          : "BUSINESS_CARD",
+            ? "CARD"
+            : "BUSINESS_CARD",
       active: false,
     };
     if (type === "cash") setCashPayments((prev) => [...prev, newPayment]);
@@ -1421,9 +1423,8 @@ export default function ContentTable({ data }) {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `shipment_report_${
-      new Date().toISOString().split("T")[0]
-    }.xlsx`;
+    a.download = `shipment_report_${new Date().toISOString().split("T")[0]
+      }.xlsx`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -1689,8 +1690,8 @@ export default function ContentTable({ data }) {
       sum +
       (Array.isArray(item?.pricePayment?.cashPayment)
         ? item.pricePayment.cashPayment
-            .filter((p) => p.active)
-            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
+          .filter((p) => p.active)
+          .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
         : 0),
     0
   );
@@ -1701,8 +1702,8 @@ export default function ContentTable({ data }) {
       sum +
       (Array.isArray(item?.pricePayment?.cardPayment)
         ? item.pricePayment.cardPayment
-            .filter((p) => p.active)
-            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
+          .filter((p) => p.active)
+          .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
         : 0),
     0
   );
@@ -1713,8 +1714,8 @@ export default function ContentTable({ data }) {
       sum +
       (Array.isArray(item?.pricePayment?.businessCardPayment)
         ? item.pricePayment.businessCardPayment
-            .filter((p) => p.active)
-            .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
+          .filter((p) => p.active)
+          .reduce((s, p) => s + (parseFloat(p.price) || 0), 0)
         : 0),
     0
   );
@@ -1738,9 +1739,8 @@ export default function ContentTable({ data }) {
         >
           <span className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
             <svg
-              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${
-                showFilter ? "rotate-180" : ""
-              }`}
+              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${showFilter ? "rotate-180" : ""
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -1781,8 +1781,8 @@ export default function ContentTable({ data }) {
                         className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                         value={
                           filterType === "range" &&
-                          filterRange.from &&
-                          filterRange.to
+                            filterRange.from &&
+                            filterRange.to
                             ? [filterRange.from, filterRange.to]
                             : []
                         }
@@ -2054,9 +2054,8 @@ export default function ContentTable({ data }) {
         >
           <span className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
             <svg
-              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${
-                showOverview ? "rotate-180" : ""
-              }`}
+              className={`w-5 h-5 mr-2 text-purple-700 transition-transform duration-300 ${showOverview ? "rotate-180" : ""
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -2156,7 +2155,7 @@ export default function ContentTable({ data }) {
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
             >
-              {[5, 8, 10].map((value) => (
+              {[5, 10, 15].map((value) => (
                 <option
                   key={value}
                   value={value}
@@ -2367,121 +2366,63 @@ export default function ContentTable({ data }) {
                   {(authorities.includes("ADMIN") ||
                     authorities.includes("BD") ||
                     authorities.includes("MANAGER")) && (
-                    <div className="mb-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                          THÔNG TIN NHÂN SỰ
-                        </span>
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => {
-                              const newVisibleColumns = { ...visibleColumns };
-                              if (authorities.includes("ADMIN")) {
-                                ["bd", "manager"].forEach((column) => {
-                                  newVisibleColumns[column] = true;
-                                });
-                              } else if (authorities.includes("BD")) {
-                                newVisibleColumns["manager"] = true;
-                              } else if (authorities.includes("MANAGER")) {
-                                ["user", "cs", "transporter"].forEach(
-                                  (column) => {
+                      <div className="mb-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                            THÔNG TIN NHÂN SỰ
+                          </span>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => {
+                                const newVisibleColumns = { ...visibleColumns };
+                                if (authorities.includes("ADMIN")) {
+                                  ["bd", "manager"].forEach((column) => {
                                     newVisibleColumns[column] = true;
-                                  }
-                                );
-                              }
-                              setVisibleColumns(newVisibleColumns);
-                            }}
-                            className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                          >
-                            Chọn
-                          </button>
-                          <button
-                            onClick={() => {
-                              const newVisibleColumns = { ...visibleColumns };
-                              if (authorities.includes("ADMIN")) {
-                                ["bd", "manager"].forEach((column) => {
-                                  newVisibleColumns[column] = false;
-                                });
-                              } else if (authorities.includes("BD")) {
-                                newVisibleColumns["manager"] = false;
-                              } else if (authorities.includes("MANAGER")) {
-                                ["user", "cs", "transporter"].forEach(
-                                  (column) => {
-                                    newVisibleColumns[column] = false;
-                                  }
-                                );
-                              }
-                              setVisibleColumns(newVisibleColumns);
-                            }}
-                            className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                          >
-                            Bỏ chọn
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* ADMIN: hiển thị bd và manager */}
-                      {authorities.includes("ADMIN") && (
-                        <>
-                          {["bd", "manager"].map((column) => (
-                            <div
-                              key={column}
-                              className="flex items-center ml-2 mt-1"
-                            >
-                              <input
-                                type="checkbox"
-                                id={`col-${column}`}
-                                checked={visibleColumns[column]}
-                                onChange={() =>
-                                  setVisibleColumns({
-                                    ...visibleColumns,
-                                    [column]: !visibleColumns[column],
-                                  })
+                                  });
+                                } else if (authorities.includes("BD")) {
+                                  newVisibleColumns["manager"] = true;
+                                } else if (authorities.includes("MANAGER")) {
+                                  ["user", "cs", "transporter"].forEach(
+                                    (column) => {
+                                      newVisibleColumns[column] = true;
+                                    }
+                                  );
                                 }
-                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                              />
-                              <label
-                                htmlFor={`col-${column}`}
-                                className="ml-2 text-xs text-gray-600 dark:text-gray-400"
-                              >
-                                {columnLabels[column] || column}
-                              </label>
-                            </div>
-                          ))}
-                        </>
-                      )}
-
-                      {/* BD: chỉ hiển thị manager */}
-                      {authorities.includes("BD") &&
-                        !authorities.includes("ADMIN") && (
-                          <div className="flex items-center ml-2 mt-1">
-                            <input
-                              type="checkbox"
-                              id="col-manager"
-                              checked={visibleColumns["manager"]}
-                              onChange={() =>
-                                setVisibleColumns({
-                                  ...visibleColumns,
-                                  manager: !visibleColumns["manager"],
-                                })
-                              }
-                              className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                            />
-                            <label
-                              htmlFor="col-manager"
-                              className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                                setVisibleColumns(newVisibleColumns);
+                              }}
+                              className="px-1.5 py-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
                             >
-                              {columnLabels["manager"] || "manager"}
-                            </label>
+                              Chọn
+                            </button>
+                            <button
+                              onClick={() => {
+                                const newVisibleColumns = { ...visibleColumns };
+                                if (authorities.includes("ADMIN")) {
+                                  ["bd", "manager"].forEach((column) => {
+                                    newVisibleColumns[column] = false;
+                                  });
+                                } else if (authorities.includes("BD")) {
+                                  newVisibleColumns["manager"] = false;
+                                } else if (authorities.includes("MANAGER")) {
+                                  ["user", "cs", "transporter"].forEach(
+                                    (column) => {
+                                      newVisibleColumns[column] = false;
+                                    }
+                                  );
+                                }
+                                setVisibleColumns(newVisibleColumns);
+                              }}
+                              className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                            >
+                              Bỏ chọn
+                            </button>
                           </div>
-                        )}
+                        </div>
 
-                      {/* MANAGER: chỉ hiển thị user, cs, transporter */}
-                      {authorities.includes("MANAGER") &&
-                        !authorities.includes("ADMIN") &&
-                        !authorities.includes("BD") && (
+                        {/* ADMIN: hiển thị bd và manager */}
+                        {authorities.includes("ADMIN") && (
                           <>
-                            {["user", "cs", "transporter"].map((column) => (
+                            {["bd", "manager"].map((column) => (
                               <div
                                 key={column}
                                 className="flex items-center ml-2 mt-1"
@@ -2508,8 +2449,66 @@ export default function ContentTable({ data }) {
                             ))}
                           </>
                         )}
-                    </div>
-                  )}
+
+                        {/* BD: chỉ hiển thị manager */}
+                        {authorities.includes("BD") &&
+                          !authorities.includes("ADMIN") && (
+                            <div className="flex items-center ml-2 mt-1">
+                              <input
+                                type="checkbox"
+                                id="col-manager"
+                                checked={visibleColumns["manager"]}
+                                onChange={() =>
+                                  setVisibleColumns({
+                                    ...visibleColumns,
+                                    manager: !visibleColumns["manager"],
+                                  })
+                                }
+                                className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                              />
+                              <label
+                                htmlFor="col-manager"
+                                className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                              >
+                                {columnLabels["manager"] || "manager"}
+                              </label>
+                            </div>
+                          )}
+
+                        {/* MANAGER: chỉ hiển thị user, cs, transporter */}
+                        {authorities.includes("MANAGER") &&
+                          !authorities.includes("ADMIN") &&
+                          !authorities.includes("BD") && (
+                            <>
+                              {["user", "cs", "transporter"].map((column) => (
+                                <div
+                                  key={column}
+                                  className="flex items-center ml-2 mt-1"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    id={`col-${column}`}
+                                    checked={visibleColumns[column]}
+                                    onChange={() =>
+                                      setVisibleColumns({
+                                        ...visibleColumns,
+                                        [column]: !visibleColumns[column],
+                                      })
+                                    }
+                                    className="w-3.5 h-3.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                  />
+                                  <label
+                                    htmlFor={`col-${column}`}
+                                    className="ml-2 text-xs text-gray-600 dark:text-gray-400"
+                                  >
+                                    {columnLabels[column] || column}
+                                  </label>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                      </div>
+                    )}
 
                   {/* Nhóm PRICE */}
                   <div className="mb-2">
@@ -3123,13 +3122,13 @@ export default function ContentTable({ data }) {
             </svg>
             Import New Debit
           </button>
-           <input
-              type="file"
-              accept=".xlsx, .xls"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-            />
+          <input
+            type="file"
+            accept=".xlsx, .xls"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
 
         </div>
 
@@ -3411,17 +3410,17 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("ACCOUNTANT") ||
                           authorities.includes("BD")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              openModal();
-                              setBillEdit(item);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                openModal();
+                                setBillEdit(item);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
 
                         {/* Giá trị tiền order */}
                         <div className="flex flex-col space-y-1 pt-6">
@@ -3473,18 +3472,18 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("BD") ||
                           authorities.includes("ACCOUNTANT")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("CASH");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CASH");
+                                handleViewPaymentDetails(item);
+                                setIsOpenFormPayment(true);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
                         {/* Tổng đã xác nhận và chưa xác nhận */}
                         <div className="flex flex-col gap-1 pt-6">
                           <div className="flex items-center">
@@ -3527,18 +3526,18 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("BD") ||
                           authorities.includes("ACCOUNTANT")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("CARD");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("CARD");
+                                handleViewPaymentDetails(item);
+                                setIsOpenFormPayment(true);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
                         {/* Tổng đã xác nhận và chưa xác nhận */}
                         <div className="flex flex-col gap-1 pt-6">
                           <div className="flex items-center">
@@ -3581,18 +3580,18 @@ export default function ContentTable({ data }) {
                         {(authorities.includes("ADMIN") ||
                           authorities.includes("BD") ||
                           authorities.includes("ACCOUNTANT")) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditType("BUSINESS_CARD");
-                              handleViewPaymentDetails(item);
-                              setIsOpenFormPayment(true);
-                            }}
-                            className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditType("BUSINESS_CARD");
+                                handleViewPaymentDetails(item);
+                                setIsOpenFormPayment(true);
+                              }}
+                              className="pointer-events-auto select-auto absolute top-0 right-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          )}
                         {/* Tổng đã xác nhận và chưa xác nhận */}
                         <div className="flex flex-col gap-1 pt-6">
                           <div className="flex items-center">
@@ -3737,8 +3736,8 @@ export default function ContentTable({ data }) {
                         <StatusBadge status={item.status_payment} />
 
                         {authorities.includes("ADMIN") ||
-                        authorities.includes("ACCOUNTANT") ||
-                        authorities.includes("BD") ? (
+                          authorities.includes("ACCOUNTANT") ||
+                          authorities.includes("BD") ? (
                           <select
                             value={item.status_payment || "pending"}
                             onChange={(e) =>
@@ -3770,14 +3769,16 @@ export default function ContentTable({ data }) {
         <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
           {/* Left side: Showing entries */}
           <div className="pb-3 xl:pb-0">
-            <p className="pb-3 text-sm font-medium text-center text-gray-500 border-b border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-b-0 xl:pb-0 xl:text-left">
-              Showing {startIndex + 1} to {endIndex} of {totalItems} entries
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {hasData
+                ? `Showing ${start} to ${end} of ${totalElements} entries`
+                : "No entries to display"}
             </p>
           </div>
           <PaginationWithIcon
             totalPages={totalPages}
             initialPage={currentPage}
-            onPageChange={handlePageChange}
+            onPageChange={setCurrentPage}
           />
         </div>
       </div>
@@ -3817,187 +3818,186 @@ export default function ContentTable({ data }) {
             {(authorities.includes("ADMIN") ||
               authorities.includes("ACCOUNTANT") ||
               authorities.includes("BD")) && (
-              <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                    Quản lý Price Orders
-                  </h4>
-                  <div className="bg-green-100 dark:bg-green-800 rounded-xl px-4 py-2 mt-2 inline-block shadow-sm">
-                    <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                      Tổng giá:&nbsp;
-                      {priceOrders
-                        .filter((order) => order.active) // chỉ cộng order đã xác nhận
-                        .reduce(
-                          (sum, order) => sum + (parseFloat(order.price) || 0),
-                          0
-                        )
-                        .toLocaleString()}{" "}
-                      VNĐ
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const currentDate = new Date();
-                      const formattedDate = `${currentDate.getDate()}/${
-                        currentDate.getMonth() + 1
-                      }/${currentDate.getFullYear()}`;
-                      const newPriceOrder = {
-                        id: "",
-                        name: "",
-                        price: "",
-                        description: "",
-                        date: formattedDate,
-                      };
-                      setPriceOrders([...priceOrders, newPriceOrder]);
-                    }}
-                    className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                  >
-                    <PlusIcon className="w-4 h-4 mr-1" />
-                    Thêm Price Order
-                  </button>
-                </div>
-
-                {/* Price Order List */}
-                <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
-                  {(priceOrders || []).map((order, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                <div className="space-y-6">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
+                      Quản lý Price Orders
+                    </h4>
+                    <div className="bg-green-100 dark:bg-green-800 rounded-xl px-4 py-2 mt-2 inline-block shadow-sm">
+                      <span className="px-3 py-2 text-base font-semibold rounded-md bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                        Tổng giá:&nbsp;
+                        {priceOrders
+                          .filter((order) => order.active) // chỉ cộng order đã xác nhận
+                          .reduce(
+                            (sum, order) => sum + (parseFloat(order.price) || 0),
+                            0
+                          )
+                          .toLocaleString()}{" "}
+                        VNĐ
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currentDate = new Date();
+                        const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
+                          }/${currentDate.getFullYear()}`;
+                        const newPriceOrder = {
+                          id: "",
+                          name: "",
+                          price: "",
+                          description: "",
+                          date: formattedDate,
+                        };
+                        setPriceOrders([...priceOrders, newPriceOrder]);
+                      }}
+                      className="flex items-center px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
                     >
-                      {/* STT */}
-                      <div className="w-1/12 text-center">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {index + 1}
-                        </p>
-                      </div>
+                      <PlusIcon className="w-4 h-4 mr-1" />
+                      Thêm Price Order
+                    </button>
+                  </div>
 
-                      {/* Name */}
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Tên
-                        </label>
-                        <input
-                          type="text"
-                          value={order.name}
-                          onChange={(e) => {
-                            const updatedOrders = [...priceOrders];
-                            updatedOrders[index].name = e.target.value;
-                            setPriceOrders(updatedOrders);
-                          }}
-                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
+                  {/* Price Order List */}
+                  <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
+                    {(priceOrders || []).map((order, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                      >
+                        {/* STT */}
+                        <div className="w-1/12 text-center">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {index + 1}
+                          </p>
+                        </div>
 
-                      {/* Price */}
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Giá
-                        </label>
-                        <input
-                          type="number"
-                          value={order.price}
-                          onChange={(e) => {
-                            const updatedOrders = [...priceOrders];
-                            updatedOrders[index].price = e.target.value;
-                            setPriceOrders(updatedOrders);
-                          }}
-                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
-
-                      {/* Description */}
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Mô tả
-                        </label>
-                        <input
-                          type="text"
-                          value={order.description}
-                          onChange={(e) => {
-                            const updatedOrders = [...priceOrders];
-                            updatedOrders[index].description = e.target.value;
-                            setPriceOrders(updatedOrders);
-                          }}
-                          className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
-
-                      {/* DateTime */}
-                      <div className="w-full sm:w-1/4">
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Ngày tạo
-                        </label>
-                        <input
-                          type="text"
-                          value={order.created_at || "Chưa có ngày tạo"}
-                          readOnly
-                          className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
-                        />
-                      </div>
-
-                      {/* Buttons */}
-                      <div className="flex items-center gap-2">
-                        {order.id === "" ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const dataRequest = {
-                                id: order.id,
-                                name: order.name,
-                                price: order.price,
-                                description: order.description,
-                                bill_id: billEdit.bill_house,
-                              };
-                              handleCreatePriceOrder(dataRequest);
-                              setIsDataChanged(true);
+                        {/* Name */}
+                        <div className="w-full sm:w-1/4">
+                          <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Tên
+                          </label>
+                          <input
+                            type="text"
+                            value={order.name}
+                            onChange={(e) => {
+                              const updatedOrders = [...priceOrders];
+                              updatedOrders[index].name = e.target.value;
+                              setPriceOrders(updatedOrders);
                             }}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-                          >
-                            Lưu
-                          </button>
-                        ) : (
-                          !order.active && (
+                            className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                          />
+                        </div>
+
+                        {/* Price */}
+                        <div className="w-full sm:w-1/4">
+                          <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Giá
+                          </label>
+                          <input
+                            type="number"
+                            value={order.price}
+                            onChange={(e) => {
+                              const updatedOrders = [...priceOrders];
+                              updatedOrders[index].price = e.target.value;
+                              setPriceOrders(updatedOrders);
+                            }}
+                            className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                          />
+                        </div>
+
+                        {/* Description */}
+                        <div className="w-full sm:w-1/4">
+                          <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Mô tả
+                          </label>
+                          <input
+                            type="text"
+                            value={order.description}
+                            onChange={(e) => {
+                              const updatedOrders = [...priceOrders];
+                              updatedOrders[index].description = e.target.value;
+                              setPriceOrders(updatedOrders);
+                            }}
+                            className="w-full px-3 py-2 text-sm border rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                          />
+                        </div>
+
+                        {/* DateTime */}
+                        <div className="w-full sm:w-1/4">
+                          <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Ngày tạo
+                          </label>
+                          <input
+                            type="text"
+                            value={order.created_at || "Chưa có ngày tạo"}
+                            readOnly
+                            className="w-full px-3 py-2 text-sm border rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
+                          />
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex items-center gap-2">
+                          {order.id === "" ? (
                             <button
                               type="button"
-                              onClick={async () => {
-                                await PutPriceOrder(order.id);
-                                order.active = true;
-                                const updatedOrders = [...priceOrders];
-                                updatedOrders[index] = order;
-                                setPriceOrders(updatedOrders);
+                              onClick={() => {
+                                const dataRequest = {
+                                  id: order.id,
+                                  name: order.name,
+                                  price: order.price,
+                                  description: order.description,
+                                  bill_id: billEdit.bill_house,
+                                };
+                                handleCreatePriceOrder(dataRequest);
                                 setIsDataChanged(true);
                               }}
-                              className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
                             >
-                              Xác nhận
+                              Lưu
                             </button>
-                          )
-                        )}
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            const updatedOrders = priceOrders.filter(
-                              (_, i) => i !== index
-                            );
-                            setPriceOrders(updatedOrders);
+                          ) : (
+                            !order.active && (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  await PutPriceOrder(order.id);
+                                  order.active = true;
+                                  const updatedOrders = [...priceOrders];
+                                  updatedOrders[index] = order;
+                                  setPriceOrders(updatedOrders);
+                                  setIsDataChanged(true);
+                                }}
+                                className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                              >
+                                Xác nhận
+                              </button>
+                            )
+                          )}
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const updatedOrders = priceOrders.filter(
+                                (_, i) => i !== index
+                              );
+                              setPriceOrders(updatedOrders);
 
-                            await DeletePriceOrder(order.id);
-                            setIsDataChanged(true);
+                              await DeletePriceOrder(order.id);
+                              setIsDataChanged(true);
 
-                            props.setDataBill(updatedDataBill); // Giả sử bạn có hàm `setDataBill` để cập nhật `dataBill`
-                          }}
-                          className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                        >
-                          Xóa
-                        </button>
+                              props.setDataBill(updatedDataBill); // Giả sử bạn có hàm `setDataBill` để cập nhật `dataBill`
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                          >
+                            Xóa
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Action Buttons */}
             <div className="flex justify-end pt-4 space-x-3 border-t dark:border-gray-700">
@@ -4037,19 +4037,19 @@ export default function ContentTable({ data }) {
             {(authorities.includes("ADMIN") ||
               authorities.includes("ACCOUNTANT") ||
               authorities.includes("BD")) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpenFormPayment(false);
-                  if (isDataChanged) {
-                    fetchBillData();
-                  }
-                }}
-                className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-              >
-                <XIcon className="w-5 h-5" />
-              </button>
-            )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpenFormPayment(false);
+                    if (isDataChanged) {
+                      fetchBillData();
+                    }
+                  }}
+                  className="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                >
+                  <XIcon className="w-5 h-5" />
+                </button>
+              )}
           </div>
 
           {/* Form */}

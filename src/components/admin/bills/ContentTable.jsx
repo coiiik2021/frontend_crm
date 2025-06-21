@@ -673,12 +673,12 @@ export default function ContentTable({ data }) {
       });
   }, [dataBill, sortKey, sortOrder, searchTerm]);
 
-  const start = (currentPage - 1) * itemsPerPage + 1;
-  const end = Math.min(currentPage * itemsPerPage, totalElements);
+  const hasData = totalElements > 0;
+  const start = hasData ? (currentPage - 1) * itemsPerPage + 1 : 0;
+  const end = hasData ? Math.min(currentPage * itemsPerPage, totalElements) : 0;
 
   const currentData = filteredAndSortedData; // hoặc currentData = dataBill nếu không filter/search
 
-  // const totalPages = Math.ceil(totalItems / itemsPerPage);
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -1973,8 +1973,10 @@ export default function ContentTable({ data }) {
         <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
           {/* Left side: Showing entries */}
           <div className="pb-3 xl:pb-0">
-            <p className="pb-3 text-sm font-medium text-center text-gray-500 border-b border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-b-0 xl:pb-0 xl:text-left">
-              Showing {start} to {end} of {totalElements} entries
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {hasData
+                ? `Showing ${start} to ${end} of ${totalElements} entries`
+                : "No entries to display"}
             </p>
           </div>
           <PaginationWithIcon
