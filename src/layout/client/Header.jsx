@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router";
 import BrandIcon from "../../part/BrandIcon.jsx";
 import Button from "../../part/Button.jsx";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
     const [isCollapse, setIsCollapse] = useState(false);
@@ -10,6 +11,7 @@ export default function Header() {
     const location = useLocation();
     const path = location.pathname;
     const [authorities, setAuthorities] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -30,7 +32,8 @@ export default function Header() {
     const handleLogout = () => {
         localStorage.removeItem("token");
         setIsLoggedIn(false);
-        window.location.href = "/signin";
+        navigate("/signin");
+
     };
 
     return (
